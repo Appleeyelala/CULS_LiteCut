@@ -1,0 +1,64 @@
+{
+  "abc_baseline_command": "read \"/data/wushangge/runs/CULS-gate3f-20260922-gate2babc/input/asap7.lib\"; read \"/data/wushangge/runs/CULS-path-impact-calibration-20260929-v1/input/c1355_orig.aig\"; map; topo; stime; print_delay po11 pi03",
+  "abc_pi": "pi03",
+  "accepted_count": 67,
+  "additional_replays": 52,
+  "baseline_endpoint_delay_ps": 194.4,
+  "baseline_expected_ps": 194.4,
+  "candidate_count": 67,
+  "candidate_outcome_count": 67,
+  "cec_pass_count": 67,
+  "cross_validation_group": "(region_id, root_id, cut_id)",
+  "cross_validation_seed": 20260929,
+  "decision_count": 16,
+  "epsilon_ps": 0.01,
+  "fixed_region_sequence": [
+    6,
+    9,
+    24,
+    36,
+    37,
+    38
+  ],
+  "interpretation": "STA response is the fixed PI-node 4 to PO11 mapped endpoint-pair delay, not an exact mapped image of the saved AIG node path.",
+  "neutral_epsilon_ps": 0.01,
+  "path_id": "po11_pi_node004",
+  "pi_node": 4,
+  "po": 11,
+  "region_counts": {
+    "24": {
+      "candidates": 37,
+      "decisions": 8
+    },
+    "36": {
+      "candidates": 0,
+      "decisions": 0
+    },
+    "37": {
+      "candidates": 1,
+      "decisions": 1
+    },
+    "38": {
+      "candidates": 2,
+      "decisions": 1
+    },
+    "6": {
+      "candidates": 10,
+      "decisions": 2
+    },
+    "9": {
+      "candidates": 17,
+      "decisions": 4
+    }
+  },
+  "regions_without_candidates": [
+    36
+  ],
+  "reused_verified_pilot_samples": 15,
+  "rewrite_status_counts": {
+    "ACCEPTED": 67
+  },
+  "selection_policy": "all saved Gate3E executable candidates in the six fixed PO11 path regions; deterministic order by path region, root, cut, LiteCut delta, subgraph index; no best-only filter",
+  "timing_precision_ps": 0.1,
+  "valid_accepted_samples_for_fit": 67
+}

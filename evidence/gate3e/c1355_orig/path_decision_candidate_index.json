@@ -1,0 +1,5249 @@
+{
+  "differing_decisions": [
+    {
+      "cut_slot": 2,
+      "gpu_subgraph_index": 0,
+      "litecut_local_best_subgraph_index": 2,
+      "region_id": 9,
+      "root": 197
+    },
+    {
+      "cut_slot": 2,
+      "gpu_subgraph_index": 0,
+      "litecut_local_best_subgraph_index": 2,
+      "region_id": 24,
+      "root": 386
+    }
+  ],
+  "selected_path": {
+    "compressed_region_sequence": [
+      6,
+      9,
+      24,
+      36,
+      37,
+      38
+    ],
+    "decisions": [
+      {
+        "candidate_count": 5,
+        "candidate_subgraph_indices": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "candidates": {
+          "0": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              23.0,
+              0.0,
+              4.0,
+              2.0,
+              6.0,
+              3.5,
+              2.5,
+              0.5,
+              6.0,
+              4.0,
+              2.0,
+              11.0,
+              2.2,
+              2.0,
+              0.7142857142857143,
+              2.0,
+              0.1322314049586777,
+              0.03305785123966942,
+              0.23877551020408158
+            ],
+            "feature_hash": "d894e22d55b00e5f42c6edcc1cbb9009286552eaedc9e46943a051f865910367",
+            "predicted_local_abc_delay": 41.19078984550342,
+            "replacement_dag_info": {
+              "library_class": 219,
+              "library_subgraph_root": 10,
+              "matched_library_inputs": [
+                145,
+                146,
+                21,
+                34
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000003,
+                10000004,
+                10000005
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10
+              ],
+              "vertex_mapping": {
+                "0": 145,
+                "1": 146,
+                "10": 151,
+                "2": 21,
+                "3": 34,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002,
+                "7": 10000003,
+                "8": 10000004,
+                "9": 10000005
+              }
+            },
+            "subgraph_index": 0
+          },
+          "1": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              23.0,
+              0.0,
+              4.0,
+              2.0,
+              6.0,
+              3.5,
+              2.5,
+              0.5,
+              6.0,
+              4.0,
+              2.0,
+              11.0,
+              2.2,
+              2.0,
+              0.7142857142857143,
+              2.0,
+              0.1322314049586777,
+              0.03305785123966942,
+              0.23877551020408158
+            ],
+            "feature_hash": "d894e22d55b00e5f42c6edcc1cbb9009286552eaedc9e46943a051f865910367",
+            "predicted_local_abc_delay": 41.19078984550342,
+            "replacement_dag_info": {
+              "library_class": 219,
+              "library_subgraph_root": 13,
+              "matched_library_inputs": [
+                145,
+                146,
+                21,
+                34
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000003,
+                10000007,
+                10000008
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                7,
+                11,
+                12,
+                13
+              ],
+              "vertex_mapping": {
+                "0": 145,
+                "1": 146,
+                "11": 10000007,
+                "12": 10000008,
+                "13": 151,
+                "2": 21,
+                "3": 34,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002,
+                "7": 10000003
+              }
+            },
+            "subgraph_index": 1
+          },
+          "2": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              23.0,
+              0.0,
+              4.0,
+              2.0,
+              6.0,
+              3.5,
+              2.5,
+              0.5,
+              7.5,
+              5.0,
+              2.5,
+              11.0,
+              1.8333333333333333,
+              2.0,
+              0.7142857142857143,
+              2.0,
+              0.1322314049586777,
+              0.03305785123966942,
+              0.23877551020408158
+            ],
+            "feature_hash": "e2ad0c274c8674e50110dfbdf9732793400277c23c930da396e241ca2751b310",
+            "predicted_local_abc_delay": 53.16312603620817,
+            "replacement_dag_info": {
+              "library_class": 219,
+              "library_subgraph_root": 19,
+              "matched_library_inputs": [
+                145,
+                146,
+                21,
+                34
+              ],
+              "synthetic_internal_ids": [
+                10000003,
+                10000010,
+                10000011,
+                10000012,
+                10000013,
+                10000014
+              ],
+              "used_library_nodes": [
+                7,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19
+              ],
+              "vertex_mapping": {
+                "0": 145,
+                "1": 146,
+                "14": 10000010,
+                "15": 10000011,
+                "16": 10000012,
+                "17": 10000013,
+                "18": 10000014,
+                "19": 151,
+                "2": 21,
+                "3": 34,
+                "7": 10000003
+              }
+            },
+            "subgraph_index": 2
+          },
+          "3": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              23.0,
+              0.0,
+              4.0,
+              2.0,
+              6.0,
+              3.5,
+              2.5,
+              0.5,
+              6.0,
+              4.0,
+              2.0,
+              11.0,
+              2.2,
+              2.0,
+              0.7142857142857143,
+              2.0,
+              0.1322314049586777,
+              0.03305785123966942,
+              0.23877551020408164
+            ],
+            "feature_hash": "d894e22d55b00e5f42c6edcc1cbb9009286552eaedc9e46943a051f865910367",
+            "predicted_local_abc_delay": 41.19078984550342,
+            "replacement_dag_info": {
+              "library_class": 219,
+              "library_subgraph_root": 25,
+              "matched_library_inputs": [
+                145,
+                146,
+                21,
+                34
+              ],
+              "synthetic_internal_ids": [
+                10000003,
+                10000016,
+                10000017,
+                10000018,
+                10000019,
+                10000020
+              ],
+              "used_library_nodes": [
+                7,
+                20,
+                21,
+                22,
+                23,
+                24,
+                25
+              ],
+              "vertex_mapping": {
+                "0": 145,
+                "1": 146,
+                "2": 21,
+                "20": 10000016,
+                "21": 10000017,
+                "22": 10000018,
+                "23": 10000019,
+                "24": 10000020,
+                "25": 151,
+                "3": 34,
+                "7": 10000003
+              }
+            },
+            "subgraph_index": 3
+          },
+          "4": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              23.0,
+              0.0,
+              4.0,
+              2.0,
+              6.0,
+              3.5,
+              2.5,
+              0.5,
+              7.5,
+              5.0,
+              2.5,
+              11.0,
+              1.8333333333333333,
+              2.0,
+              0.7142857142857143,
+              2.0,
+              0.1322314049586777,
+              0.03305785123966942,
+              0.23877551020408158
+            ],
+            "feature_hash": "e2ad0c274c8674e50110dfbdf9732793400277c23c930da396e241ca2751b310",
+            "predicted_local_abc_delay": 53.16312603620817,
+            "replacement_dag_info": {
+              "library_class": 219,
+              "library_subgraph_root": 28,
+              "matched_library_inputs": [
+                145,
+                146,
+                21,
+                34
+              ],
+              "synthetic_internal_ids": [
+                10000003,
+                10000010,
+                10000011,
+                10000012,
+                10000022,
+                10000023
+              ],
+              "used_library_nodes": [
+                7,
+                14,
+                15,
+                16,
+                26,
+                27,
+                28
+              ],
+              "vertex_mapping": {
+                "0": 145,
+                "1": 146,
+                "14": 10000010,
+                "15": 10000011,
+                "16": 10000012,
+                "2": 21,
+                "26": 10000022,
+                "27": 10000023,
+                "28": 151,
+                "3": 34,
+                "7": 10000003
+              }
+            },
+            "subgraph_index": 4
+          }
+        },
+        "classification": "INTRA_REGION",
+        "cut_leaves": [
+          21,
+          34,
+          145,
+          146
+        ],
+        "cut_slot": 5,
+        "decision_id": "d287",
+        "decision_owner_region": 6,
+        "litecut": {
+          "candidate_count": 5,
+          "cut_slot": 5,
+          "gpu_choice_defined_for_decision": true,
+          "gpu_choice_equals_litecut_local_best": "true",
+          "litecut_local_best_subgraph": 0,
+          "original_gpu_selected_subgraph": 0,
+          "prediction_max": 53.16312603620817,
+          "prediction_min": 41.19078984550342,
+          "prediction_range": 11.972336190704752,
+          "prediction_std": 5.865222939256624,
+          "region_id": 6,
+          "root": 151
+        },
+        "owner_region_count": 1,
+        "owner_regions": [
+          6
+        ],
+        "removable_node_count": 9,
+        "removable_nodes": [
+          140,
+          141,
+          142,
+          143,
+          147,
+          148,
+          149,
+          150,
+          151
+        ],
+        "replacement_candidates": [
+          {
+            "subgraph_index": 0
+          },
+          {
+            "subgraph_index": 1
+          },
+          {
+            "subgraph_index": 2
+          },
+          {
+            "subgraph_index": 3
+          },
+          {
+            "subgraph_index": 4
+          }
+        ],
+        "root": 151,
+        "root_region": 6,
+        "saved_count": 9,
+        "truth": 26217,
+        "truth_class": 219
+      },
+      {
+        "candidate_count": 5,
+        "candidate_subgraph_indices": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "candidates": {
+          "0": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              23.0,
+              0.0,
+              4.0,
+              0.0,
+              6.0,
+              6.0,
+              0.0,
+              1.0,
+              9.0,
+              6.0,
+              3.0,
+              13.0,
+              1.8571428571428572,
+              2.0,
+              0.6666666666666666,
+              2.0,
+              0.11834319526627218,
+              0.03550295857988166,
+              0.2317460317460317
+            ],
+            "feature_hash": "0a3472b0b324d8f42ebeca4a5c7076e3f46b02e2c96ebd4f7090a2bbb13a6ecf",
+            "predicted_local_abc_delay": 39.168202069248345,
+            "replacement_dag_info": {
+              "library_class": 221,
+              "library_subgraph_root": 12,
+              "matched_library_inputs": [
+                4,
+                12,
+                21,
+                34
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000003,
+                10000004,
+                10000005,
+                10000006,
+                10000007
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12
+              ],
+              "vertex_mapping": {
+                "0": 4,
+                "1": 12,
+                "10": 10000006,
+                "11": 10000007,
+                "12": 151,
+                "2": 21,
+                "3": 34,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002,
+                "7": 10000003,
+                "8": 10000004,
+                "9": 10000005
+              }
+            },
+            "subgraph_index": 0
+          },
+          "1": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              23.0,
+              0.0,
+              4.0,
+              0.0,
+              6.0,
+              6.0,
+              0.0,
+              1.0,
+              9.0,
+              6.0,
+              3.0,
+              13.0,
+              1.8571428571428572,
+              2.0,
+              0.6666666666666666,
+              2.0,
+              0.11834319526627218,
+              0.03550295857988166,
+              0.2317460317460317
+            ],
+            "feature_hash": "0a3472b0b324d8f42ebeca4a5c7076e3f46b02e2c96ebd4f7090a2bbb13a6ecf",
+            "predicted_local_abc_delay": 39.168202069248345,
+            "replacement_dag_info": {
+              "library_class": 221,
+              "library_subgraph_root": 15,
+              "matched_library_inputs": [
+                4,
+                12,
+                21,
+                34
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000003,
+                10000004,
+                10000005,
+                10000009,
+                10000010
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                13,
+                14,
+                15
+              ],
+              "vertex_mapping": {
+                "0": 4,
+                "1": 12,
+                "13": 10000009,
+                "14": 10000010,
+                "15": 151,
+                "2": 21,
+                "3": 34,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002,
+                "7": 10000003,
+                "8": 10000004,
+                "9": 10000005
+              }
+            },
+            "subgraph_index": 1
+          },
+          "2": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              23.0,
+              0.0,
+              4.0,
+              0.0,
+              6.0,
+              6.0,
+              0.0,
+              1.0,
+              6.0,
+              4.0,
+              2.0,
+              13.0,
+              2.6,
+              2.0,
+              0.6666666666666666,
+              2.0,
+              0.11834319526627218,
+              0.03550295857988166,
+              0.2317460317460317
+            ],
+            "feature_hash": "22e5ed66b4bc3ac41d228da5446032d4ed4c935ced99457da3e227bba4f3b983",
+            "predicted_local_abc_delay": 44.21108608201614,
+            "replacement_dag_info": {
+              "library_class": 221,
+              "library_subgraph_root": 21,
+              "matched_library_inputs": [
+                4,
+                12,
+                21,
+                34
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000012,
+                10000013,
+                10000014,
+                10000015,
+                10000016
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                16,
+                17,
+                18,
+                19,
+                20,
+                21
+              ],
+              "vertex_mapping": {
+                "0": 4,
+                "1": 12,
+                "16": 10000012,
+                "17": 10000013,
+                "18": 10000014,
+                "19": 10000015,
+                "2": 21,
+                "20": 10000016,
+                "21": 151,
+                "3": 34,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002
+              }
+            },
+            "subgraph_index": 2
+          },
+          "3": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              23.0,
+              0.0,
+              4.0,
+              0.0,
+              6.0,
+              6.0,
+              0.0,
+              1.0,
+              6.0,
+              4.0,
+              2.0,
+              13.0,
+              2.6,
+              2.0,
+              0.6666666666666666,
+              2.0,
+              0.11834319526627218,
+              0.03550295857988166,
+              0.2317460317460317
+            ],
+            "feature_hash": "22e5ed66b4bc3ac41d228da5446032d4ed4c935ced99457da3e227bba4f3b983",
+            "predicted_local_abc_delay": 44.21108608201614,
+            "replacement_dag_info": {
+              "library_class": 221,
+              "library_subgraph_root": 24,
+              "matched_library_inputs": [
+                4,
+                12,
+                21,
+                34
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000012,
+                10000013,
+                10000014,
+                10000018,
+                10000019
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                16,
+                17,
+                18,
+                22,
+                23,
+                24
+              ],
+              "vertex_mapping": {
+                "0": 4,
+                "1": 12,
+                "16": 10000012,
+                "17": 10000013,
+                "18": 10000014,
+                "2": 21,
+                "22": 10000018,
+                "23": 10000019,
+                "24": 151,
+                "3": 34,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002
+              }
+            },
+            "subgraph_index": 3
+          },
+          "4": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              23.0,
+              0.0,
+              4.0,
+              0.0,
+              6.0,
+              6.0,
+              0.0,
+              1.0,
+              9.0,
+              6.0,
+              3.0,
+              13.0,
+              1.8571428571428572,
+              2.0,
+              0.6666666666666666,
+              2.0,
+              0.11834319526627218,
+              0.03550295857988166,
+              0.2317460317460317
+            ],
+            "feature_hash": "0a3472b0b324d8f42ebeca4a5c7076e3f46b02e2c96ebd4f7090a2bbb13a6ecf",
+            "predicted_local_abc_delay": 39.168202069248345,
+            "replacement_dag_info": {
+              "library_class": 221,
+              "library_subgraph_root": 30,
+              "matched_library_inputs": [
+                4,
+                12,
+                21,
+                34
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000021,
+                10000022,
+                10000023,
+                10000024,
+                10000025
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                25,
+                26,
+                27,
+                28,
+                29,
+                30
+              ],
+              "vertex_mapping": {
+                "0": 4,
+                "1": 12,
+                "2": 21,
+                "25": 10000021,
+                "26": 10000022,
+                "27": 10000023,
+                "28": 10000024,
+                "29": 10000025,
+                "3": 34,
+                "30": 151,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002
+              }
+            },
+            "subgraph_index": 4
+          }
+        },
+        "classification": "INTRA_REGION",
+        "cut_leaves": [
+          4,
+          12,
+          21,
+          34
+        ],
+        "cut_slot": 7,
+        "decision_id": "d289",
+        "decision_owner_region": 6,
+        "litecut": {
+          "candidate_count": 5,
+          "cut_slot": 7,
+          "gpu_choice_defined_for_decision": false,
+          "gpu_choice_equals_litecut_local_best": "",
+          "litecut_local_best_subgraph": 0,
+          "original_gpu_selected_subgraph": "",
+          "prediction_max": 44.21108608201614,
+          "prediction_min": 39.168202069248345,
+          "prediction_range": 5.042884012767793,
+          "prediction_std": 2.4704985326639965,
+          "region_id": 6,
+          "root": 151
+        },
+        "owner_region_count": 1,
+        "owner_regions": [
+          6
+        ],
+        "removable_node_count": 9,
+        "removable_nodes": [
+          140,
+          141,
+          142,
+          143,
+          147,
+          148,
+          149,
+          150,
+          151
+        ],
+        "replacement_candidates": [
+          {
+            "subgraph_index": 0
+          },
+          {
+            "subgraph_index": 1
+          },
+          {
+            "subgraph_index": 2
+          },
+          {
+            "subgraph_index": 3
+          },
+          {
+            "subgraph_index": 4
+          }
+        ],
+        "root": 151,
+        "root_region": 6,
+        "saved_count": 9,
+        "truth": 38505,
+        "truth_class": 221
+      },
+      {
+        "candidate_count": 5,
+        "candidate_subgraph_indices": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "candidates": {
+          "0": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              17.0,
+              0.0,
+              2.0,
+              6.0,
+              8.0,
+              4.25,
+              2.48746859276655,
+              0.5,
+              6.0,
+              4.0,
+              2.0,
+              11.0,
+              2.2,
+              2.0,
+              0.5714285714285714,
+              2.0,
+              0.1322314049586777,
+              0.03305785123966942,
+              0.22448979591836735
+            ],
+            "feature_hash": "1b7a27241719a893abb93b14da6343d35f4370b38bd9af0b94d8ee72c3040096",
+            "predicted_local_abc_delay": 24.50395393528832,
+            "replacement_dag_info": {
+              "library_class": 219,
+              "library_subgraph_root": 10,
+              "matched_library_inputs": [
+                17,
+                33,
+                151,
+                188
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000003,
+                10000004,
+                10000005
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10
+              ],
+              "vertex_mapping": {
+                "0": 17,
+                "1": 33,
+                "10": 197,
+                "2": 151,
+                "3": 188,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002,
+                "7": 10000003,
+                "8": 10000004,
+                "9": 10000005
+              }
+            },
+            "subgraph_index": 0
+          },
+          "1": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              17.0,
+              0.0,
+              2.0,
+              6.0,
+              8.0,
+              4.25,
+              2.48746859276655,
+              0.5,
+              6.0,
+              4.0,
+              2.0,
+              11.0,
+              2.2,
+              2.0,
+              0.5714285714285714,
+              2.0,
+              0.1322314049586777,
+              0.03305785123966942,
+              0.22448979591836735
+            ],
+            "feature_hash": "1b7a27241719a893abb93b14da6343d35f4370b38bd9af0b94d8ee72c3040096",
+            "predicted_local_abc_delay": 24.50395393528832,
+            "replacement_dag_info": {
+              "library_class": 219,
+              "library_subgraph_root": 13,
+              "matched_library_inputs": [
+                17,
+                33,
+                151,
+                188
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000003,
+                10000007,
+                10000008
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                7,
+                11,
+                12,
+                13
+              ],
+              "vertex_mapping": {
+                "0": 17,
+                "1": 33,
+                "11": 10000007,
+                "12": 10000008,
+                "13": 197,
+                "2": 151,
+                "3": 188,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002,
+                "7": 10000003
+              }
+            },
+            "subgraph_index": 1
+          },
+          "2": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              17.0,
+              0.0,
+              2.0,
+              6.0,
+              8.0,
+              4.25,
+              2.48746859276655,
+              0.5,
+              7.0,
+              5.0,
+              2.0,
+              11.0,
+              1.8333333333333333,
+              2.0,
+              0.5714285714285714,
+              2.0,
+              0.1322314049586777,
+              0.03305785123966942,
+              0.22448979591836732
+            ],
+            "feature_hash": "f0294965527eddb7b8c15d58736a2460407d10b6dff054242f9d3237cd0f3fa8",
+            "predicted_local_abc_delay": 23.63992684120847,
+            "replacement_dag_info": {
+              "library_class": 219,
+              "library_subgraph_root": 19,
+              "matched_library_inputs": [
+                17,
+                33,
+                151,
+                188
+              ],
+              "synthetic_internal_ids": [
+                10000003,
+                10000010,
+                10000011,
+                10000012,
+                10000013,
+                10000014
+              ],
+              "used_library_nodes": [
+                7,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19
+              ],
+              "vertex_mapping": {
+                "0": 17,
+                "1": 33,
+                "14": 10000010,
+                "15": 10000011,
+                "16": 10000012,
+                "17": 10000013,
+                "18": 10000014,
+                "19": 197,
+                "2": 151,
+                "3": 188,
+                "7": 10000003
+              }
+            },
+            "subgraph_index": 2
+          },
+          "3": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              17.0,
+              0.0,
+              2.0,
+              6.0,
+              8.0,
+              4.25,
+              2.48746859276655,
+              0.5,
+              6.0,
+              4.0,
+              2.0,
+              11.0,
+              2.2,
+              2.0,
+              0.5714285714285714,
+              2.0,
+              0.1322314049586777,
+              0.03305785123966942,
+              0.22448979591836737
+            ],
+            "feature_hash": "1b7a27241719a893abb93b14da6343d35f4370b38bd9af0b94d8ee72c3040096",
+            "predicted_local_abc_delay": 24.50395393528832,
+            "replacement_dag_info": {
+              "library_class": 219,
+              "library_subgraph_root": 25,
+              "matched_library_inputs": [
+                17,
+                33,
+                151,
+                188
+              ],
+              "synthetic_internal_ids": [
+                10000003,
+                10000016,
+                10000017,
+                10000018,
+                10000019,
+                10000020
+              ],
+              "used_library_nodes": [
+                7,
+                20,
+                21,
+                22,
+                23,
+                24,
+                25
+              ],
+              "vertex_mapping": {
+                "0": 17,
+                "1": 33,
+                "2": 151,
+                "20": 10000016,
+                "21": 10000017,
+                "22": 10000018,
+                "23": 10000019,
+                "24": 10000020,
+                "25": 197,
+                "3": 188,
+                "7": 10000003
+              }
+            },
+            "subgraph_index": 3
+          },
+          "4": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              17.0,
+              0.0,
+              2.0,
+              6.0,
+              8.0,
+              4.25,
+              2.48746859276655,
+              0.5,
+              7.0,
+              5.0,
+              2.0,
+              11.0,
+              1.8333333333333333,
+              2.0,
+              0.5714285714285714,
+              2.0,
+              0.1322314049586777,
+              0.03305785123966942,
+              0.22448979591836732
+            ],
+            "feature_hash": "f0294965527eddb7b8c15d58736a2460407d10b6dff054242f9d3237cd0f3fa8",
+            "predicted_local_abc_delay": 23.63992684120847,
+            "replacement_dag_info": {
+              "library_class": 219,
+              "library_subgraph_root": 28,
+              "matched_library_inputs": [
+                17,
+                33,
+                151,
+                188
+              ],
+              "synthetic_internal_ids": [
+                10000003,
+                10000010,
+                10000011,
+                10000012,
+                10000022,
+                10000023
+              ],
+              "used_library_nodes": [
+                7,
+                14,
+                15,
+                16,
+                26,
+                27,
+                28
+              ],
+              "vertex_mapping": {
+                "0": 17,
+                "1": 33,
+                "14": 10000010,
+                "15": 10000011,
+                "16": 10000012,
+                "2": 151,
+                "26": 10000022,
+                "27": 10000023,
+                "28": 197,
+                "3": 188,
+                "7": 10000003
+              }
+            },
+            "subgraph_index": 4
+          }
+        },
+        "classification": "INTRA_REGION",
+        "cut_leaves": [
+          17,
+          33,
+          151,
+          188
+        ],
+        "cut_slot": 2,
+        "decision_id": "d432",
+        "decision_owner_region": 9,
+        "litecut": {
+          "candidate_count": 5,
+          "cut_slot": 2,
+          "gpu_choice_defined_for_decision": true,
+          "gpu_choice_equals_litecut_local_best": "false",
+          "litecut_local_best_subgraph": 2,
+          "original_gpu_selected_subgraph": 0,
+          "prediction_max": 24.50395393528832,
+          "prediction_min": 23.63992684120847,
+          "prediction_range": 0.864027094079848,
+          "prediction_std": 0.4232851008870687,
+          "region_id": 9,
+          "root": 197
+        },
+        "owner_region_count": 1,
+        "owner_regions": [
+          9
+        ],
+        "removable_node_count": 9,
+        "removable_nodes": [
+          189,
+          190,
+          191,
+          192,
+          193,
+          194,
+          195,
+          196,
+          197
+        ],
+        "replacement_candidates": [
+          {
+            "subgraph_index": 0
+          },
+          {
+            "subgraph_index": 1
+          },
+          {
+            "subgraph_index": 2
+          },
+          {
+            "subgraph_index": 3
+          },
+          {
+            "subgraph_index": 4
+          }
+        ],
+        "root": 197,
+        "root_region": 9,
+        "saved_count": 9,
+        "truth": 30855,
+        "truth_class": 219
+      },
+      {
+        "candidate_count": 2,
+        "candidate_subgraph_indices": [
+          0,
+          1
+        ],
+        "candidates": {
+          "0": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              17.0,
+              0.0,
+              2.0,
+              8.0,
+              8.0,
+              2.75,
+              3.031088913245535,
+              0.5,
+              4.5,
+              3.0,
+              1.5,
+              9.0,
+              2.25,
+              2.0,
+              0.6,
+              2.0,
+              0.14814814814814814,
+              0.024691358024691357,
+              0.2314285714285714
+            ],
+            "feature_hash": "ff89f55f29f4de92fd89cd0dae087f4bdf54f7a0c5b54779e27ef44c10113ed8",
+            "predicted_local_abc_delay": 37.07024291679322,
+            "replacement_dag_info": {
+              "library_class": 84,
+              "library_subgraph_root": 8,
+              "matched_library_inputs": [
+                190,
+                17,
+                33,
+                191
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000003
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                7,
+                8
+              ],
+              "vertex_mapping": {
+                "0": 190,
+                "1": 17,
+                "2": 33,
+                "3": 191,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002,
+                "7": 10000003,
+                "8": 197
+              }
+            },
+            "subgraph_index": 0
+          },
+          "1": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              17.0,
+              0.0,
+              2.0,
+              8.0,
+              8.0,
+              2.75,
+              3.031088913245535,
+              0.5,
+              4.5,
+              3.0,
+              1.5,
+              9.0,
+              2.25,
+              2.0,
+              0.6,
+              2.0,
+              0.14814814814814814,
+              0.024691358024691357,
+              0.2314285714285714
+            ],
+            "feature_hash": "ff89f55f29f4de92fd89cd0dae087f4bdf54f7a0c5b54779e27ef44c10113ed8",
+            "predicted_local_abc_delay": 37.07024291679322,
+            "replacement_dag_info": {
+              "library_class": 84,
+              "library_subgraph_root": 11,
+              "matched_library_inputs": [
+                190,
+                17,
+                33,
+                191
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000005,
+                10000006
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                9,
+                10,
+                11
+              ],
+              "vertex_mapping": {
+                "0": 190,
+                "1": 17,
+                "10": 10000006,
+                "11": 197,
+                "2": 33,
+                "3": 191,
+                "4": 10000000,
+                "5": 10000001,
+                "9": 10000005
+              }
+            },
+            "subgraph_index": 1
+          }
+        },
+        "classification": "INTRA_REGION",
+        "cut_leaves": [
+          17,
+          33,
+          190,
+          191
+        ],
+        "cut_slot": 4,
+        "decision_id": "d433",
+        "decision_owner_region": 9,
+        "litecut": {
+          "candidate_count": 2,
+          "cut_slot": 4,
+          "gpu_choice_defined_for_decision": false,
+          "gpu_choice_equals_litecut_local_best": "",
+          "litecut_local_best_subgraph": 0,
+          "original_gpu_selected_subgraph": "",
+          "prediction_max": 37.07024291679322,
+          "prediction_min": 37.07024291679322,
+          "prediction_range": 0.0,
+          "prediction_std": 0.0,
+          "region_id": 9,
+          "root": 197
+        },
+        "owner_region_count": 1,
+        "owner_regions": [
+          9
+        ],
+        "removable_node_count": 6,
+        "removable_nodes": [
+          192,
+          193,
+          194,
+          195,
+          196,
+          197
+        ],
+        "replacement_candidates": [
+          {
+            "subgraph_index": 0
+          },
+          {
+            "subgraph_index": 1
+          }
+        ],
+        "root": 197,
+        "root_region": 9,
+        "saved_count": 6,
+        "truth": 34951,
+        "truth_class": 84
+      },
+      {
+        "candidate_count": 5,
+        "candidate_subgraph_indices": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "candidates": {
+          "0": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              14.0,
+              0.0,
+              11.0,
+              9.0,
+              8.0,
+              3.25,
+              2.7726341266023544,
+              0.5,
+              6.0,
+              4.0,
+              2.0,
+              11.0,
+              2.2,
+              2.0,
+              0.5714285714285714,
+              2.0,
+              0.1322314049586777,
+              0.03305785123966942,
+              0.22448979591836735
+            ],
+            "feature_hash": "ab35447c751148b3e863f821041b5a3160d3fe7dd8fdf5b89d52e40e7fa74cc8",
+            "predicted_local_abc_delay": 62.49644498942498,
+            "replacement_dag_info": {
+              "library_class": 219,
+              "library_subgraph_root": 10,
+              "matched_library_inputs": [
+                17,
+                33,
+                209,
+                192
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000003,
+                10000004,
+                10000005
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10
+              ],
+              "vertex_mapping": {
+                "0": 17,
+                "1": 33,
+                "10": 213,
+                "2": 209,
+                "3": 192,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002,
+                "7": 10000003,
+                "8": 10000004,
+                "9": 10000005
+              }
+            },
+            "subgraph_index": 0
+          },
+          "1": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              14.0,
+              0.0,
+              11.0,
+              9.0,
+              8.0,
+              3.25,
+              2.7726341266023544,
+              0.5,
+              6.0,
+              4.0,
+              2.0,
+              11.0,
+              2.2,
+              2.0,
+              0.5714285714285714,
+              2.0,
+              0.1322314049586777,
+              0.03305785123966942,
+              0.22448979591836735
+            ],
+            "feature_hash": "ab35447c751148b3e863f821041b5a3160d3fe7dd8fdf5b89d52e40e7fa74cc8",
+            "predicted_local_abc_delay": 62.49644498942498,
+            "replacement_dag_info": {
+              "library_class": 219,
+              "library_subgraph_root": 13,
+              "matched_library_inputs": [
+                17,
+                33,
+                209,
+                192
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000003,
+                10000007,
+                10000008
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                7,
+                11,
+                12,
+                13
+              ],
+              "vertex_mapping": {
+                "0": 17,
+                "1": 33,
+                "11": 10000007,
+                "12": 10000008,
+                "13": 213,
+                "2": 209,
+                "3": 192,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002,
+                "7": 10000003
+              }
+            },
+            "subgraph_index": 1
+          },
+          "2": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              14.0,
+              0.0,
+              11.0,
+              9.0,
+              8.0,
+              3.25,
+              2.7726341266023544,
+              0.5,
+              7.0,
+              5.0,
+              2.0,
+              11.0,
+              1.8333333333333333,
+              2.0,
+              0.5714285714285714,
+              2.0,
+              0.1322314049586777,
+              0.03305785123966942,
+              0.22448979591836732
+            ],
+            "feature_hash": "fff8f6a05e5ffd37fa9a069b2c6bac6eb992e523783051b8c4f85a2516d0d1ec",
+            "predicted_local_abc_delay": 69.49265685265706,
+            "replacement_dag_info": {
+              "library_class": 219,
+              "library_subgraph_root": 19,
+              "matched_library_inputs": [
+                17,
+                33,
+                209,
+                192
+              ],
+              "synthetic_internal_ids": [
+                10000003,
+                10000010,
+                10000011,
+                10000012,
+                10000013,
+                10000014
+              ],
+              "used_library_nodes": [
+                7,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19
+              ],
+              "vertex_mapping": {
+                "0": 17,
+                "1": 33,
+                "14": 10000010,
+                "15": 10000011,
+                "16": 10000012,
+                "17": 10000013,
+                "18": 10000014,
+                "19": 213,
+                "2": 209,
+                "3": 192,
+                "7": 10000003
+              }
+            },
+            "subgraph_index": 2
+          },
+          "3": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              14.0,
+              0.0,
+              11.0,
+              9.0,
+              8.0,
+              3.25,
+              2.7726341266023544,
+              0.5,
+              6.0,
+              4.0,
+              2.0,
+              11.0,
+              2.2,
+              2.0,
+              0.5714285714285714,
+              2.0,
+              0.1322314049586777,
+              0.03305785123966942,
+              0.22448979591836737
+            ],
+            "feature_hash": "ab35447c751148b3e863f821041b5a3160d3fe7dd8fdf5b89d52e40e7fa74cc8",
+            "predicted_local_abc_delay": 62.49644498942498,
+            "replacement_dag_info": {
+              "library_class": 219,
+              "library_subgraph_root": 25,
+              "matched_library_inputs": [
+                17,
+                33,
+                209,
+                192
+              ],
+              "synthetic_internal_ids": [
+                10000003,
+                10000016,
+                10000017,
+                10000018,
+                10000019,
+                10000020
+              ],
+              "used_library_nodes": [
+                7,
+                20,
+                21,
+                22,
+                23,
+                24,
+                25
+              ],
+              "vertex_mapping": {
+                "0": 17,
+                "1": 33,
+                "2": 209,
+                "20": 10000016,
+                "21": 10000017,
+                "22": 10000018,
+                "23": 10000019,
+                "24": 10000020,
+                "25": 213,
+                "3": 192,
+                "7": 10000003
+              }
+            },
+            "subgraph_index": 3
+          },
+          "4": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              14.0,
+              0.0,
+              11.0,
+              9.0,
+              8.0,
+              3.25,
+              2.7726341266023544,
+              0.5,
+              7.0,
+              5.0,
+              2.0,
+              11.0,
+              1.8333333333333333,
+              2.0,
+              0.5714285714285714,
+              2.0,
+              0.1322314049586777,
+              0.03305785123966942,
+              0.22448979591836732
+            ],
+            "feature_hash": "fff8f6a05e5ffd37fa9a069b2c6bac6eb992e523783051b8c4f85a2516d0d1ec",
+            "predicted_local_abc_delay": 69.49265685265706,
+            "replacement_dag_info": {
+              "library_class": 219,
+              "library_subgraph_root": 28,
+              "matched_library_inputs": [
+                17,
+                33,
+                209,
+                192
+              ],
+              "synthetic_internal_ids": [
+                10000003,
+                10000010,
+                10000011,
+                10000012,
+                10000022,
+                10000023
+              ],
+              "used_library_nodes": [
+                7,
+                14,
+                15,
+                16,
+                26,
+                27,
+                28
+              ],
+              "vertex_mapping": {
+                "0": 17,
+                "1": 33,
+                "14": 10000010,
+                "15": 10000011,
+                "16": 10000012,
+                "2": 209,
+                "26": 10000022,
+                "27": 10000023,
+                "28": 213,
+                "3": 192,
+                "7": 10000003
+              }
+            },
+            "subgraph_index": 4
+          }
+        },
+        "classification": "INTRA_REGION",
+        "cut_leaves": [
+          17,
+          33,
+          209,
+          192
+        ],
+        "cut_slot": 3,
+        "decision_id": "d474",
+        "decision_owner_region": 9,
+        "litecut": {
+          "candidate_count": 5,
+          "cut_slot": 3,
+          "gpu_choice_defined_for_decision": true,
+          "gpu_choice_equals_litecut_local_best": "false",
+          "litecut_local_best_subgraph": 0,
+          "original_gpu_selected_subgraph": 2,
+          "prediction_max": 69.49265685265706,
+          "prediction_min": 62.49644498942498,
+          "prediction_range": 6.996211863232084,
+          "prediction_std": 3.4274298394649954,
+          "region_id": 9,
+          "root": 213
+        },
+        "owner_region_count": 1,
+        "owner_regions": [
+          9
+        ],
+        "removable_node_count": 9,
+        "removable_nodes": [
+          193,
+          194,
+          195,
+          196,
+          197,
+          210,
+          211,
+          212,
+          213
+        ],
+        "replacement_candidates": [
+          {
+            "subgraph_index": 0
+          },
+          {
+            "subgraph_index": 1
+          },
+          {
+            "subgraph_index": 2
+          },
+          {
+            "subgraph_index": 3
+          },
+          {
+            "subgraph_index": 4
+          }
+        ],
+        "root": 213,
+        "root_region": 9,
+        "saved_count": 9,
+        "truth": 30855,
+        "truth_class": 219
+      },
+      {
+        "candidate_count": 5,
+        "candidate_subgraph_indices": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "candidates": {
+          "0": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              10.0,
+              0.0,
+              1.0,
+              15.0,
+              12.0,
+              11.0,
+              1.224744871391589,
+              0.0,
+              4.5,
+              3.0,
+              1.5,
+              9.0,
+              2.25,
+              2.0,
+              0.5,
+              1.0,
+              0.09876543209876543,
+              0.024691358024691357,
+              0.24999999999999994
+            ],
+            "feature_hash": "b41dc1f9be88a85fb2c45701edba7ce0f5d833ea9a11d60cbe33b626803d363f",
+            "predicted_local_abc_delay": 38.55056715055094,
+            "replacement_dag_info": {
+              "library_class": 3,
+              "library_subgraph_root": 8,
+              "matched_library_inputs": [
+                139,
+                176,
+                213,
+                238
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000003
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                7,
+                8
+              ],
+              "vertex_mapping": {
+                "0": 139,
+                "1": 176,
+                "2": 213,
+                "3": 238,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002,
+                "7": 10000003,
+                "8": 386
+              }
+            },
+            "subgraph_index": 0
+          },
+          "1": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              10.0,
+              0.0,
+              1.0,
+              15.0,
+              12.0,
+              11.0,
+              1.224744871391589,
+              0.0,
+              4.0,
+              3.0,
+              1.0,
+              9.0,
+              2.25,
+              2.0,
+              0.4,
+              0.0,
+              0.09876543209876543,
+              0.024691358024691357,
+              0.24
+            ],
+            "feature_hash": "114384c627970160ddb9fb56322ea554ade8afb630497642092fcfd72ceb8b6d",
+            "predicted_local_abc_delay": 183.49226782488117,
+            "replacement_dag_info": {
+              "library_class": 3,
+              "library_subgraph_root": 12,
+              "matched_library_inputs": [
+                139,
+                176,
+                213,
+                238
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000005,
+                10000006,
+                10000007
+              ],
+              "used_library_nodes": [
+                4,
+                9,
+                10,
+                11,
+                12
+              ],
+              "vertex_mapping": {
+                "0": 139,
+                "1": 176,
+                "10": 10000006,
+                "11": 10000007,
+                "12": 386,
+                "2": 213,
+                "3": 238,
+                "4": 10000000,
+                "9": 10000005
+              }
+            },
+            "subgraph_index": 1
+          },
+          "2": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              10.0,
+              0.0,
+              1.0,
+              15.0,
+              12.0,
+              11.0,
+              1.224744871391589,
+              0.0,
+              5.0,
+              4.0,
+              1.0,
+              9.0,
+              1.8,
+              2.0,
+              0.4,
+              0.0,
+              0.09876543209876543,
+              0.024691358024691357,
+              0.24500000000000002
+            ],
+            "feature_hash": "21b6f655b23e3b243a63ebf60c92f038096c755843fa995c5f1b7de4e9582b6e",
+            "predicted_local_abc_delay": 35.14845244688254,
+            "replacement_dag_info": {
+              "library_class": 3,
+              "library_subgraph_root": 14,
+              "matched_library_inputs": [
+                139,
+                176,
+                213,
+                238
+              ],
+              "synthetic_internal_ids": [
+                10000005,
+                10000006,
+                10000007,
+                10000009
+              ],
+              "used_library_nodes": [
+                9,
+                10,
+                11,
+                13,
+                14
+              ],
+              "vertex_mapping": {
+                "0": 139,
+                "1": 176,
+                "10": 10000006,
+                "11": 10000007,
+                "13": 10000009,
+                "14": 386,
+                "2": 213,
+                "3": 238,
+                "9": 10000005
+              }
+            },
+            "subgraph_index": 2
+          },
+          "3": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              10.0,
+              0.0,
+              1.0,
+              15.0,
+              12.0,
+              11.0,
+              1.224744871391589,
+              0.0,
+              4.0,
+              3.0,
+              1.0,
+              9.0,
+              2.25,
+              2.0,
+              0.4,
+              1.0,
+              0.09876543209876543,
+              0.024691358024691357,
+              0.24166666666666664
+            ],
+            "feature_hash": "9c351472c83ab904a2f7ff2536ee447e297f8a888e740d11d888a4ff1e291dcc",
+            "predicted_local_abc_delay": 56.47497436108696,
+            "replacement_dag_info": {
+              "library_class": 3,
+              "library_subgraph_root": 16,
+              "matched_library_inputs": [
+                139,
+                176,
+                213,
+                238
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000005,
+                10000006,
+                10000011
+              ],
+              "used_library_nodes": [
+                4,
+                9,
+                10,
+                15,
+                16
+              ],
+              "vertex_mapping": {
+                "0": 139,
+                "1": 176,
+                "10": 10000006,
+                "15": 10000011,
+                "16": 386,
+                "2": 213,
+                "3": 238,
+                "4": 10000000,
+                "9": 10000005
+              }
+            },
+            "subgraph_index": 3
+          },
+          "4": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              10.0,
+              0.0,
+              1.0,
+              15.0,
+              12.0,
+              11.0,
+              1.224744871391589,
+              0.0,
+              3.5,
+              3.0,
+              0.5,
+              9.0,
+              2.25,
+              2.0,
+              0.4,
+              1.0,
+              0.09876543209876543,
+              0.024691358024691357,
+              0.24166666666666664
+            ],
+            "feature_hash": "d0b066f452656d640e000936c7196d34cf599690bd6172ae6b5ee7345c984cec",
+            "predicted_local_abc_delay": 45.26699416043256,
+            "replacement_dag_info": {
+              "library_class": 3,
+              "library_subgraph_root": 18,
+              "matched_library_inputs": [
+                139,
+                176,
+                213,
+                238
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000005,
+                10000006,
+                10000013
+              ],
+              "used_library_nodes": [
+                4,
+                9,
+                10,
+                17,
+                18
+              ],
+              "vertex_mapping": {
+                "0": 139,
+                "1": 176,
+                "10": 10000006,
+                "17": 10000013,
+                "18": 386,
+                "2": 213,
+                "3": 238,
+                "4": 10000000,
+                "9": 10000005
+              }
+            },
+            "subgraph_index": 4
+          }
+        },
+        "classification": "INTRA_REGION",
+        "cut_leaves": [
+          139,
+          176,
+          213,
+          238
+        ],
+        "cut_slot": 2,
+        "decision_id": "d1093",
+        "decision_owner_region": 24,
+        "litecut": {
+          "candidate_count": 5,
+          "cut_slot": 2,
+          "gpu_choice_defined_for_decision": true,
+          "gpu_choice_equals_litecut_local_best": "false",
+          "litecut_local_best_subgraph": 2,
+          "original_gpu_selected_subgraph": 0,
+          "prediction_max": 183.49226782488117,
+          "prediction_min": 35.14845244688254,
+          "prediction_range": 148.34381537799862,
+          "prediction_std": 56.32562353578608,
+          "region_id": 24,
+          "root": 386
+        },
+        "owner_region_count": 1,
+        "owner_regions": [
+          24
+        ],
+        "removable_node_count": 6,
+        "removable_nodes": [
+          381,
+          382,
+          383,
+          384,
+          385,
+          386
+        ],
+        "replacement_candidates": [
+          {
+            "subgraph_index": 0
+          },
+          {
+            "subgraph_index": 1
+          },
+          {
+            "subgraph_index": 2
+          },
+          {
+            "subgraph_index": 3
+          },
+          {
+            "subgraph_index": 4
+          }
+        ],
+        "root": 386,
+        "root_region": 24,
+        "saved_count": 6,
+        "truth": 40959,
+        "truth_class": 3
+      },
+      {
+        "candidate_count": 4,
+        "candidate_subgraph_indices": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "candidates": {
+          "0": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              10.0,
+              0.0,
+              1.0,
+              16.0,
+              12.0,
+              4.0,
+              4.636809247747852,
+              0.0,
+              5.5,
+              4.0,
+              1.5,
+              9.0,
+              1.8,
+              2.0,
+              0.6,
+              0.0,
+              0.12345679012345678,
+              0.024691358024691357,
+              0.24904761904761905
+            ],
+            "feature_hash": "0308fc29ff2222659087243f066aeac125d14bee0ec1831b1bb01c98b874b2d0",
+            "predicted_local_abc_delay": 48.66704320509119,
+            "replacement_dag_info": {
+              "library_class": 11,
+              "library_subgraph_root": 8,
+              "matched_library_inputs": [
+                137,
+                138,
+                176,
+                381
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000003
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                7,
+                8
+              ],
+              "vertex_mapping": {
+                "0": 137,
+                "1": 138,
+                "2": 176,
+                "3": 381,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002,
+                "7": 10000003,
+                "8": 386
+              }
+            },
+            "subgraph_index": 0
+          },
+          "1": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              10.0,
+              0.0,
+              1.0,
+              16.0,
+              12.0,
+              4.0,
+              4.636809247747852,
+              0.0,
+              6.0,
+              4.0,
+              2.0,
+              9.0,
+              1.8,
+              2.0,
+              0.7,
+              1.0,
+              0.12345679012345678,
+              0.024691358024691357,
+              0.2590476190476191
+            ],
+            "feature_hash": "054868f82565e1b0562039094b97a27d8301744b118534ced28b6324bb8b48b2",
+            "predicted_local_abc_delay": 49.02878063209083,
+            "replacement_dag_info": {
+              "library_class": 11,
+              "library_subgraph_root": 12,
+              "matched_library_inputs": [
+                137,
+                138,
+                176,
+                381
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000005,
+                10000006,
+                10000007
+              ],
+              "used_library_nodes": [
+                4,
+                9,
+                10,
+                11,
+                12
+              ],
+              "vertex_mapping": {
+                "0": 137,
+                "1": 138,
+                "10": 10000006,
+                "11": 10000007,
+                "12": 386,
+                "2": 176,
+                "3": 381,
+                "4": 10000000,
+                "9": 10000005
+              }
+            },
+            "subgraph_index": 1
+          },
+          "2": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              10.0,
+              0.0,
+              1.0,
+              16.0,
+              12.0,
+              4.0,
+              4.636809247747852,
+              0.0,
+              5.5,
+              4.0,
+              1.5,
+              9.0,
+              1.8,
+              2.0,
+              0.6,
+              1.0,
+              0.12345679012345678,
+              0.024691358024691357,
+              0.24571428571428572
+            ],
+            "feature_hash": "3d11231615dead95be72deeaf41d99407b92cfa2b32f64201b9e198f359983ce",
+            "predicted_local_abc_delay": 36.29180264557913,
+            "replacement_dag_info": {
+              "library_class": 11,
+              "library_subgraph_root": 14,
+              "matched_library_inputs": [
+                137,
+                138,
+                176,
+                381
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000009
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                13,
+                14
+              ],
+              "vertex_mapping": {
+                "0": 137,
+                "1": 138,
+                "13": 10000009,
+                "14": 386,
+                "2": 176,
+                "3": 381,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002
+              }
+            },
+            "subgraph_index": 2
+          },
+          "3": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              10.0,
+              0.0,
+              1.0,
+              16.0,
+              12.0,
+              4.0,
+              4.636809247747852,
+              0.0,
+              5.0,
+              4.0,
+              1.0,
+              9.0,
+              1.8,
+              2.0,
+              0.6,
+              1.0,
+              0.12345679012345678,
+              0.024691358024691357,
+              0.24571428571428572
+            ],
+            "feature_hash": "5a69afbff1ec0027c5fef8382b610f730aff33c5372bff475af262efb8f76394",
+            "predicted_local_abc_delay": 32.38797167451801,
+            "replacement_dag_info": {
+              "library_class": 11,
+              "library_subgraph_root": 16,
+              "matched_library_inputs": [
+                137,
+                138,
+                176,
+                381
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000011
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                15,
+                16
+              ],
+              "vertex_mapping": {
+                "0": 137,
+                "1": 138,
+                "15": 10000011,
+                "16": 386,
+                "2": 176,
+                "3": 381,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002
+              }
+            },
+            "subgraph_index": 3
+          }
+        },
+        "classification": "INTRA_REGION",
+        "cut_leaves": [
+          137,
+          138,
+          176,
+          381
+        ],
+        "cut_slot": 5,
+        "decision_id": "d1096",
+        "decision_owner_region": 24,
+        "litecut": {
+          "candidate_count": 4,
+          "cut_slot": 5,
+          "gpu_choice_defined_for_decision": false,
+          "gpu_choice_equals_litecut_local_best": "",
+          "litecut_local_best_subgraph": 3,
+          "original_gpu_selected_subgraph": "",
+          "prediction_max": 49.02878063209083,
+          "prediction_min": 32.38797167451801,
+          "prediction_range": 16.640808957572816,
+          "prediction_std": 7.385258247055997,
+          "region_id": 24,
+          "root": 386
+        },
+        "owner_region_count": 1,
+        "owner_regions": [
+          24
+        ],
+        "removable_node_count": 5,
+        "removable_nodes": [
+          382,
+          383,
+          384,
+          385,
+          386
+        ],
+        "replacement_candidates": [
+          {
+            "subgraph_index": 0
+          },
+          {
+            "subgraph_index": 1
+          },
+          {
+            "subgraph_index": 2
+          },
+          {
+            "subgraph_index": 3
+          }
+        ],
+        "root": 386,
+        "root_region": 24,
+        "saved_count": 5,
+        "truth": 7935,
+        "truth_class": 11
+      },
+      {
+        "candidate_count": 4,
+        "candidate_subgraph_indices": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "candidates": {
+          "0": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              10.0,
+              0.0,
+              1.0,
+              16.0,
+              12.0,
+              8.666666666666666,
+              4.714045207910316,
+              0.0,
+              4.0,
+              3.0,
+              1.0,
+              7.0,
+              1.75,
+              2.0,
+              0.5,
+              0.0,
+              0.12244897959183673,
+              0.04081632653061224,
+              0.25416666666666665
+            ],
+            "feature_hash": "1a67ddfbfaf68db1505c5543d616720badb2e5d6842506b7cd68318e68e1cc7d",
+            "predicted_local_abc_delay": 87.98393783465966,
+            "replacement_dag_info": {
+              "library_class": 13,
+              "library_subgraph_root": 7,
+              "matched_library_inputs": [
+                0,
+                139,
+                176,
+                381
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                7
+              ],
+              "vertex_mapping": {
+                "0": 0,
+                "1": 139,
+                "2": 176,
+                "3": 381,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002,
+                "7": 386
+              }
+            },
+            "subgraph_index": 0
+          },
+          "1": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              10.0,
+              0.0,
+              1.0,
+              16.0,
+              12.0,
+              8.666666666666666,
+              4.714045207910316,
+              0.0,
+              4.5,
+              3.0,
+              1.5,
+              7.0,
+              1.75,
+              2.0,
+              0.625,
+              1.0,
+              0.12244897959183673,
+              0.04081632653061224,
+              0.26666666666666666
+            ],
+            "feature_hash": "10d6ea871c171312c5db19da14b14aab586ea0ae0743955e881597102469f981",
+            "predicted_local_abc_delay": 30.257957033735334,
+            "replacement_dag_info": {
+              "library_class": 13,
+              "library_subgraph_root": 11,
+              "matched_library_inputs": [
+                0,
+                139,
+                176,
+                381
+              ],
+              "synthetic_internal_ids": [
+                10000004,
+                10000005,
+                10000006
+              ],
+              "used_library_nodes": [
+                8,
+                9,
+                10,
+                11
+              ],
+              "vertex_mapping": {
+                "0": 0,
+                "1": 139,
+                "10": 10000006,
+                "11": 386,
+                "2": 176,
+                "3": 381,
+                "8": 10000004,
+                "9": 10000005
+              }
+            },
+            "subgraph_index": 1
+          },
+          "2": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              10.0,
+              0.0,
+              1.0,
+              16.0,
+              12.0,
+              8.666666666666666,
+              4.714045207910316,
+              0.0,
+              3.5,
+              3.0,
+              0.5,
+              7.0,
+              1.75,
+              2.0,
+              0.5,
+              1.0,
+              0.12244897959183673,
+              0.04081632653061224,
+              0.25
+            ],
+            "feature_hash": "590b4ffe8a9eb8b7649cdfaff613bda4d4afb09e4b7493b1297a1499fba10cc2",
+            "predicted_local_abc_delay": 34.72549261519138,
+            "replacement_dag_info": {
+              "library_class": 13,
+              "library_subgraph_root": 13,
+              "matched_library_inputs": [
+                0,
+                139,
+                176,
+                381
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000008
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                12,
+                13
+              ],
+              "vertex_mapping": {
+                "0": 0,
+                "1": 139,
+                "12": 10000008,
+                "13": 386,
+                "2": 176,
+                "3": 381,
+                "4": 10000000,
+                "5": 10000001
+              }
+            },
+            "subgraph_index": 2
+          },
+          "3": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              10.0,
+              0.0,
+              1.0,
+              16.0,
+              12.0,
+              8.666666666666666,
+              4.714045207910316,
+              0.0,
+              4.0,
+              3.0,
+              1.0,
+              7.0,
+              1.75,
+              2.0,
+              0.5,
+              1.0,
+              0.12244897959183673,
+              0.04081632653061224,
+              0.25
+            ],
+            "feature_hash": "36006841700a41335332b40bce0474ce2e482a70833f2f905d173cb239320f09",
+            "predicted_local_abc_delay": 42.55209114538315,
+            "replacement_dag_info": {
+              "library_class": 13,
+              "library_subgraph_root": 15,
+              "matched_library_inputs": [
+                0,
+                139,
+                176,
+                381
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000010
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                14,
+                15
+              ],
+              "vertex_mapping": {
+                "0": 0,
+                "1": 139,
+                "14": 10000010,
+                "15": 386,
+                "2": 176,
+                "3": 381,
+                "4": 10000000,
+                "5": 10000001
+              }
+            },
+            "subgraph_index": 3
+          }
+        },
+        "classification": "INTRA_REGION",
+        "cut_leaves": [
+          139,
+          176,
+          381
+        ],
+        "cut_slot": 6,
+        "decision_id": "d1097",
+        "decision_owner_region": 24,
+        "litecut": {
+          "candidate_count": 4,
+          "cut_slot": 6,
+          "gpu_choice_defined_for_decision": false,
+          "gpu_choice_equals_litecut_local_best": "",
+          "litecut_local_best_subgraph": 1,
+          "original_gpu_selected_subgraph": "",
+          "prediction_max": 87.98393783465966,
+          "prediction_min": 30.257957033735334,
+          "prediction_range": 57.72598080092432,
+          "prediction_std": 23.001581185460477,
+          "region_id": 24,
+          "root": 386
+        },
+        "owner_region_count": 1,
+        "owner_regions": [
+          24
+        ],
+        "removable_node_count": 5,
+        "removable_nodes": [
+          382,
+          383,
+          384,
+          385,
+          386
+        ],
+        "replacement_candidates": [
+          {
+            "subgraph_index": 0
+          },
+          {
+            "subgraph_index": 1
+          },
+          {
+            "subgraph_index": 2
+          },
+          {
+            "subgraph_index": 3
+          }
+        ],
+        "root": 386,
+        "root_region": 24,
+        "saved_count": 5,
+        "truth": 40863,
+        "truth_class": 13
+      },
+      {
+        "candidate_count": 5,
+        "candidate_subgraph_indices": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "candidates": {
+          "0": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              9.0,
+              0.0,
+              1.0,
+              16.0,
+              12.0,
+              6.75,
+              5.261891294962297,
+              0.0,
+              5.5,
+              4.0,
+              1.5,
+              10.0,
+              2.0,
+              2.0,
+              0.5,
+              2.0,
+              0.12,
+              0.03,
+              0.2339285714285714
+            ],
+            "feature_hash": "5524762660267f880c7f4874dd44aa217b8cc1d0e1ef3fc7505d1187f3d0a796",
+            "predicted_local_abc_delay": 35.00439976794128,
+            "replacement_dag_info": {
+              "library_class": 34,
+              "library_subgraph_root": 9,
+              "matched_library_inputs": [
+                378,
+                139,
+                176,
+                381
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000003,
+                10000004
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "vertex_mapping": {
+                "0": 378,
+                "1": 139,
+                "2": 176,
+                "3": 381,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002,
+                "7": 10000003,
+                "8": 10000004,
+                "9": 387
+              }
+            },
+            "subgraph_index": 0
+          },
+          "1": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              9.0,
+              0.0,
+              1.0,
+              16.0,
+              12.0,
+              6.75,
+              5.261891294962297,
+              0.0,
+              6.0,
+              4.0,
+              2.0,
+              11.0,
+              2.2,
+              3.0,
+              0.5,
+              2.0,
+              0.09917355371900827,
+              0.049586776859504134,
+              0.22738095238095238
+            ],
+            "feature_hash": "32f1627cc2b52dfc4eafb47b6f9871972d53e70e27a1843262d9ca2f27782b92",
+            "predicted_local_abc_delay": 28.67115246798002,
+            "replacement_dag_info": {
+              "library_class": 34,
+              "library_subgraph_root": 14,
+              "matched_library_inputs": [
+                378,
+                139,
+                176,
+                381
+              ],
+              "synthetic_internal_ids": [
+                10000001,
+                10000004,
+                10000006,
+                10000007,
+                10000008,
+                10000009
+              ],
+              "used_library_nodes": [
+                5,
+                8,
+                10,
+                11,
+                12,
+                13,
+                14
+              ],
+              "vertex_mapping": {
+                "0": 378,
+                "1": 139,
+                "10": 10000006,
+                "11": 10000007,
+                "12": 10000008,
+                "13": 10000009,
+                "14": 387,
+                "2": 176,
+                "3": 381,
+                "5": 10000001,
+                "8": 10000004
+              }
+            },
+            "subgraph_index": 1
+          },
+          "2": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              9.0,
+              0.0,
+              1.0,
+              16.0,
+              12.0,
+              6.75,
+              5.261891294962297,
+              0.0,
+              5.5,
+              4.0,
+              1.5,
+              11.0,
+              2.2,
+              3.0,
+              0.42857142857142855,
+              2.0,
+              0.09917355371900827,
+              0.049586776859504134,
+              0.2214285714285714
+            ],
+            "feature_hash": "09929926ccbba81f0d85458e7c3a0995a8c3ec14640a9fe55b616c7391b8a54e",
+            "predicted_local_abc_delay": 44.14048323417009,
+            "replacement_dag_info": {
+              "library_class": 34,
+              "library_subgraph_root": 17,
+              "matched_library_inputs": [
+                378,
+                139,
+                176,
+                381
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000003,
+                10000011,
+                10000012
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                7,
+                15,
+                16,
+                17
+              ],
+              "vertex_mapping": {
+                "0": 378,
+                "1": 139,
+                "15": 10000011,
+                "16": 10000012,
+                "17": 387,
+                "2": 176,
+                "3": 381,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002,
+                "7": 10000003
+              }
+            },
+            "subgraph_index": 2
+          },
+          "3": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              9.0,
+              0.0,
+              1.0,
+              16.0,
+              12.0,
+              6.75,
+              5.261891294962297,
+              0.0,
+              6.0,
+              4.0,
+              2.0,
+              10.0,
+              2.0,
+              2.0,
+              0.6666666666666666,
+              2.0,
+              0.12,
+              0.03,
+              0.25128968253968254
+            ],
+            "feature_hash": "0b9d2049d81334c9cb814c5214ea16cd14ba3cc9a77410092a07b5f4b2c22e6f",
+            "predicted_local_abc_delay": 43.39262487234558,
+            "replacement_dag_info": {
+              "library_class": 34,
+              "library_subgraph_root": 21,
+              "matched_library_inputs": [
+                378,
+                139,
+                176,
+                381
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000014,
+                10000015,
+                10000016
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                18,
+                19,
+                20,
+                21
+              ],
+              "vertex_mapping": {
+                "0": 378,
+                "1": 139,
+                "18": 10000014,
+                "19": 10000015,
+                "2": 176,
+                "20": 10000016,
+                "21": 387,
+                "3": 381,
+                "4": 10000000,
+                "5": 10000001
+              }
+            },
+            "subgraph_index": 3
+          },
+          "4": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              9.0,
+              0.0,
+              1.0,
+              16.0,
+              12.0,
+              6.75,
+              5.261891294962297,
+              0.0,
+              5.5,
+              4.0,
+              1.5,
+              10.0,
+              2.0,
+              2.0,
+              0.5,
+              2.0,
+              0.12,
+              0.03,
+              0.2339285714285714
+            ],
+            "feature_hash": "5524762660267f880c7f4874dd44aa217b8cc1d0e1ef3fc7505d1187f3d0a796",
+            "predicted_local_abc_delay": 35.00439976794128,
+            "replacement_dag_info": {
+              "library_class": 34,
+              "library_subgraph_root": 23,
+              "matched_library_inputs": [
+                378,
+                139,
+                176,
+                381
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000004,
+                10000014,
+                10000018
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                8,
+                18,
+                22,
+                23
+              ],
+              "vertex_mapping": {
+                "0": 378,
+                "1": 139,
+                "18": 10000014,
+                "2": 176,
+                "22": 10000018,
+                "23": 387,
+                "3": 381,
+                "4": 10000000,
+                "5": 10000001,
+                "8": 10000004
+              }
+            },
+            "subgraph_index": 4
+          }
+        },
+        "classification": "INTRA_REGION",
+        "cut_leaves": [
+          139,
+          176,
+          378,
+          381
+        ],
+        "cut_slot": 2,
+        "decision_id": "d1099",
+        "decision_owner_region": 24,
+        "litecut": {
+          "candidate_count": 5,
+          "cut_slot": 2,
+          "gpu_choice_defined_for_decision": true,
+          "gpu_choice_equals_litecut_local_best": "false",
+          "litecut_local_best_subgraph": 1,
+          "original_gpu_selected_subgraph": 0,
+          "prediction_max": 44.14048323417009,
+          "prediction_min": 28.67115246798002,
+          "prediction_range": 15.469330766190073,
+          "prediction_std": 5.811925539676817,
+          "region_id": 24,
+          "root": 387
+        },
+        "owner_region_count": 1,
+        "owner_regions": [
+          24
+        ],
+        "removable_node_count": 8,
+        "removable_nodes": [
+          379,
+          380,
+          382,
+          383,
+          384,
+          385,
+          386,
+          387
+        ],
+        "replacement_candidates": [
+          {
+            "subgraph_index": 0
+          },
+          {
+            "subgraph_index": 1
+          },
+          {
+            "subgraph_index": 2
+          },
+          {
+            "subgraph_index": 3
+          },
+          {
+            "subgraph_index": 4
+          }
+        ],
+        "root": 387,
+        "root_region": 24,
+        "saved_count": 8,
+        "truth": 6527,
+        "truth_class": 34
+      },
+      {
+        "candidate_count": 4,
+        "candidate_subgraph_indices": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "candidates": {
+          "0": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              9.0,
+              0.0,
+              1.0,
+              18.0,
+              12.0,
+              6.75,
+              5.261891294962297,
+              0.0,
+              5.5,
+              4.0,
+              1.5,
+              9.0,
+              1.8,
+              2.0,
+              0.6,
+              2.0,
+              0.09876543209876543,
+              0.024691358024691357,
+              0.27166666666666667
+            ],
+            "feature_hash": "a9a8c02f47d205fff5643a03e7416a2468956b05bb5ebc11e0197fdc163d86e7",
+            "predicted_local_abc_delay": 68.89867724306079,
+            "replacement_dag_info": {
+              "library_class": 18,
+              "library_subgraph_root": 8,
+              "matched_library_inputs": [
+                139,
+                176,
+                381,
+                380
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000003
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                7,
+                8
+              ],
+              "vertex_mapping": {
+                "0": 139,
+                "1": 176,
+                "2": 381,
+                "3": 380,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002,
+                "7": 10000003,
+                "8": 387
+              }
+            },
+            "subgraph_index": 0
+          },
+          "1": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              9.0,
+              0.0,
+              1.0,
+              18.0,
+              12.0,
+              6.75,
+              5.261891294962297,
+              0.0,
+              6.0,
+              4.0,
+              2.0,
+              9.0,
+              1.8,
+              2.0,
+              0.7,
+              2.0,
+              0.09876543209876543,
+              0.024691358024691357,
+              0.27999999999999997
+            ],
+            "feature_hash": "affba81585d2ce6e3f7d5f3e70d8df2e4dfbdd6955994816d15ecf4627662e32",
+            "predicted_local_abc_delay": 35.14323797635103,
+            "replacement_dag_info": {
+              "library_class": 18,
+              "library_subgraph_root": 13,
+              "matched_library_inputs": [
+                139,
+                176,
+                381,
+                380
+              ],
+              "synthetic_internal_ids": [
+                10000005,
+                10000006,
+                10000007,
+                10000008
+              ],
+              "used_library_nodes": [
+                9,
+                10,
+                11,
+                12,
+                13
+              ],
+              "vertex_mapping": {
+                "0": 139,
+                "1": 176,
+                "10": 10000006,
+                "11": 10000007,
+                "12": 10000008,
+                "13": 387,
+                "2": 381,
+                "3": 380,
+                "9": 10000005
+              }
+            },
+            "subgraph_index": 1
+          },
+          "2": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              9.0,
+              0.0,
+              1.0,
+              18.0,
+              12.0,
+              6.75,
+              5.261891294962297,
+              0.0,
+              5.5,
+              4.0,
+              1.5,
+              9.0,
+              1.8,
+              2.0,
+              0.6,
+              2.0,
+              0.09876543209876543,
+              0.024691358024691357,
+              0.27166666666666667
+            ],
+            "feature_hash": "a9a8c02f47d205fff5643a03e7416a2468956b05bb5ebc11e0197fdc163d86e7",
+            "predicted_local_abc_delay": 68.89867724306079,
+            "replacement_dag_info": {
+              "library_class": 18,
+              "library_subgraph_root": 16,
+              "matched_library_inputs": [
+                139,
+                176,
+                381,
+                380
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000010,
+                10000011
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                14,
+                15,
+                16
+              ],
+              "vertex_mapping": {
+                "0": 139,
+                "1": 176,
+                "14": 10000010,
+                "15": 10000011,
+                "16": 387,
+                "2": 381,
+                "3": 380,
+                "4": 10000000,
+                "5": 10000001
+              }
+            },
+            "subgraph_index": 2
+          },
+          "3": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              9.0,
+              0.0,
+              1.0,
+              18.0,
+              12.0,
+              6.75,
+              5.261891294962297,
+              0.0,
+              5.0,
+              4.0,
+              1.0,
+              9.0,
+              1.8,
+              2.0,
+              0.6,
+              2.0,
+              0.09876543209876543,
+              0.024691358024691357,
+              0.27166666666666667
+            ],
+            "feature_hash": "b8074ed40ddf59983b9119e79669ec8029241f83ca317a46d288a6fbb00b17d0",
+            "predicted_local_abc_delay": 61.864508246823085,
+            "replacement_dag_info": {
+              "library_class": 18,
+              "library_subgraph_root": 19,
+              "matched_library_inputs": [
+                139,
+                176,
+                381,
+                380
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000013,
+                10000014
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                17,
+                18,
+                19
+              ],
+              "vertex_mapping": {
+                "0": 139,
+                "1": 176,
+                "17": 10000013,
+                "18": 10000014,
+                "19": 387,
+                "2": 381,
+                "3": 380,
+                "4": 10000000,
+                "5": 10000001
+              }
+            },
+            "subgraph_index": 3
+          }
+        },
+        "classification": "INTRA_REGION",
+        "cut_leaves": [
+          139,
+          176,
+          381,
+          380
+        ],
+        "cut_slot": 3,
+        "decision_id": "d1100",
+        "decision_owner_region": 24,
+        "litecut": {
+          "candidate_count": 4,
+          "cut_slot": 3,
+          "gpu_choice_defined_for_decision": false,
+          "gpu_choice_equals_litecut_local_best": "",
+          "litecut_local_best_subgraph": 1,
+          "original_gpu_selected_subgraph": "",
+          "prediction_max": 68.89867724306079,
+          "prediction_min": 35.14323797635103,
+          "prediction_range": 33.75543926670976,
+          "prediction_std": 13.901089687457823,
+          "region_id": 24,
+          "root": 387
+        },
+        "owner_region_count": 1,
+        "owner_regions": [
+          24
+        ],
+        "removable_node_count": 6,
+        "removable_nodes": [
+          382,
+          383,
+          384,
+          385,
+          386,
+          387
+        ],
+        "replacement_candidates": [
+          {
+            "subgraph_index": 0
+          },
+          {
+            "subgraph_index": 1
+          },
+          {
+            "subgraph_index": 2
+          },
+          {
+            "subgraph_index": 3
+          }
+        ],
+        "root": 387,
+        "root_region": 24,
+        "saved_count": 6,
+        "truth": 159,
+        "truth_class": 18
+      },
+      {
+        "candidate_count": 5,
+        "candidate_subgraph_indices": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "candidates": {
+          "0": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              9.0,
+              0.0,
+              1.0,
+              15.0,
+              12.0,
+              11.0,
+              1.224744871391589,
+              0.0,
+              5.5,
+              5.0,
+              0.5,
+              11.0,
+              1.8333333333333333,
+              2.0,
+              0.5,
+              0.0,
+              0.11570247933884298,
+              0.03305785123966942,
+              0.23146258503401365
+            ],
+            "feature_hash": "30c191ce3be96a70a4a33977533091757738189459f149d2d95c1488932a7799",
+            "predicted_local_abc_delay": 44.24598599046949,
+            "replacement_dag_info": {
+              "library_class": 6,
+              "library_subgraph_root": 10,
+              "matched_library_inputs": [
+                139,
+                176,
+                213,
+                238
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000003,
+                10000004,
+                10000005
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10
+              ],
+              "vertex_mapping": {
+                "0": 139,
+                "1": 176,
+                "10": 387,
+                "2": 213,
+                "3": 238,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002,
+                "7": 10000003,
+                "8": 10000004,
+                "9": 10000005
+              }
+            },
+            "subgraph_index": 0
+          },
+          "1": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              9.0,
+              0.0,
+              1.0,
+              15.0,
+              12.0,
+              11.0,
+              1.224744871391589,
+              0.0,
+              5.5,
+              5.0,
+              0.5,
+              11.0,
+              1.8333333333333333,
+              2.0,
+              0.5,
+              0.0,
+              0.11570247933884298,
+              0.03305785123966942,
+              0.23146258503401365
+            ],
+            "feature_hash": "30c191ce3be96a70a4a33977533091757738189459f149d2d95c1488932a7799",
+            "predicted_local_abc_delay": 44.24598599046949,
+            "replacement_dag_info": {
+              "library_class": 6,
+              "library_subgraph_root": 17,
+              "matched_library_inputs": [
+                139,
+                176,
+                213,
+                238
+              ],
+              "synthetic_internal_ids": [
+                10000007,
+                10000008,
+                10000009,
+                10000010,
+                10000011,
+                10000012
+              ],
+              "used_library_nodes": [
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17
+              ],
+              "vertex_mapping": {
+                "0": 139,
+                "1": 176,
+                "11": 10000007,
+                "12": 10000008,
+                "13": 10000009,
+                "14": 10000010,
+                "15": 10000011,
+                "16": 10000012,
+                "17": 387,
+                "2": 213,
+                "3": 238
+              }
+            },
+            "subgraph_index": 1
+          },
+          "2": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              9.0,
+              0.0,
+              1.0,
+              15.0,
+              12.0,
+              11.0,
+              1.224744871391589,
+              0.0,
+              7.0,
+              5.0,
+              2.0,
+              11.0,
+              1.8333333333333333,
+              2.0,
+              0.6428571428571429,
+              1.0,
+              0.11570247933884298,
+              0.03305785123966942,
+              0.24013605442176875
+            ],
+            "feature_hash": "269d1c9e03c239b6e9b6a5fe2bc6ca0abd6ad0ddf16b3427b5c8a0a572045c34",
+            "predicted_local_abc_delay": 40.99097558243001,
+            "replacement_dag_info": {
+              "library_class": 6,
+              "library_subgraph_root": 24,
+              "matched_library_inputs": [
+                139,
+                176,
+                213,
+                238
+              ],
+              "synthetic_internal_ids": [
+                10000014,
+                10000015,
+                10000016,
+                10000017,
+                10000018,
+                10000019
+              ],
+              "used_library_nodes": [
+                18,
+                19,
+                20,
+                21,
+                22,
+                23,
+                24
+              ],
+              "vertex_mapping": {
+                "0": 139,
+                "1": 176,
+                "18": 10000014,
+                "19": 10000015,
+                "2": 213,
+                "20": 10000016,
+                "21": 10000017,
+                "22": 10000018,
+                "23": 10000019,
+                "24": 387,
+                "3": 238
+              }
+            },
+            "subgraph_index": 2
+          },
+          "3": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              9.0,
+              0.0,
+              1.0,
+              15.0,
+              12.0,
+              11.0,
+              1.224744871391589,
+              0.0,
+              7.0,
+              5.0,
+              2.0,
+              11.0,
+              1.8333333333333333,
+              2.0,
+              0.6428571428571429,
+              1.0,
+              0.11570247933884298,
+              0.03305785123966942,
+              0.24013605442176872
+            ],
+            "feature_hash": "269d1c9e03c239b6e9b6a5fe2bc6ca0abd6ad0ddf16b3427b5c8a0a572045c34",
+            "predicted_local_abc_delay": 40.99097558243001,
+            "replacement_dag_info": {
+              "library_class": 6,
+              "library_subgraph_root": 28,
+              "matched_library_inputs": [
+                139,
+                176,
+                213,
+                238
+              ],
+              "synthetic_internal_ids": [
+                10000007,
+                10000008,
+                10000011,
+                10000021,
+                10000022,
+                10000023
+              ],
+              "used_library_nodes": [
+                11,
+                12,
+                15,
+                25,
+                26,
+                27,
+                28
+              ],
+              "vertex_mapping": {
+                "0": 139,
+                "1": 176,
+                "11": 10000007,
+                "12": 10000008,
+                "15": 10000011,
+                "2": 213,
+                "25": 10000021,
+                "26": 10000022,
+                "27": 10000023,
+                "28": 387,
+                "3": 238
+              }
+            },
+            "subgraph_index": 3
+          },
+          "4": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              9.0,
+              0.0,
+              1.0,
+              15.0,
+              12.0,
+              11.0,
+              1.224744871391589,
+              0.0,
+              7.0,
+              5.0,
+              2.0,
+              11.0,
+              1.8333333333333333,
+              2.0,
+              0.6428571428571429,
+              0.0,
+              0.11570247933884298,
+              0.03305785123966942,
+              0.24251700680272112
+            ],
+            "feature_hash": "8f82c79f38d0c423502e35c4f939cf2933e4cb80850649b6c8146517703de6e0",
+            "predicted_local_abc_delay": 28.398894094584755,
+            "replacement_dag_info": {
+              "library_class": 6,
+              "library_subgraph_root": 30,
+              "matched_library_inputs": [
+                139,
+                176,
+                213,
+                238
+              ],
+              "synthetic_internal_ids": [
+                10000014,
+                10000015,
+                10000016,
+                10000017,
+                10000018,
+                10000025
+              ],
+              "used_library_nodes": [
+                18,
+                19,
+                20,
+                21,
+                22,
+                29,
+                30
+              ],
+              "vertex_mapping": {
+                "0": 139,
+                "1": 176,
+                "18": 10000014,
+                "19": 10000015,
+                "2": 213,
+                "20": 10000016,
+                "21": 10000017,
+                "22": 10000018,
+                "29": 10000025,
+                "3": 238,
+                "30": 387
+              }
+            },
+            "subgraph_index": 4
+          }
+        },
+        "classification": "INTRA_REGION",
+        "cut_leaves": [
+          139,
+          176,
+          213,
+          238
+        ],
+        "cut_slot": 4,
+        "decision_id": "d1101",
+        "decision_owner_region": 24,
+        "litecut": {
+          "candidate_count": 5,
+          "cut_slot": 4,
+          "gpu_choice_defined_for_decision": false,
+          "gpu_choice_equals_litecut_local_best": "",
+          "litecut_local_best_subgraph": 4,
+          "original_gpu_selected_subgraph": "",
+          "prediction_max": 44.24598599046949,
+          "prediction_min": 28.398894094584755,
+          "prediction_range": 15.847091895884738,
+          "prediction_std": 5.871156773693182,
+          "region_id": 24,
+          "root": 387
+        },
+        "owner_region_count": 1,
+        "owner_regions": [
+          24
+        ],
+        "removable_node_count": 8,
+        "removable_nodes": [
+          378,
+          379,
+          380,
+          382,
+          383,
+          385,
+          386,
+          387
+        ],
+        "replacement_candidates": [
+          {
+            "subgraph_index": 0
+          },
+          {
+            "subgraph_index": 1
+          },
+          {
+            "subgraph_index": 2
+          },
+          {
+            "subgraph_index": 3
+          },
+          {
+            "subgraph_index": 4
+          }
+        ],
+        "root": 387,
+        "root_region": 24,
+        "saved_count": 8,
+        "truth": 38911,
+        "truth_class": 6
+      },
+      {
+        "candidate_count": 5,
+        "candidate_subgraph_indices": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "candidates": {
+          "0": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              9.0,
+              0.0,
+              1.0,
+              17.0,
+              12.0,
+              6.75,
+              5.261891294962297,
+              0.0,
+              5.5,
+              4.0,
+              1.5,
+              10.0,
+              2.0,
+              3.0,
+              0.5,
+              2.0,
+              0.1,
+              0.04,
+              0.23749999999999996
+            ],
+            "feature_hash": "014f9bdaafc9f81b4061875c08ef3931c0939dfab3fc8fda6e6395fd90b4b095",
+            "predicted_local_abc_delay": 47.72571724917308,
+            "replacement_dag_info": {
+              "library_class": 89,
+              "library_subgraph_root": 9,
+              "matched_library_inputs": [
+                176,
+                379,
+                139,
+                381
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000003,
+                10000004
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "vertex_mapping": {
+                "0": 176,
+                "1": 379,
+                "2": 139,
+                "3": 381,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002,
+                "7": 10000003,
+                "8": 10000004,
+                "9": 387
+              }
+            },
+            "subgraph_index": 0
+          },
+          "1": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              9.0,
+              0.0,
+              1.0,
+              17.0,
+              12.0,
+              6.75,
+              5.261891294962297,
+              0.0,
+              6.0,
+              4.0,
+              2.0,
+              10.0,
+              2.0,
+              3.0,
+              0.5833333333333334,
+              2.0,
+              0.1,
+              0.04,
+              0.24444444444444444
+            ],
+            "feature_hash": "610af51c7aafc877bce9a613777b1fccb494dcdafd349bead212f7fe8d2e6d1e",
+            "predicted_local_abc_delay": 30.614916028107373,
+            "replacement_dag_info": {
+              "library_class": 89,
+              "library_subgraph_root": 14,
+              "matched_library_inputs": [
+                176,
+                379,
+                139,
+                381
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000006,
+                10000007,
+                10000008,
+                10000009
+              ],
+              "used_library_nodes": [
+                4,
+                10,
+                11,
+                12,
+                13,
+                14
+              ],
+              "vertex_mapping": {
+                "0": 176,
+                "1": 379,
+                "10": 10000006,
+                "11": 10000007,
+                "12": 10000008,
+                "13": 10000009,
+                "14": 387,
+                "2": 139,
+                "3": 381,
+                "4": 10000000
+              }
+            },
+            "subgraph_index": 1
+          },
+          "2": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              9.0,
+              0.0,
+              1.0,
+              17.0,
+              12.0,
+              6.75,
+              5.261891294962297,
+              0.0,
+              6.0,
+              4.0,
+              2.0,
+              10.0,
+              2.0,
+              2.0,
+              0.5833333333333334,
+              2.0,
+              0.1,
+              0.03,
+              0.2534722222222222
+            ],
+            "feature_hash": "e635bc1a23ce5c2476e58e1c2ed7a793024602636a7104cbdfffee050997e43c",
+            "predicted_local_abc_delay": 35.849647339559446,
+            "replacement_dag_info": {
+              "library_class": 89,
+              "library_subgraph_root": 20,
+              "matched_library_inputs": [
+                176,
+                379,
+                139,
+                381
+              ],
+              "synthetic_internal_ids": [
+                10000011,
+                10000012,
+                10000013,
+                10000014,
+                10000015
+              ],
+              "used_library_nodes": [
+                15,
+                16,
+                17,
+                18,
+                19,
+                20
+              ],
+              "vertex_mapping": {
+                "0": 176,
+                "1": 379,
+                "15": 10000011,
+                "16": 10000012,
+                "17": 10000013,
+                "18": 10000014,
+                "19": 10000015,
+                "2": 139,
+                "20": 387,
+                "3": 381
+              }
+            },
+            "subgraph_index": 2
+          },
+          "3": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              9.0,
+              0.0,
+              1.0,
+              17.0,
+              12.0,
+              6.75,
+              5.261891294962297,
+              0.0,
+              5.5,
+              4.0,
+              1.5,
+              10.0,
+              2.0,
+              3.0,
+              0.5833333333333334,
+              2.0,
+              0.1,
+              0.04,
+              0.24444444444444446
+            ],
+            "feature_hash": "09f0ad3a62abf76799db0b54b56f4ef44002c6cd4c6160588bdf457b9d4f6298",
+            "predicted_local_abc_delay": 46.98423778257758,
+            "replacement_dag_info": {
+              "library_class": 89,
+              "library_subgraph_root": 23,
+              "matched_library_inputs": [
+                176,
+                379,
+                139,
+                381
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000017,
+                10000018
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                21,
+                22,
+                23
+              ],
+              "vertex_mapping": {
+                "0": 176,
+                "1": 379,
+                "2": 139,
+                "21": 10000017,
+                "22": 10000018,
+                "23": 387,
+                "3": 381,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002
+              }
+            },
+            "subgraph_index": 3
+          },
+          "4": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              9.0,
+              0.0,
+              1.0,
+              17.0,
+              12.0,
+              6.75,
+              5.261891294962297,
+              0.0,
+              5.0,
+              4.0,
+              1.0,
+              10.0,
+              2.0,
+              3.0,
+              0.5,
+              2.0,
+              0.1,
+              0.04,
+              0.23749999999999996
+            ],
+            "feature_hash": "bd375066ed5d0bad6f47131767c952aad405176ca34bfdb6fff51199288e70f4",
+            "predicted_local_abc_delay": 66.16879187284756,
+            "replacement_dag_info": {
+              "library_class": 89,
+              "library_subgraph_root": 25,
+              "matched_library_inputs": [
+                176,
+                379,
+                139,
+                381
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000017,
+                10000020
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                21,
+                24,
+                25
+              ],
+              "vertex_mapping": {
+                "0": 176,
+                "1": 379,
+                "2": 139,
+                "21": 10000017,
+                "24": 10000020,
+                "25": 387,
+                "3": 381,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002
+              }
+            },
+            "subgraph_index": 4
+          }
+        },
+        "classification": "INTRA_REGION",
+        "cut_leaves": [
+          139,
+          176,
+          381,
+          379
+        ],
+        "cut_slot": 7,
+        "decision_id": "d1103",
+        "decision_owner_region": 24,
+        "litecut": {
+          "candidate_count": 5,
+          "cut_slot": 7,
+          "gpu_choice_defined_for_decision": false,
+          "gpu_choice_equals_litecut_local_best": "",
+          "litecut_local_best_subgraph": 1,
+          "original_gpu_selected_subgraph": "",
+          "prediction_max": 66.16879187284756,
+          "prediction_min": 30.614916028107373,
+          "prediction_range": 35.55387584474019,
+          "prediction_std": 12.239655694002165,
+          "region_id": 24,
+          "root": 387
+        },
+        "owner_region_count": 1,
+        "owner_regions": [
+          24
+        ],
+        "removable_node_count": 7,
+        "removable_nodes": [
+          380,
+          382,
+          383,
+          384,
+          385,
+          386,
+          387
+        ],
+        "replacement_candidates": [
+          {
+            "subgraph_index": 0
+          },
+          {
+            "subgraph_index": 1
+          },
+          {
+            "subgraph_index": 2
+          },
+          {
+            "subgraph_index": 3
+          },
+          {
+            "subgraph_index": 4
+          }
+        ],
+        "root": 387,
+        "root_region": 24,
+        "saved_count": 7,
+        "truth": 5535,
+        "truth_class": 89
+      },
+      {
+        "candidate_count": 5,
+        "candidate_subgraph_indices": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "candidates": {
+          "0": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              8.0,
+              0.0,
+              2.0,
+              15.0,
+              12.0,
+              11.0,
+              1.224744871391589,
+              0.0,
+              6.0,
+              4.0,
+              2.0,
+              13.0,
+              2.6,
+              2.0,
+              0.7777777777777778,
+              2.0,
+              0.11834319526627218,
+              0.03550295857988166,
+              0.2402116402116402
+            ],
+            "feature_hash": "c1b633a9eedb8c3e8b519bc6c4b4383d360a92289cdb6b344549d419818aa651",
+            "predicted_local_abc_delay": 56.67137991278438,
+            "replacement_dag_info": {
+              "library_class": 22,
+              "library_subgraph_root": 12,
+              "matched_library_inputs": [
+                139,
+                176,
+                213,
+                238
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000003,
+                10000004,
+                10000005,
+                10000006,
+                10000007
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12
+              ],
+              "vertex_mapping": {
+                "0": 139,
+                "1": 176,
+                "10": 10000006,
+                "11": 10000007,
+                "12": 388,
+                "2": 213,
+                "3": 238,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002,
+                "7": 10000003,
+                "8": 10000004,
+                "9": 10000005
+              }
+            },
+            "subgraph_index": 0
+          },
+          "1": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              8.0,
+              0.0,
+              2.0,
+              15.0,
+              12.0,
+              11.0,
+              1.224744871391589,
+              0.0,
+              5.5,
+              4.0,
+              1.5,
+              13.0,
+              2.6,
+              2.0,
+              0.5555555555555556,
+              2.0,
+              0.11834319526627218,
+              0.03550295857988166,
+              0.22301587301587297
+            ],
+            "feature_hash": "8aa47a5c5fe6f6464acc23075d1adfd39660b8f7c743dfbd09015d282b903d83",
+            "predicted_local_abc_delay": 35.09076524719758,
+            "replacement_dag_info": {
+              "library_class": 22,
+              "library_subgraph_root": 15,
+              "matched_library_inputs": [
+                139,
+                176,
+                213,
+                238
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000003,
+                10000004,
+                10000005,
+                10000006,
+                10000009,
+                10000010
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                7,
+                8,
+                9,
+                10,
+                13,
+                14,
+                15
+              ],
+              "vertex_mapping": {
+                "0": 139,
+                "1": 176,
+                "10": 10000006,
+                "13": 10000009,
+                "14": 10000010,
+                "15": 388,
+                "2": 213,
+                "3": 238,
+                "4": 10000000,
+                "5": 10000001,
+                "7": 10000003,
+                "8": 10000004,
+                "9": 10000005
+              }
+            },
+            "subgraph_index": 1
+          },
+          "2": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              8.0,
+              0.0,
+              2.0,
+              15.0,
+              12.0,
+              11.0,
+              1.224744871391589,
+              0.0,
+              7.0,
+              5.0,
+              2.0,
+              13.0,
+              2.1666666666666665,
+              2.0,
+              0.6666666666666666,
+              1.0,
+              0.11834319526627218,
+              0.03550295857988166,
+              0.23068783068783066
+            ],
+            "feature_hash": "0e6ca89b646fc6585c91a625d73b2201a46ee6a3e4e6a18756f3a5f2df5700ee",
+            "predicted_local_abc_delay": 49.55805176469889,
+            "replacement_dag_info": {
+              "library_class": 22,
+              "library_subgraph_root": 18,
+              "matched_library_inputs": [
+                139,
+                176,
+                213,
+                238
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000003,
+                10000004,
+                10000005,
+                10000012,
+                10000013
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                16,
+                17,
+                18
+              ],
+              "vertex_mapping": {
+                "0": 139,
+                "1": 176,
+                "16": 10000012,
+                "17": 10000013,
+                "18": 388,
+                "2": 213,
+                "3": 238,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002,
+                "7": 10000003,
+                "8": 10000004,
+                "9": 10000005
+              }
+            },
+            "subgraph_index": 2
+          },
+          "3": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              8.0,
+              0.0,
+              2.0,
+              15.0,
+              12.0,
+              11.0,
+              1.224744871391589,
+              0.0,
+              7.0,
+              5.0,
+              2.0,
+              13.0,
+              2.1666666666666665,
+              2.0,
+              0.6666666666666666,
+              1.0,
+              0.11834319526627218,
+              0.03550295857988166,
+              0.23068783068783066
+            ],
+            "feature_hash": "0e6ca89b646fc6585c91a625d73b2201a46ee6a3e4e6a18756f3a5f2df5700ee",
+            "predicted_local_abc_delay": 49.55805176469889,
+            "replacement_dag_info": {
+              "library_class": 22,
+              "library_subgraph_root": 21,
+              "matched_library_inputs": [
+                139,
+                176,
+                213,
+                238
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000003,
+                10000005,
+                10000006,
+                10000015,
+                10000016
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                7,
+                9,
+                10,
+                19,
+                20,
+                21
+              ],
+              "vertex_mapping": {
+                "0": 139,
+                "1": 176,
+                "10": 10000006,
+                "19": 10000015,
+                "2": 213,
+                "20": 10000016,
+                "21": 388,
+                "3": 238,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002,
+                "7": 10000003,
+                "9": 10000005
+              }
+            },
+            "subgraph_index": 3
+          },
+          "4": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              8.0,
+              0.0,
+              2.0,
+              15.0,
+              12.0,
+              11.0,
+              1.224744871391589,
+              0.0,
+              7.0,
+              5.0,
+              2.0,
+              13.0,
+              2.1666666666666665,
+              2.0,
+              0.6111111111111112,
+              2.0,
+              0.11834319526627218,
+              0.03550295857988166,
+              0.22764550264550262
+            ],
+            "feature_hash": "7044368d47127d9324612496c5be0a1f92c990573f6a23645f39f9420e3fd20a",
+            "predicted_local_abc_delay": 41.96054587752343,
+            "replacement_dag_info": {
+              "library_class": 22,
+              "library_subgraph_root": 24,
+              "matched_library_inputs": [
+                139,
+                176,
+                213,
+                238
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000003,
+                10000004,
+                10000005,
+                10000009,
+                10000018,
+                10000019
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                7,
+                8,
+                9,
+                13,
+                22,
+                23,
+                24
+              ],
+              "vertex_mapping": {
+                "0": 139,
+                "1": 176,
+                "13": 10000009,
+                "2": 213,
+                "22": 10000018,
+                "23": 10000019,
+                "24": 388,
+                "3": 238,
+                "4": 10000000,
+                "5": 10000001,
+                "7": 10000003,
+                "8": 10000004,
+                "9": 10000005
+              }
+            },
+            "subgraph_index": 4
+          }
+        },
+        "classification": "INTRA_REGION",
+        "cut_leaves": [
+          139,
+          176,
+          213,
+          238
+        ],
+        "cut_slot": 6,
+        "decision_id": "d1107",
+        "decision_owner_region": 24,
+        "litecut": {
+          "candidate_count": 5,
+          "cut_slot": 6,
+          "gpu_choice_defined_for_decision": true,
+          "gpu_choice_equals_litecut_local_best": "false",
+          "litecut_local_best_subgraph": 1,
+          "original_gpu_selected_subgraph": 0,
+          "prediction_max": 56.67137991278438,
+          "prediction_min": 35.09076524719758,
+          "prediction_range": 21.5806146655868,
+          "prediction_std": 7.38802619844111,
+          "region_id": 24,
+          "root": 388
+        },
+        "owner_region_count": 1,
+        "owner_regions": [
+          24
+        ],
+        "removable_node_count": 9,
+        "removable_nodes": [
+          375,
+          376,
+          377,
+          378,
+          379,
+          380,
+          386,
+          387,
+          388
+        ],
+        "replacement_candidates": [
+          {
+            "subgraph_index": 0
+          },
+          {
+            "subgraph_index": 1
+          },
+          {
+            "subgraph_index": 2
+          },
+          {
+            "subgraph_index": 3
+          },
+          {
+            "subgraph_index": 4
+          }
+        ],
+        "root": 388,
+        "root_region": 24,
+        "saved_count": 9,
+        "truth": 38783,
+        "truth_class": 22
+      },
+      {
+        "candidate_count": 1,
+        "candidate_subgraph_indices": [
+          6
+        ],
+        "candidates": {
+          "6": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              5.0,
+              0.0,
+              1.0,
+              21.0,
+              12.0,
+              8.5,
+              3.905124837953327,
+              0.0,
+              3.0,
+              3.0,
+              0.0,
+              7.0,
+              1.75,
+              1.0,
+              0.3333333333333333,
+              1.0,
+              0.08163265306122448,
+              0.0,
+              0.2902777777777778
+            ],
+            "feature_hash": "3102943948761050d3aca4f5d06489705c3be0fce38e0c4b5b5f3b85307e9d9c",
+            "predicted_local_abc_delay": 21.772271661081177,
+            "replacement_dag_info": {
+              "library_class": 1,
+              "library_subgraph_root": 19,
+              "matched_library_inputs": [
+                337,
+                312,
+                275,
+                388
+              ],
+              "synthetic_internal_ids": [
+                10000006,
+                10000014
+              ],
+              "used_library_nodes": [
+                10,
+                18,
+                19
+              ],
+              "vertex_mapping": {
+                "0": 337,
+                "1": 312,
+                "10": 10000006,
+                "18": 10000014,
+                "19": 438,
+                "2": 275,
+                "3": 388
+              }
+            },
+            "subgraph_index": 6
+          }
+        },
+        "classification": "INTRA_REGION",
+        "cut_leaves": [
+          275,
+          312,
+          337,
+          388
+        ],
+        "cut_slot": 3,
+        "decision_id": "d1319",
+        "decision_owner_region": 37,
+        "litecut": {
+          "candidate_count": 1,
+          "cut_slot": 3,
+          "gpu_choice_defined_for_decision": true,
+          "gpu_choice_equals_litecut_local_best": "true",
+          "litecut_local_best_subgraph": 6,
+          "original_gpu_selected_subgraph": 6,
+          "prediction_max": 21.772271661081177,
+          "prediction_min": 21.772271661081177,
+          "prediction_range": 0.0,
+          "prediction_std": 0.0,
+          "region_id": 37,
+          "root": 438
+        },
+        "owner_region_count": 1,
+        "owner_regions": [
+          37
+        ],
+        "removable_node_count": 2,
+        "removable_nodes": [
+          437,
+          438
+        ],
+        "replacement_candidates": [
+          {
+            "subgraph_index": 6
+          }
+        ],
+        "root": 438,
+        "root_region": 37,
+        "saved_count": 2,
+        "truth": 64,
+        "truth_class": 1
+      },
+      {
+        "candidate_count": 2,
+        "candidate_subgraph_indices": [
+          0,
+          1
+        ],
+        "candidates": {
+          "0": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              0.0,
+              0.0,
+              0.0,
+              24.0,
+              12.0,
+              7.75,
+              4.602988159880492,
+              0.25,
+              5.5,
+              4.0,
+              1.5,
+              9.0,
+              1.8,
+              2.0,
+              0.6,
+              2.0,
+              0.12345679012345678,
+              0.024691358024691357,
+              0.2525
+            ],
+            "feature_hash": "ad01700febd9edf271968df3da38e21e9edc789405dd6ef9be576556e1128773",
+            "predicted_local_abc_delay": 31.063123367176566,
+            "replacement_dag_info": {
+              "library_class": 80,
+              "library_subgraph_root": 8,
+              "matched_library_inputs": [
+                438,
+                90,
+                176,
+                1
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000002,
+                10000003
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                6,
+                7,
+                8
+              ],
+              "vertex_mapping": {
+                "0": 438,
+                "1": 90,
+                "2": 176,
+                "3": 1,
+                "4": 10000000,
+                "5": 10000001,
+                "6": 10000002,
+                "7": 10000003,
+                "8": 444
+              }
+            },
+            "subgraph_index": 0
+          },
+          "1": {
+            "candidate_type": "GPU_REWRITE_LIBRARY_SUBGRAPH",
+            "continuous_features_19": [
+              0.0,
+              0.0,
+              0.0,
+              24.0,
+              12.0,
+              7.75,
+              4.602988159880492,
+              0.25,
+              5.5,
+              4.0,
+              1.5,
+              9.0,
+              1.8,
+              2.0,
+              0.6,
+              2.0,
+              0.12345679012345678,
+              0.024691358024691357,
+              0.2525
+            ],
+            "feature_hash": "ad01700febd9edf271968df3da38e21e9edc789405dd6ef9be576556e1128773",
+            "predicted_local_abc_delay": 31.063123367176566,
+            "replacement_dag_info": {
+              "library_class": 80,
+              "library_subgraph_root": 11,
+              "matched_library_inputs": [
+                438,
+                90,
+                176,
+                1
+              ],
+              "synthetic_internal_ids": [
+                10000000,
+                10000001,
+                10000005,
+                10000006
+              ],
+              "used_library_nodes": [
+                4,
+                5,
+                9,
+                10,
+                11
+              ],
+              "vertex_mapping": {
+                "0": 438,
+                "1": 90,
+                "10": 10000006,
+                "11": 444,
+                "2": 176,
+                "3": 1,
+                "4": 10000000,
+                "5": 10000001,
+                "9": 10000005
+              }
+            },
+            "subgraph_index": 1
+          }
+        },
+        "classification": "INTRA_REGION",
+        "cut_leaves": [
+          1,
+          90,
+          176,
+          438
+        ],
+        "cut_slot": 4,
+        "decision_id": "d1350",
+        "decision_owner_region": 38,
+        "litecut": {
+          "candidate_count": 2,
+          "cut_slot": 4,
+          "gpu_choice_defined_for_decision": true,
+          "gpu_choice_equals_litecut_local_best": "true",
+          "litecut_local_best_subgraph": 0,
+          "original_gpu_selected_subgraph": 0,
+          "prediction_max": 31.063123367176566,
+          "prediction_min": 31.063123367176566,
+          "prediction_range": 0.0,
+          "prediction_std": 0.0,
+          "region_id": 38,
+          "root": 444
+        },
+        "owner_region_count": 1,
+        "owner_regions": [
+          38
+        ],
+        "removable_node_count": 5,
+        "removable_nodes": [
+          440,
+          441,
+          442,
+          443,
+          444
+        ],
+        "replacement_candidates": [
+          {
+            "subgraph_index": 0
+          },
+          {
+            "subgraph_index": 1
+          }
+        ],
+        "root": 444,
+        "root_region": 38,
+        "saved_count": 5,
+        "truth": 22101,
+        "truth_class": 80
+      }
+    ],
+    "executable_decision_count": 15,
+    "node_path": [
+      4,
+      144,
+      145,
+      147,
+      148,
+      149,
+      151,
+      189,
+      190,
+      192,
+      194,
+      195,
+      197,
+      210,
+      211,
+      213,
+      381,
+      382,
+      383,
+      386,
+      387,
+      388,
+      436,
+      437,
+      438,
+      439,
+      440,
+      441,
+      442,
+      444
+    ],
+    "path_available": true,
+    "path_hits_root_required": false,
+    "pi": 4,
+    "po": 11,
+    "po_driver": 444,
+    "po_id": 11,
+    "po_literal": 889,
+    "raw_region_sequence": [
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      24,
+      24,
+      24,
+      24,
+      24,
+      24,
+      36,
+      37,
+      37,
+      37,
+      38,
+      38,
+      38,
+      38
+    ],
+    "reentered_regions": [],
+    "region_observations": [
+      {
+        "path_hits_region": true,
+        "path_hits_region_root": true,
+        "path_nodes_in_region": [
+          144,
+          145,
+          147,
+          148,
+          149,
+          151
+        ],
+        "region_id": 6,
+        "region_root": 151
+      },
+      {
+        "path_hits_region": true,
+        "path_hits_region_root": true,
+        "path_nodes_in_region": [
+          189,
+          190,
+          192,
+          194,
+          195,
+          197,
+          210,
+          211,
+          213
+        ],
+        "region_id": 9,
+        "region_root": 213
+      },
+      {
+        "path_hits_region": true,
+        "path_hits_region_root": true,
+        "path_nodes_in_region": [
+          381,
+          382,
+          383,
+          386,
+          387,
+          388
+        ],
+        "region_id": 24,
+        "region_root": 388
+      },
+      {
+        "path_hits_region": true,
+        "path_hits_region_root": true,
+        "path_nodes_in_region": [
+          436
+        ],
+        "region_id": 36,
+        "region_root": 436
+      },
+      {
+        "path_hits_region": true,
+        "path_hits_region_root": true,
+        "path_nodes_in_region": [
+          437,
+          438,
+          439
+        ],
+        "region_id": 37,
+        "region_root": 439
+      },
+      {
+        "path_hits_region": true,
+        "path_hits_region_root": true,
+        "path_nodes_in_region": [
+          440,
+          441,
+          442,
+          444
+        ],
+        "region_id": 38,
+        "region_root": 444
+      }
+    ],
+    "selection_rule": "max executable decisions; tie longest region path; tie smallest PO ID",
+    "valid_node_path": true,
+    "valid_region_path": true
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "baseline_global_critical_delay_ps": 360.11,
+  "candidate_count": 326,
+  "candidate_final_status_counts": {
+    "ACCEPTED": 15
+  },
+  "cec_pass_count": 15,
+  "checkpoint_sha256": "b3f499d2973bdb36fb42690794e9838d4c8359f05d6e141aa8cbe2b9fe3ae64d",
+  "current_proxy_count": 91,
+  "decision_count": 91,
+  "input_sha256": "2602b10f131a6ba5996521036ba130aab128a4aa15e3ab49ce44f2f02047f0b0",
+  "path_count": 32,
+  "path_identity_note": "Exact mapped correspondence to the original AIG node sequence is unavailable. ABC's explicit print_delay <PO> <PI> reports the maximum mapped timing path between the same PI/PO endpoints; the PO-wide maximum is also recorded separately.",
+  "paths_with_valid_endpoint_pair_report": 32,
+  "pilot_count": 15,
+  "pilot_minimum_target_met": true,
+  "pilot_selection": {
+    "configured_cap": 15,
+    "min_target": 10,
+    "no_matched_path_reason": null,
+    "path_count": 32,
+    "paths_with_valid_endpoint_pair_report": 32,
+    "saved_pairs_without_STA_path": [],
+    "selected_candidate_count": 15,
+    "selection_rule": "one minimum-delta candidate per executable root/cut, over saved Gate3B paths with an explicit ABC print_delay PO,PI endpoint-pair report, ranked by decision count desc, region count desc, PO asc"
+  },
+  "po_endpoint_only_or_unresolved_count": 0,
+  "saved_path_policy": "use saved Gate3B paths only; no path enumeration",
+  "timing_precision_ps": 0.01,
+  "valid_endpoint_pair_count": 15
+}

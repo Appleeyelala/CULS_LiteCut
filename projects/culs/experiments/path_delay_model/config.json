@@ -1,0 +1,18 @@
+{
+  "design": "c1355_orig",
+  "input_aig": "/home/wushangge/cutLibOrigin/open-sourceDataset/OpenABC/c1355_orig.aig",
+  "gate3a_dir": "gate3a_out/c1355_orig",
+  "gate3b_dir": "gate3b_out/c1355_orig",
+  "gate3c_dir": "gate3c_out/c1355_orig",
+  "gate3e_dir": "gate3e_out/c1355_orig",
+  "cutlib_run_root": "/data/wushangge/runs/CULS-gate3e-20260922/cutlib",
+  "rewrite_library": "/data/wushangge/runs/CULS-gate3e-20260922/input/rewrite_library.inc",
+  "abc_run_root": "/data/wushangge/runs/CULS-gate3f-20260922-gate2babc",
+  "path_source": "existing Gate 3B example_pi_po_paths.jsonl; no path enumeration",
+  "pilot_max_candidates": 15,
+  "pilot_min_candidates_target": 10,
+  "pilot_selection": "Use explicit ABC print_delay <PO> <PI> endpoint-pair queries for existing saved Gate3B paths. Rank paths by executable-decision count descending, region count descending, then PO ID ascending. Choose up to one most-negative LiteCut delta candidate per distinct decision in path order; fill to cap from next-ranked saved paths, deduplicating decisions. If fewer than 10 are available, run all and report the shortfall.",
+  "timing_precision_ps": 0.01,
+  "neutral_epsilon_ps": 0.01,
+  "random_seed": 20260929
+}

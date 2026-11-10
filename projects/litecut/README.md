@@ -1,0 +1,1 @@
+- 所有 agent task 先读 AGENTS.md

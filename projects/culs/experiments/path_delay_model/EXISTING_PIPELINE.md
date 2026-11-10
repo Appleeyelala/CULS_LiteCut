@@ -1,0 +1,38 @@
+# Existing pipeline audit — c1355 Path Delay Model
+
+This is a source/artifact audit only; it does not recompute or alter the MFFC partition.
+
+## Reusable artifacts and code
+
+| Item | Existing source / function | Existing artifact / meaning |
+|---|---|---|
+| AIG manager and node IDs | `src/aig_manager.h` (`AIGMan` host arrays) and `src/aig_manager.cu` (`readFile`, AIGER reader/writer); rewrite internals consume fanin literals, fanouts, PIs and PO drivers | Input is `/home/wushangge/cutLibOrigin/open-sourceDataset/OpenABC/c1355_orig.aig` (Gate 3E manifest SHA256 `2602b10f131a6ba5996521036ba130aab128a4aa15e3ab49ce44f2f02047f0b0`) |
+| Strict maximal MFFC partition | `tools/gate3a_analyze.py`: `strict_standard_mffc`, `partition_checks`; C++ dump command declared in `src/algorithms/gate3a.h`, handler in `src/command_manager.cpp` | `gate3a_out/c1355_orig/maximal_standard_mffcs.json` (62 regions), `node_to_strict_mffc_region.csv`, `region_stats.json` |
+| Node → owner | Gate 3A strict owner CSV, read by Gate 3D/3E replay as a region map | `gate3a_out/c1355_orig/node_to_strict_mffc_region.csv`; do not derive a new ownership partition for this experiment |
+| Region roots/members | `tools/gate3a_analyze.py` emits sorted strict regions | `maximal_standard_mffcs.json` contains each `region_id`, `root`, `internal_nodes`, and `STANDARD_MFFC` semantics |
+| Region DAG / boundaries | `tools/gate3b_analyze.py` projects node graph/paths through the existing owner map | `gate3b_out/c1355_orig/region_dag.json`, `region_edges.csv`, `pi_region_edges.csv`, `region_po_edges.csv`, `region_metadata.jsonl` |
+| PI / PO paths | `tools/gate3b_analyze.py`; path records are already materialized | `gate3b_out/c1355_orig/example_pi_po_paths.jsonl` (32 saved paths, one per PO), with PI node ID, PO ID, node path, compressed region sequence and roots per region |
+| Rewrite decisions / candidates | `src/algorithms/rewrite.cu`: `gate3cRewriteDecisionDump`, `gate3cCalcMFFC`; command handler in `src/command_manager.cpp` | `gate3c_out/c1355_orig/executable_rewrite_decisions.jsonl` (91 executable decisions), `all_rewrite_decisions.jsonl` (1815 legal decisions), plus cut/candidate identity fields |
+| Candidate ↔ root/cut | Gate 3C records `root`, `cut_slot`, `cut_leaves`, truth/class and `candidate_subgraph_indices` | `gate3c_out/c1355_orig/executable_rewrite_decisions.jsonl`; LiteCut candidate rows are in Gate 3E output |
+| LiteCut inference | `/home/wushangge/cutLibOrigin/gate2a_candidate_inference.py`: `materialize_candidate_subgraph`, `CompleteCutFeatureExtractor`, `run_student`, `infer_one`; Gate 3E wrapper is `tools/gate3e_run.py`: `LiteCutPredictor.score` | `gate3e_out/c1355_orig/candidate_litecut_scores.jsonl` (326 candidates, 19 features, feature hash, `predicted_local_abc_delay`); checkpoint reused from `/data/wushangge/runs/CULS-gate3e-20260922/cutlib/best.pt` |
+| Candidate execution / isolation | `src/algorithms/rewrite.cu`: `gate3eExecutionReplay`, replay choice parser and CPU sequential install loop | Gate 3E's `path_configurations.input`, replay manifests/traces and four CEC-passing path examples demonstrate the API. A one-choice configuration leaves every unrequested root as a pre-evaluation reject, so it supports isolated single-candidate runs from the original snapshot. |
+| Mapping / STA | Frozen Gate 3F flow uses the Gate 2B ABC binary and ASAP7 library: `read <lib>; read <aig>; map; topo; stime`. `stime` reports global Liberty-table STA. `print_delay poNN piMM` accepts both names and constrains the displayed path trace, but source audit shows it does **not** recompute a PI-restricted endpoint arrival | `gate3f_out/c1355_orig/abc_flow_manifest.json`, `main_case/timing_results.csv`, `main_case/replay_results.jsonl`; see `ABC_TIMING_AUDIT.md` for binary/source provenance and semantics |
+| CEC | Existing Gate 3E/Gate 3F runners call ABC `read baseline; read candidate; cec -n` | CEC logs and CSVs under `gate3e_out/c1355_orig/cec_logs/` and `gate3f_out/c1355_orig/main_case/` |
+
+## LiteCut label and output semantics (verified from generation code)
+
+The Student target is the raw `cell_struct[*].abc_delay` value. `src/subutils/Parser.py:process` creates this field by calling `stimeDelayProcess` for the selected `supergateIndex`. `stime_parser` first extracts a scalar maximum ABC-reported delay for each mapped object. `stimeDelayProcess` traces the mapped standard-cell cone associated with one selected root/cut supergate, sums those per-cell scalar delays along each internal path, and retains the largest local path sum (with its existing boundary-cell handling). `src/entry_script/sub_graph_extract.py` attaches this value only to the selected `supergateIndex`; `src/subutils/extraction_utils.py:_load_single_json_case` uses it as `y`. The Student training/evaluation applies log1p plus standardization and inference reverses those transforms (`src/extract_cutlib_student/trainer.py`, `src/validate/eval_prediction_accuracy.py`).
+
+Therefore `y_hat` is best described as a prediction of the training pipeline's **selected mapped supergate local-cone delay label**. It is not whole-design delay, not an exact arrival-time increment attributable to a maximal MFFC, and not a guaranteed post-map score of a supplied rewrite candidate. The Gate 3E field name `predicted_local_abc_delay` is directionally appropriate but should not be interpreted as a physical additive contribution.
+
+Gate 3E currently scores replacement candidates only. To define a current-side comparison without changing the model, this experiment runs the same extractor and Student on the original AIG logic cone bounded by that decision's existing cut leaves. This is an explicitly constructed **current cut-cone proxy**, not a ground-truth mapped current supergate. Candidate and current scores are thus comparable model outputs, but their applicability to a region-level delay delta is a hypothesis under test.
+
+There is no unique current score or candidate per MFFC Region in the existing interface: one Region can contain several Rewrite Decisions with different `(root, cut)` boundaries. Accordingly, the pilot stores current score and delta at `(region_id, root, cut_slot, candidate_id)` granularity. This avoids collapsing distinct rewrite decisions into a fictitious region scalar.
+
+## Timing/path identity limitation to preserve
+
+Gate 3B's saved node sequence is a structural AIG path. ABC mapping can absorb/rewrite its node identities. Gate 3F's `print_delay po11` reports a PO-wide mapped arrival; its saved PO11 structural path starts at AIG PI node `4`, while the archived mapped GG report says the critical PI for PO11 is `pi22`. `print_delay poNN piMM` accepts both object names and emits a path whose topology reaches the requested PI, but the arrival pass is still seeded from all CIs and the reported gate arrivals remain global. Therefore the prior extraction of the last `Arrival` from that text is **not a validated endpoint-pair delay**. Existing 194.4-ps PI4→PO11 baseline and single-candidate pilot/calibration values extracted this way must be treated as legacy trace-arrival observations until a source-restricted mapped timing query is implemented and validated. `stime` currently provides global Liberty-table STA, not a PI/PO-specific query. See `ABC_TIMING_AUDIT.md` and `ABC_TIMING_PROPAGATION.md`.
+
+## Worktree preservation
+
+The repository already has user-owned Gate 3A–3F changes/artifacts and `mffc_cover_bundle/`. This experiment adds files only under `experiments/path_delay_model/` and its results; it does not modify the existing partition, DAG, rewrite implementation, or Gate outputs.

@@ -1,0 +1,14 @@
+{
+  "baseline_abc_command": "read \"/data/wushangge/runs/CULS-gate3f-20260922-gate2babc/input/asap7.lib\"; read \"/data/wushangge/runs/CULS-path-impact-calibration-20260929-v1/input/c1355_orig.aig\"; map; topo; stime; print_delay po03 pi03; print_delay po04 pi03; print_delay po08 pi03; print_delay po11 pi03; print_delay po12 pi03; print_delay po14 pi03; print_delay po15 pi03; print_delay po16 pi03; print_delay po17 pi03; print_delay po18 pi03; print_delay po21 pi03; print_delay po23 pi03; print_delay po24 pi03; print_delay po27 pi03; print_delay po28 pi03; print_delay po30 pi03",
+  "candidate_count": 8,
+  "candidate_quantile_rule": "for R9 and R24 separately, nearest order-statistic indices at q={0,1/3,2/3,1}; only already-tested ACCEPTED + CEC PASS candidates; deterministic",
+  "candidates_path_dependent_gt_precision": 0,
+  "candidates_with_multiple_paths": 8,
+  "distinct_pi_count": 1,
+  "distinct_po_count": 16,
+  "max_true_delta_range_ps": 0.0,
+  "measurement_count": 128,
+  "path_count": 16,
+  "path_dependence_conclusion": "Among 8 candidates with at least two path measurements, 0 had a within-candidate true-delta range greater than the 0.10 ps observed report resolution; maximum observed range was 0.00 ps. No path-dependent impact was visible at the observed report resolution; sub-resolution effects are unresolved.",
+  "timing_precision_ps": 0.1
+}

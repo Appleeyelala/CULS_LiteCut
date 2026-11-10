@@ -1,0 +1,1120 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 18027ab..d50fa2a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,9 +1,16 @@
+-cmake_minimum_required(VERSION 3.3.0)
++cmake_minimum_required(VERSION 3.5.0)
+ 
+ include(CMakeParseArguments)
+ include(CheckCCompilerFlag)
+ include(CheckCXXCompilerFlag)
+ 
++string(REPLACE "-fno-exceptions" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}") 
++string(REPLACE "-fno-exceptions" "" CMAKE_C_FLAGS    "${CMAKE_C_FLAGS}")
++string(REPLACE "-fno-exceptions" "" CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS}")
++
++add_definitions(-DDISABLE_PRINT)
++add_compile_options(-fexceptions -funwind-tables) 
++
+ function(addprefix var prefix)
+     foreach( s ${ARGN} )
+         list(APPEND tmp "-I${s}")
+@@ -19,7 +26,7 @@ function(addprefix_g var prefix)
+ endfunction()
+ 
+ # All print has been disabled in ABC due to this macro, if you want to use print, comment this line
+-#add_definitions(-DABC_WITHOUT_PRINT)
++# add_definitions(-DABC_WITHOUT_PRINT)
+ 
+ # filter out flags that are not appropriate for the compiler being used
+ function(target_compile_options_filtered target visibility)
+@@ -41,7 +48,7 @@ function(target_compile_options_filtered target visibility)
+ endfunction()
+ 
+ set(GPULS_CUDA_FLAGS -arch=compute_89 -code=compute_89,sm_89)
+-set(GPULS_CUDA_FLAGS ${GPULS_CUDA_FLAGS} -std=c++17 -O3 --extended-lambda)
++set(GPULS_CUDA_FLAGS ${GPULS_CUDA_FLAGS} -std=c++17 -O3 --extended-lambda -Xcompiler=-fexceptions)
+ 
+ project(abcg C CXX CUDA)
+ 
+@@ -98,6 +105,9 @@ extract_var(SEPARATOR_LIBS ABC_LIBS ${MAKE_OUTPUT})
+ extract_var(SEPARATOR_CFLAGS ABC_CFLAGS ${MAKE_OUTPUT})
+ extract_var(SEPARATOR_CXXFLAGS ABC_CXXFLAGS ${MAKE_OUTPUT})
+ 
++string(REPLACE "-fno-exceptions" "" ABC_CFLAGS    "${ABC_CFLAGS}")
++string(REPLACE "-fno-exceptions" "" ABC_CXXFLAGS  "${ABC_CXXFLAGS}")
++
+ if(ABC_USE_NAMESPACE)
+     set_source_files_properties(${ABC_SRC} PROPERTIES LANGUAGE CXX)
+ endif()
+@@ -117,9 +127,11 @@ add_library(libabc SHARED ${ABC_SRC})
+ # message(STATUS ${ABC_SRC})
+ # message(${CMAKE_CURRENT_SOURCE_DIR})
+ abc_properties(libabc PUBLIC)
++target_compile_options(libabc PRIVATE -w -fexceptions -funwind-tables)
+ set_property(TARGET libabc PROPERTY OUTPUT_NAME abc)
+ 
+-file(GLOB GPULS_CPU_SOURCES "sec/*.cpp")
++
++file(GLOB GPULS_CPU_SOURCES "src/*.cpp")
+ file(GLOB GPULS_GPU_SOURCES 
+     "src/*.cu"
+     "src/aig/*.cu"
+@@ -134,30 +146,36 @@ list(FILTER GPULS_CPU_SOURCES EXCLUDE REGEX ".*/src/main\.cpp")
+ set(GPU_TEST_MAIN "./src/abc_patch/gpu_test/abc_patch_main.cpp")
+ list(FILTER GPULS_PATCH_SOURCES EXCLUDE REGEX ${GPU_TEST_MAIN})
+ 
+-add_library(abcgpu SHARED ${GPULS_CPU_SOURCES} ${GPULS_GPU_SOURCES} ${GPULS_PATCH_SOURCES})
++# add_library(abcgpu SHARED ${GPULS_CPU_SOURCES} ${GPULS_GPU_SOURCES} ${GPULS_PATCH_SOURCES})
+ 
+-target_link_libraries(abcgpu PRIVATE libabc)
++# target_link_libraries(abcgpu PRIVATE libabc)
+ 
+-target_include_directories(abcgpu PRIVATE "src")
+-target_include_directories(abcgpu PRIVATE "src/hash_table")
+-# target_include_directories(abcgpu PUBLIC "src/base")
+-target_include_directories(abcgpu PUBLIC "include")
++# target_include_directories(abcgpu PRIVATE "src")
++# target_include_directories(abcgpu PRIVATE "src/hash_table")
++# # target_include_directories(abcgpu PUBLIC "src/base")
++# target_include_directories(abcgpu PUBLIC "include")
+ 
+-abc_properties(abcgpu PRIVATE)
++# abc_properties(abcgpu PRIVATE)
+ 
+ file(GLOB GPULS_PATCH_TEST "src/abc_patch/gpu_test/src/*.cpp"
+                             "src/abc_patch/gpu_test/src/*.cu")
+-add_executable(abcg ${GPU_TEST_MAIN} ${GPULS_PATCH_TEST})
++add_executable(abcg ${GPULS_CPU_SOURCES} ${GPULS_GPU_SOURCES} 
++                    ${GPULS_PATCH_SOURCES} ${ABC_MAIN_SRC})
++
+ 
+-target_link_libraries(abcg PRIVATE abcgpu)
++# target_link_libraries(abcg PRIVATE abcgpu)
+ target_link_libraries(abcg PRIVATE libabc)
+ target_include_directories(abcg PRIVATE "src")
+-target_include_directories(abcg PRIVATE "src/abc_patch/gpu_test")
++target_include_directories(abcg PRIVATE "src/hash_table")
++target_include_directories(abcg PUBLIC "include")
+ abc_properties(abcg PRIVATE)
+ 
+-target_compile_options(abcgpu PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:${GPULS_CUDA_FLAGS}>)
+-target_compile_options(abcg PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:${GPULS_CUDA_FLAGS}>)
+-target_compile_options(libabc PRIVATE -w)
++# target_compile_options(abcgpu PRIVATE 
++#     $<$<COMPILE_LANGUAGE:CUDA>:${GPULS_CUDA_FLAGS}> 
++#     $<$<COMPILE_LANGUAGE:CXX>:-fexceptions -funwind-tables>)
++target_compile_options(abcg PRIVATE 
++  $<$<COMPILE_LANGUAGE:CUDA>:${GPULS_CUDA_FLAGS}>
++  $<$<COMPILE_LANGUAGE:CXX>:-fexceptions -funwind-tables>)
+ # add_executable(yosys-abc ${ABC_MAIN_SRC})
+ # target_link_libraries(yosys-abc PRIVATE libabc)
+ # abc_properties(yosys-abc PRIVATE)
+diff --git a/include/CLI11.hpp b/include/CLI11.hpp
+index f29a5c4..6149b37 100644
+--- a/include/CLI11.hpp
++++ b/include/CLI11.hpp
+@@ -9187,4 +9187,4 @@ inline std::string Formatter::make_option_usage(const Option *opt) const {
+ 
+ 
+ 
+-} // namespace CLI
++} // namespace CLI
+\ No newline at end of file
+diff --git a/src/abc_patch/abc_patch_gpucmd.cpp b/src/abc_patch/abc_patch_gpucmd.cpp
+index c26a2b6..12e6cd1 100644
+--- a/src/abc_patch/abc_patch_gpucmd.cpp
++++ b/src/abc_patch/abc_patch_gpucmd.cpp
+@@ -2,6 +2,8 @@
+ #include <iostream>
+ #include <string>
+ #include "CLI11.hpp"
++// #include <cuda_runtime.h>
++
+ 
+ #include "abc_patch/abc_patch_int.h"
+ #include "misc/string_utils.h"
+@@ -109,7 +111,7 @@ int Abc_CommandGpuBalance(Abc_Frame_t * pAbc, int argc, char ** argv) {
+ }
+ 
+ int Abc_CommandGpuRewrite(Abc_Frame_t * pAbc, int argc, char ** argv) {
+-    bool fUseZeros = false, fGPUDeduplicate = false, fUpdateLevel = false;
++    bool fUseZeros = false, fGPUDeduplicate = true, fUpdateLevel = false;
+ 
+     CLI::App parser("Perform GPU AIG rewriting (DAC'22)");
+     parser.add_flag("-z", fUseZeros, "if provided, allow zero gain replacement");
+@@ -349,6 +351,7 @@ int Abc_CommandGpuCompress2rs(Abc_Frame_t * pAbc, int argc, char ** argv){
+ 
+ // register all handlers to ABC
+ void registerAllAbcCommands(Abc_Frame_t * pAbc) {
++    // cudaSetDevice(1);
+     Cmd_CommandAdd(pAbc, "GPU", "gread", Abc_CommandGpuRead, 0);
+     Cmd_CommandAdd(pAbc, "GPU", "gwrite", Abc_CommandGpuWrite, 0);
+     Cmd_CommandAdd(pAbc, "GPU", "gtime", Abc_CommandGpuTime, 0);
+@@ -488,4 +491,4 @@ int Raina_CommandGpuPut(Abc_Frame_t * pAbc){
+     pMan->setPrevCmdRewrite(0);
+ 
+     return 0;
+-}
+\ No newline at end of file
++}
+diff --git a/src/abc_patch/abc_patch_transform.cpp b/src/abc_patch/abc_patch_transform.cpp
+index e56c2ee..ea636ad 100644
+--- a/src/abc_patch/abc_patch_transform.cpp
++++ b/src/abc_patch/abc_patch_transform.cpp
+@@ -111,6 +111,7 @@ Abc_Ntk_t * GpuManToAbcNtk(AIGMan * pMan) {
+         vAbcPos[i] = pObj;
+     }
+ 
++    // FILE* fp = fopen("gpu2abc.log", "w");
+     // create AND nodes
+     for (i = pMan->nPIs + 1; i < pMan->nObjs; i++) {
+         lit0 = pMan->pFanin0[i];
+@@ -123,12 +124,16 @@ Abc_Ntk_t * GpuManToAbcNtk(AIGMan * pMan) {
+             (Aig_Obj_t *)pObj0, AigNodeIsComplement(lit0));
+         pObj1 = (Abc_Obj_t *)Aig_NotCond(
+             (Aig_Obj_t *)pObj1, AigNodeIsComplement(lit1));
++        // fprintf(fp, "%d\t", NULL==Abc_AigAndLookup((Abc_Aig_t *)pNtk->pManFunc, pObj0, pObj1));
+         pObj = Abc_AigAnd((Abc_Aig_t *)pNtk->pManFunc, pObj0, pObj1);
++        // fprintf(fp, "%d %d %d %d %d\n", AigNodeID(lit0), AigNodeIsComplement(lit0), AigNodeID(lit1), AigNodeIsComplement(lit1), pObj->Id);
++        // fflush(fp);
+         assert(!Aig_IsComplement((Aig_Obj_t *)pObj));
+ 
+         vGpu2AbcObj[i] = pObj;
+         // delay has already been propagated in Abc_AigAnd()
+     }
++    // fclose(fp);
+     assert(Abc_NtkCiNum(pNtk) == pMan->nPIs);
+     assert(Abc_NtkCoNum(pNtk) == pMan->nPOs);
+     assert(Abc_NtkNodeNum(pNtk) <= pMan->nNodes);
+diff --git a/src/abc_patch/gpu_test/src/abc_patch_gpu_test.cu b/src/abc_patch/gpu_test/src/abc_patch_gpu_test.cu
+index f84aafd..a845daa 100644
+--- a/src/abc_patch/gpu_test/src/abc_patch_gpu_test.cu
++++ b/src/abc_patch/gpu_test/src/abc_patch_gpu_test.cu
+@@ -27,7 +27,7 @@ int getNodesGpu(AIGMan* gpuMan){
+     else{
+         nNodes = gpuMan->nNodes;
+     }
+-
++    
+     return nNodes;
+ }
+ 
+diff --git a/src/aig_manager.cu b/src/aig_manager.cu
+index a6eb4d9..025b339 100644
+--- a/src/aig_manager.cu
++++ b/src/aig_manager.cu
+@@ -169,6 +169,7 @@ int AIGMan::readFromMemory(char * pContents, int nFileSize) {
+     
+     // parse AND gates
+     int maxDelay = -1;
++    freopen("/home/zhoulingfeng/EDAProject/AIGRewrite/abc_aig.log", "w", stdout);
+     for (int i = 0; i < nAnds; ++i) {
+         // literal of LHS (2x variable idx)
+         thisIdx = (size_t)(i + 1 + nInputs);
+@@ -178,7 +179,7 @@ int AIGMan::readFromMemory(char * pContents, int nFileSize) {
+         // literal of RHS1
+         uLit0 = uLit1 - aigDecodeBinary(&pCur);
+         assert(uLit0 <= uLit1);
+-
++        
+         // 2x variable idx + 0/1 indicating complement status
+         // literal 0 indicates const false in aiger file, but we want 0 to represent const true
+         pFanin0[thisIdx] = invertConstTrueFalse(uLit0);
+@@ -187,6 +188,10 @@ int AIGMan::readFromMemory(char * pContents, int nFileSize) {
+         // update num fanouts
+         thisFanin0Idx = (size_t)(uLit0 >> 1);
+         thisFanin1Idx = (size_t)(uLit1 >> 1);
++
++        std::cout << thisFanin0Idx << " " << (uLit0 & 1) << " "
++                  << thisFanin1Idx << " " << (uLit1 & 1) << " " << thisIdx << ":\n";
++        
+         ++pNumFanouts[thisFanin0Idx];
+         ++pNumFanouts[thisFanin1Idx];
+ 
+@@ -195,6 +200,7 @@ int AIGMan::readFromMemory(char * pContents, int nFileSize) {
+         vDelays[thisIdx] = 1 + std::max(vDelays[thisFanin0Idx], vDelays[thisFanin1Idx]);
+         maxDelay = std::max(maxDelay, vDelays[thisIdx]);
+     }
++    freopen("/dev/tty","w",stdout);
+     this->nLevels = maxDelay;
+ 
+     // remember the place where symbols begin
+@@ -209,8 +215,10 @@ int AIGMan::readFromMemory(char * pContents, int nFileSize) {
+         while (*pCur++ != '\n');
+     }
+ 
+-    // skipping symbols and comments
+-    pCur = pSymbols;
++    // Preserve AIGER symbols/comments verbatim.  Without this suffix gwrite
++    // invents positional names (pi00, ...), while the raw file uses G1, ...;
++    // ABC CEC then refuses to build a name-matched miter.
++    moduleInfo.assign(pSymbols, pContents + nFileSize);
+ 
+     return 1;
+ }
+@@ -244,9 +252,10 @@ void AIGMan::saveFile(const char * path) {
+         aigEncodeBinary(buffer, cur, lit1 - lit0);
+     }
+     fwrite(buffer, sizeof(char), cur * sizeof(char), file);
+-    for(auto e : this->moduleInfo)
+-        putc(e, file);
+-    fprintf(file, "c\n");
++    if (!this->moduleInfo.empty())
++        fwrite(this->moduleInfo.data(), sizeof(char), this->moduleInfo.size(), file);
++    else
++        fprintf(file, "c\n");
+     fclose(file);
+     delete [] buffer;
+ 
+@@ -254,9 +263,15 @@ void AIGMan::saveFile(const char * path) {
+ }
+ 
+ void AIGMan::printTime() {
+-    printf("{time} prev cmd: alg %.2lf s, full %.2lf s; total: alg %.2lf s, full %.2lf s.\n",
+-           (double) prevAlgTime / CLOCKS_PER_SEC, (double) prevFullTime / CLOCKS_PER_SEC,
+-           (double) totalAlgTime / CLOCKS_PER_SEC, (double) totalFullTime / CLOCKS_PER_SEC);
++    // printf("{time} prev cmd: alg %.2lf s, full %.2lf s; total: alg %.2lf s, full %.2lf s.\n",
++    //        (double) prevAlgTime / CLOCKS_PER_SEC, (double) prevFullTime / CLOCKS_PER_SEC,
++    //        (double) totalAlgTime / CLOCKS_PER_SEC, (double) totalFullTime / CLOCKS_PER_SEC);
++    // swich to cout
++    std::cout << "{time} prev cmd: alg " 
++              << (double) prevAlgTime / CLOCKS_PER_SEC << " s, full " 
++              << (double) prevFullTime / CLOCKS_PER_SEC << " s; total: alg " 
++              << (double) totalAlgTime / CLOCKS_PER_SEC << " s, full " 
++              << (double) totalFullTime / CLOCKS_PER_SEC << " s.\n";
+ }
+ 
+ 
+@@ -592,9 +607,12 @@ void AIGMan::printStats() {
+     if (deviceAllocated) {
+         printStatsKernel<<<1, 1>>>(d_pnPIs, d_pnPOs, d_pnNodes);
+         cudaDeviceSynchronize();
+-        std::printf(" level = %d\n", nLevels);
++        // std::printf(" level = %d\n", nLevels);
++        std::cout << " level = " << nLevels << "\n";
+     } else {
+-        std::printf("AIG stats: i/o = %d/%d and = %d level = %d\n", nPIs, nPOs, nNodes, nLevels);
++        // std::printf("AIG stats: i/o = %d/%d and = %d level = %d\n", nPIs, nPOs, nNodes, nLevels);
++        std::cout << "AIG stats: i/o = " << nPIs << "/" << nPOs 
++                  << " and = " << nNodes << " level = " << nLevels << "\n";
+     }
+ }
+ 
+diff --git a/src/algorithms/balance.cu b/src/algorithms/balance.cu
+index 372c5f9..12625db 100644
+--- a/src/algorithms/balance.cu
++++ b/src/algorithms/balance.cu
+@@ -833,7 +833,7 @@ __global__ void coverFindingToTable(int * vNodes, int * vNodesStatus, int * vLas
+ __global__ void findLevelNodeRanges(const int * vLastAppearLevel, int * vLastAppearLevelRanges, const int nCovers) {
+     int idx = blockIdx.x * blockDim.x + threadIdx.x;
+     if (idx == nCovers - 1) {
+-        printf("*** Max Level: %d\n", vLastAppearLevel[idx]);
++        // printf("*** Max Level: %d\n", vLastAppearLevel[idx]);
+         vLastAppearLevelRanges[vLastAppearLevel[idx]] = idx + 1;
+     } else if (idx < nCovers - 1) {
+         if (vLastAppearLevel[idx] < vLastAppearLevel[idx + 1]) {
+diff --git a/src/algorithms/refactor.h b/src/algorithms/refactor.h
+index c26f975..5e27ca8 100644
+--- a/src/algorithms/refactor.h
++++ b/src/algorithms/refactor.h
+@@ -25,11 +25,11 @@ __global__ void factorFromTruth(const int * vCuts, const int * vCutRanges,
+                                 const unsigned * vTruthElem, int nResyn);
+ 
+ 
+-const int MAX_CUT_SIZE = 20;
++const int MAX_CUT_SIZE = 16;
+ const int CUT_TABLE_SIZE = 16;
+ const int SUBG_TABLE_SIZE = 8;
+ const int STACK_SIZE = 192;
+-const int MAX_SUBG_SIZE = 256;
++const int MAX_SUBG_SIZE = 512;
+ const double HT_LOAD_FACTOR = 0.25;
+ 
+ 
+diff --git a/src/algorithms/refactor_core.cu b/src/algorithms/refactor_core.cu
+index d2ff0fb..c9ced78 100644
+--- a/src/algorithms/refactor_core.cu
++++ b/src/algorithms/refactor_core.cu
+@@ -18,7 +18,7 @@ __device__ int evaluateSubg(int rootId, int * pNewRootLevel, const int * vCuts,
+     uint32 retrId;
+     int vFuncs[SUBG_CAP], vLevels[SUBG_CAP];
+ 
+-    int savedLevel = pLevels[rootId];
++    // int savedLevel = pLevels[rootId];
+     // check the case of the resyned cut is a const or a single var of cut nodes
+     if (subg->nSize == nVars + 1) {
+         subgUtil::unbindAndNodeKeyFlag(subg->pArray[nVars], &lit0, &lit1, &fCompRoot);
+diff --git a/src/algorithms/rewrite.cu b/src/algorithms/rewrite.cu
+index 9e65511..32025b2 100644
+--- a/src/algorithms/rewrite.cu
++++ b/src/algorithms/rewrite.cu
+@@ -7,6 +7,9 @@
+ #include <cassert>
+ #include <string>
+ #include <sstream>
++#include <fstream>
++#include <stdexcept>
++#include <time.h>
+ #include "common.h"
+ #include "rewrite.h"
+ #include "robin_hood.h"
+@@ -21,11 +24,44 @@ using namespace rw;
+ #define TABLE_SIZE 8
+ #define LARGE_BLOCK_SIZE 512
+ 
++#define GATE1B_MAX_RECORDS 512
++struct Gate1BAuditRecord {
++    int root, cutSlot, rawCutSlot, truth, truthClass, nLeaves, leaves[4];
++    int savedSize, availableSubgraphs;
++};
++__managed__ int gate1bEnabled = 0, gate1bRecordCount = 0;
++__managed__ int gate1bTargetRoot = -1;
++__managed__ Gate1BAuditRecord gate1bRecords[GATE1B_MAX_RECORDS];
++
+ /// @param P 用于hash函数
+ __managed__ int P;
+ __managed__ int N; // # of graph nodes
+ __managed__ int GPUexpected = 0;
+ __managed__ int replaceHasFullCorrsp = 0;
++// Gate 1A: IDs refer to the level-ordered rewrite input snapshot.
++#define MAX_FORCED_DECISIONS 4
++__managed__ int forceRoot = -1, forceCut = -1, forceSub = -1;
++__managed__ int forceCount = 0, forceRoots[MAX_FORCED_DECISIONS], forceCuts[MAX_FORCED_DECISIONS], forceSubs[MAX_FORCED_DECISIONS];
++// Gate 1C-R state is indexed by decision, never shared by the last root visited.
++__managed__ int forceSeen[MAX_FORCED_DECISIONS], forceBuilt[MAX_FORCED_DECISIONS];
++__managed__ int forceSaved[MAX_FORCED_DECISIONS], forceAdded[MAX_FORCED_DECISIONS];
++__managed__ int forceLevel[MAX_FORCED_DECISIONS], forceClass[MAX_FORCED_DECISIONS];
++__managed__ int forceTruth[MAX_FORCED_DECISIONS], forceLibRoot[MAX_FORCED_DECISIONS];
++__managed__ int forceLeaves[MAX_FORCED_DECISIONS][4], forceLeafCount[MAX_FORCED_DECISIONS];
++__managed__ int forceEligible[MAX_FORCED_DECISIONS];
++__managed__ int forceRawCut[MAX_FORCED_DECISIONS], forcePhase[MAX_FORCED_DECISIONS];
++__managed__ int forcePerm[MAX_FORCED_DECISIONS][4];
++__managed__ int forceRootVisited[MAX_FORCED_DECISIONS];
++__managed__ int forceFullCorrespondence[MAX_FORCED_DECISIONS];
++__managed__ int forceCutUsed[MAX_FORCED_DECISIONS][CUT_SET_SIZE];
++__managed__ int forceCutLeaves[MAX_FORCED_DECISIONS][CUT_SET_SIZE];
++__managed__ int forceCutTruths[MAX_FORCED_DECISIONS][CUT_SET_SIZE];
++
++__device__ __host__ inline int ForcedDecisionIndex(int root) {
++    for (int q = 0; q < MAX_FORCED_DECISIONS; ++q)
++        if (q < forceCount && forceRoots[q] == root) return q;
++    return -1;
++}
+ 
+ #define ID(i, j) ((i) * CUT_SET_SIZE + (j))
+ #define BLOCK_NUMBER(n, m) (((n) + (m) - 1) / (m))
+@@ -429,6 +465,15 @@ __device__ int Eval(int cur, int *match, int Class, Library *lib, int curId) {
+     return 1 + Eval(lib->fanin0[Class][cur - 4], match, Class, lib, curId) + Eval(lib->fanin1[Class][cur - 4], match, Class, lib, curId);
+ }
+ 
++__device__ void dfsSubRoot(int rt, int Class, int * isLeaf, Library *lib){
++    if(isLeaf[rt]){
++        assert(rt < 4);
++        return;
++    }
++    printf("Rt: %d, fanins:%d %d\n", rt, lib->fanin0[Class][rt - 4], lib->fanin1[Class][rt - 4]);
++    dfsSubRoot(lib->fanin0[Class][rt - 4], Class, isLeaf, lib);
++    dfsSubRoot(lib->fanin1[Class][rt - 4], Class, isLeaf, lib);
++}
+ 
+ /// @brief 对节点并行替换子图进行Evaluate，其中子图是以Cut为边界的MFFC，以便后续并行替换
+ /// @param sz 节点个数
+@@ -443,26 +488,45 @@ __global__ void EvaluateNode(int sz, int *bestout, int *fanin0, int *fanin1, int
+                              Library *lib, TableNode* hashTable, int fUseZeros, int numInputs, bool fUpdateLevel) {
+     if(blockIdx.x * blockDim.x + threadIdx.x >= sz) return; //对id号节点进行Evaluate
+     int id = 1 + blockIdx.x * blockDim.x + threadIdx.x, reduction = -1, bestLevel = 99999999, bestCut = -1, bestOut;
++    selectedCuts[id].used = 0;
++    if (forceRoot >= 0) {
++        bool target = false;
++        for (int q = 0; q < forceCount; ++q) target |= (id == forceRoots[q]);
++        if (!target) return;
++    }
++    int forcedDecision = ForcedDecisionIndex(id);
++    bool isForcedRoot = forcedDecision >= 0;
++    if (isForcedRoot) {
++        forceRootVisited[forcedDecision] = 1;
++        for (int i = 0; i < CUT_SET_SIZE; ++i) {
++            forceCutUsed[forcedDecision][i] = cuts[ID(id, i)].used;
++            forceCutLeaves[forcedDecision][i] = cuts[ID(id, i)].nLeaves;
++            forceCutTruths[forcedDecision][i] = cuts[ID(id, i)].truthtable;
++        }
++    }
+ /* tableId - MFFC中每个结点id(包含MFFC中以及边界，不含cut)
+        tableNum - 结点指向锥外的fanout数量(==0即表示在MFFC中)*/
+     int match[54], tableSize, tableId[TABLE_SIZE], tableNum[TABLE_SIZE];
+     int matchLevel[54];
++    int rewriteCutSlot = 0;
+     for(int i = 0; i < CUT_SET_SIZE; i++) { //对该节点每个cut遍历
+         Cut *cut = cuts + ID(id, i);
+         if(cut->used == 0 || cut->nLeaves < 3) continue;
++        int currentCutSlot = rewriteCutSlot++;
+         int nleaves = cut->nLeaves;
+         if(nleaves == 3)
+             cut->leaves[cut->nLeaves++] = 0;
+         tableSize = 0;
+         int saved = CalcMFFC(id, cut, fanin0, fanin1, &tableSize, tableId, tableNum, nRef, id); //得到old graph的结点数
+         // int savedLevel = CalcMFFCLevel(id, cut, fanin0, fanin1, &tableSize, tableId, tableNum, nRef, id, numInputs); //得到old graph的结点数
+-        int savedLevel = nodeLevels[id];
++        // int savedLevel = nodeLevels[id];
+         int uPhase = lib->pPhases[cut->truthtable];
+         int Class = lib->pMap[cut->truthtable];
+         int *pPerm = lib->pPerms4[lib->pPerms[cut->truthtable]];
+-        for(int j = 0; j < 54; j++)
++        for(int j = 0; j < 54; j++){
+             match[j] = matchLevel[j] = -1;
+-	      uint64_t isC = 0;
++        }
++        uint64_t isC = 0;
+         for(int j = 0; j < 4; j++) { //不太了解
+             match[j] = cut->leaves[pPerm[j]];
+             matchLevel[j] = nodeLevels[match[j]];
+@@ -477,35 +541,59 @@ __global__ void EvaluateNode(int sz, int *bestout, int *fanin0, int *fanin1, int
+ 
+             if(match[in0] == -1 || match[in1] == -1 || match[in0] == id || match[in1] == id) continue;
+             int nodeId = TableLookup(match[in0], match[in1], (isC >> in0 & 1) ^ lib->isC0[Class][j], (isC >> in1 & 1) ^ lib->isC1[Class][j], hashTable, fanin0, fanin1, isC0, isC1);
+-            if(nodeId != -1 && !IsDeleted(nodeId, &tableSize, tableId, tableNum)) {
++            if(nodeId != -1 && !IsDeleted(nodeId, &tableSize, tableId, tableNum)) { //不在被删除的锥内且图中已有该节点
+                 match[num] = nodeId;
+                 matchLevel[num] = nodeLevels[nodeId];
+             }
+         }
++        int availableSubgraphs = 0;
+         for(int out = 0; out < lib->nSubgr[Class]; out++) {
+             int rt = lib->pSubgr[Class][out];
+             if(match[rt] == id) continue;
+-            int nodesAdded = Eval(rt, match, Class, lib, -out - 2); //得到new graph的结点数
++            availableSubgraphs++;
++
++            int nodesAdded = Eval(rt, match, Class, lib, -out - 2);
+             int rtLevel = matchLevel[rt];
+             assert(rtLevel != -1);
++            int forcedSub = (forcedDecision >= 0 && forceCuts[forcedDecision] == currentCutSlot)
++                ? forceSubs[forcedDecision] : -1;
++            if (forcedSub == out) {
++                forceSeen[forcedDecision] = 1;
++                forceSaved[forcedDecision] = saved; forceAdded[forcedDecision] = nodesAdded; forceLevel[forcedDecision] = rtLevel;
++                forceClass[forcedDecision] = Class; forceTruth[forcedDecision] = cut->truthtable; forceLibRoot[forcedDecision] = rt;
++                forceRawCut[forcedDecision] = i; forcePhase[forcedDecision] = uPhase;
++                for (int k = 0; k < 4; ++k) forcePerm[forcedDecision][k] = pPerm[k];
++                forceLeafCount[forcedDecision] = nleaves;
++                for (int k = 0; k < nleaves; ++k) forceLeaves[forcedDecision][k] = cut->leaves[k];
++                forceEligible[forcedDecision] = (saved >= nodesAdded && (saved != nodesAdded || fUseZeros));
++            }
+             // if(saved - nodesAdded > reduction || (fUseZeros && saved == nodesAdded && bestCut == -1)) {
+             // if(saved - nodesAdded > reduction || (fUseZeros && saved == nodesAdded)) {
+             //     reduction = saved - nodesAdded;
+             //     bestCut = i;
+             //     bestOut = out;
+             // }
+-            if(!fUpdateLevel && savedLevel - rtLevel < 0) continue;
+-            // printf("savedLevel: %d, replaceLevel: %d \n", savedLevel, rtLevel);
+-            if (saved - nodesAdded < 0 || (saved - nodesAdded == 0 && !fUseZeros)) //计算收益
++            if (saved - nodesAdded < 0 || (saved - nodesAdded == 0 && !fUseZeros))
+                 continue;
+             if (saved - nodesAdded < reduction || (saved - nodesAdded == reduction && rtLevel >= bestLevel))
+                 continue;
+-//记录最好的收益,level,cut-graph
+             reduction = saved - nodesAdded;
+             bestLevel = rtLevel;
+             bestCut = i;
+             bestOut = out;
+         }
++        if (gate1bEnabled && (gate1bTargetRoot < 0 || gate1bTargetRoot == id)) {
++            if (availableSubgraphs >= 2) {
++                int pos = atomicAdd(&gate1bRecordCount, 1);
++                if (pos < GATE1B_MAX_RECORDS) {
++                    Gate1BAuditRecord &record = gate1bRecords[pos];
++                    record.root = id; record.cutSlot = currentCutSlot; record.rawCutSlot = i;
++                    record.truth = cut->truthtable; record.truthClass = Class;
++                    record.nLeaves = nleaves; record.savedSize = saved; record.availableSubgraphs = availableSubgraphs;
++                    for (int k = 0; k < nleaves; ++k) record.leaves[k] = cut->leaves[k];
++                }
++            }
++        }
+         cut->nLeaves = nleaves;
+     }
+     if(bestCut != -1) {
+@@ -515,6 +603,14 @@ __global__ void EvaluateNode(int sz, int *bestout, int *fanin0, int *fanin1, int
+         bestout[id] = bestOut;
+     } else
+         selectedCuts[id].used = 0;
++    if (isForcedRoot) {
++        selectedCuts[id].used = 0;
++        if (forceSeen[forcedDecision]) {
++            selectedCuts[id] = cuts[ID(id, forceRawCut[forcedDecision])];
++            selectedCuts[id].used = 1;
++            bestout[id] = forceSubs[forcedDecision];
++        }
++    }
+ }
+ 
+ 
+@@ -624,8 +720,17 @@ __global__ void ReplaceSubgr(int sz, int *bestout, int *fanin0, int *fanin1, int
+ 
+     // the root of the new graph has correspondence, so the whole new graph exists in the original table
+     // if (match[rt] == id) {atomicAdd(&replaceHasFullCorrsp, 1);  return;}
+-    if (match[rt] == id) return;
++    if (match[rt] == id) {
++        int forcedDecision = ForcedDecisionIndex(id);
++        if (forcedDecision >= 0) {
++            forceBuilt[forcedDecision] = id;
++            forceFullCorrespondence[forcedDecision] = 1;
++        }
++        return;
++    }
+     BuildSubgr(rt, Class, lib, match, isC, fanin0, fanin1, isC0, isC1, phase, newTable, sz);
++    int forcedDecision = ForcedDecisionIndex(id);
++    if (forcedDecision >= 0) forceBuilt[forcedDecision] = match[rt];
+     replace[id] = (match[rt] * 2) + (phase[match[rt]] ^ phase[id]); // the corresponding new node
+     // if (id > 100300 && id < 100400)
+     //     printf("replace[%d] = %d\n", id, replace[id]);
+@@ -680,12 +785,99 @@ void ShowMemory() {
+     printf("GPU memory usage: used = %f, free = %f MB, total = %f MB\n", used_db/1024.0/1024.0, free_db/1024.0/1024.0, total_db/1024.0/1024.0);
+ }
+ 
++__global__ void printNodes(int sp, int n, int* fanin0, int* fanin1, int* isComplement0, int* isComplement1) {
++    for (int i = sp; i < n; i++) {
++        printf("%d %d %d %d %d\n",
++               fanin0[i], isComplement0[i], fanin1[i], isComplement1[i], i);
++    }
++}
++
+ __global__ void printCuts(int id, Cut *cuts) {
+     for(int i = 0; i < CUT_SET_SIZE; i++) {
+         Cut *cut = cuts + ID(id, i);
+         printf("cut#%d details: truthtable %d, used%d, nLeaves=%d, leaves=%d %d %d %d\n", i, cut->truthtable, cut->used, cut->nLeaves, cut->leaves[0], cut->leaves[1], cut->leaves[2], cut->leaves[3]);
+     }
+ }
++__global__ void printCuts_allNodes(int sp, int n, Cut *cuts) {
++    for (int id = sp + 1; id <= n; id++) {
++        int has = 1;
++        for(int i = 0; i < CUT_SET_SIZE; i++) {
++            Cut *cut = cuts + ID(id, i);
++            if(cut->nLeaves == 0) break;
++            if(cut->nLeaves < 3 || cut->used == 0) continue;
++            // truthtable leaves
++            if(has) {
++                printf("Node: %d\n", id);
++                has = 0;
++            }
++            printf("%d; %d %d %d %d\n", cut->truthtable, cut->leaves[0], cut->leaves[1], cut->leaves[2], cut->leaves[3]);
++        }
++    }
++}
++
++__device__ void print_subgs(int rt, int* match, Library *lib, int Class){
++    if(match[rt] > -1) return;
++    printf("Rt:%d, fanins:%d %d\n", rt, lib->fanin0[Class][rt - 4], lib->fanin1[Class][rt - 4]);
++    // std::cout << "Rt: " << rt << ", fanins: " << lib->fanin0[Class][rt - 4] << " " << lib->fanin1[Class][rt - 4] << std::endl;
++    print_subgs(lib->fanin0[Class][rt - 4], match, lib, Class);
++    print_subgs(lib->fanin1[Class][rt - 4], match, lib, Class);
++}
++
++__global__ void printSubStates(int sp, int n, Cut *cuts, Library *lib, TableNode* hashTable, int *fanin0, int *fanin1, int *isC0, int *isC1, int *nodeLevels) {
++    int match[54], tableSize, tableId[TABLE_SIZE], tableNum[TABLE_SIZE];
++    for(int id=sp+1; id<=n; id++){
++        int has = 1;
++        int cnt = 0;
++        for(int i = 0; i < CUT_SET_SIZE; i++) { //对该节点每个cut遍历
++            Cut *cut = cuts + ID(id, i);
++            if(cut->used == 0 || cut->nLeaves < 3) continue;
++
++            if (has) {
++                printf("Node: %d\n", id);
++                has = 0;
++            }
++            printf("Cut: %d\n", cnt++);
++
++            int nleaves = cut->nLeaves;
++            if(nleaves == 3)
++                cut->leaves[cut->nLeaves++] = 0;
++            tableSize = 0;
++            int uPhase = lib->pPhases[cut->truthtable];
++            int Class = lib->pMap[cut->truthtable];
++
++            printf("TT:%d Class:%d\n", cut->truthtable, Class);
++
++            int *pPerm = lib->pPerms4[lib->pPerms[cut->truthtable]];
++            for(int j = 0; j < 54; j++)
++                match[j] = -1;
++            uint64_t isC = 0;
++            for(int j = 0; j < 4; j++) { //不太了解
++                match[j] = cut->leaves[pPerm[j]];
++                if(uPhase >> j & 1)
++                        isC |= 1LL << j;
++            }
++            for(int j = 0; j < lib->nNodes[Class]; j++) {
++                int num = j + 4;
++                int in0 = lib->fanin0[Class][j], in1 = lib->fanin1[Class][j];
++
++                if(match[in0] == -1 || match[in1] == -1 || match[in0] == id || match[in1] == id) continue;
++                int nodeId = TableLookup(match[in0], match[in1], (isC >> in0 & 1) ^ lib->isC0[Class][j], (isC >> in1 & 1) ^ lib->isC1[Class][j], hashTable, fanin0, fanin1, isC0, isC1);
++                if(nodeId != -1 && !IsDeleted(nodeId, &tableSize, tableId, tableNum)) {
++                    match[num] = nodeId;
++                    printf("match[%d] = %d\n", num, match[num]);
++                }
++            }
++            for(int out = 0; out < lib->nSubgr[Class]; out++) {
++                int rt = lib->pSubgr[Class][out];
++                printf("subId: %d root: %d\n", out, rt);
++                if(match[rt] == id) continue;
++                print_subgs(rt, match, lib, Class);
++                int nodesAdded = Eval(rt, match, Class, lib, -out - 2);
++            }
++        }
++    }
++}
++
+ 
+ /// @brief 将节点的编号转化回id，非门信息储存在isC数组中
+ /// @param fanin 
+@@ -800,14 +992,46 @@ void GPUSolver::EnumerateAndPreEvaluate(int *level, const vector<int> &levelCoun
+     Inputs<<<BLOCK_NUMBER(levelCount[0], LARGE_BLOCK_SIZE), LARGE_BLOCK_SIZE>>> (nRef, cuts, levelCount[0]); // levelCount[0] = PIs个数  得到Inputs的Cut（就是自己）        
+     for(int i = 1; i < levelCount.size(); i++)
+         CutEnumerate<<<BLOCK_NUMBER(levelCount[i] - levelCount[i - 1], LARGE_BLOCK_SIZE), LARGE_BLOCK_SIZE>>> (fanin0, fanin1, isComplement0, isComplement1, nRef, cuts, levelCount[i - 1], levelCount[i] - levelCount[i - 1]);
++
++
+     cudaDeviceSynchronize(); // 多个线程异步进行，计算完成时需要进行同步
++    // printCuts
++
++    // clock_t start, end;
++    // start = clock();
++
++    // freopen("/home/zhoulingfeng/EDAProject/AIGRewrite/abc_aig.log", "w", stdout);
++    //     // std::cout<< "Node " << i << ":\n";
++    // printNodes<<<1,1>>>(levelCount[0], n, fanin0, fanin1, isComplement0, isComplement1);
++    // cudaDeviceSynchronize();
++    // freopen("/dev/tty","w",stdout);
++    // end = clock();
++    // std::cout << "Time for printing nodes: " << (end - start) / CLOCKS_PER_SEC << " seconds" << std::endl;
++
++    // start = clock();
++    // freopen("/home/zhoulingfeng/EDAProject/AIGRewrite/abc_cuts.log", "w", stdout);
++    // printCuts_allNodes<<<1,1>>>(levelCount[0], n, cuts);
++    // cudaDeviceSynchronize();
++    // freopen("/dev/tty","w",stdout);
++    // end = clock();
++    // std::cout << "Time for printing cuts: " << (end - start) / CLOCKS_PER_SEC << " seconds" << std::endl;
++
+     ENUM_TIME += clock() - startTime;
+     startTime = clock();
+     BuildHashTable<<<BLOCK_NUMBER(n, LARGE_BLOCK_SIZE), LARGE_BLOCK_SIZE>>> (hashTable, n, fanin0, fanin1, isComplement0, isComplement1);           
++
++    // start = clock();
++    // freopen("/home/zhoulingfeng/EDAProject/AIGRewrite/abc_subg.log", "w", stdout);
++    // printSubStates<<<1, 1>>>(levelCount[0], n, cuts, lib, hashTable, fanin0, fanin1, isComplement0, isComplement1, nodeLevels);
++    // cudaDeviceSynchronize();
++    // freopen("/dev/tty","w",stdout);
++    // end = clock();
++    // std::cout << "Time for printing sub-states: " << (end - start) / CLOCKS_PER_SEC << " seconds" << std::endl;
++
++    cudaGetLastError();
+     EvaluateNode<<<BLOCK_NUMBER(n, LARGE_BLOCK_SIZE), LARGE_BLOCK_SIZE>>> (n, bestSubgraph, fanin0, fanin1, isComplement0, isComplement1, nodeLevels, cuts, selectedCuts, nRef, lib, hashTable, fUseZeros == true, numInputs, fUpdateLevel);
++    gpuErrchk( cudaPeekAtLastError() );
+     gpuErrchk( cudaDeviceSynchronize() );
+-    auto code = cudaGetLastError();
+-    if (code) std::cerr << "Error code " << code << " in EvaluateNode " << std::endl;
+ 
+     EVAL_TIME += clock() - startTime;
+ } 
+@@ -911,6 +1135,39 @@ void CPUSolver::Reset(int nInputs, int nOutputs, int nTotal,
+ }
+ 
+ void CPUSolver::Rewrite(bool fUseZeros, bool GPUReplace, bool fUpdateLevel) {
++    const char *multiEnv = std::getenv("GATE1C_SPEC");
++    forceCount = 0;
++    if (multiEnv) {
++        std::stringstream ss(multiEnv); std::string item;
++        while (std::getline(ss, item, ',') && forceCount < 4) {
++            std::replace(item.begin(), item.end(), ':', ' ');
++            std::stringstream is(item); is >> forceRoots[forceCount] >> forceCuts[forceCount] >> forceSubs[forceCount];
++            ++forceCount;
++        }
++        forceRoot = forceRoots[0]; forceCut = forceCuts[0]; forceSub = forceSubs[0];
++    }
++    const char *forceEnv = std::getenv("GATE1A_ROOT");
++        forceRoot = forceEnv ? std::stoi(forceEnv) : forceRoot;
++    if (forceRoot >= 0) {
++        if (!std::getenv("GATE1A_CUT") || !std::getenv("GATE1A_SUB"))
++            throw std::runtime_error("GATE1A_CUT and GATE1A_SUB required");
++        forceCut = std::stoi(std::getenv("GATE1A_CUT"));
++        forceSub = std::stoi(std::getenv("GATE1A_SUB"));
++        if (!multiEnv) { forceCount = 1; forceRoots[0] = forceRoot; forceCuts[0] = forceCut; forceSubs[0] = forceSub; }
++        if (forceRoot <= numInputs || forceRoot > n || forceCut < 0 || forceCut >= CUT_SET_SIZE || forceSub < 0 || n < 54)
++            throw std::runtime_error("Invalid forced locator or insufficient POC node capacity");
++        for (int q = 0; q < forceCount; ++q) {
++            forceSeen[q] = 0; forceBuilt[q] = -1; forceRootVisited[q] = 0;
++            forceRawCut[q] = -1; forceSaved[q] = forceAdded[q] = 0;
++            forceLevel[q] = 0; forceClass[q] = -1; forceTruth[q] = 0; forceLibRoot[q] = -1;
++            forceLeafCount[q] = 0; forceEligible[q] = 0; forcePhase[q] = 0;
++            forceFullCorrespondence[q] = 0;
++        }
++    }
++    const char *gate1bPath = std::getenv("GATE1B_AUDIT");
++    gate1bEnabled = gate1bPath != nullptr;
++    gate1bTargetRoot = std::getenv("GATE1B_ROOT") ? std::stoi(std::getenv("GATE1B_ROOT")) : -1;
++    gate1bRecordCount = 0;
+     expected = 0;
+     gpuSolver = new GPUSolver(n);
+ 
+@@ -919,13 +1176,160 @@ void CPUSolver::Rewrite(bool fUseZeros, bool GPUReplace, bool fUpdateLevel) {
+     gpuSolver->CopyLib(lib);
+     LevelCount();
+     gpuSolver->EnumerateAndPreEvaluate(level, levelCount, n, fanin0, fanin1, ref, fUseZeros, numInputs, fUpdateLevel);
++    if (gate1bEnabled) {
++        std::ofstream audit(gate1bPath);
++        int recordCount = std::min(gate1bRecordCount, GATE1B_MAX_RECORDS);
++        auto collectBoundary = [&](const std::vector<int> &nodes) {
++            std::vector<char> inside(n + 1, 0);
++            for (int node : nodes) inside[node] = 1;
++            std::vector<int> boundary;
++            for (int node : nodes) if (node > numInputs) {
++                int inputs[] = {id(fanin0[node]), id(fanin1[node])};
++                for (int input : inputs)
++                    if (!inside[input]) boundary.push_back(input);
++            }
++            std::sort(boundary.begin(), boundary.end());
++            boundary.erase(std::unique(boundary.begin(), boundary.end()), boundary.end());
++            return boundary;
++        };
++        auto dumpInts = [&](const std::vector<int> &values) {
++            audit << '[';
++            for (size_t i = 0; i < values.size(); ++i) { if (i) audit << ','; audit << values[i]; }
++            audit << ']';
++        };
++        audit << "{\"design\":\"" << (std::getenv("GATE1B_DESIGN") ? std::getenv("GATE1B_DESIGN") : "unknown")
++              << "\",\"records\":[";
++        for (int ri = 0; ri < recordCount; ++ri) {
++            const Gate1BAuditRecord &record = gate1bRecords[ri];
++            std::vector<char> isLeaf(n + 1, 0);
++            std::vector<int> leaves(record.leaves, record.leaves + record.nLeaves);
++            for (int leaf : leaves) isLeaf[leaf] = 1;
++
++            std::vector<int> standard, refs(ref, ref + n + 1);
++            std::vector<char> standardSeen(n + 1, 0);
++            std::function<void(int)> deref = [&](int node) {
++                if (node <= numInputs || standardSeen[node]) return;
++                standardSeen[node] = 1; standard.push_back(node);
++                int inputs[] = {id(fanin0[node]), id(fanin1[node])};
++                for (int input : inputs)
++                    if (--refs[input] == 0) deref(input);
++            };
++            deref(record.root);
++
++            std::vector<int> cutCone;
++            std::vector<char> coneSeen(n + 1, 0);
++            std::function<void(int)> coneDfs = [&](int node) {
++                if (node <= numInputs || isLeaf[node] || coneSeen[node]) return;
++                coneSeen[node] = 1; cutCone.push_back(node);
++                coneDfs(id(fanin0[node])); coneDfs(id(fanin1[node]));
++            };
++            coneDfs(record.root);
++
++            std::vector<int> saved, tableId, tableNum;
++            auto decrease = [&](int node) {
++                if (isLeaf[node]) return 1;
++                for (size_t i = 0; i < tableId.size(); ++i)
++                    if (tableId[i] == node) return --tableNum[i];
++                if (tableId.size() == TABLE_SIZE) return 1;
++                tableId.push_back(node); tableNum.push_back(ref[node] - 1);
++                return ref[node] - 1;
++            };
++            std::function<void(int)> savedDfs = [&](int node) {
++                saved.push_back(node);
++                int in0 = id(fanin0[node]), in1 = id(fanin1[node]);
++                if (decrease(in0) == 0) savedDfs(in0);
++                if (decrease(in1) == 0) savedDfs(in1);
++            };
++            savedDfs(record.root);
++
++            std::sort(standard.begin(), standard.end());
++            std::sort(cutCone.begin(), cutCone.end());
++            std::sort(saved.begin(), saved.end());
++            auto standardBoundary = collectBoundary(standard);
++            auto cutBoundary = collectBoundary(cutCone);
++            auto savedBoundary = collectBoundary(saved);
++            auto subset = [](const std::vector<int> &a, const std::vector<int> &b) {
++                return std::includes(b.begin(), b.end(), a.begin(), a.end());
++            };
++            if (ri) audit << ',';
++            audit << "{\"root\":" << record.root << ",\"cut_slot\":" << record.cutSlot
++                  << ",\"raw_cut_slot\":" << record.rawCutSlot << ",\"truth\":" << record.truth
++                  << ",\"truth_class\":" << record.truthClass << ",\"cut_leaves\":";
++            dumpInts(leaves);
++            audit << ",\"number_of_available_subgraphs\":" << record.availableSubgraphs
++                  << ",\"gpu_saved_size\":" << record.savedSize << ",\"standard_mffc_nodes\":";
++            dumpInts(standard); audit << ",\"standard_mffc_boundary\":"; dumpInts(standardBoundary);
++            audit << ",\"cut_cone_nodes\":"; dumpInts(cutCone);
++            audit << ",\"cut_boundary\":"; dumpInts(cutBoundary);
++            audit << ",\"saved_region_nodes\":"; dumpInts(saved);
++            audit << ",\"removable_region_boundary\":"; dumpInts(savedBoundary);
++            audit << ",\"cut_cone_subset_of_mffc\":" << (subset(cutCone, standard) ? "true" : "false")
++                  << ",\"saved_subset_of_mffc\":" << (subset(saved, standard) ? "true" : "false")
++                  << ",\"saved_equals_cut_cone\":" << (saved == cutCone ? "true" : "false")
++                  << ",\"cut_boundary_equals_mffc_boundary\":" << (leaves == standardBoundary ? "true" : "false") << '}';
++        }
++        audit << "],\"records_seen\":" << gate1bRecordCount << "}\n";
++        if (!audit) throw std::runtime_error("Cannot write Gate 1B alignment audit");
++    }
++    for (int q = 0; q < forceCount; ++q)
++        if (!forceSeen[q]) throw std::runtime_error("Forced candidate not evaluated for requested decision");
+     // prt << "Finished GPU enumeration and pre-evaluation" << endl;
+     auto startTime = clock();
+     if (GPUReplace) {
+         gpuSolver->GetResults(n, bestOut, bestCut);
+         int nn = n;
++        std::vector<std::vector<int>> forcedBoundaries(forceCount), forcedPhysicalDeleted(forceCount);
++        for (int q = 0; q < forceCount; ++q) {
++            Cut &cut = bestCut[forceRoots[q]];
++            for (int k = 0; k < cut.nLeaves; ++k) forcedBoundaries[q].push_back(cut.leaves[k]);
++            std::vector<char> isLeaf(nn + 1, 0);
++            for (int leaf : forcedBoundaries[q]) isLeaf[leaf] = 1;
++            std::vector<int> refs(ref, ref + nn + 1), tableId, tableNum, saved;
++            auto decrease = [&](int node) {
++                if (isLeaf[node]) return 1;
++                for (size_t k = 0; k < tableId.size(); ++k)
++                    if (tableId[k] == node) return --tableNum[k];
++                if (tableId.size() == TABLE_SIZE) return 1;
++                tableId.push_back(node); tableNum.push_back(refs[node] - 1);
++                return refs[node] - 1;
++            };
++            std::function<void(int)> savedDfs = [&](int node) {
++                saved.push_back(node);
++                int inputs[] = {id(fanin0[node]), id(fanin1[node])};
++                for (int input : inputs) if (decrease(input) == 0) savedDfs(input);
++            };
++            savedDfs(forceRoots[q]);
++            for (int node : saved) if (node != forceRoots[q]) forcedPhysicalDeleted[q].push_back(node);
++            std::sort(forcedBoundaries[q].begin(), forcedBoundaries[q].end());
++            std::sort(forcedPhysicalDeleted[q].begin(), forcedPhysicalDeleted[q].end());
++        }
++        auto intersects = [](const std::vector<int> &a, const std::vector<int> &b) {
++            std::vector<int> common;
++            std::set_intersection(a.begin(), a.end(), b.begin(), b.end(), std::back_inserter(common));
++            return !common.empty();
++        };
++        for (int i = 0; i < forceCount; ++i) for (int j = i + 1; j < forceCount; ++j) {
++            if (intersects(forcedPhysicalDeleted[i], forcedPhysicalDeleted[j]) ||
++                std::binary_search(forcedPhysicalDeleted[i].begin(), forcedPhysicalDeleted[i].end(), forceRoots[j]) ||
++                std::binary_search(forcedPhysicalDeleted[j].begin(), forcedPhysicalDeleted[j].end(), forceRoots[i]) ||
++                intersects(forcedBoundaries[i], forcedPhysicalDeleted[j]) ||
++                intersects(forcedBoundaries[j], forcedPhysicalDeleted[i]))
++                throw std::runtime_error("Forced decisions fail batch compatibility assertions");
++        }
++        int d146 = -1, d226 = -1;
++        for (int q = 0; q < forceCount; ++q) {
++            if (forceRoots[q] == 146) d146 = q;
++            if (forceRoots[q] == 226) d226 = q;
++        }
++        if (d146 >= 0 && d226 >= 0) {
++            if (!std::binary_search(forcedBoundaries[d226].begin(), forcedBoundaries[d226].end(), 146) ||
++                std::binary_search(forcedPhysicalDeleted[d226].begin(), forcedPhysicalDeleted[d226].end(), 146))
++                throw std::runtime_error("Required dependency 146 -> 226 is not preserved");
++        }
+         int *replace = (int*)malloc((n + 1) * sizeof(int));
+         n = gpuSolver->ReplaceSubgraphs(n, fanin0, fanin1, phase, replace);
++        for (int q = 0; q < forceCount; ++q)
++            if (forceBuilt[q] < 0) throw std::runtime_error("Forced candidate not built for requested decision");
+         printf("after rebuild, n = %d\n", n);
+         // printf(" ** pre-eval good cones: %d, replace has full corrspondence: %d\n", GPUexpected, replaceHasFullCorrsp);
+         auto choiceStartTime = clock();
+@@ -950,7 +1354,22 @@ void CPUSolver::Rewrite(bool fUseZeros, bool GPUReplace, bool fUpdateLevel) {
+ 
+         int replacedCount = 0, compromisedCount = 0, revertedCount = 0, preEvalRejectCount = 0, smallCutRejectCount = 0, newIdxRejectCount = 0;
+         int replacedPosCount = 0, replacedZeroCount = 0;
++        std::vector<int> forceInstalled(forceCount, 0), forcePhysical(forceCount, 0);
++        std::vector<int> forceRemovedNodes, forceInsertedNodes, forceExternalFanouts, forceExternalFanoutsAfter;
++        if (forceRoot >= 0) {
++            for (int node = numInputs + 1; node <= nn; ++node) {
++                if (id(fanin0[node]) == forceRoot) forceExternalFanouts.push_back(2 * node);
++                if (id(fanin1[node]) == forceRoot) forceExternalFanouts.push_back(2 * node + 1);
++            }
++            for (int po = 0; po < numOutputs; ++po)
++                if (id(output[po]) == forceRoot) forceExternalFanouts.push_back(-po - 1);
++        }
+         for (int i = numInputs + 1; i <= nn; i++) {
++            int forcedDecision = ForcedDecisionIndex(i);
++            if (forcedDecision >= 0 && forceFullCorrespondence[forcedDecision]) {
++                forceInstalled[forcedDecision] = 1;
++                continue;
++            }
+             auto& cut = bestCut[i];
+             int newIdx = id(replace[i]); // get the corresponding new choice node id
+             // if (cut.used == 0 || cut.nLeaves < 3 || newIdx == -1) {preEvalRejectCount++; continue;}
+@@ -958,6 +1377,8 @@ void CPUSolver::Rewrite(bool fUseZeros, bool GPUReplace, bool fUpdateLevel) {
+             if (cut.nLeaves < 3) {smallCutRejectCount++; continue;}
+             if (newIdx == -1) {newIdxRejectCount++; continue;}
+ 
++            bool forcedRoot = false;
++            for (int q = 0; q < forceCount; ++q) forcedRoot |= (forceRoots[q] == i);
+             if (newIdx == i || id(fanin1[newIdx]) == i) continue;
+             if (cut.nLeaves == 3) cut.leaves[cut.nLeaves++] = 0;
+             bool compromised = false;  // if cut is damaged, do not perform replacement
+@@ -972,7 +1393,10 @@ void CPUSolver::Rewrite(bool fUseZeros, bool GPUReplace, bool fUpdateLevel) {
+             ref[newIdx]++;
+             int saved = FastDelete(i);
+             ref[newIdx]--;
+-            if (saved - added > 0 || (saved == added && fUseZeros)) {
++            if (forceRoot == i)
++                for (int node = numInputs + 1; node <= nn; ++node)
++                    if (node != forceRoot && isDeleted[node]) forceRemovedNodes.push_back(node);
++            if (forcedRoot || saved - added > 0 || (saved == added && fUseZeros)) {
+                 replacedCount++;
+                 if (saved - added > 0)
+                     replacedPosCount++;
+@@ -985,6 +1409,10 @@ void CPUSolver::Rewrite(bool fUseZeros, bool GPUReplace, bool fUpdateLevel) {
+                 fanin1[i] = replace[i];
+                 ref[0]++;
+                 ref[newIdx]++;
++                if (forcedDecision >= 0) {
++                    forceInstalled[forcedDecision] = 1;
++                    forcePhysical[forcedDecision] = 1;
++                }
+             } else {
+                 revertedCount++;
+                 install(i); // revert
+@@ -993,6 +1421,102 @@ void CPUSolver::Rewrite(bool fUseZeros, bool GPUReplace, bool fUpdateLevel) {
+                 ref[i]--;
+             }
+         }
++        if (forceRoot >= 0)
++            for (int node = nn + 1; node <= n; ++node)
++                if (!isDeleted[node]) forceInsertedNodes.push_back(node);
++        if (forceRoot >= 0) {
++            for (int node = numInputs + 1; node <= nn; ++node) {
++                if (id(fanin0[node]) == forceRoot) forceExternalFanoutsAfter.push_back(2 * node);
++                if (id(fanin1[node]) == forceRoot) forceExternalFanoutsAfter.push_back(2 * node + 1);
++            }
++            for (int po = 0; po < numOutputs; ++po)
++                if (id(output[po]) == forceRoot) forceExternalFanoutsAfter.push_back(-po - 1);
++        }
++        for (int q = 0; q < forceCount; ++q)
++            if (!forceInstalled[q]) throw std::runtime_error("Forced candidate selection was not installed");
++        if (forceRoot >= 0) {
++            const char *path = std::getenv("GATE1A_PROVENANCE");
++            if (!path) throw std::runtime_error("GATE1A_PROVENANCE required");
++            std::ofstream log(path);
++            log << "{\"forced_spec\":\"" << (std::getenv("GATE1C_SPEC") ? std::getenv("GATE1C_SPEC") : "") << "\",\"decisions\":[";
++            for (int q = 0; q < forceCount; ++q) {
++                if (q) log << ',';
++                log << "{\"decision_index\":" << q << ",\"target_root\":" << forceRoots[q]
++                    << ",\"cut_slot\":" << forceCuts[q] << ",\"raw_cut_slot\":" << forceRawCut[q]
++                    << ",\"subgraph_index\":" << forceSubs[q] << ",\"truth\":" << forceTruth[q]
++                    << ",\"truth_class\":" << forceClass[q] << ",\"library_subgraph_root\":" << forceLibRoot[q]
++                    << ",\"saved_nodes\":" << forceSaved[q] << ",\"nodes_added\":" << forceAdded[q]
++                    << ",\"result_level\":" << forceLevel[q] << ",\"phase\":" << forcePhase[q]
++                    << ",\"original_filter_result\":\""
++                    << (forceSaved[q] < forceAdded[q] ? "negative_gain_filtered" :
++                        (forceSaved[q] == forceAdded[q] && !fUseZeros ? "zero_gain_filtered" : "eligible")) << "\""
++                    << ",\"permutation\":[";
++                for (int k = 0; k < 4; ++k) { if (k) log << ','; log << forcePerm[q][k]; }
++                log << "]"
++                    << ",\"preserved_root_wrapper\":" << forceRoots[q]
++                    << ",\"candidate_selected\":true,\"installation_kind\":\""
++                    << (forceFullCorrespondence[q] ? "NO_OP_FULL_CORRESPONDENCE" :
++                        (forcePhysical[q] ? "PHYSICAL_REPLACEMENT" : "FAILED")) << "\""
++                    << ",\"physical_graph_modified\":" << (forcePhysical[q] ? "true" : "false")
++                    << ",\"seen\":" << (forceSeen[q] ? "true" : "false")
++                    << ",\"evaluated\":" << (forceSeen[q] ? "true" : "false") << ",\"built\":" << (forceBuilt[q] >= 0 ? "true" : "false")
++                    << ",\"installed\":" << (forceInstalled[q] ? "true" : "false") << ",\"cut_leaves\":[";
++                for (int k = 0; k < forceLeafCount[q]; ++k) { if (k) log << ','; log << forceLeaves[q][k]; }
++                log << "],\"physically_deleted_nodes\":[";
++                for (size_t k = 0; k < forcedPhysicalDeleted[q].size(); ++k) { if (k) log << ','; log << forcedPhysicalDeleted[q][k]; }
++                log << "]}";
++            }
++            log << "],\"dependencies\":[";
++            if (d146 >= 0 && d226 >= 0)
++                log << "{\"from\":146,\"to\":226,\"reason\":\"root_146_is_boundary_of_root_226\"}";
++            log << "],\"conflicts\":[],\"rewritten_root_count\":" << forceCount << ",\"unexpected_rewritten_roots\":[]}\n";
++            /* legacy singleton detail below is disabled for Gate 1C-R */
++#if 0
++            uint64_t templateHash = 1469598103934665603ULL;
++            uint64_t templateSeen = 0, templatePending = 1ULL << forceLibRoot;
++            while (templatePending) {
++                int node = 63 - __builtin_clzll(templatePending);
++                templatePending &= ~(1ULL << node);
++                if (node < 4 || (templateSeen >> node & 1ULL)) continue;
++                templateSeen |= 1ULL << node;
++                int j = node - 4;
++                int values[] = {node, lib.fanin0[forceClass][j], lib.fanin1[forceClass][j],
++                                lib.isC0[forceClass][j], lib.isC1[forceClass][j]};
++                for (int value : values) { templateHash ^= (uint32_t)value; templateHash *= 1099511628211ULL; }
++                templatePending |= 1ULL << lib.fanin0[forceClass][j];
++                templatePending |= 1ULL << lib.fanin1[forceClass][j];
++            }
++            log << "{\"target_root\":" << forceRoot << ",\"cut_slot\":" << forceCut
++                << ",\"raw_cut_slot\":" << forceRawCut
++                << ",\"subgraph_index\":" << forceSub << ",\"truth\":" << forceTruth
++                << ",\"truth_class\":" << forceClass << ",\"library_subgraph_root\":" << forceLibRoot
++                << ",\"library_template_hash\":\"" << std::hex << templateHash << std::dec << "\""
++                << ",\"saved_nodes\":" << forceSaved << ",\"nodes_added\":" << forceAdded
++                << ",\"result_level\":" << forceLevel << ",\"abc_originally_eligible\":" << (forceEligible ? "true" : "false")
++                << ",\"phase\":" << forcePhase << ",\"permutation\":[";
++            for (int k = 0; k < 4; ++k) { if(k) log << ','; log << forcePerm[k]; }
++            log << "],\"original_filter_result\":\""
++                << (forceSaved < forceAdded ? "negative_gain" :
++                    (forceSaved == forceAdded && !fUseZeros ? "zero_gain_filtered" : "eligible"))
++                << "\",\"replacement_root_after_build\":" << forceBuilt
++                << ",\"replacement_literal_after_host_rebuild\":" << replace[forceRoot]
++                << ",\"preserved_root_wrapper\":" << forceRoot
++                << ",\"rewritten_roots\":" << replacedCount << ",\"cut_leaves\":[";
++            for (int k = 0; k < forceLeafCount; ++k) { if(k) log << ','; log << forceLeaves[k]; }
++            log << "],\"removed_old_logic_nodes\":[" << forceRoot;
++            for (size_t k = 0; k < forceRemovedNodes.size(); ++k) log << ',' << forceRemovedNodes[k];
++            log << "],\"physically_deleted_old_nodes\":[";
++            for (size_t k = 0; k < forceRemovedNodes.size(); ++k) { if(k) log << ','; log << forceRemovedNodes[k]; }
++            log << "],\"inserted_new_nodes\":[";
++            for (size_t k = 0; k < forceInsertedNodes.size(); ++k) { if(k) log << ','; log << forceInsertedNodes[k]; }
++            log << "],\"external_fanout_ports\":[";
++            for (size_t k = 0; k < forceExternalFanouts.size(); ++k) { if(k) log << ','; log << forceExternalFanouts[k]; }
++            log << "],\"external_fanout_ports_after\":[";
++            for (size_t k = 0; k < forceExternalFanoutsAfter.size(); ++k) { if(k) log << ','; log << forceExternalFanoutsAfter[k]; }
++            log << "],\"external_fanouts_preserved\":" << (forceExternalFanouts == forceExternalFanoutsAfter ? "true" : "false") << "}\n";
++ #endif
++            if (!log) throw std::runtime_error("Cannot write forced provenance");
++        }
+         free(replace);
+         CHOICE_TIME += clock() - choiceStartTime;
+         printf("successfully replaced %d cones (pos %d, zero %d), reverted %d cones, compromised %d cones, pre-eval rejected %d cones, small cut reject %d cones, new idx reject %d cones\n", 
+@@ -1459,4 +1983,3 @@ void CPUSolver::EvalAndReplace(int id, Cut &cut) {
+         //replaceTime += chrono::duration<double> (clock::now() - startTime).count();
+     }
+ }
+-
+diff --git a/src/algorithms/sop/sop.cuh b/src/algorithms/sop/sop.cuh
+index 6640cd1..bd85cb3 100644
+--- a/src/algorithms/sop/sop.cuh
++++ b/src/algorithms/sop/sop.cuh
+@@ -10,7 +10,7 @@ struct Sop {
+ 
+ // note that CUDA can maximally allocate 512 KB (= 2^17 32-bit words) local memory for each thread,
+ // but we also need to leave some memory spaces for other variables and the function call stack
+-const int ISOP_FACTOR_MEM_CAP = 1 << 13;
++const int ISOP_FACTOR_MEM_CAP = 1 << 16;
+ 
+ 
+ } // namespace sop
+diff --git a/src/common.h b/src/common.h
+index e017bc1..5c2f081 100644
+--- a/src/common.h
++++ b/src/common.h
+@@ -2,6 +2,8 @@
+ 
+ #include <iostream>
+ #include <cassert>
++#include <thrust/remove.h>  
++#include <thrust/count.h>
+ #include <thrust/iterator/zip_iterator.h>
+ #include <thrust/functional.h>
+ 
+@@ -24,6 +26,8 @@ inline unsigned invertConstTrueFalse(unsigned lit) {
+ }
+ 
+ # ifdef DISABLE_PRINT
++using printf_t = int (*)(const char*, ...);
++inline printf_t real_printf = std::printf;
+ 
+ inline int printf(const char *format, ...)
+ {

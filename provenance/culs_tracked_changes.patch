@@ -1,0 +1,2060 @@
+diff --git a/src/aig/truth.cuh b/src/aig/truth.cuh
+index 3173797..665e242 100644
+--- a/src/aig/truth.cuh
++++ b/src/aig/truth.cuh
+@@ -212,6 +212,60 @@ __global__ void getCutTruthTable(const int * pFanin0, const int * pFanin1, const
+ }
+ 
+ 
++/**
++ * Collect the internal nodes of a cut-bounded cone.
++ *
++ * This traversal is shared by the truth-table path and the Gate 3A audit
++ * path.  Cut nodes are initialized as visited, so stackRes contains the
++ * root and intermediate AND nodes, but not the cut boundary itself.
++ */
++template <int STACK_SIZE>
++__device__ __forceinline__ int collectCutConeNodes(const int * pFanin0, const int * pFanin1,
++                                                   const int * pCuts, int nVars, int rootId,
++                                                   int nPIs, int * stack, int * stackRes,
++                                                   int * visited) {
++    int stackTop = -1;
++    int stackResTop = -1;
++    int visitedSize = 0;
++    int nodeId;
++
++    for (int i = 0; i < nVars; i++)
++        visited[visitedSize++] = pCuts[i];
++
++    stack[++stackTop] = rootId;
++    while (stackTop != -1) {
++        nodeId = stack[stackTop--];
++
++        bool fVisited = false;
++        for (int i = 0; i < visitedSize; i++) {
++            if (visited[i] == nodeId) {
++                fVisited = true;
++                break;
++            }
++        }
++        if (fVisited)
++            continue;
++
++        assert(dUtils::AigIsNode(nodeId, nPIs));
++        assert(visitedSize < STACK_SIZE);
++        visited[visitedSize++] = nodeId;
++
++        // Preserve the original decreasing-id insertion order.
++        int j = stackResTop++;
++        for (; j >= 0 && stackRes[j] < nodeId; j--)
++            stackRes[j + 1] = stackRes[j];
++        stackRes[j + 1] = nodeId;
++
++        assert(stackTop < STACK_SIZE - 2);
++        stack[++stackTop] = dUtils::AigNodeID(pFanin1[nodeId]);
++        stack[++stackTop] = dUtils::AigNodeID(pFanin0[nodeId]);
++    }
++
++    assert(stackResTop >= 0 && stackRes[0] == rootId);
++    return stackResTop + 1;
++}
++
++
+ /**
+  * Same as getCutTruthTable, except that cuts are stored in a consecutive array.
+  * Additionally, if vNode2ConeResynIdx is provided, mark the nodes in each cone using the 
+@@ -230,9 +284,9 @@ __global__ void getCutTruthTableConsecutive(const int * pFanin0, const int * pFa
+     int idx = blockIdx.x * blockDim.x + threadIdx.x;
+     int warpIdx = threadIdx.x / 32, laneIdx = threadIdx.x % 32;
+     int stack[STACK_SIZE], stackRes[STACK_SIZE], visited[STACK_SIZE];
+-    int stackTop, stackResTop, visitedSize;
+-    int nodeId, rootId;
+-    int fVisited, nWords, nWordsElem, nVars, nIntNodes;
++    int visitedSize;
++    int rootId;
++    int nWords, nWordsElem, nVars, nIntNodes;
+     unsigned * vTruthMem;
+     int startIdx, endIdx;
+     int localMemLen, totalMemLen = -1, startMemIdx = -1;
+@@ -248,48 +302,17 @@ __global__ void getCutTruthTableConsecutive(const int * pFanin0, const int * pFa
+             nWords = dUtils::TruthWordNum(nVars);
+             nWordsElem = dUtils::TruthWordNum(nMaxCutSize);
+ 
+-            // set the leaves as visited
+-            visitedSize = 0;
+-            for (int i = 0; i < nVars; i++) {
+-                visited[visitedSize++] = vCuts[startIdx + i];
+-            }
+-
+             // 1. traversal to collect intermediate nodes
+-            stackTop = stackResTop = -1;
+-            stack[++stackTop] = rootId;
+-            while (stackTop != -1) {
+-                // skip if already visited
+-                nodeId = stack[stackTop--];
+-                fVisited = 0;
+-                for (int i = 0; i < visitedSize; i++) {
+-                    if (visited[i] == nodeId) {
+-                        fVisited = 1;
+-                        break;
+-                    }
+-                }
+-                if (fVisited) continue;
+-
+-                assert(dUtils::AigIsNode(nodeId, nPIs));
+-                assert(visitedSize < STACK_SIZE);
+-                visited[visitedSize++] = nodeId;
+-
+-                // mark the node if vNode2ConeResynIdx is provided
+-                if (vNode2ConeResynIdx && nodeId != rootId) {
+-                    vNode2ConeResynIdx[nodeId] = idx;
++            nIntNodes = collectCutConeNodes<STACK_SIZE>(
++                pFanin0, pFanin1, vCuts + startIdx, nVars, rootId, nPIs,
++                stack, stackRes, visited
++            );
++            if (vNode2ConeResynIdx) {
++                for (int i = 0; i < nIntNodes; i++) {
++                    if (stackRes[i] != rootId)
++                        vNode2ConeResynIdx[stackRes[i]] = idx;
+                 }
+-
+-                // save result. make sure the nodes in stackRes are in reversed topo order (decreasing id)
+-                int j = stackResTop++;
+-                for (; j >= 0 && stackRes[j] < nodeId; j--) // insertion sort
+-                    stackRes[j + 1] = stackRes[j];
+-                stackRes[j + 1] = nodeId;
+-
+-                // push fanins into stack
+-                assert(stackTop < STACK_SIZE - 2);
+-                stack[++stackTop] = dUtils::AigNodeID(pFanin1[nodeId]);
+-                stack[++stackTop] = dUtils::AigNodeID(pFanin0[nodeId]);
+             }
+-            nIntNodes = stackResTop + 1;
+             assert(nIntNodes >= vNumSaved[rootId] && nIntNodes + nVars < STACK_SIZE);
+             assert(stackRes[0] == rootId);
+         }
+@@ -317,7 +340,7 @@ __global__ void getCutTruthTableConsecutive(const int * pFanin0, const int * pFa
+                     vTruthMem[i * nWords + j] = vTruthElem[i * nWordsElem + j];
+                 visited[visitedSize++] = vCuts[startIdx + i];
+             }
+-            for (int i = stackResTop; i >= 0; i--) {
++            for (int i = nIntNodes - 1; i >= 0; i--) {
+                 cutTruthIter(stackRes[i], pFanin0, pFanin1, vTruthMem, visited, &visitedSize, nWords);
+             }
+             assert(visited[visitedSize - 1] == rootId);
+@@ -336,4 +359,34 @@ __global__ void getCutTruthTableConsecutive(const int * pFanin0, const int * pFa
+     }
+ }
+ 
++
++/**
++ * Audit-only variant of the shared cut traversal.  It returns the actual
++ * internal node list for every supplied root and performs no truth-table or
++ * resynthesis work.
++ */
++template <int STACK_SIZE>
++__global__ void getCutConeNodesConsecutive(const int * pFanin0, const int * pFanin1,
++                                           const int * vIndices, const int * vCuts,
++                                           const int * vCutRanges, int nIndices, int nPIs,
++                                           int * vConeNodes, int * vConeSizes) {
++    int idx = blockIdx.x * blockDim.x + threadIdx.x;
++    if (idx >= nIndices)
++        return;
++
++    int startIdx = (idx == 0 ? 0 : vCutRanges[idx - 1]);
++    int endIdx = vCutRanges[idx];
++    int rootId = vIndices[idx];
++    int nVars = endIdx - startIdx;
++    int stack[STACK_SIZE], stackRes[STACK_SIZE], visited[STACK_SIZE];
++
++    int nIntNodes = collectCutConeNodes<STACK_SIZE>(
++        pFanin0, pFanin1, vCuts + startIdx, nVars, rootId, nPIs,
++        stack, stackRes, visited
++    );
++    vConeSizes[idx] = nIntNodes;
++    for (int i = 0; i < nIntNodes; i++)
++        vConeNodes[idx * STACK_SIZE + i] = stackRes[i];
++}
++
+ } // namespace Aig
+diff --git a/src/algorithms/refactor.h b/src/algorithms/refactor.h
+index 1f5b3cb..4c919e7 100644
+--- a/src/algorithms/refactor.h
++++ b/src/algorithms/refactor.h
+@@ -15,6 +15,15 @@ refactorMFFCPerform(bool fUseZeros, int cutSize,
+                     const int * d_pFanin0, const int * d_pFanin1, const int * d_pOuts, 
+                     const int * d_pNumFanouts, const int * d_pLevel, 
+                     int * pOuts, int * pNumFanouts, int verbose);
++
++// Gate 3A: run only the PO->PI MFFC/cut discovery front half and dump the
++// discovered cuts plus the exact cut-bounded internal node sets.  This entry
++// point deliberately does not perform truth factoring, resynthesis, or
++// replacement.
++int gate3aMFFCDump(const char * outputDir, const char * inputPath,
++                   int nObjs, int nPIs, int nPOs, int nNodes,
++                   const int * pFanin0, const int * pFanin1, const int * pOuts,
++                   const int * pNumFanouts, int cutSize, int verbose);
+ __global__ void resynCut(const int * vResynInd, const int * vCutTable, const int * vCutSizes, const int * vNumSaved, 
+                          const uint64 * htKeys, const uint32 * htValues, int htCapacity, const int * pLevels, 
+                          uint64 * vSubgTable, int * vSubgLinks, int * vSubgLens, int * pSubgTableNext,
+@@ -34,4 +43,3 @@ const double HT_LOAD_FACTOR = 0.25;
+ 
+ 
+ 
+-
+diff --git a/src/algorithms/refactor_mffc.cu b/src/algorithms/refactor_mffc.cu
+index 6e33a52..960d4f9 100644
+--- a/src/algorithms/refactor_mffc.cu
++++ b/src/algorithms/refactor_mffc.cu
+@@ -2,6 +2,10 @@
+ #include <vector>
+ #include <ctime>
+ #include <climits>
++#include <algorithm>
++#include <filesystem>
++#include <fstream>
++#include <string>
+ #include <thrust/sequence.h>
+ #include <thrust/copy.h>
+ #include <thrust/transform.h>
+@@ -991,3 +995,297 @@ refactorMFFCPerform(bool fUseZeros, int cutSize,
+ 
+     return {nObjsNew, vhFanin0New, vhFanin1New, vhOutsNew, nLevelsNew};
+ }
++
++
++namespace {
++
++std::string gate3aJsonEscape(const char * value) {
++    if (value == nullptr)
++        return "";
++    std::string result;
++    for (const char * p = value; *p != '\0'; ++p) {
++        switch (*p) {
++        case '\\': result += "\\\\"; break;
++        case '"': result += "\\\""; break;
++        case '\n': result += "\\n"; break;
++        case '\r': result += "\\r"; break;
++        case '\t': result += "\\t"; break;
++        default: result += *p; break;
++        }
++    }
++    return result;
++}
++
++void gate3aWriteIntArray(std::ofstream & out, const int * values, int length) {
++    out << '[';
++    for (int i = 0; i < length; ++i) {
++        if (i != 0)
++            out << ',';
++        out << values[i];
++    }
++    out << ']';
++}
++
++} // namespace
++
++
++int gate3aMFFCDump(const char * outputDir, const char * inputPath,
++                   int nObjs, int nPIs, int nPOs, int nNodes,
++                   const int * pFanin0, const int * pFanin1, const int * pOuts,
++                   const int * pNumFanouts, int cutSize, int verbose) {
++    if (outputDir == nullptr || inputPath == nullptr ||
++        pFanin0 == nullptr || pFanin1 == nullptr || pOuts == nullptr ||
++        pNumFanouts == nullptr) {
++        fprintf(stderr, "gate3a: invalid audit arguments\n");
++        return 1;
++    }
++    if (cutSize <= 0 || cutSize > MAX_CUT_SIZE) {
++        fprintf(stderr, "gate3a: cut size must be in [1, %d]\n", MAX_CUT_SIZE);
++        return 1;
++    }
++
++    try {
++        std::filesystem::create_directories(outputDir);
++    } catch (const std::exception & e) {
++        fprintf(stderr, "gate3a: cannot create output directory %s: %s\n",
++                outputDir, e.what());
++        return 1;
++    }
++
++    // Dump the exact graph representation used by CULS.  The post-processing
++    // oracle consumes this file and never reparses or converts the benchmark.
++    {
++        std::ofstream graphOut(std::filesystem::path(outputDir) / "graph.json");
++        if (!graphOut) {
++            fprintf(stderr, "gate3a: cannot open graph.json for writing\n");
++            return 1;
++        }
++        graphOut << "{\"input_path\":\"" << gate3aJsonEscape(inputPath) << "\""
++                 << ",\"n_objs\":" << nObjs
++                 << ",\"n_pis\":" << nPIs
++                 << ",\"n_pos\":" << nPOs
++                 << ",\"n_nodes\":" << nNodes;
++        graphOut << ",\"fanin0\":";
++        gate3aWriteIntArray(graphOut, pFanin0, nObjs);
++        graphOut << ",\"fanin1\":";
++        gate3aWriteIntArray(graphOut, pFanin1, nObjs);
++        graphOut << ",\"outs\":";
++        gate3aWriteIntArray(graphOut, pOuts, nPOs);
++        graphOut << ",\"num_fanouts\":";
++        gate3aWriteIntArray(graphOut, pNumFanouts, nObjs);
++        graphOut << "}\n";
++    }
++
++    std::vector<int> levels(nObjs, 0);
++    for (int nodeId = nPIs + 1; nodeId < nObjs; ++nodeId) {
++        int fanin0 = dUtils::AigNodeID(pFanin0[nodeId]);
++        int fanin1 = dUtils::AigNodeID(pFanin1[nodeId]);
++        levels[nodeId] = 1 + std::max(levels[fanin0], levels[fanin1]);
++    }
++
++    int * dFanin0 = nullptr, * dFanin1 = nullptr, * dOuts = nullptr;
++    int * dNumFanouts = nullptr, * dLevels = nullptr;
++    int * vRoots = nullptr, * vNodesStatus = nullptr, * vNodesIndices = nullptr;
++    int * vCutTable = nullptr, * vCutSizes = nullptr, * vNumSaved = nullptr;
++
++    gpuErrchk(cudaMalloc(&dFanin0, (size_t)nObjs * sizeof(int)));
++    gpuErrchk(cudaMalloc(&dFanin1, (size_t)nObjs * sizeof(int)));
++    gpuErrchk(cudaMalloc(&dOuts, (size_t)nPOs * sizeof(int)));
++    gpuErrchk(cudaMalloc(&dNumFanouts, (size_t)nObjs * sizeof(int)));
++    gpuErrchk(cudaMalloc(&dLevels, (size_t)nObjs * sizeof(int)));
++    gpuErrchk(cudaMemcpy(dFanin0, pFanin0, (size_t)nObjs * sizeof(int), cudaMemcpyHostToDevice));
++    gpuErrchk(cudaMemcpy(dFanin1, pFanin1, (size_t)nObjs * sizeof(int), cudaMemcpyHostToDevice));
++    gpuErrchk(cudaMemcpy(dOuts, pOuts, (size_t)nPOs * sizeof(int), cudaMemcpyHostToDevice));
++    gpuErrchk(cudaMemcpy(dNumFanouts, pNumFanouts, (size_t)nObjs * sizeof(int), cudaMemcpyHostToDevice));
++    gpuErrchk(cudaMemcpy(dLevels, levels.data(), (size_t)nObjs * sizeof(int), cudaMemcpyHostToDevice));
++
++    gpuErrchk(cudaMalloc(&vRoots, (size_t)nObjs * sizeof(int)));
++    gpuErrchk(cudaMalloc(&vNodesStatus, (size_t)nObjs * sizeof(int)));
++    gpuErrchk(cudaMalloc(&vNodesIndices, (size_t)nObjs * sizeof(int)));
++    gpuErrchk(cudaMalloc(&vCutTable, (size_t)nObjs * CUT_TABLE_SIZE * sizeof(int)));
++    gpuErrchk(cudaMalloc(&vCutSizes, (size_t)nObjs * sizeof(int)));
++    gpuErrchk(cudaMalloc(&vNumSaved, (size_t)nObjs * sizeof(int)));
++    gpuErrchk(cudaMemset(vCutSizes, -1, (size_t)nObjs * sizeof(int)));
++    gpuErrchk(cudaMemset(vNumSaved, -1, (size_t)nObjs * sizeof(int)));
++    thrust::sequence(thrust::device, vNodesIndices, vNodesIndices + nObjs);
++
++    // This is the same initial-root construction as refactorMFFCPerform:
++    // PO drivers that are AND nodes, transformed to node IDs and deduplicated.
++    int * pNewGlobalListEnd = thrust::copy_if(
++        thrust::device, dOuts, dOuts + nPOs, vRoots,
++        dUtils::isNodeLit<int>(nPIs)
++    );
++    int currLen = (int)(pNewGlobalListEnd - vRoots);
++    thrust::transform(thrust::device, vRoots, pNewGlobalListEnd, vRoots, dUtils::getNodeID());
++    thrust::sort(thrust::device, vRoots, vRoots + currLen);
++    pNewGlobalListEnd = thrust::unique(thrust::device, vRoots, vRoots + currLen);
++    currLen = (int)(pNewGlobalListEnd - vRoots);
++
++    std::vector<int> discoveredRoots;
++    std::vector<int> discoveryLevel(nObjs, -1);
++    int levelCount = 0;
++    while (currLen > 0) {
++        gpuErrchk(cudaMemset(vNodesStatus, 0, (size_t)nObjs * sizeof(int)));
++
++        recordMFFC<false><<<NUM_BLOCKS(currLen, THREAD_PER_BLOCK), THREAD_PER_BLOCK>>>(
++            vRoots, dFanin0, dFanin1, dNumFanouts, dLevels,
++            vCutTable, vCutSizes, vNumSaved, nPIs, cutSize, currLen
++        );
++        gpuErrchk(cudaPeekAtLastError());
++        gpuErrchk(cudaDeviceSynchronize());
++
++        setStatus<<<NUM_BLOCKS(currLen, THREAD_PER_BLOCK), THREAD_PER_BLOCK>>>(
++            vRoots, vCutTable, vCutSizes, vNodesStatus, nPIs, currLen
++        );
++        gpuErrchk(cudaPeekAtLastError());
++        gpuErrchk(cudaDeviceSynchronize());
++
++        std::vector<int> hRoots(currLen);
++        gpuErrchk(cudaMemcpy(hRoots.data(), vRoots, (size_t)currLen * sizeof(int), cudaMemcpyDeviceToHost));
++        for (int rootId : hRoots) {
++            discoveredRoots.push_back(rootId);
++            discoveryLevel[rootId] = levelCount;
++        }
++
++        pNewGlobalListEnd = thrust::copy_if(
++            thrust::device, vNodesIndices, vNodesIndices + nObjs,
++            vNodesStatus, vRoots, dUtils::isOne<int>()
++        );
++        currLen = (int)(pNewGlobalListEnd - vRoots);
++        ++levelCount;
++        if (verbose >= 3)
++            printf("gate3a: discovery level %d, next roots %d\n", levelCount, currLen);
++    }
++
++    std::sort(discoveredRoots.begin(), discoveredRoots.end());
++    discoveredRoots.erase(std::unique(discoveredRoots.begin(), discoveredRoots.end()), discoveredRoots.end());
++
++    std::vector<int> hCutSizes(nObjs), hConeSizes(nObjs), hCutTable((size_t)nObjs * CUT_TABLE_SIZE);
++    gpuErrchk(cudaMemcpy(hCutSizes.data(), vCutSizes, (size_t)nObjs * sizeof(int), cudaMemcpyDeviceToHost));
++    gpuErrchk(cudaMemcpy(hConeSizes.data(), vNumSaved, (size_t)nObjs * sizeof(int), cudaMemcpyDeviceToHost));
++    gpuErrchk(cudaMemcpy(hCutTable.data(), vCutTable,
++                         (size_t)nObjs * CUT_TABLE_SIZE * sizeof(int), cudaMemcpyDeviceToHost));
++
++    // Feed every discovered root through the same cut-bounded traversal that
++    // the truth-table path uses, without invoking any truth/factoring stage.
++    std::vector<int> activeRoots = discoveredRoots;
++    std::sort(activeRoots.begin(), activeRoots.end());
++    std::vector<int> hCuts;
++    std::vector<int> hCutRanges;
++    hCutRanges.reserve(activeRoots.size());
++    for (int rootId : activeRoots) {
++        if (hCutSizes[rootId] < 0) {
++            fprintf(stderr, "gate3a: discovered root %d has no cut\n", rootId);
++            return 1;
++        }
++        for (int j = 0; j < hCutSizes[rootId]; ++j)
++            hCuts.push_back(hCutTable[(size_t)rootId * CUT_TABLE_SIZE + j]);
++        hCutRanges.push_back((int)hCuts.size());
++    }
++
++    int * dActiveRoots = nullptr, * dCuts = nullptr, * dCutRanges = nullptr;
++    int * dConeNodes = nullptr, * dConeSizes = nullptr;
++    if (!activeRoots.empty()) {
++        gpuErrchk(cudaMalloc(&dActiveRoots, activeRoots.size() * sizeof(int)));
++        gpuErrchk(cudaMalloc(&dCuts, hCuts.size() * sizeof(int)));
++        gpuErrchk(cudaMalloc(&dCutRanges, hCutRanges.size() * sizeof(int)));
++        gpuErrchk(cudaMalloc(&dConeNodes, activeRoots.size() * STACK_SIZE * sizeof(int)));
++        gpuErrchk(cudaMalloc(&dConeSizes, activeRoots.size() * sizeof(int)));
++        gpuErrchk(cudaMemcpy(dActiveRoots, activeRoots.data(), activeRoots.size() * sizeof(int), cudaMemcpyHostToDevice));
++        gpuErrchk(cudaMemcpy(dCuts, hCuts.data(), hCuts.size() * sizeof(int), cudaMemcpyHostToDevice));
++        gpuErrchk(cudaMemcpy(dCutRanges, hCutRanges.data(), hCutRanges.size() * sizeof(int), cudaMemcpyHostToDevice));
++
++        Aig::getCutConeNodesConsecutive<STACK_SIZE>
++            <<<NUM_BLOCKS((int)activeRoots.size(), THREAD_PER_BLOCK), THREAD_PER_BLOCK>>>(
++                dFanin0, dFanin1, dActiveRoots, dCuts, dCutRanges,
++                (int)activeRoots.size(), nPIs, dConeNodes, dConeSizes
++            );
++        gpuErrchk(cudaPeekAtLastError());
++        gpuErrchk(cudaDeviceSynchronize());
++    }
++
++    std::vector<int> hConeSizesFromTraversal(activeRoots.size());
++    std::vector<int> hConeNodes(activeRoots.size() * STACK_SIZE);
++    if (!activeRoots.empty()) {
++        gpuErrchk(cudaMemcpy(hConeSizesFromTraversal.data(), dConeSizes,
++                             activeRoots.size() * sizeof(int), cudaMemcpyDeviceToHost));
++        gpuErrchk(cudaMemcpy(hConeNodes.data(), dConeNodes,
++                             activeRoots.size() * STACK_SIZE * sizeof(int), cudaMemcpyDeviceToHost));
++    }
++
++    std::ofstream regionsOut(std::filesystem::path(outputDir) / "culs_regions.jsonl");
++    if (!regionsOut) {
++        fprintf(stderr, "gate3a: cannot open culs_regions.jsonl for writing\n");
++        return 1;
++    }
++    int regionId = 0;
++    for (int rootId : discoveredRoots) {
++        auto activeIt = std::lower_bound(activeRoots.begin(), activeRoots.end(), rootId);
++        int activeIdx = (int)(activeIt - activeRoots.begin());
++        std::vector<int> cutNodes;
++        for (int j = 0; j < hCutSizes[rootId]; ++j)
++            cutNodes.push_back(hCutTable[(size_t)rootId * CUT_TABLE_SIZE + j]);
++        std::sort(cutNodes.begin(), cutNodes.end());
++
++        std::vector<int> internalNodes;
++        for (int j = 0; j < hConeSizesFromTraversal[activeIdx]; ++j)
++            internalNodes.push_back(hConeNodes[(size_t)activeIdx * STACK_SIZE + j]);
++        std::sort(internalNodes.begin(), internalNodes.end());
++
++        regionsOut << "{\"region_id\":" << regionId++
++                   << ",\"root\":" << rootId
++                   << ",\"cut_nodes\":[";
++        for (size_t j = 0; j < cutNodes.size(); ++j) {
++            if (j != 0) regionsOut << ',';
++            regionsOut << cutNodes[j];
++        }
++        regionsOut << "],\"internal_nodes\":[";
++        for (size_t j = 0; j < internalNodes.size(); ++j) {
++            if (j != 0) regionsOut << ',';
++            regionsOut << internalNodes[j];
++        }
++        regionsOut << "],\"cone_size\":" << hConeSizes[rootId]
++                   << ",\"traversal_internal_size\":" << hConeSizesFromTraversal[activeIdx]
++                   << ",\"cut_size\":" << hCutSizes[rootId]
++                   << ",\"discovery_level\":" << discoveryLevel[rootId]
++                   << ",\"semantics\":\"UNKNOWN_PENDING_STRICT_CHECK\"}\n";
++    }
++
++    std::ofstream runManifest(std::filesystem::path(outputDir) / "culs_run_manifest.json");
++    if (!runManifest) {
++        fprintf(stderr, "gate3a: cannot open culs_run_manifest.json for writing\n");
++        return 1;
++    }
++    runManifest << "{\"cut_size_limit\":" << cutSize
++                << ",\"total_discovered_regions\":" << discoveredRoots.size()
++                << ",\"discovery_levels\":" << levelCount
++                << ",\"used_recordMFFC\":true"
++                << ",\"used_findReconvMFFCCut\":true"
++                << ",\"used_setStatus\":true"
++                << ",\"used_cut_bounded_cone_traversal\":true"
++                << ",\"truth_factorization_executed\":false"
++                << ",\"resynthesis_executed\":false"
++                << ",\"replacement_executed\":false"
++                << ",\"original_refactor_singleton_filter_applied\":false}\n";
++
++    cudaFree(dActiveRoots);
++    cudaFree(dCuts);
++    cudaFree(dCutRanges);
++    cudaFree(dConeNodes);
++    cudaFree(dConeSizes);
++    cudaFree(dFanin0);
++    cudaFree(dFanin1);
++    cudaFree(dOuts);
++    cudaFree(dNumFanouts);
++    cudaFree(dLevels);
++    cudaFree(vRoots);
++    cudaFree(vNodesStatus);
++    cudaFree(vNodesIndices);
++    cudaFree(vCutTable);
++    cudaFree(vCutSizes);
++    cudaFree(vNumSaved);
++
++    printf("gate3a: dumped %zu CULS discovery regions to %s\n",
++           discoveredRoots.size(), outputDir);
++    return 0;
++}
+diff --git a/src/algorithms/rewrite.cu b/src/algorithms/rewrite.cu
+index 916a27c..261e044 100644
+--- a/src/algorithms/rewrite.cu
++++ b/src/algorithms/rewrite.cu
+@@ -7,6 +7,11 @@
+ #include <cassert>
+ #include <string>
+ #include <sstream>
++#include <filesystem>
++#include <fstream>
++#include <map>
++#include <stdexcept>
++#include <utility>
+ #include "common.h"
+ #include "rewrite.h"
+ #include "robin_hood.h"
+@@ -375,8 +380,9 @@ __device__ int Eval(int cur, int *match, int Class, Library *lib, int curId) {
+ 
+ 
+ 
+-__global__ void EvaluateNode(int sz, int *bestout, int *fanin0, int *fanin1, int *isC0, int *isC1, int *nodeLevels, Cut *cuts, Cut* selectedCuts, int *nRef, 
+-                             Library *lib, TableNode* hashTable, int fUseZeros) {
++__global__ void EvaluateNode(int sz, int *bestout, int *selectedCutSlots, int *fanin0, int *fanin1, int *isC0, int *isC1, int *nodeLevels, Cut *cuts, Cut* selectedCuts, int *nRef,
++                             Library *lib, TableNode* hashTable, int fUseZeros,
++                             unsigned char *candidateMasks) {
+     if(blockIdx.x * blockDim.x + threadIdx.x >= sz) return;
+     int id = 1 + blockIdx.x * blockDim.x + threadIdx.x, reduction = -1, bestLevel = 99999999, bestCut = -1, bestOut;
+     int match[54], tableSize, tableId[TABLE_SIZE], tableNum[TABLE_SIZE];
+@@ -428,6 +434,7 @@ __global__ void EvaluateNode(int sz, int *bestout, int *fanin0, int *fanin1, int
+             // }
+             if (saved - nodesAdded < 0 || (saved - nodesAdded == 0 && !fUseZeros))
+                 continue;
++            candidateMasks[(ID(id, i) * MAX_REWRITE_SUBGR) + out] = 1;
+             if (saved - nodesAdded < reduction || (saved - nodesAdded == reduction && rtLevel >= bestLevel))
+                 continue;
+             reduction = saved - nodesAdded;
+@@ -442,8 +449,12 @@ __global__ void EvaluateNode(int sz, int *bestout, int *fanin0, int *fanin1, int
+         selectedCuts[id] = cuts[ID(id, bestCut)];
+         selectedCuts[id].used = 1;
+         bestout[id] = bestOut;
++        selectedCutSlots[id] = bestCut;
+     } else
++    {
+         selectedCuts[id].used = 0;
++        selectedCutSlots[id] = -1;
++    }
+ }
+ 
+ 
+@@ -644,6 +655,7 @@ void GPUSolver::Init(int n) {
+     cudaMalloc(&isComplement0, static_cast<int> (RATIO * (n + 1) * sizeof(int)));
+     cudaMalloc(&isComplement1, static_cast<int> (RATIO * (n + 1) * sizeof(int)));
+     cudaMalloc(&bestSubgraph, (n + 1) * sizeof(int));
++    cudaMalloc(&selectedCutSlots, (n + 1) * sizeof(int));
+     cudaMalloc(&phase, static_cast<int> (RATIO * (n + 1) * sizeof(int)));
+     cudaMalloc(&replace, static_cast<int> (RATIO * (n + 1) * sizeof(int)));
+     cudaMalloc(&lib, sizeof(Library));
+@@ -652,6 +664,8 @@ void GPUSolver::Init(int n) {
+     cudaMalloc(&hashTable, (2 * n + 1 + P) * sizeof(TableNode));
+     // ShowMemory();
+     cudaMalloc(&selectedCuts, (n + 1) * sizeof(Cut));
++    cudaMalloc(&candidateMasks,
++               static_cast<size_t>(n + 1) * CUT_SET_SIZE * MAX_REWRITE_SUBGR * sizeof(unsigned char));
+     ShowMemory();
+     printf("memory needed for Cut: %.2f MB\n", 1.0*sizeof(Cut) * (n + 1) * CUT_SET_SIZE / 1024/1024);
+     CHECK_CUDA( cudaMalloc(&cuts, sizeof(Cut) * (n + 1) * CUT_SET_SIZE ) );
+@@ -665,12 +679,14 @@ void GPUSolver::Free() {
+     cudaFree(isComplement0);
+     cudaFree(isComplement1);
+     cudaFree(bestSubgraph);
++    cudaFree(selectedCutSlots);
+     cudaFree(phase);
+     cudaFree(replace);
+     cudaFree(lib);
+     cudaFree(newTable);
+     cudaFree(hashTable);
+     cudaFree(selectedCuts);
++    cudaFree(candidateMasks);
+     cudaFree(cuts);
+ 
+     printf("GPUSolver: setting cudaLimitStackSize = %lu\n", cudaStackSize);
+@@ -682,6 +698,28 @@ void GPUSolver::GetResults(int n, int *CPUbestSubgraph, Cut *CPUcuts) {
+     cudaMemcpy(CPUcuts, selectedCuts, (n + 1) * sizeof(Cut), cudaMemcpyDeviceToHost);
+ }
+ 
++void GPUSolver::GetSelectedCutSlots(int n, int *CPUselectedCutSlots) {
++    cudaMemcpy(CPUselectedCutSlots, selectedCutSlots,
++               (n + 1) * sizeof(int), cudaMemcpyDeviceToHost);
++}
++
++void GPUSolver::GetEnumeratedCuts(int n, Cut *CPUcuts) {
++    cudaMemcpy(CPUcuts, cuts,
++               static_cast<size_t>(n + 1) * CUT_SET_SIZE * sizeof(Cut),
++               cudaMemcpyDeviceToHost);
++}
++
++void GPUSolver::GetCandidateMasks(int n, unsigned char *CPUcandidateMasks) {
++    cudaMemcpy(CPUcandidateMasks, candidateMasks,
++               static_cast<size_t>(n + 1) * CUT_SET_SIZE * MAX_REWRITE_SUBGR * sizeof(unsigned char),
++               cudaMemcpyDeviceToHost);
++}
++
++void GPUSolver::CopySelectedChoices(int n, const int *CPUbestSubgraph, const Cut *CPUcuts) {
++    cudaMemcpy(bestSubgraph, CPUbestSubgraph, (n + 1) * sizeof(int), cudaMemcpyHostToDevice);
++    cudaMemcpy(selectedCuts, CPUcuts, (n + 1) * sizeof(Cut), cudaMemcpyHostToDevice);
++}
++
+ void GPUSolver::CopyLib(Library CPUlib) {
+     cudaMemcpy(lib, &CPUlib, sizeof(Library), cudaMemcpyHostToDevice);
+ }
+@@ -696,6 +734,9 @@ void GPUSolver::EnumerateAndPreEvaluate(int *level, const vector<int> &levelCoun
+     cudaMemcpy(nRef, CPUref, (n + 1) * sizeof(int), cudaMemcpyHostToDevice);
+     cudaMemset(hashTable, -1, sizeof(TableNode) * (2 * n + 1 + P));
+     cudaMemset(cuts, 0, CUT_SET_SIZE * (n + 1) * sizeof(Cut));
++    cudaMemset(candidateMasks, 0,
++               static_cast<size_t>(n + 1) * CUT_SET_SIZE * MAX_REWRITE_SUBGR * sizeof(unsigned char));
++    cudaMemset(selectedCutSlots, -1, (n + 1) * sizeof(int));
+     auto startTime = clock();
+     Convert<<<BLOCK_NUMBER(n + 1, LARGE_BLOCK_SIZE), LARGE_BLOCK_SIZE>>> (fanin0, isComplement0, (n + 1));
+     Convert<<<BLOCK_NUMBER(n + 1, LARGE_BLOCK_SIZE), LARGE_BLOCK_SIZE>>> (fanin1, isComplement1, (n + 1));
+@@ -706,7 +747,11 @@ void GPUSolver::EnumerateAndPreEvaluate(int *level, const vector<int> &levelCoun
+     ENUM_TIME += clock() - startTime;
+     startTime = clock();
+     BuildHashTable<<<BLOCK_NUMBER(n, LARGE_BLOCK_SIZE), LARGE_BLOCK_SIZE>>> (hashTable, n, fanin0, fanin1, isComplement0, isComplement1);           
+-    EvaluateNode<<<BLOCK_NUMBER(n, LARGE_BLOCK_SIZE), LARGE_BLOCK_SIZE>>> (n, bestSubgraph, fanin0, fanin1, isComplement0, isComplement1, nodeLevels, cuts, selectedCuts, nRef, lib, hashTable, fUseZeros == true);
++    EvaluateNode<<<BLOCK_NUMBER(n, LARGE_BLOCK_SIZE), LARGE_BLOCK_SIZE>>> (
++        n, bestSubgraph, selectedCutSlots, fanin0, fanin1, isComplement0, isComplement1,
++        nodeLevels, cuts, selectedCuts, nRef, lib, hashTable, fUseZeros == true,
++        candidateMasks
++    );
+     gpuErrchk( cudaDeviceSynchronize() );
+     std::cerr << cudaGetLastError() << " in EvaluateNode " << std::endl;
+ 
+@@ -775,6 +820,206 @@ void Message(string s) {
+ }
+ 
+ 
++namespace {
++
++struct RewriteAuditLeafStatus {
++    int leafInternal = -1;
++    int leafOriginal = -1;
++    bool deleted = false;
++    int firstDeletedByInternalRoot = -1;
++    int firstDeletedByOriginalRoot = -1;
++    int firstDeletedByExecutionOrder = -1;
++};
++
++struct RewriteAuditRecord {
++    int internalRoot = -1;
++    int root = -1;
++    int regionId = -1;
++    int executionOrder = -1;
++    int cutSlot = -1;
++    bool preselected = false;
++    std::string status;
++    std::string statusReason;
++    int selectedSubgraph = -1;
++    std::vector<int> cutLeaves;
++    std::vector<int> cutLeavesInternal;
++    std::vector<int> removableNodesBefore;
++    std::vector<int> removableNodesBeforeInternal;
++    std::vector<int> removableNodesBeforeGeneratedInternal;
++    std::vector<RewriteAuditLeafStatus> cutLeafStatusBefore;
++    std::vector<int> damagedCutLeaves;
++    std::vector<int> damagedByPriorRoot;
++    std::vector<int> damagedByPriorExecutionOrder;
++    int replacementLiteral = -1;
++    int replacementNodeInternal = -1;
++    int replacementNodeOriginal = -1;
++    int saved = -1;
++    int added = -1;
++    bool savedAddedEvaluated = false;
++    std::vector<int> deletedNodesInternal;
++    std::vector<int> deletedNodes;
++};
++
++struct RewriteAuditMFFCResult {
++    int saved = 0;
++    std::vector<int> nodes;
++};
++
++std::string rewriteAuditJsonEscape(const std::string & value) {
++    std::string result;
++    result.reserve(value.size());
++    for (char c : value) {
++        switch (c) {
++        case '\\': result += "\\\\"; break;
++        case '"': result += "\\\""; break;
++        case '\n': result += "\\n"; break;
++        case '\r': result += "\\r"; break;
++        case '\t': result += "\\t"; break;
++        default: result += c; break;
++        }
++    }
++    return result;
++}
++
++void rewriteAuditWriteIntArray(std::ostream & out, const std::vector<int> & values) {
++    out << '[';
++    for (size_t i = 0; i < values.size(); ++i) {
++        if (i != 0)
++            out << ',';
++        out << values[i];
++    }
++    out << ']';
++}
++
++int rewriteAuditOriginalId(const RewriteAuditOptions & options, int internalId) {
++    if (internalId < 0 || internalId >= static_cast<int>(options.internalToOriginal.size()))
++        return -1;
++    return options.internalToOriginal[internalId];
++}
++
++int rewriteAuditRegionId(const RewriteAuditOptions & options, int originalId) {
++    if (originalId < 0 || originalId >= static_cast<int>(options.originalToRegion.size()))
++        return -1;
++    return options.originalToRegion[originalId];
++}
++
++RewriteAuditMFFCResult rewriteAuditCollectMFFC(
++    int root, int numInputs, int graphSize,
++    const int *fanin0, const int *fanin1, const int *refs,
++    const std::vector<int> & cutLeaves) {
++    RewriteAuditMFFCResult result;
++    if (root <= numInputs || root > graphSize)
++        return result;
++
++    std::vector<int> temporaryRefs(refs, refs + graphSize + 1);
++    std::vector<unsigned char> cutLeaf(graphSize + 1, 0);
++    for (int leaf : cutLeaves)
++        if (leaf >= 0 && leaf <= graphSize)
++            cutLeaf[leaf] = 1;
++    std::vector<unsigned char> touched(graphSize + 1, 0);
++    std::vector<unsigned char> visited(graphSize + 1, 0);
++
++    auto decrease = [&](int literal) {
++        int node = id(literal);
++        if (node < 0 || node > graphSize)
++            return 1;
++        if (cutLeaf[node])
++            return 1;
++        if (!touched[node]) {
++            touched[node] = 1;
++            temporaryRefs[node]--;
++        } else {
++            temporaryRefs[node]--;
++        }
++        return temporaryRefs[node];
++    };
++
++    std::function<void(int)> collect = [&](int cur) {
++        if (cur <= numInputs || cur > graphSize || visited[cur])
++            return;
++        visited[cur] = 1;
++        result.nodes.push_back(cur);
++        if (!(fanin0[cur] == fanin1[cur] || fanin0[cur] == 1))
++            ++result.saved;
++        if (decrease(fanin0[cur]) == 0)
++            collect(id(fanin0[cur]));
++        if (decrease(fanin1[cur]) == 0)
++            collect(id(fanin1[cur]));
++    };
++
++    collect(root);
++    std::sort(result.nodes.begin(), result.nodes.end());
++    return result;
++}
++
++void rewriteAuditWriteRecord(std::ostream & out, const RewriteAuditRecord & record) {
++    out << "{\"root\":" << record.root
++        << ",\"internal_root\":" << record.internalRoot
++        << ",\"region_id\":" << record.regionId
++        << ",\"execution_order\":" << record.executionOrder
++        << ",\"cut_slot\":" << record.cutSlot
++        << ",\"preselected\":" << (record.preselected ? "true" : "false")
++        << ",\"final_status\":\"" << rewriteAuditJsonEscape(record.status) << "\""
++        << ",\"status_reason\":\"" << rewriteAuditJsonEscape(record.statusReason) << "\""
++        << ",\"selected_subgraph\":" << record.selectedSubgraph
++        << ",\"cut_leaves\":";
++    rewriteAuditWriteIntArray(out, record.cutLeaves);
++    out << ",\"cut_leaves_internal\":";
++    rewriteAuditWriteIntArray(out, record.cutLeavesInternal);
++    out << ",\"removable_nodes_before_execution\":";
++    rewriteAuditWriteIntArray(out, record.removableNodesBefore);
++    out << ",\"removable_nodes_before_execution_internal\":";
++    rewriteAuditWriteIntArray(out, record.removableNodesBeforeInternal);
++    out << ",\"removable_nodes_before_execution_generated_internal\":";
++    rewriteAuditWriteIntArray(out, record.removableNodesBeforeGeneratedInternal);
++    out << ",\"cut_leaf_status_before_execution\":[";
++    for (size_t i = 0; i < record.cutLeafStatusBefore.size(); ++i) {
++        if (i != 0)
++            out << ',';
++        const auto & leaf = record.cutLeafStatusBefore[i];
++        out << "{\"leaf\":" << leaf.leafOriginal
++            << ",\"leaf_internal\":" << leaf.leafInternal
++            << ",\"deleted\":" << (leaf.deleted ? "true" : "false")
++            << ",\"first_deleted_by_prior_root\":" << leaf.firstDeletedByOriginalRoot
++            << ",\"first_deleted_by_prior_root_internal\":" << leaf.firstDeletedByInternalRoot
++            << ",\"first_deleted_by_prior_execution_order\":" << leaf.firstDeletedByExecutionOrder
++            << '}';
++    }
++    out << ']';
++    out << ",\"damaged_cut_leaves\":";
++    rewriteAuditWriteIntArray(out, record.damagedCutLeaves);
++    out << ",\"damaged_by_prior_root\":";
++    rewriteAuditWriteIntArray(out, record.damagedByPriorRoot);
++    out << ",\"damaged_by_prior_execution_order\":";
++    rewriteAuditWriteIntArray(out, record.damagedByPriorExecutionOrder);
++    out << ",\"replacement_identity\":{\"selected_subgraph\":" << record.selectedSubgraph
++        << ",\"replace_literal\":" << record.replacementLiteral
++        << ",\"replace_node_internal\":" << record.replacementNodeInternal
++        << ",\"replace_node_original\":" << record.replacementNodeOriginal << '}'
++        << ",\"saved\":" << record.saved
++        << ",\"added\":" << record.added
++        << ",\"saved_added_evaluated\":" << (record.savedAddedEvaluated ? "true" : "false")
++        << ",\"deleted_nodes_internal\":";
++    rewriteAuditWriteIntArray(out, record.deletedNodesInternal);
++    out << ",\"deleted_nodes\":";
++    rewriteAuditWriteIntArray(out, record.deletedNodes);
++    out << "}\n";
++}
++
++void rewriteAuditWriteTrace(const RewriteAuditOptions & options,
++                            const std::vector<RewriteAuditRecord> & records) {
++    if (options.tracePath.empty())
++        return;
++    std::ofstream out(options.tracePath);
++    if (!out)
++        throw std::runtime_error("cannot open rewrite audit trace: " + options.tracePath);
++    for (const auto & record : records)
++        rewriteAuditWriteRecord(out, record);
++}
++
++} // namespace
++
++
+ 
+ 
+ void CPUSolver::Reset(int nInputs, int nOutputs, int nTotal, 
+@@ -821,6 +1066,41 @@ void CPUSolver::Rewrite(bool fUseZeros, bool GPUReplace) {
+     auto startTime = clock();
+     if (GPUReplace) {
+         gpuSolver->GetResults(n, bestOut, bestCut);
++        gpuSolver->GetSelectedCutSlots(n, bestCutSlot);
++        if (!rewriteAuditOptions.replayChoices.empty()) {
++            std::vector<Cut> allCuts(static_cast<size_t>(n + 1) * CUT_SET_SIZE);
++            std::vector<unsigned char> candidateMasks(
++                static_cast<size_t>(n + 1) * CUT_SET_SIZE * MAX_REWRITE_SUBGR
++            );
++            gpuSolver->GetEnumeratedCuts(n, allCuts.data());
++            gpuSolver->GetCandidateMasks(n, candidateMasks.data());
++
++            std::fill(bestOut, bestOut + n + 1, -1);
++            std::fill(bestCutSlot, bestCutSlot + n + 1, -1);
++            std::fill(bestCut, bestCut + n + 1, Cut{});
++            for (const RewriteReplayChoice & choice : rewriteAuditOptions.replayChoices) {
++                if (choice.internalRoot <= numInputs || choice.internalRoot > n ||
++                    choice.cutSlot < 0 || choice.cutSlot >= CUT_SET_SIZE ||
++                    choice.subgraphIndex < 0 || choice.subgraphIndex >= MAX_REWRITE_SUBGR) {
++                    throw std::runtime_error("Gate 3E replay choice is outside the reordered graph");
++                }
++                const Cut & candidateCut = allCuts[ID(choice.internalRoot, choice.cutSlot)];
++                const size_t maskIndex =
++                    (static_cast<size_t>(ID(choice.internalRoot, choice.cutSlot)) * MAX_REWRITE_SUBGR)
++                    + choice.subgraphIndex;
++                if (!candidateCut.used || candidateCut.nLeaves < 3 || !candidateMasks[maskIndex]) {
++                    throw std::runtime_error("Gate 3E replay choice is not an executable GPU candidate");
++                }
++                if (bestCut[choice.internalRoot].used) {
++                    throw std::runtime_error("Gate 3E replay contains duplicate roots");
++                }
++                bestCut[choice.internalRoot] = candidateCut;
++                bestCut[choice.internalRoot].used = 1;
++                bestOut[choice.internalRoot] = choice.subgraphIndex;
++                bestCutSlot[choice.internalRoot] = choice.cutSlot;
++            }
++            gpuSolver->CopySelectedChoices(n, bestOut, bestCut);
++        }
+         int nn = n;
+         int *replace = (int*)malloc((n + 1) * sizeof(int));
+         n = gpuSolver->ReplaceSubgraphs(n, fanin0, fanin1, phase, replace);
+@@ -848,28 +1128,152 @@ void CPUSolver::Rewrite(bool fUseZeros, bool GPUReplace) {
+ 
+         int replacedCount = 0, compromisedCount = 0, revertedCount = 0, preEvalRejectCount = 0, smallCutRejectCount = 0, newIdxRejectCount = 0;
+         int replacedPosCount = 0, replacedZeroCount = 0;
+-        for (int i = numInputs + 1; i <= nn; i++) {
++        std::vector<RewriteAuditRecord> auditRecords;
++        std::vector<int> firstDeletedByInternalRoot;
++        std::vector<int> firstDeletedByExecutionOrder;
++        if (rewriteAuditOptions.enabled) {
++            auditRecords.reserve(nn - numInputs);
++            firstDeletedByInternalRoot.assign(n + 1, -1);
++            firstDeletedByExecutionOrder.assign(n + 1, -1);
++            if (rewriteAuditOptions.preselectedInternalRoots != nullptr)
++                rewriteAuditOptions.preselectedInternalRoots->clear();
++        }
++
++        std::vector<int> executionRoots;
++        if (rewriteAuditOptions.enabled && !rewriteAuditOptions.executionOrder.empty()) {
++            executionRoots = rewriteAuditOptions.executionOrder;
++            if (static_cast<int>(executionRoots.size()) != nn - numInputs)
++                throw std::runtime_error("Gate 3D execution order does not cover every original root");
++        } else {
++            executionRoots.reserve(nn - numInputs);
++            for (int i = numInputs + 1; i <= nn; ++i)
++                executionRoots.push_back(i);
++        }
++
++        auto appendAuditRecord = [&](RewriteAuditRecord && record) {
++            if (rewriteAuditOptions.enabled)
++                auditRecords.push_back(std::move(record));
++        };
++
++        for (int executionOrder = 0; executionOrder < static_cast<int>(executionRoots.size()); ++executionOrder) {
++            int i = executionRoots[executionOrder];
+             auto& cut = bestCut[i];
+             int newIdx = id(replace[i]); // get the corresponding new choice node id
++            RewriteAuditRecord auditRecord;
++            if (rewriteAuditOptions.enabled) {
++                auditRecord.internalRoot = i;
++                auditRecord.root = rewriteAuditOriginalId(rewriteAuditOptions, i);
++                auditRecord.regionId = rewriteAuditRegionId(rewriteAuditOptions, auditRecord.root);
++                auditRecord.executionOrder = executionOrder;
++                auditRecord.cutSlot = bestCutSlot[i];
++                auditRecord.preselected = cut.used != 0;
++                auditRecord.selectedSubgraph = cut.used ? bestOut[i] : -1;
++                auditRecord.replacementLiteral = replace[i];
++                auditRecord.replacementNodeInternal = newIdx;
++                auditRecord.replacementNodeOriginal = rewriteAuditOriginalId(rewriteAuditOptions, newIdx);
++                if (cut.used) {
++                    int reportedLeafCount = cut.nLeaves;
++                    auditRecord.cutLeavesInternal.assign(cut.leaves, cut.leaves + reportedLeafCount);
++                    for (int leaf : auditRecord.cutLeavesInternal)
++                        auditRecord.cutLeaves.push_back(rewriteAuditOriginalId(rewriteAuditOptions, leaf));
++                    if (rewriteAuditOptions.preselectedInternalRoots != nullptr)
++                        rewriteAuditOptions.preselectedInternalRoots->push_back(i);
++                }
++            }
+             // if (cut.used == 0 || cut.nLeaves < 3 || newIdx == -1) {preEvalRejectCount++; continue;}
+-            if (cut.used == 0) {preEvalRejectCount++; continue;}
+-            if (cut.nLeaves < 3) {smallCutRejectCount++; continue;}
+-            if (newIdx == -1) {newIdxRejectCount++; continue;}
++            if (cut.used == 0) {
++                preEvalRejectCount++;
++                auditRecord.status = "PRE_EVAL_REJECT";
++                auditRecord.statusReason = "selected_cut_used_is_false";
++                appendAuditRecord(std::move(auditRecord));
++                continue;
++            }
++            if (cut.nLeaves < 3) {
++                smallCutRejectCount++;
++                auditRecord.status = "SMALL_CUT_REJECT";
++                auditRecord.statusReason = "selected_cut_has_fewer_than_three_leaves";
++                appendAuditRecord(std::move(auditRecord));
++                continue;
++            }
++            if (newIdx == -1) {
++                newIdxRejectCount++;
++                auditRecord.status = replace[i] == -1 ? "FULL_CORRESPONDENCE" : "NEW_IDX_REJECT";
++                auditRecord.statusReason = replace[i] == -1
++                    ? "replacement_root_has_full_correspondence_in_original_graph"
++                    : "replacement_node_id_is_minus_one";
++                appendAuditRecord(std::move(auditRecord));
++                continue;
++            }
+ 
+-            if (newIdx == i || id(fanin1[newIdx]) == i) continue;
++            if (newIdx == i || id(fanin1[newIdx]) == i) {
++                auditRecord.status = "NO_OP";
++                auditRecord.statusReason = "replacement_is_root_or_replacement_fanin_contains_root";
++                appendAuditRecord(std::move(auditRecord));
++                continue;
++            }
+             if (cut.nLeaves == 3) cut.leaves[cut.nLeaves++] = 0;
++
++            if (rewriteAuditOptions.enabled) {
++                std::vector<int> mffcLeaves(cut.leaves, cut.leaves + cut.nLeaves);
++                RewriteAuditMFFCResult mffc = rewriteAuditCollectMFFC(
++                    i, numInputs, n, fanin0, fanin1, ref, mffcLeaves
++                );
++                auditRecord.removableNodesBeforeInternal = mffc.nodes;
++                for (int node : mffc.nodes) {
++                    int originalNode = rewriteAuditOriginalId(rewriteAuditOptions, node);
++                    if (originalNode >= 0)
++                        auditRecord.removableNodesBefore.push_back(originalNode);
++                    else
++                        auditRecord.removableNodesBeforeGeneratedInternal.push_back(node);
++                }
++                for (int leaf : auditRecord.cutLeavesInternal) {
++                    RewriteAuditLeafStatus leafStatus;
++                    leafStatus.leafInternal = leaf;
++                    leafStatus.leafOriginal = rewriteAuditOriginalId(rewriteAuditOptions, leaf);
++                    leafStatus.deleted = isDeleted[leaf] != 0;
++                    if (leaf >= 0 && leaf < static_cast<int>(firstDeletedByInternalRoot.size())) {
++                        leafStatus.firstDeletedByInternalRoot = firstDeletedByInternalRoot[leaf];
++                        leafStatus.firstDeletedByOriginalRoot = rewriteAuditOriginalId(
++                            rewriteAuditOptions, firstDeletedByInternalRoot[leaf]
++                        );
++                        leafStatus.firstDeletedByExecutionOrder = firstDeletedByExecutionOrder[leaf];
++                    }
++                    auditRecord.cutLeafStatusBefore.push_back(leafStatus);
++                    if (leafStatus.deleted) {
++                        auditRecord.damagedCutLeaves.push_back(leafStatus.leafOriginal);
++                        auditRecord.damagedByPriorRoot.push_back(leafStatus.firstDeletedByOriginalRoot);
++                        auditRecord.damagedByPriorExecutionOrder.push_back(
++                            leafStatus.firstDeletedByExecutionOrder
++                        );
++                    }
++                }
++            }
+             bool compromised = false;  // if cut is damaged, do not perform replacement
+             for (int j = 0; j < cut.nLeaves; j++) {
+                 if (isDeleted[cut.leaves[j]]) {
+                     compromised = true;
+                 }
+             }
+-            if (compromised) {compromisedCount++; continue;}
++            if (compromised) {
++                compromisedCount++;
++                auditRecord.status = "COMPROMISED";
++                auditRecord.statusReason = "one_or_more_cut_leaves_are_deleted_before_install";
++                appendAuditRecord(std::move(auditRecord));
++                continue;
++            }
+ 
++            std::vector<unsigned char> deletedBeforeExecution;
++            if (rewriteAuditOptions.enabled)
++                deletedBeforeExecution.assign(isDeleted, isDeleted + n + 1);
+             int added = install(newIdx);
+             ref[newIdx]++;
+             int saved = FastDelete(i);
+             ref[newIdx]--;
++            if (rewriteAuditOptions.enabled) {
++                auditRecord.saved = saved;
++                auditRecord.added = added;
++                auditRecord.savedAddedEvaluated = true;
++            }
+             if (saved - added > 0 || (saved == added && fUseZeros)) {
+                 replacedCount++;
+                 if (saved - added > 0)
+@@ -883,20 +1287,43 @@ void CPUSolver::Rewrite(bool fUseZeros, bool GPUReplace) {
+                 fanin1[i] = replace[i];
+                 ref[0]++;
+                 ref[newIdx]++;
++                if (rewriteAuditOptions.enabled) {
++                    auditRecord.status = "ACCEPTED";
++                    for (int node = 0; node <= n; ++node) {
++                        if (!deletedBeforeExecution[node] && isDeleted[node] && node != i) {
++                            auditRecord.deletedNodesInternal.push_back(node);
++                            int originalNode = rewriteAuditOriginalId(rewriteAuditOptions, node);
++                            if (originalNode >= 0)
++                                auditRecord.deletedNodes.push_back(originalNode);
++                            if (node < static_cast<int>(firstDeletedByInternalRoot.size()) &&
++                                firstDeletedByInternalRoot[node] == -1) {
++                                firstDeletedByInternalRoot[node] = i;
++                                firstDeletedByExecutionOrder[node] = executionOrder;
++                            }
++                        }
++                    }
++                    appendAuditRecord(std::move(auditRecord));
++                }
+             } else {
+                 revertedCount++;
+                 install(i); // revert
+                 ref[i]++;
+                 if(ref[newIdx] == 0) FastDelete(newIdx);
+                 ref[i]--;
++                auditRecord.status = "REVERTED";
++                auditRecord.statusReason = "saved_minus_added_not_positive_and_zero_gain_disabled_or_rejected";
++                appendAuditRecord(std::move(auditRecord));
+             }
+         }
++        if (rewriteAuditOptions.enabled)
++            rewriteAuditWriteTrace(rewriteAuditOptions, auditRecords);
+         free(replace);
+         CHOICE_TIME += clock() - choiceStartTime;
+         printf("successfully replaced %d cones (pos %d, zero %d), reverted %d cones, compromised %d cones, pre-eval rejected %d cones, small cut reject %d cones, new idx reject %d cones\n", 
+                replacedCount, replacedPosCount, replacedZeroCount, revertedCount, compromisedCount, preEvalRejectCount, smallCutRejectCount, newIdxRejectCount);
+     } else {
+         gpuSolver->GetResults(n, bestOut, bestCut);
++        gpuSolver->GetSelectedCutSlots(n, bestCutSlot);
+         BuildTable();
+         prt << "Finished building table" << endl;
+         int nn = n;
+@@ -977,13 +1404,14 @@ int currWaveIndices(int n, int * vBuffer, const std::vector<int> & levelCount, i
+     return maxLevel;
+ }
+ 
+-__global__ void EvaluateNodeWave(int sz, int *bestout, int *fanin0, int *fanin1, int *isC0, int *isC1, int *nodeLevels, Cut *cuts, Cut* selectedCuts, int *nRef, 
++__global__ void EvaluateNodeWave(int sz, int *bestout, int *selectedCutSlots, int *fanin0, int *fanin1, int *isC0, int *isC1, int *nodeLevels, Cut *cuts, Cut* selectedCuts, int *nRef,
+                                  Library * lib, TableNode* hashTable, const int * vWaveMask, int fUseZeros) {
+     if(blockIdx.x * blockDim.x + threadIdx.x >= sz) return;
+     int id = 1 + blockIdx.x * blockDim.x + threadIdx.x;
+     if (!vWaveMask[id]) {
+         // node not in this wave
+         selectedCuts[id].used = 0;
++        selectedCutSlots[id] = -1;
+         return;
+     }
+ 
+@@ -1051,8 +1479,12 @@ __global__ void EvaluateNodeWave(int sz, int *bestout, int *fanin0, int *fanin1,
+         selectedCuts[id] = cuts[ID(id, bestCut)];
+         selectedCuts[id].used = 1;
+         bestout[id] = bestOut;
++        selectedCutSlots[id] = bestCut;
+     } else
++    {
+         selectedCuts[id].used = 0;
++        selectedCutSlots[id] = -1;
++    }
+ }
+ 
+ int GPUSolver::EnumerateAndPreEvaluateWave(int currIter, int *level, const std::vector<int> &levelCount, 
+@@ -1087,7 +1519,7 @@ int GPUSolver::EnumerateAndPreEvaluateWave(int currIter, int *level, const std::
+     
+     startTime = clock();
+     BuildHashTable<<<BLOCK_NUMBER(n, LARGE_BLOCK_SIZE), LARGE_BLOCK_SIZE>>>(hashTable, n, fanin0, fanin1, isComplement0, isComplement1);
+-    EvaluateNodeWave<<<BLOCK_NUMBER(n, 768), 768>>>(n, bestSubgraph, fanin0, fanin1, isComplement0, isComplement1, 
++        EvaluateNodeWave<<<BLOCK_NUMBER(n, 768), 768>>>(n, bestSubgraph, selectedCutSlots, fanin0, fanin1, isComplement0, isComplement1,
+                                                     nodeLevels, cuts, selectedCuts, nRef, lib, hashTable, vWaveMask, fUseZeros == true);
+     gpuErrchk( cudaDeviceSynchronize() );
+     std::cerr << "Error code " << cudaGetLastError() << " in EvaluateNode " << std::endl;
+@@ -1278,6 +1710,38 @@ void CPUSolver::Reorder() {
+     Init();
+ }
+ 
++void CPUSolver::WriteAig(const char * path) const {
++    if (path == nullptr)
++        throw std::runtime_error("Gate 3E output AIG path is null");
++    std::ofstream file(path, std::ios::binary);
++    if (!file)
++        throw std::runtime_error(std::string("cannot open replay AIG: ") + path);
++
++    file << "aig " << n << ' ' << numInputs << " 0 " << numOutputs << ' '
++         << (n - numInputs) << '\n';
++    for (int i = 0; i < numOutputs; ++i)
++        file << invertConstTrueFalse(static_cast<unsigned>(output[i])) << '\n';
++
++    auto writeVarint = [&](unsigned value) {
++        while (value >= 0x80U) {
++            file.put(static_cast<char>((value & 0x7FU) | 0x80U));
++            value >>= 7;
++        }
++        file.put(static_cast<char>(value));
++    };
++    for (int node = numInputs + 1; node <= n; ++node) {
++        unsigned lhs = static_cast<unsigned>(2 * node);
++        unsigned lit0 = invertConstTrueFalse(static_cast<unsigned>(fanin0[node]));
++        unsigned lit1 = invertConstTrueFalse(static_cast<unsigned>(fanin1[node]));
++        if (lit0 > lit1)
++            std::swap(lit0, lit1);
++        if (lhs < lit1 || lit1 < lit0)
++            throw std::runtime_error("invalid topological literal while writing replay AIG");
++        writeVarint(lhs - lit1);
++        writeVarint(lit1 - lit0);
++    }
++}
++
+ void CPUSolver::ReadLibrary() {
+     int cur = 0;		
+     for(int i = 0; i < (1 << 16); i++)
+@@ -1350,4 +1814,635 @@ void CPUSolver::EvalAndReplace(int id, Cut &cut) {
+     }
+ }
+ 
++namespace {
++
++struct Gate3CRefState {
++    std::vector<int> tableId;
++    std::vector<int> tableNum;
++};
++
++std::string gate3cJsonEscape(const char * value) {
++    if (value == nullptr)
++        return "";
++    std::string result;
++    for (const char * p = value; *p != '\0'; ++p) {
++        switch (*p) {
++        case '\\': result += "\\\\"; break;
++        case '"': result += "\\\""; break;
++        case '\n': result += "\\n"; break;
++        case '\r': result += "\\r"; break;
++        case '\t': result += "\\t"; break;
++        default: result += *p; break;
++        }
++    }
++    return result;
++}
+ 
++void gate3cWriteIntArray(std::ostream & out, const std::vector<int> & values) {
++    out << '[';
++    for (size_t i = 0; i < values.size(); ++i) {
++        if (i != 0)
++            out << ',';
++        out << values[i];
++    }
++    out << ']';
++}
++
++int gate3cDecrease(int literal, const std::vector<int> & cutLeaves,
++                  const std::vector<int> & refs, Gate3CRefState & state) {
++    int nodeId = id(literal);
++    for (int leaf : cutLeaves)
++        if (nodeId == leaf)
++            return 1;
++    for (size_t i = 0; i < state.tableId.size(); ++i)
++        if (state.tableId[i] == nodeId)
++            return --state.tableNum[i];
++    if (state.tableId.size() == TABLE_SIZE)
++        return 1;
++    state.tableId.push_back(nodeId);
++    state.tableNum.push_back(refs[nodeId] - 1);
++    return refs[nodeId] - 1;
++}
++
++int gate3cCalcMFFC(int cur, const std::vector<int> & cutLeaves,
++                   const std::vector<int> & fanin0, const std::vector<int> & fanin1,
++                   const std::vector<int> & refs, int nPIs,
++                   Gate3CRefState & state, std::vector<int> & removable) {
++    if (cur <= nPIs)
++        throw std::runtime_error("GPU rewrite CalcMFFC attempted to recurse into a PI/constant");
++    removable.push_back(cur);
++    int saved = 1;
++    if (gate3cDecrease(fanin0[cur], cutLeaves, refs, state) == 0)
++        saved += gate3cCalcMFFC(id(fanin0[cur]), cutLeaves, fanin0, fanin1,
++                                refs, nPIs, state, removable);
++    if (gate3cDecrease(fanin1[cur], cutLeaves, refs, state) == 0)
++        saved += gate3cCalcMFFC(id(fanin1[cur]), cutLeaves, fanin0, fanin1,
++                                refs, nPIs, state, removable);
++    return saved;
++}
++
++void gate3cLoadLibrary(rw::Library & lib) {
++    int cur = 0;
++    for (int i = 0; i < (1 << 16); ++i)
++        lib.pPhases[i] = LIBRARY[cur++];
++    for (int i = 0; i < (1 << 16); ++i)
++        lib.pPerms[i] = LIBRARY[cur++];
++    for (int i = 0; i < 2 * 3 * 4; ++i)
++        for (int j = 0; j < 4; ++j)
++            lib.pPerms4[i][j] = LIBRARY[cur++];
++    for (int i = 0; i < (1 << 16); ++i)
++        lib.pMap[i] = LIBRARY[cur++];
++    for (int i = 0; i < 222; ++i)
++        lib.nNodes[i] = LIBRARY[cur++];
++    for (int i = 0; i < 222; ++i)
++        lib.nSubgr[i] = LIBRARY[cur++];
++    for (int Class = 0; Class < 222; ++Class) {
++        for (int i = 0; i < lib.nNodes[Class]; ++i) {
++            lib.fanin0[Class][i] = LIBRARY[cur++];
++            lib.fanin1[Class][i] = LIBRARY[cur++];
++            lib.isC0[Class][i] = LIBRARY[cur++];
++            lib.isC1[Class][i] = LIBRARY[cur++];
++        }
++        for (int j = 0; j < lib.nSubgr[Class]; ++j)
++            lib.pSubgr[Class][j] = LIBRARY[cur++];
++    }
++}
++
++struct Gate3CReorderedGraph {
++    std::vector<int> fanin0;
++    std::vector<int> fanin1;
++    std::vector<int> refs;
++    std::vector<int> levels;
++    std::vector<int> oldToNew;
++    std::vector<int> newToOld;
++    std::vector<int> levelCount;
++};
++
++Gate3CReorderedGraph gate3cReorderGraph(
++    int n, int nPIs, int nPOs, const int * pFanin0, const int * pFanin1,
++    const int * pOuts) {
++    Gate3CReorderedGraph graph;
++    std::vector<int> oldFanin0(n + 1, 0), oldFanin1(n + 1, 0);
++    std::vector<int> oldLevels(n + 1, 0);
++
++    // CPUSolver::Reset normalizes literals before its Reorder() call.  Keep
++    // the same literal convention, but make the level-grouping permutation
++    // explicit so the Gate 3C read-only path is deterministic on an AIG whose
++    // original IDs are topological but not level-contiguous.
++    for (int oldNode = nPIs + 1; oldNode <= n; ++oldNode) {
++        oldFanin0[oldNode] = invertConstTrueFalse(pFanin0[oldNode]);
++        oldFanin1[oldNode] = invertConstTrueFalse(pFanin1[oldNode]);
++        if (oldFanin0[oldNode] > oldFanin1[oldNode])
++            std::swap(oldFanin0[oldNode], oldFanin1[oldNode]);
++        if (id(oldFanin0[oldNode]) >= oldNode || id(oldFanin1[oldNode]) >= oldNode)
++            throw std::runtime_error("input AIG is not topologically ordered");
++        oldLevels[oldNode] = 1 + std::max(
++            oldLevels[id(oldFanin0[oldNode])], oldLevels[id(oldFanin1[oldNode])]
++        );
++    }
++
++    int maxLevel = 0;
++    for (int oldNode = 1; oldNode <= n; ++oldNode)
++        maxLevel = std::max(maxLevel, oldLevels[oldNode]);
++
++    graph.oldToNew.assign(n + 1, -1);
++    graph.newToOld.assign(n + 1, -1);
++    graph.oldToNew[0] = 0;
++    graph.newToOld[0] = 0;
++    int nextId = 1;
++    for (int level = 0; level <= maxLevel; ++level) {
++        // Ascending old IDs reproduce CPUSolver::Reorder's stable level order.
++        for (int oldNode = 1; oldNode <= n; ++oldNode) {
++            if (oldLevels[oldNode] != level)
++                continue;
++            graph.oldToNew[oldNode] = nextId;
++            graph.newToOld[nextId] = oldNode;
++            ++nextId;
++        }
++    }
++    if (nextId != n + 1)
++        throw std::runtime_error("failed to construct a complete rewrite reorder map");
++
++    graph.fanin0.assign(n + 1, 0);
++    graph.fanin1.assign(n + 1, 0);
++    graph.refs.assign(n + 1, 0);
++    graph.levels.assign(n + 1, 0);
++    for (int newNode = 1; newNode <= n; ++newNode)
++        graph.levels[newNode] = oldLevels[graph.newToOld[newNode]];
++    for (int oldNode = nPIs + 1; oldNode <= n; ++oldNode) {
++        int newNode = graph.oldToNew[oldNode];
++        graph.fanin0[newNode] = dUtils::AigNodeLitCond(
++            graph.oldToNew[id(oldFanin0[oldNode])], isC(oldFanin0[oldNode])
++        );
++        graph.fanin1[newNode] = dUtils::AigNodeLitCond(
++            graph.oldToNew[id(oldFanin1[oldNode])], isC(oldFanin1[oldNode])
++        );
++        // Reorder() ends with Init(), and Init() canonicalizes each AND's
++        // literal order before the GPU hash table is built.
++        if (graph.fanin0[newNode] > graph.fanin1[newNode])
++            std::swap(graph.fanin0[newNode], graph.fanin1[newNode]);
++        ++graph.refs[id(graph.fanin0[newNode])];
++        ++graph.refs[id(graph.fanin1[newNode])];
++    }
++    for (int po = 0; po < nPOs; ++po) {
++        int output = invertConstTrueFalse(pOuts[po]);
++        ++graph.refs[graph.oldToNew[id(output)]];
++    }
++
++    graph.levelCount.assign(maxLevel + 1, 0);
++    for (int newNode = 1; newNode <= n; ++newNode)
++        ++graph.levelCount[graph.levels[newNode]];
++    for (int level = 1; level <= maxLevel; ++level)
++        graph.levelCount[level] += graph.levelCount[level - 1];
++    return graph;
++}
++
++} // namespace
++
++int gate3cRewriteDecisionDump(const char * outputDir, const char * inputPath,
++                              int nObjs, int nPIs, int nPOs, int nNodes,
++                              const int * pFanin0, const int * pFanin1,
++                              const int * pOuts, const int * pNumFanouts) {
++    if (outputDir == nullptr || inputPath == nullptr ||
++        pFanin0 == nullptr || pFanin1 == nullptr || pOuts == nullptr ||
++        pNumFanouts == nullptr || nObjs != nNodes + nPIs + 1) {
++        fprintf(stderr, "gate3c: invalid audit arguments\n");
++        return 1;
++    }
++
++    try {
++        std::filesystem::create_directories(outputDir);
++
++        const int n = nObjs - 1;
++        Gate3CReorderedGraph graph = gate3cReorderGraph(
++            n, nPIs, nPOs, pFanin0, pFanin1, pOuts
++        );
++        std::vector<int> & fanin0 = graph.fanin0;
++        std::vector<int> & fanin1 = graph.fanin1;
++        std::vector<int> & refs = graph.refs;
++        std::vector<int> & levels = graph.levels;
++        std::vector<int> & levelCount = graph.levelCount;
++
++        rw::Library lib{};
++        gate3cLoadLibrary(lib);
++        rw::GPUSolver gpuSolver(n);
++        gpuSolver.CopyLib(lib);
++        gpuSolver.EnumerateAndPreEvaluate(
++            levels.data(), levelCount, n, fanin0.data(), fanin1.data(),
++            refs.data(), false
++        );
++
++        std::vector<rw::Cut> cuts(static_cast<size_t>(n + 1) * CUT_SET_SIZE);
++        gpuSolver.GetEnumeratedCuts(n, cuts.data());
++        std::vector<unsigned char> candidateMasks(
++            static_cast<size_t>(n + 1) * CUT_SET_SIZE * MAX_REWRITE_SUBGR
++        );
++        gpuSolver.GetCandidateMasks(n, candidateMasks.data());
++
++        std::ofstream rawOut(std::filesystem::path(outputDir) / "gpu_rewrite_cuts.jsonl");
++        if (!rawOut)
++            throw std::runtime_error("cannot open gpu_rewrite_cuts.jsonl");
++
++        int eligibleCutCount = 0;
++        int decisionCount = 0;
++        int candidateCount = 0;
++        for (int gpuRoot = nPIs + 1; gpuRoot <= n; ++gpuRoot) {
++            for (int cutSlot = 0; cutSlot < CUT_SET_SIZE; ++cutSlot) {
++                const rw::Cut & storedCut = cuts[static_cast<size_t>(gpuRoot) * CUT_SET_SIZE + cutSlot];
++                if (!storedCut.used || storedCut.nLeaves < 3)
++                    continue;
++                ++eligibleCutCount;
++
++                rw::Cut cut = storedCut;
++                int reportedLeafCount = cut.nLeaves;
++                if (cut.nLeaves == 3)
++                    cut.leaves[cut.nLeaves++] = 0;
++
++                Gate3CRefState mffcState;
++                std::vector<int> removable;
++                int saved = gate3cCalcMFFC(
++                    gpuRoot, std::vector<int>(cut.leaves, cut.leaves + cut.nLeaves),
++                    fanin0, fanin1, refs, nPIs, mffcState, removable
++                );
++                std::sort(removable.begin(), removable.end());
++                removable.erase(std::unique(removable.begin(), removable.end()), removable.end());
++
++                int truth = cut.truthtable & 0xFFFF;
++                int Class = lib.pMap[truth];
++                std::vector<int> candidates;
++                for (int subgraphIndex = 0; subgraphIndex < lib.nSubgr[Class]; ++subgraphIndex) {
++                    if (candidateMasks[(static_cast<size_t>(ID(gpuRoot, cutSlot)) *
++                                        MAX_REWRITE_SUBGR) + subgraphIndex])
++                        candidates.push_back(subgraphIndex);
++                }
++                candidateCount += static_cast<int>(candidates.size());
++                if (!candidates.empty())
++                    ++decisionCount;
++
++                std::vector<int> cutLeaves(cut.leaves, cut.leaves + reportedLeafCount);
++                std::vector<int> originalCutLeaves;
++                originalCutLeaves.reserve(cutLeaves.size());
++                for (int leaf : cutLeaves)
++                    originalCutLeaves.push_back(graph.newToOld[leaf]);
++                std::vector<int> originalRemovable;
++                originalRemovable.reserve(removable.size());
++                for (int node : removable)
++                    originalRemovable.push_back(graph.newToOld[node]);
++                std::sort(originalRemovable.begin(), originalRemovable.end());
++
++                int originalRoot = graph.newToOld[gpuRoot];
++                rawOut << "{\"root\":" << originalRoot
++                       << ",\"cut_slot\":" << cutSlot
++                       << ",\"cut_leaves\":";
++                gate3cWriteIntArray(rawOut, originalCutLeaves);
++                rawOut << ",\"truth\":" << truth
++                       << ",\"truth_class\":" << Class
++                       << ",\"candidate_count\":" << candidates.size()
++                       << ",\"candidate_subgraph_indices\":";
++                gate3cWriteIntArray(rawOut, candidates);
++                rawOut << ",\"removable_nodes\":";
++                gate3cWriteIntArray(rawOut, originalRemovable);
++                rawOut << ",\"removable_node_count\":" << originalRemovable.size()
++                       << ",\"saved_count\":" << saved
++                       << ",\"gpu_rewrite_node_id\":" << gpuRoot
++                       << "}\n";
++            }
++        }
++
++        std::ofstream manifest(std::filesystem::path(outputDir) / "gate3c_raw_manifest.json");
++        if (!manifest)
++            throw std::runtime_error("cannot open gate3c_raw_manifest.json");
++        manifest << "{\"gate\":\"Gate 3C\","
++                 << "\"input_path\":\"" << gate3cJsonEscape(inputPath) << "\","
++                 << "\"n_objs\":" << nObjs
++                 << ",\"n_pis\":" << nPIs
++                 << ",\"n_pos\":" << nPOs
++                 << ",\"n_nodes\":" << nNodes
++                 << ",\"id_space\":\"original_aig_node_ids\""
++                 << ",\"gpu_reorder\":\"stable_level_grouping_like_CPUSolver_Reorder\""
++                 << ",\"cut_set_size\":" << CUT_SET_SIZE
++                 << ",\"use_zeros\":false"
++                 << ",\"eligible_cut_count\":" << eligibleCutCount
++                 << ",\"executable_decision_count\":" << decisionCount
++                 << ",\"candidate_count\":" << candidateCount
++                 << ",\"candidate_rule\":\"saved_minus_nodes_added_gt_zero\""
++                 << ",\"used_gpu_cut_enumeration\":true"
++                 << ",\"used_gpu_candidate_mask_export\":true"
++                 << ",\"used_gpu_rewrite_candidate_semantics\":true"
++                 << ",\"replacement_executed\":false"
++                 << ",\"litecut_executed\":false"
++                 << ",\"gradient_executed\":false}\n";
++
++        printf("gate3c: dumped %d eligible cuts, %d executable decisions, %d candidates to %s\n",
++               eligibleCutCount, decisionCount, candidateCount, outputDir);
++        return 0;
++    } catch (const std::exception & e) {
++        fprintf(stderr, "gate3c: %s\n", e.what());
++        return 1;
++    }
++}
++
++namespace {
++
++bool gate3dReadRegionMap(const char * path, std::vector<int> & originalToRegion) {
++    std::ifstream in(path);
++    if (!in)
++        return false;
++    std::string line;
++    while (std::getline(in, line)) {
++        if (line.empty() || line.rfind("node_id,", 0) == 0)
++            continue;
++        std::stringstream fields(line);
++        std::string nodeText, regionText;
++        if (!std::getline(fields, nodeText, ',') || !std::getline(fields, regionText, ','))
++            continue;
++        int node = std::stoi(nodeText);
++        int region = std::stoi(regionText);
++        if (node >= 0 && node < static_cast<int>(originalToRegion.size()))
++            originalToRegion[node] = region;
++    }
++    return true;
++}
++
++void gate3dRunOnce(const char * outputTrace,
++                   int nObjs, int nPIs, int nPOs,
++                   const int * pFanin0, const int * pFanin1,
++                   const int * pOuts,
++                   const std::vector<int> & internalToOriginal,
++                   const std::vector<int> & originalToRegion,
++                   const std::vector<int> & executionOrder,
++                   std::vector<int> & preselectedRoots) {
++    rw::RewriteAuditOptions options;
++    options.enabled = true;
++    options.tracePath = outputTrace;
++    options.internalToOriginal = internalToOriginal;
++    options.originalToRegion = originalToRegion;
++    options.executionOrder = executionOrder;
++    options.preselectedInternalRoots = &preselectedRoots;
++
++    rw::CPUSolver solver;
++    solver.ConfigureRewriteAudit(options);
++    solver.Reset(nPIs, nPOs, nObjs - 1, pFanin0, pFanin1, pOuts);
++    solver.Rewrite(false, true);
++}
++
++} // namespace
++
++int gate3dRewriteExecutionAudit(const char * outputDir, const char * inputPath,
++                                const char * regionMapPath,
++                                int nObjs, int nPIs, int nPOs, int nNodes,
++                                const int * pFanin0, const int * pFanin1,
++                                const int * pOuts, const int * pNumFanouts) {
++    (void)pNumFanouts;
++    if (outputDir == nullptr || inputPath == nullptr || regionMapPath == nullptr ||
++        pFanin0 == nullptr || pFanin1 == nullptr || pOuts == nullptr ||
++        nObjs != nNodes + nPIs + 1) {
++        fprintf(stderr, "gate3d: invalid audit arguments\n");
++        return 1;
++    }
++
++    try {
++        std::filesystem::path root(outputDir);
++        std::filesystem::path orderRoot = root / "order_sensitivity";
++        std::filesystem::create_directories(orderRoot);
++
++        const int n = nObjs - 1;
++        Gate3CReorderedGraph graph = gate3cReorderGraph(
++            n, nPIs, nPOs, pFanin0, pFanin1, pOuts
++        );
++        std::vector<int> originalToRegion(nObjs, -1);
++        if (!gate3dReadRegionMap(regionMapPath, originalToRegion))
++            throw std::runtime_error("cannot read Gate 3A region map: " + std::string(regionMapPath));
++
++        std::vector<int> primaryRoots;
++        gate3dRunOnce(
++            (root / "decision_execution_trace.jsonl").c_str(),
++            nObjs, nPIs, nPOs, pFanin0, pFanin1, pOuts,
++            graph.newToOld, originalToRegion, {}, primaryRoots
++        );
++
++        std::map<int, std::vector<int>> rootsByRegion;
++        for (int internalRoot : primaryRoots) {
++            int originalRoot = rewriteAuditOriginalId(
++                rw::RewriteAuditOptions{false, "", graph.newToOld, originalToRegion, {}, nullptr},
++                internalRoot
++            );
++            int region = originalRoot >= 0 && originalRoot < nObjs
++                ? originalToRegion[originalRoot] : -1;
++            if (region >= 0)
++                rootsByRegion[region].push_back(internalRoot);
++        }
++
++        std::vector<int> selectedRegions;
++        for (const auto & entry : rootsByRegion)
++            if (entry.second.size() >= 2)
++                selectedRegions.push_back(entry.first);
++        std::sort(selectedRegions.begin(), selectedRegions.end(), [&](int left, int right) {
++            if (rootsByRegion[left].size() != rootsByRegion[right].size())
++                return rootsByRegion[left].size() > rootsByRegion[right].size();
++            return left < right;
++        });
++        if (selectedRegions.size() > 3)
++            selectedRegions.resize(3);
++
++        std::ofstream manifest(root / "gate3d_raw_manifest.json");
++        if (!manifest)
++            throw std::runtime_error("cannot open gate3d_raw_manifest.json");
++        manifest << "{\"gate\":\"Gate 3D\",\"input_path\":\""
++                 << gate3cJsonEscape(inputPath) << "\",\"region_map\":\""
++                 << gate3cJsonEscape(regionMapPath) << "\",\"n_objs\":" << nObjs
++                 << ",\"n_pis\":" << nPIs << ",\"n_pos\":" << nPOs
++                 << ",\"n_nodes\":" << nNodes << ",\"primary_order\":\"ascending_internal_root\""
++                 << ",\"selected_order_sensitivity_regions\":[";
++        for (size_t i = 0; i < selectedRegions.size(); ++i) {
++            if (i != 0)
++                manifest << ',';
++            manifest << selectedRegions[i];
++        }
++        manifest << "]}\n";
++
++        for (int region : selectedRegions) {
++            std::vector<int> order;
++            order.reserve(n - nPIs);
++            std::vector<int> regionRoots = rootsByRegion[region];
++            std::reverse(regionRoots.begin(), regionRoots.end());
++            bool inserted = false;
++            for (int internalRoot = nPIs + 1; internalRoot <= n; ++internalRoot) {
++                bool isRegionRoot = std::find(
++                    rootsByRegion[region].begin(), rootsByRegion[region].end(), internalRoot
++                ) != rootsByRegion[region].end();
++                if (isRegionRoot) {
++                    if (!inserted) {
++                        order.insert(order.end(), regionRoots.begin(), regionRoots.end());
++                        inserted = true;
++                    }
++                    continue;
++                }
++                order.push_back(internalRoot);
++            }
++            if (!inserted)
++                throw std::runtime_error("failed to construct reverse order for region");
++
++            std::ostringstream tracePath;
++            tracePath << (orderRoot / ("region_" + std::to_string(region) + "_reverse.jsonl")).string();
++            std::vector<int> replayRoots;
++            gate3dRunOnce(
++                (orderRoot / ("region_" + std::to_string(region) + "_original.jsonl")).c_str(),
++                nObjs, nPIs, nPOs, pFanin0, pFanin1, pOuts,
++                graph.newToOld, originalToRegion, {}, replayRoots
++            );
++            gate3dRunOnce(
++                tracePath.str().c_str(),
++                nObjs, nPIs, nPOs, pFanin0, pFanin1, pOuts,
++                graph.newToOld, originalToRegion, order, replayRoots
++            );
++        }
++
++        printf("gate3d: audited original GPU rewrite and %zu reverse-order region replays to %s\n",
++               selectedRegions.size(), outputDir);
++        return 0;
++    } catch (const std::exception & e) {
++        fprintf(stderr, "gate3d: %s\n", e.what());
++        return 1;
++    }
++}
++
++namespace {
++
++struct Gate3EConfig {
++    std::string id;
++    std::vector<int> roots;
++    std::vector<int> cutSlots;
++    std::vector<int> subgraphs;
++};
++
++bool gate3eReadConfigFile(const char * path, std::vector<Gate3EConfig> & configs) {
++    std::ifstream in(path);
++    if (!in)
++        return false;
++    std::string line;
++    Gate3EConfig current;
++    while (std::getline(in, line)) {
++        if (line.empty() || line[0] == '#')
++            continue;
++        std::replace(line.begin(), line.end(), '\t', ' ');
++        std::istringstream fields(line);
++        std::string configId;
++        int root = -1, cutSlot = -1, subgraph = -1;
++        if (!(fields >> configId >> root >> cutSlot >> subgraph))
++            return false;
++        if (current.id != configId) {
++            if (!current.id.empty())
++                configs.push_back(std::move(current));
++            current = Gate3EConfig{};
++            current.id = configId;
++        }
++        if (root >= 0) {
++            current.roots.push_back(root);
++            current.cutSlots.push_back(cutSlot);
++            current.subgraphs.push_back(subgraph);
++        }
++    }
++    if (!current.id.empty())
++        configs.push_back(std::move(current));
++    return !configs.empty();
++}
++
++void gate3eWriteManifestLine(std::ofstream & out, const std::string & configId,
++                             const std::filesystem::path & aigPath,
++                             const std::filesystem::path & tracePath,
++                             size_t requestedCount) {
++    const std::filesystem::path aigRelative =
++        aigPath.parent_path().filename() / aigPath.filename();
++    const std::filesystem::path traceRelative =
++        tracePath.parent_path().filename() / tracePath.filename();
++    out << "{\"config_id\":\"" << gate3cJsonEscape(configId.c_str())
++        << "\",\"requested_count\":" << requestedCount
++        << ",\"aig_path\":\"" << gate3cJsonEscape(aigRelative.c_str())
++        << "\",\"trace_path\":\"" << gate3cJsonEscape(traceRelative.c_str()) << "\"}\n";
++}
++
++} // namespace
++
++int gate3eExecutionReplay(const char * outputDir, const char * inputPath,
++                          const char * regionMapPath, const char * configPath,
++                          int nObjs, int nPIs, int nPOs, int nNodes,
++                          const int * pFanin0, const int * pFanin1,
++                          const int * pOuts, const int * pNumFanouts) {
++    (void)pNumFanouts;
++    if (outputDir == nullptr || inputPath == nullptr || regionMapPath == nullptr ||
++        configPath == nullptr || pFanin0 == nullptr || pFanin1 == nullptr ||
++        pOuts == nullptr || nObjs != nNodes + nPIs + 1) {
++        fprintf(stderr, "gate3e: invalid replay arguments\n");
++        return 1;
++    }
++
++    try {
++        std::filesystem::path root(outputDir);
++        std::filesystem::create_directories(root / "aigs");
++        std::filesystem::create_directories(root / "traces");
++
++        std::vector<Gate3EConfig> configs;
++        if (!gate3eReadConfigFile(configPath, configs))
++            throw std::runtime_error("cannot read Gate 3E configuration file");
++
++        const int n = nObjs - 1;
++        Gate3CReorderedGraph graph = gate3cReorderGraph(
++            n, nPIs, nPOs, pFanin0, pFanin1, pOuts
++        );
++        std::vector<int> originalToRegion(nObjs, -1);
++        if (!gate3dReadRegionMap(regionMapPath, originalToRegion))
++            throw std::runtime_error("cannot read Gate 3A region map: " + std::string(regionMapPath));
++
++        std::ofstream manifest(root / "replay_manifest.jsonl");
++        if (!manifest)
++            throw std::runtime_error("cannot open Gate 3E replay manifest");
++
++        for (const Gate3EConfig & config : configs) {
++            if (config.roots.size() != config.cutSlots.size() ||
++                config.roots.size() != config.subgraphs.size())
++                throw std::runtime_error("malformed Gate 3E configuration");
++
++            rw::RewriteAuditOptions options;
++            options.enabled = true;
++            options.internalToOriginal = graph.newToOld;
++            options.originalToRegion = originalToRegion;
++            std::vector<bool> selectedInternal(static_cast<size_t>(n + 1), false);
++            for (size_t i = 0; i < config.roots.size(); ++i) {
++                int originalRoot = config.roots[i];
++                if (originalRoot < 0 || originalRoot >= static_cast<int>(graph.oldToNew.size()) ||
++                    graph.oldToNew[originalRoot] < 0)
++                    throw std::runtime_error("Gate 3E configuration root is outside the input AIG");
++                int internalRoot = graph.oldToNew[originalRoot];
++                if (selectedInternal[internalRoot])
++                    throw std::runtime_error("Gate 3E configuration contains duplicate roots");
++                selectedInternal[internalRoot] = true;
++                options.replayChoices.push_back({
++                    internalRoot, config.cutSlots[i], config.subgraphs[i]
++                });
++                // The requested list is the controlled order. Unrequested roots
++                // are appended below and remain PRE_EVAL_REJECT entries.
++                options.executionOrder.push_back(internalRoot);
++            }
++            for (int internalRoot = nPIs + 1; internalRoot <= n; ++internalRoot)
++                if (!selectedInternal[internalRoot])
++                    options.executionOrder.push_back(internalRoot);
++
++            std::filesystem::path tracePath = root / "traces" / (config.id + ".jsonl");
++            std::filesystem::path aigPath = root / "aigs" / (config.id + ".aig");
++            options.tracePath = tracePath.string();
++
++            rw::CPUSolver solver;
++            solver.ConfigureRewriteAudit(options);
++            solver.Reset(nPIs, nPOs, nObjs - 1, pFanin0, pFanin1, pOuts);
++            solver.Rewrite(false, true);
++            solver.WriteAig(aigPath.c_str());
++            gate3eWriteManifestLine(manifest, config.id, aigPath, tracePath, config.roots.size());
++        }
++        printf("gate3e: replayed %zu ordered configurations to %s\n", configs.size(), outputDir);
++        return 0;
++    } catch (const std::exception & e) {
++        fprintf(stderr, "gate3e: %s\n", e.what());
++        return 1;
++    }
++}
+diff --git a/src/algorithms/rewrite.h b/src/algorithms/rewrite.h
+index 388d2dc..b31b57c 100644
+--- a/src/algorithms/rewrite.h
++++ b/src/algorithms/rewrite.h
+@@ -38,6 +38,8 @@ inline int id(int x) {
+     return x >> 1;
+ }
+ 
++const int MAX_REWRITE_SUBGR = 20;
++
+ class GPUSolver {
+ public:
+     GPUSolver() = delete;
+@@ -47,23 +49,48 @@ public:
+     void Init(int n);
+     void Free();
+     void GetResults(int n, int *CPUbestSubgraph, Cut *CPUcuts);
++    void GetSelectedCutSlots(int n, int *CPUselectedCutSlots);
+     void CopyLib(Library CPUlib);
+     void EnumerateAndPreEvaluate(int *level, const std::vector<int> &levelCount, 
+                                  int n, int *CPUfanin0, int *CPUfanin1, int *CPUref, bool fUseZeros);
+     int EnumerateAndPreEvaluateWave(int currIter, int *level, const std::vector<int> &levelCount, 
+                                     int n, int *CPUfanin0, int *CPUfanin1, int *CPUref, bool fUseZeros);
+     int ReplaceSubgraphs(int n, int *CPUfanin0, int *CPUfanin1, int *CPUphase, int *CPUreplace);
++    void GetEnumeratedCuts(int n, Cut *CPUcuts);
++    void GetCandidateMasks(int n, unsigned char *CPUcandidateMasks);
++    void CopySelectedChoices(int n, const int *CPUbestSubgraph, const Cut *CPUcuts);
+ 
+ private:
+-    int *fanin0, *fanin1, *isComplement0, *isComplement1, *nRef, *bestSubgraph;
++    int *fanin0, *fanin1, *isComplement0, *isComplement1, *nRef, *bestSubgraph, *selectedCutSlots;
+     int *phase, *replace;
+     TableNode *hashTable, *newTable;
+     Cut *cuts, *selectedCuts;
++    unsigned char *candidateMasks;
+     Library *lib;
+ 
+     size_t cudaStackSize;
+ };
+ 
++// Optional, read-only provenance configuration for one invocation of the
++// existing GPU-rewrite execution path.  The configuration does not change
++// cut selection, replacement construction, or the normal execution order;
++// executionOrder is used only by the Gate 3D controlled replay.
++struct RewriteReplayChoice {
++    int internalRoot = -1;
++    int cutSlot = -1;
++    int subgraphIndex = -1;
++};
++
++struct RewriteAuditOptions {
++    bool enabled = false;
++    std::string tracePath;
++    std::vector<int> internalToOriginal;
++    std::vector<int> originalToRegion;
++    std::vector<int> executionOrder;
++    std::vector<int> *preselectedInternalRoots = nullptr;
++    std::vector<RewriteReplayChoice> replayChoices;
++};
++
+ class CPUSolver {
+ public:
+     CPUSolver() {
+@@ -87,6 +114,7 @@ public:
+         temp0 = new int[MAX_NODE_NUM];
+         temp1 = new int[MAX_NODE_NUM];
+         bestCut = new Cut[MAX_NODE_NUM];
++        bestCutSlot = new int[MAX_NODE_NUM];
+         visMark = new int[MAX_NODE_NUM];
+     }
+ 
+@@ -103,11 +131,16 @@ public:
+         delete [] temp0;
+         delete [] temp1;
+         delete [] bestCut;
++        delete [] bestCutSlot;
+         delete [] visMark;
+     }
+ 
+     void Rewrite(bool fUseZeros = false, bool GPUReplace = true);
+     void RewriteWave(bool fUseZeros = false);
++    void ConfigureRewriteAudit(const RewriteAuditOptions & options) {
++        rewriteAuditOptions = options;
++    }
++    void WriteAig(const char * path) const;
+     void Reset(int nInputs, int nOutputs, int nTotal, // need to be called if the previous command is not rewrite
+                const int * pFanin0, const int * pFanin1, const int * pOuts); 
+     void Init(); 
+@@ -317,12 +350,15 @@ public:
+     int created[1000];
+ 
+     Cut *bestCut;
++    int *bestCutSlot;
+     robin_hood::unordered_map<unsigned long long, int> table;
+     std::string names;
+     Library lib;
+ 
++    RewriteAuditOptions rewriteAuditOptions;
++
+     GPUSolver *gpuSolver;
+ };
+ 
+ 
+-} // namespace rw
+\ No newline at end of file
++} // namespace rw
+diff --git a/src/command_manager.cpp b/src/command_manager.cpp
+index 91a79bb..4a63f79 100644
+--- a/src/command_manager.cpp
++++ b/src/command_manager.cpp
+@@ -5,6 +5,10 @@
+ #include "CLI11.hpp"
+ #include "command_manager.h"
+ #include "misc/string_utils.h"
++#include "algorithms/gate3a.h"
++#include "algorithms/gate3c.h"
++#include "algorithms/gate3d.h"
++#include "algorithms/gate3e.h"
+ 
+ using strUtil::descWithDefault;
+ 
+@@ -112,6 +116,103 @@ int refactorHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals)
+     return 0;
+ }
+ 
++int gate3aMFFCPartitionDumpHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals) {
++    std::string outputDir;
++    int cutSize = 12;
++
++    CLI::App parser("Gate 3A read-only CULS MFFC/FFC partition dump");
++    parser.add_option("-o,--output", outputDir, "directory for the audit dump")->required();
++    parser.add_option("-K", cutSize, descWithDefault("maximum cut size (<=15)", cutSize));
++
++    int ret;
++    if ((ret = parseCmd(parser, vLiterals)) < 2)
++        return ret;
++    if (aigman.nObjs == 0 || aigman.modulePath.empty()) {
++        printf("gate3a: read an AIG before running the audit.\n");
++        return 1;
++    }
++
++    // This handler calls only the discovery front half.  It intentionally
++    // does not call AIGMan::refactor() or any replacement path.
++    return gate3aMFFCDump(
++        outputDir.c_str(), aigman.modulePath.c_str(),
++        aigman.nObjs, aigman.nPIs, aigman.nPOs, aigman.nNodes,
++        aigman.pFanin0, aigman.pFanin1, aigman.pOuts,
++        aigman.pNumFanouts, cutSize, aigman.verbose
++    );
++}
++
++int gate3cRewriteDecisionDumpHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals) {
++    std::string outputDir;
++
++    CLI::App parser("Gate 3C read-only GPU rewrite decision dump");
++    parser.add_option("-o,--output", outputDir, "directory for the raw decision dump")->required();
++
++    int ret;
++    if ((ret = parseCmd(parser, vLiterals)) < 2)
++        return ret;
++    if (aigman.nObjs == 0 || aigman.modulePath.empty()) {
++        printf("gate3c: read an AIG before running the audit.\n");
++        return 1;
++    }
++
++    return gate3cRewriteDecisionDump(
++        outputDir.c_str(), aigman.modulePath.c_str(),
++        aigman.nObjs, aigman.nPIs, aigman.nPOs, aigman.nNodes,
++        aigman.pFanin0, aigman.pFanin1, aigman.pOuts,
++        aigman.pNumFanouts
++    );
++}
++
++int gate3dRewriteExecutionAuditHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals) {
++    std::string outputDir;
++    std::string regionMap;
++
++    CLI::App parser("Gate 3D GPU rewrite execution audit");
++    parser.add_option("-o,--output", outputDir, "directory for the execution audit")->required();
++    parser.add_option("--region-map", regionMap, "Gate 3A node_to_strict_mffc_region.csv")->required();
++
++    int ret = parseCmd(parser, vLiterals);
++    if (ret < 2)
++        return ret;
++    if (aigman.nObjs == 0 || aigman.modulePath.empty()) {
++        printf("gate3d: read an AIG before running the audit.\n");
++        return 1;
++    }
++
++    return gate3dRewriteExecutionAudit(
++        outputDir.c_str(), aigman.modulePath.c_str(), regionMap.c_str(),
++        aigman.nObjs, aigman.nPIs, aigman.nPOs, aigman.nNodes,
++        aigman.pFanin0, aigman.pFanin1, aigman.pOuts,
++        aigman.pNumFanouts
++    );
++}
++
++int gate3eExecutionReplayHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals) {
++    std::string outputDir;
++    std::string regionMap;
++    std::string configPath;
++
++    CLI::App parser("Gate 3E execution-aware candidate replay");
++    parser.add_option("-o,--output", outputDir, "replay output directory")->required();
++    parser.add_option("--region-map", regionMap, "Gate 3A node_to_strict_mffc_region.csv")->required();
++    parser.add_option("--config", configPath, "ordered replay configuration file")->required();
++
++    int ret = parseCmd(parser, vLiterals);
++    if (ret < 2)
++        return ret;
++    if (aigman.nObjs == 0 || aigman.modulePath.empty()) {
++        printf("gate3e: read an AIG before running the replay.\n");
++        return 1;
++    }
++
++    return gate3eExecutionReplay(
++        outputDir.c_str(), aigman.modulePath.c_str(), regionMap.c_str(), configPath.c_str(),
++        aigman.nObjs, aigman.nPIs, aigman.nPOs, aigman.nNodes,
++        aigman.pFanin0, aigman.pFanin1, aigman.pOuts, aigman.pNumFanouts
++    );
++}
++
+ int strashHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals) {
+     bool fCPU = false;
+ 
+@@ -266,6 +367,10 @@ void CmdMan::registerAllCommands() {
+     registerCommand("rewrite", rewriteHandler);
+     registerCommand("rf", refactorHandler);
+     registerCommand("refactor", refactorHandler);
++    registerCommand("gate3a_mffc_partition_dump", gate3aMFFCPartitionDumpHandler);
++    registerCommand("gate3c_rewrite_decisions_dump", gate3cRewriteDecisionDumpHandler);
++    registerCommand("gate3d_rewrite_execution_audit", gate3dRewriteExecutionAuditHandler);
++    registerCommand("gate3e_execution_replay", gate3eExecutionReplayHandler);
+     registerCommand("rs", resubHandler);
+     registerCommand("resub", resubHandler);
+     registerCommand("st", strashHandler);
+diff --git a/src/misc/print.cu b/src/misc/print.cu
+index 5e1e3fa..ad9df82 100644
+--- a/src/misc/print.cu
++++ b/src/misc/print.cu
+@@ -1,3 +1,4 @@
++#include <cstdio>
+ #include "print.cuh"
+ 
+ __global__ void printAIGA(const int * pFanin0, const int * pFanin1, 

@@ -1,0 +1,1865 @@
+{
+  "summary": [
+    {
+      "variant": "baseline",
+      "truth": {
+        "type": "truth",
+        "cut_index": 12,
+        "truth_lo": 536879104,
+        "truth_hi": 536879104,
+        "leaves": [
+          139,
+          176,
+          213,
+          238
+        ],
+        "leaf_mapper_ids": [
+          138,
+          175,
+          212,
+          237
+        ],
+        "event_index": 75
+      },
+      "inventory_count": 24,
+      "final": {
+        "type": "best",
+        "stage": "final",
+        "mode": 3,
+        "mapper_id": 384,
+        "phase": 0,
+        "refs": [
+          1,
+          0,
+          1
+        ],
+        "node_arrival": {
+          "rise": 126.769989,
+          "fall": 126.769989,
+          "worst": 126.769989
+        },
+        "cut_index": 12,
+        "match_arrival": {
+          "rise": 126.769989,
+          "fall": 126.769989,
+          "worst": 126.769989
+        },
+        "area_cost": 1.39999998,
+        "input_phase_mask": 2,
+        "super": {
+          "id": 2046,
+          "root_cell": "NAND4xp25_ASAP7_75t_L",
+          "formula": "",
+          "area": 1.39999998,
+          "n_gates": 1,
+          "n_fanins": 4,
+          "fanout_limit": 1,
+          "arcs": [
+            {
+              "pin": 0,
+              "rr": 15.5900002,
+              "fr": 15.5900002,
+              "rf": 15.5900002,
+              "ff": 15.5900002
+            },
+            {
+              "pin": 1,
+              "rr": 18.1800003,
+              "fr": 18.1800003,
+              "rf": 18.1800003,
+              "ff": 18.1800003
+            },
+            {
+              "pin": 2,
+              "rr": 16.7299995,
+              "fr": 16.7299995,
+              "rf": 16.7299995,
+              "ff": 16.7299995
+            },
+            {
+              "pin": 3,
+              "rr": 17.5300007,
+              "fr": 17.5300007,
+              "rf": 17.5300007,
+              "ff": 17.5300007
+            }
+          ],
+          "implementation": {
+            "cell": "NAND4xp25_ASAP7_75t_L",
+            "fanins": [
+              {
+                "leaf_pin": 0
+              },
+              {
+                "leaf_pin": 2
+              },
+              {
+                "leaf_pin": 3
+              },
+              {
+                "leaf_pin": 1
+              }
+            ]
+          }
+        },
+        "leaves": [
+          139,
+          176,
+          213,
+          238
+        ],
+        "leaf_mapper_ids": [
+          138,
+          175,
+          212,
+          237
+        ],
+        "event_index": 3609
+      },
+      "delay_dp": {
+        "type": "best",
+        "stage": "delay_dp",
+        "mode": 0,
+        "mapper_id": 384,
+        "phase": 0,
+        "refs": [
+          1,
+          0,
+          1
+        ],
+        "node_arrival": {
+          "rise": 126.769989,
+          "fall": 126.769989,
+          "worst": 126.769989
+        },
+        "cut_index": 12,
+        "match_arrival": {
+          "rise": 126.769989,
+          "fall": 126.769989,
+          "worst": 126.769989
+        },
+        "area_cost": 58.1298523,
+        "input_phase_mask": 2,
+        "super": {
+          "id": 2046,
+          "root_cell": "NAND4xp25_ASAP7_75t_L",
+          "formula": "",
+          "area": 1.39999998,
+          "n_gates": 1,
+          "n_fanins": 4,
+          "fanout_limit": 1,
+          "arcs": [
+            {
+              "pin": 0,
+              "rr": 15.5900002,
+              "fr": 15.5900002,
+              "rf": 15.5900002,
+              "ff": 15.5900002
+            },
+            {
+              "pin": 1,
+              "rr": 18.1800003,
+              "fr": 18.1800003,
+              "rf": 18.1800003,
+              "ff": 18.1800003
+            },
+            {
+              "pin": 2,
+              "rr": 16.7299995,
+              "fr": 16.7299995,
+              "rf": 16.7299995,
+              "ff": 16.7299995
+            },
+            {
+              "pin": 3,
+              "rr": 17.5300007,
+              "fr": 17.5300007,
+              "rf": 17.5300007,
+              "ff": 17.5300007
+            }
+          ],
+          "implementation": {
+            "cell": "NAND4xp25_ASAP7_75t_L",
+            "fanins": [
+              {
+                "leaf_pin": 0
+              },
+              {
+                "leaf_pin": 2
+              },
+              {
+                "leaf_pin": 3
+              },
+              {
+                "leaf_pin": 1
+              }
+            ]
+          }
+        },
+        "leaves": [
+          139,
+          176,
+          213,
+          238
+        ],
+        "leaf_mapper_ids": [
+          138,
+          175,
+          212,
+          237
+        ],
+        "event_index": 2331
+      },
+      "first_selections": [
+        {
+          "type": "match_attempt",
+          "mode": 0,
+          "cut_index": 12,
+          "phase": 0,
+          "input_phase_mask": 2,
+          "limit": 130.289993,
+          "status": "selected_in_cut",
+          "arrival": {
+            "rise": 127.419991,
+            "fall": 127.419991,
+            "worst": 127.419991
+          },
+          "area_cost": 58.1298523,
+          "super": {
+            "id": 2043,
+            "root_cell": "NAND4xp25_ASAP7_75t_L",
+            "formula": "",
+            "area": 1.39999998,
+            "n_gates": 1,
+            "n_fanins": 4,
+            "fanout_limit": 1,
+            "arcs": [
+              {
+                "pin": 0,
+                "rr": 15.5900002,
+                "fr": 15.5900002,
+                "rf": 15.5900002,
+                "ff": 15.5900002
+              },
+              {
+                "pin": 1,
+                "rr": 16.7299995,
+                "fr": 16.7299995,
+                "rf": 16.7299995,
+                "ff": 16.7299995
+              },
+              {
+                "pin": 2,
+                "rr": 17.5300007,
+                "fr": 17.5300007,
+                "rf": 17.5300007,
+                "ff": 17.5300007
+              },
+              {
+                "pin": 3,
+                "rr": 18.1800003,
+                "fr": 18.1800003,
+                "rf": 18.1800003,
+                "ff": 18.1800003
+              }
+            ],
+            "implementation": {
+              "cell": "NAND4xp25_ASAP7_75t_L",
+              "fanins": [
+                {
+                  "leaf_pin": 0
+                },
+                {
+                  "leaf_pin": 1
+                },
+                {
+                  "leaf_pin": 2
+                },
+                {
+                  "leaf_pin": 3
+                }
+              ]
+            }
+          },
+          "leaf_arrivals": [
+            {
+              "rise": 109.23999,
+              "fall": 109.23999,
+              "worst": 109.23999
+            },
+            {
+              "rise": 108.069992,
+              "fall": 108.069992,
+              "worst": 108.069992
+            },
+            {
+              "rise": 109.23999,
+              "fall": 109.23999,
+              "worst": 109.23999
+            },
+            {
+              "rise": 109.23999,
+              "fall": 109.23999,
+              "worst": 109.23999
+            }
+          ],
+          "event_index": 1966
+        },
+        {
+          "type": "match_attempt",
+          "mode": 0,
+          "cut_index": 12,
+          "phase": 0,
+          "input_phase_mask": 2,
+          "limit": 127.419991,
+          "status": "selected_in_cut",
+          "arrival": {
+            "rise": 126.769989,
+            "fall": 126.769989,
+            "worst": 126.769989
+          },
+          "area_cost": 58.1298523,
+          "super": {
+            "id": 2046,
+            "root_cell": "NAND4xp25_ASAP7_75t_L",
+            "formula": "",
+            "area": 1.39999998,
+            "n_gates": 1,
+            "n_fanins": 4,
+            "fanout_limit": 1,
+            "arcs": [
+              {
+                "pin": 0,
+                "rr": 15.5900002,
+                "fr": 15.5900002,
+                "rf": 15.5900002,
+                "ff": 15.5900002
+              },
+              {
+                "pin": 1,
+                "rr": 18.1800003,
+                "fr": 18.1800003,
+                "rf": 18.1800003,
+                "ff": 18.1800003
+              },
+              {
+                "pin": 2,
+                "rr": 16.7299995,
+                "fr": 16.7299995,
+                "rf": 16.7299995,
+                "ff": 16.7299995
+              },
+              {
+                "pin": 3,
+                "rr": 17.5300007,
+                "fr": 17.5300007,
+                "rf": 17.5300007,
+                "ff": 17.5300007
+              }
+            ],
+            "implementation": {
+              "cell": "NAND4xp25_ASAP7_75t_L",
+              "fanins": [
+                {
+                  "leaf_pin": 0
+                },
+                {
+                  "leaf_pin": 2
+                },
+                {
+                  "leaf_pin": 3
+                },
+                {
+                  "leaf_pin": 1
+                }
+              ]
+            }
+          },
+          "leaf_arrivals": [
+            {
+              "rise": 109.23999,
+              "fall": 109.23999,
+              "worst": 109.23999
+            },
+            {
+              "rise": 108.069992,
+              "fall": 108.069992,
+              "worst": 108.069992
+            },
+            {
+              "rise": 109.23999,
+              "fall": 109.23999,
+              "worst": 109.23999
+            },
+            {
+              "rise": 109.23999,
+              "fall": 109.23999,
+              "worst": 109.23999
+            }
+          ],
+          "event_index": 1970
+        }
+      ],
+      "metrics": [
+        [
+          "382",
+          "513.22"
+        ]
+      ],
+      "pair_delay": 194.169998,
+      "noninterference": true,
+      "node": {
+        "type": "node",
+        "aiger_var": 385,
+        "abc_obj_id": 417,
+        "mapper_id": 384,
+        "node_type": "AND",
+        "fanin_mapper_ids": [
+          138,
+          383
+        ],
+        "fanin_complemented": [
+          0,
+          0
+        ],
+        "aiger_to_abc_complemented": 0,
+        "event_index": 5
+      }
+    },
+    {
+      "variant": "candidate",
+      "truth": {
+        "type": "truth",
+        "cut_index": 10,
+        "truth_lo": 536879104,
+        "truth_hi": 536879104,
+        "leaves": [
+          338,
+          339,
+          322,
+          340
+        ],
+        "leaf_mapper_ids": [
+          138,
+          175,
+          210,
+          235
+        ],
+        "event_index": 73
+      },
+      "inventory_count": 24,
+      "final": {
+        "type": "best",
+        "stage": "final",
+        "mode": 3,
+        "mapper_id": 382,
+        "phase": 0,
+        "refs": [
+          1,
+          0,
+          1
+        ],
+        "node_arrival": {
+          "rise": 126.409988,
+          "fall": 126.409988,
+          "worst": 126.409988
+        },
+        "cut_index": 10,
+        "match_arrival": {
+          "rise": 126.409988,
+          "fall": 126.409988,
+          "worst": 126.409988
+        },
+        "area_cost": 1.39999998,
+        "input_phase_mask": 2,
+        "super": {
+          "id": 2047,
+          "root_cell": "NAND4xp25_ASAP7_75t_L",
+          "formula": "",
+          "area": 1.39999998,
+          "n_gates": 1,
+          "n_fanins": 4,
+          "fanout_limit": 1,
+          "arcs": [
+            {
+              "pin": 0,
+              "rr": 15.5900002,
+              "fr": 15.5900002,
+              "rf": 15.5900002,
+              "ff": 15.5900002
+            },
+            {
+              "pin": 1,
+              "rr": 17.5300007,
+              "fr": 17.5300007,
+              "rf": 17.5300007,
+              "ff": 17.5300007
+            },
+            {
+              "pin": 2,
+              "rr": 18.1800003,
+              "fr": 18.1800003,
+              "rf": 18.1800003,
+              "ff": 18.1800003
+            },
+            {
+              "pin": 3,
+              "rr": 16.7299995,
+              "fr": 16.7299995,
+              "rf": 16.7299995,
+              "ff": 16.7299995
+            }
+          ],
+          "implementation": {
+            "cell": "NAND4xp25_ASAP7_75t_L",
+            "fanins": [
+              {
+                "leaf_pin": 0
+              },
+              {
+                "leaf_pin": 3
+              },
+              {
+                "leaf_pin": 1
+              },
+              {
+                "leaf_pin": 2
+              }
+            ]
+          }
+        },
+        "leaves": [
+          338,
+          339,
+          322,
+          340
+        ],
+        "leaf_mapper_ids": [
+          138,
+          175,
+          210,
+          235
+        ],
+        "event_index": 3611
+      },
+      "delay_dp": {
+        "type": "best",
+        "stage": "delay_dp",
+        "mode": 0,
+        "mapper_id": 382,
+        "phase": 0,
+        "refs": [
+          1,
+          0,
+          1
+        ],
+        "node_arrival": {
+          "rise": 125.969986,
+          "fall": 125.969986,
+          "worst": 125.969986
+        },
+        "cut_index": 10,
+        "match_arrival": {
+          "rise": 125.969986,
+          "fall": 125.969986,
+          "worst": 125.969986
+        },
+        "area_cost": 53.1589432,
+        "input_phase_mask": 2,
+        "super": {
+          "id": 2047,
+          "root_cell": "NAND4xp25_ASAP7_75t_L",
+          "formula": "",
+          "area": 1.39999998,
+          "n_gates": 1,
+          "n_fanins": 4,
+          "fanout_limit": 1,
+          "arcs": [
+            {
+              "pin": 0,
+              "rr": 15.5900002,
+              "fr": 15.5900002,
+              "rf": 15.5900002,
+              "ff": 15.5900002
+            },
+            {
+              "pin": 1,
+              "rr": 17.5300007,
+              "fr": 17.5300007,
+              "rf": 17.5300007,
+              "ff": 17.5300007
+            },
+            {
+              "pin": 2,
+              "rr": 18.1800003,
+              "fr": 18.1800003,
+              "rf": 18.1800003,
+              "ff": 18.1800003
+            },
+            {
+              "pin": 3,
+              "rr": 16.7299995,
+              "fr": 16.7299995,
+              "rf": 16.7299995,
+              "ff": 16.7299995
+            }
+          ],
+          "implementation": {
+            "cell": "NAND4xp25_ASAP7_75t_L",
+            "fanins": [
+              {
+                "leaf_pin": 0
+              },
+              {
+                "leaf_pin": 3
+              },
+              {
+                "leaf_pin": 1
+              },
+              {
+                "leaf_pin": 2
+              }
+            ]
+          }
+        },
+        "leaves": [
+          338,
+          339,
+          322,
+          340
+        ],
+        "leaf_mapper_ids": [
+          138,
+          175,
+          210,
+          235
+        ],
+        "event_index": 2333
+      },
+      "first_selections": [
+        {
+          "type": "match_attempt",
+          "mode": 0,
+          "cut_index": 10,
+          "phase": 0,
+          "input_phase_mask": 2,
+          "limit": 128.729996,
+          "status": "selected_in_cut",
+          "arrival": {
+            "rise": 127.419991,
+            "fall": 127.419991,
+            "worst": 127.419991
+          },
+          "area_cost": 53.1589432,
+          "super": {
+            "id": 2043,
+            "root_cell": "NAND4xp25_ASAP7_75t_L",
+            "formula": "",
+            "area": 1.39999998,
+            "n_gates": 1,
+            "n_fanins": 4,
+            "fanout_limit": 1,
+            "arcs": [
+              {
+                "pin": 0,
+                "rr": 15.5900002,
+                "fr": 15.5900002,
+                "rf": 15.5900002,
+                "ff": 15.5900002
+              },
+              {
+                "pin": 1,
+                "rr": 16.7299995,
+                "fr": 16.7299995,
+                "rf": 16.7299995,
+                "ff": 16.7299995
+              },
+              {
+                "pin": 2,
+                "rr": 17.5300007,
+                "fr": 17.5300007,
+                "rf": 17.5300007,
+                "ff": 17.5300007
+              },
+              {
+                "pin": 3,
+                "rr": 18.1800003,
+                "fr": 18.1800003,
+                "rf": 18.1800003,
+                "ff": 18.1800003
+              }
+            ],
+            "implementation": {
+              "cell": "NAND4xp25_ASAP7_75t_L",
+              "fanins": [
+                {
+                  "leaf_pin": 0
+                },
+                {
+                  "leaf_pin": 1
+                },
+                {
+                  "leaf_pin": 2
+                },
+                {
+                  "leaf_pin": 3
+                }
+              ]
+            }
+          },
+          "leaf_arrivals": [
+            {
+              "rise": 109.23999,
+              "fall": 109.23999,
+              "worst": 109.23999
+            },
+            {
+              "rise": 108.069992,
+              "fall": 108.069992,
+              "worst": 108.069992
+            },
+            {
+              "rise": 106.219986,
+              "fall": 106.219986,
+              "worst": 106.219986
+            },
+            {
+              "rise": 109.23999,
+              "fall": 109.23999,
+              "worst": 109.23999
+            }
+          ],
+          "event_index": 1966
+        },
+        {
+          "type": "match_attempt",
+          "mode": 0,
+          "cut_index": 10,
+          "phase": 0,
+          "input_phase_mask": 2,
+          "limit": 127.419991,
+          "status": "selected_in_cut",
+          "arrival": {
+            "rise": 126.769989,
+            "fall": 126.769989,
+            "worst": 126.769989
+          },
+          "area_cost": 53.1589432,
+          "super": {
+            "id": 2044,
+            "root_cell": "NAND4xp25_ASAP7_75t_L",
+            "formula": "",
+            "area": 1.39999998,
+            "n_gates": 1,
+            "n_fanins": 4,
+            "fanout_limit": 1,
+            "arcs": [
+              {
+                "pin": 0,
+                "rr": 15.5900002,
+                "fr": 15.5900002,
+                "rf": 15.5900002,
+                "ff": 15.5900002
+              },
+              {
+                "pin": 1,
+                "rr": 16.7299995,
+                "fr": 16.7299995,
+                "rf": 16.7299995,
+                "ff": 16.7299995
+              },
+              {
+                "pin": 2,
+                "rr": 18.1800003,
+                "fr": 18.1800003,
+                "rf": 18.1800003,
+                "ff": 18.1800003
+              },
+              {
+                "pin": 3,
+                "rr": 17.5300007,
+                "fr": 17.5300007,
+                "rf": 17.5300007,
+                "ff": 17.5300007
+              }
+            ],
+            "implementation": {
+              "cell": "NAND4xp25_ASAP7_75t_L",
+              "fanins": [
+                {
+                  "leaf_pin": 0
+                },
+                {
+                  "leaf_pin": 1
+                },
+                {
+                  "leaf_pin": 3
+                },
+                {
+                  "leaf_pin": 2
+                }
+              ]
+            }
+          },
+          "leaf_arrivals": [
+            {
+              "rise": 109.23999,
+              "fall": 109.23999,
+              "worst": 109.23999
+            },
+            {
+              "rise": 108.069992,
+              "fall": 108.069992,
+              "worst": 108.069992
+            },
+            {
+              "rise": 106.219986,
+              "fall": 106.219986,
+              "worst": 106.219986
+            },
+            {
+              "rise": 109.23999,
+              "fall": 109.23999,
+              "worst": 109.23999
+            }
+          ],
+          "event_index": 1968
+        },
+        {
+          "type": "match_attempt",
+          "mode": 0,
+          "cut_index": 10,
+          "phase": 0,
+          "input_phase_mask": 2,
+          "limit": 126.769989,
+          "status": "selected_in_cut",
+          "arrival": {
+            "rise": 125.969986,
+            "fall": 125.969986,
+            "worst": 125.969986
+          },
+          "area_cost": 53.1589432,
+          "super": {
+            "id": 2047,
+            "root_cell": "NAND4xp25_ASAP7_75t_L",
+            "formula": "",
+            "area": 1.39999998,
+            "n_gates": 1,
+            "n_fanins": 4,
+            "fanout_limit": 1,
+            "arcs": [
+              {
+                "pin": 0,
+                "rr": 15.5900002,
+                "fr": 15.5900002,
+                "rf": 15.5900002,
+                "ff": 15.5900002
+              },
+              {
+                "pin": 1,
+                "rr": 17.5300007,
+                "fr": 17.5300007,
+                "rf": 17.5300007,
+                "ff": 17.5300007
+              },
+              {
+                "pin": 2,
+                "rr": 18.1800003,
+                "fr": 18.1800003,
+                "rf": 18.1800003,
+                "ff": 18.1800003
+              },
+              {
+                "pin": 3,
+                "rr": 16.7299995,
+                "fr": 16.7299995,
+                "rf": 16.7299995,
+                "ff": 16.7299995
+              }
+            ],
+            "implementation": {
+              "cell": "NAND4xp25_ASAP7_75t_L",
+              "fanins": [
+                {
+                  "leaf_pin": 0
+                },
+                {
+                  "leaf_pin": 3
+                },
+                {
+                  "leaf_pin": 1
+                },
+                {
+                  "leaf_pin": 2
+                }
+              ]
+            }
+          },
+          "leaf_arrivals": [
+            {
+              "rise": 109.23999,
+              "fall": 109.23999,
+              "worst": 109.23999
+            },
+            {
+              "rise": 108.069992,
+              "fall": 108.069992,
+              "worst": 108.069992
+            },
+            {
+              "rise": 106.219986,
+              "fall": 106.219986,
+              "worst": 106.219986
+            },
+            {
+              "rise": 109.23999,
+              "fall": 109.23999,
+              "worst": 109.23999
+            }
+          ],
+          "event_index": 1972
+        }
+      ],
+      "metrics": [
+        [
+          "381",
+          "509.72"
+        ]
+      ],
+      "pair_delay": 193.519989,
+      "noninterference": true,
+      "node": {
+        "type": "node",
+        "aiger_var": 365,
+        "abc_obj_id": 396,
+        "mapper_id": 382,
+        "node_type": "AND",
+        "fanin_mapper_ids": [
+          138,
+          381
+        ],
+        "fanin_complemented": [
+          0,
+          0
+        ],
+        "aiger_to_abc_complemented": 0,
+        "event_index": 5
+      }
+    }
+  ],
+  "rows": [
+    {
+      "variant": "baseline",
+      "function_point": 385,
+      "mapper_node_id": 384,
+      "mapping_mode": 0,
+      "cut_index": 12,
+      "leaves": "[139, 176, 213, 238]",
+      "leaf_mapper_ids": "[138, 175, 212, 237]",
+      "output_phase": 0,
+      "input_phase_mask": 2,
+      "truth_lo": 536879104,
+      "truth_hi": 536879104,
+      "supergate_id": 2043,
+      "cell": "NAND4xp25_ASAP7_75t_L",
+      "physical_pin_to_leaf": "[0, 1, 2, 3]",
+      "critical_leaf_index": 1,
+      "critical_pin": "B",
+      "leaf_rise_arrivals": "[109.23999, 108.069992, 109.23999, 109.23999]",
+      "leaf_fall_arrivals": "[109.23999, 108.069992, 109.23999, 109.23999]",
+      "leaf_arc_rr": "[15.5900002, 16.7299995, 17.5300007, 18.1800003]",
+      "leaf_arc_fr": "[15.5900002, 16.7299995, 17.5300007, 18.1800003]",
+      "leaf_arc_rf": "[15.5900002, 16.7299995, 17.5300007, 18.1800003]",
+      "leaf_arc_ff": "[15.5900002, 16.7299995, 17.5300007, 18.1800003]",
+      "recorded_output_rise": 127.419991,
+      "recorded_output_fall": 127.419991,
+      "recorded_output_worst": 127.419991,
+      "complete_timing_record": true,
+      "audit_unbounded_output": 127.41999053955078,
+      "audit_leaf_contributions": "[124.82998657226562, 124.79998779296875, 126.76998901367188, 127.41999053955078]",
+      "matching_cost": 58.1298523,
+      "library_cell_area": 1.39999998,
+      "limit": 130.289993,
+      "statuses": "[\"eligible\", \"selected_in_cut\"]",
+      "selected_in_cut": true,
+      "final_best_supergate": 2046,
+      "final_selected": false,
+      "event_index": 1965,
+      "estimated_load": "UNAVAILABLE",
+      "pair_delay": 194.169998
+    },
+    {
+      "variant": "baseline",
+      "function_point": 385,
+      "mapper_node_id": 384,
+      "mapping_mode": 0,
+      "cut_index": 12,
+      "leaves": "[139, 176, 213, 238]",
+      "leaf_mapper_ids": "[138, 175, 212, 237]",
+      "output_phase": 0,
+      "input_phase_mask": 2,
+      "truth_lo": 536879104,
+      "truth_hi": 536879104,
+      "supergate_id": 2044,
+      "cell": "NAND4xp25_ASAP7_75t_L",
+      "physical_pin_to_leaf": "[0, 1, 3, 2]",
+      "critical_leaf_index": 1,
+      "critical_pin": "B",
+      "leaf_rise_arrivals": "[109.23999, 108.069992, 109.23999, 109.23999]",
+      "leaf_fall_arrivals": "[109.23999, 108.069992, 109.23999, 109.23999]",
+      "leaf_arc_rr": "[15.5900002, 16.7299995, 18.1800003, 17.5300007]",
+      "leaf_arc_fr": "[15.5900002, 16.7299995, 18.1800003, 17.5300007]",
+      "leaf_arc_rf": "[15.5900002, 16.7299995, 18.1800003, 17.5300007]",
+      "leaf_arc_ff": "[15.5900002, 16.7299995, 18.1800003, 17.5300007]",
+      "recorded_output_rise": 127.419991,
+      "recorded_output_fall": 127.419991,
+      "recorded_output_worst": 127.419991,
+      "complete_timing_record": true,
+      "audit_unbounded_output": 127.41999053955078,
+      "audit_leaf_contributions": "[124.82998657226562, 124.79998779296875, 127.41999053955078, 126.76998901367188]",
+      "matching_cost": 58.1298523,
+      "library_cell_area": 1.39999998,
+      "limit": 127.419991,
+      "statuses": "[\"eligible\"]",
+      "selected_in_cut": false,
+      "final_best_supergate": 2046,
+      "final_selected": false,
+      "event_index": 1967,
+      "estimated_load": "UNAVAILABLE",
+      "pair_delay": 194.169998
+    },
+    {
+      "variant": "baseline",
+      "function_point": 385,
+      "mapper_node_id": 384,
+      "mapping_mode": 0,
+      "cut_index": 12,
+      "leaves": "[139, 176, 213, 238]",
+      "leaf_mapper_ids": "[138, 175, 212, 237]",
+      "output_phase": 0,
+      "input_phase_mask": 2,
+      "truth_lo": 536879104,
+      "truth_hi": 536879104,
+      "supergate_id": 2046,
+      "cell": "NAND4xp25_ASAP7_75t_L",
+      "physical_pin_to_leaf": "[0, 2, 3, 1]",
+      "critical_leaf_index": 1,
+      "critical_pin": "D",
+      "leaf_rise_arrivals": "[109.23999, 108.069992, 109.23999, 109.23999]",
+      "leaf_fall_arrivals": "[109.23999, 108.069992, 109.23999, 109.23999]",
+      "leaf_arc_rr": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "leaf_arc_fr": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "leaf_arc_rf": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "leaf_arc_ff": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "recorded_output_rise": 126.769989,
+      "recorded_output_fall": 126.769989,
+      "recorded_output_worst": 126.769989,
+      "complete_timing_record": true,
+      "audit_unbounded_output": 126.76998901367188,
+      "audit_leaf_contributions": "[124.82998657226562, 126.24999237060547, 125.96998596191406, 126.76998901367188]",
+      "matching_cost": 58.1298523,
+      "library_cell_area": 1.39999998,
+      "limit": 127.419991,
+      "statuses": "[\"eligible\", \"selected_in_cut\"]",
+      "selected_in_cut": true,
+      "final_best_supergate": 2046,
+      "final_selected": true,
+      "event_index": 1969,
+      "estimated_load": "UNAVAILABLE",
+      "pair_delay": 194.169998
+    },
+    {
+      "variant": "baseline",
+      "function_point": 385,
+      "mapper_node_id": 384,
+      "mapping_mode": 0,
+      "cut_index": 12,
+      "leaves": "[139, 176, 213, 238]",
+      "leaf_mapper_ids": "[138, 175, 212, 237]",
+      "output_phase": 0,
+      "input_phase_mask": 2,
+      "truth_lo": 536879104,
+      "truth_hi": 536879104,
+      "supergate_id": 2047,
+      "cell": "NAND4xp25_ASAP7_75t_L",
+      "physical_pin_to_leaf": "[0, 3, 1, 2]",
+      "critical_leaf_index": 1,
+      "critical_pin": "C",
+      "leaf_rise_arrivals": "[109.23999, 108.069992, 109.23999, 109.23999]",
+      "leaf_fall_arrivals": "[109.23999, 108.069992, 109.23999, 109.23999]",
+      "leaf_arc_rr": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "leaf_arc_fr": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "leaf_arc_rf": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "leaf_arc_ff": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "recorded_output_rise": 125.969986,
+      "recorded_output_fall": 125.969986,
+      "recorded_output_worst": 3.40282347e+37,
+      "complete_timing_record": false,
+      "audit_unbounded_output": 127.41999053955078,
+      "audit_leaf_contributions": "[124.82998657226562, 125.59999084472656, 127.41999053955078, 125.96998596191406]",
+      "matching_cost": 58.1298523,
+      "library_cell_area": 1.39999998,
+      "limit": 126.769989,
+      "statuses": "[\"delay_limit\"]",
+      "selected_in_cut": false,
+      "final_best_supergate": 2046,
+      "final_selected": false,
+      "event_index": 1971,
+      "estimated_load": "UNAVAILABLE",
+      "pair_delay": 194.169998
+    },
+    {
+      "variant": "baseline",
+      "function_point": 385,
+      "mapper_node_id": 384,
+      "mapping_mode": 1,
+      "cut_index": 12,
+      "leaves": "[139, 176, 213, 238]",
+      "leaf_mapper_ids": "[138, 175, 212, 237]",
+      "output_phase": 0,
+      "input_phase_mask": 2,
+      "truth_lo": 536879104,
+      "truth_hi": 536879104,
+      "supergate_id": 2046,
+      "cell": "NAND4xp25_ASAP7_75t_L",
+      "physical_pin_to_leaf": "[0, 2, 3, 1]",
+      "critical_leaf_index": 1,
+      "critical_pin": "D",
+      "leaf_rise_arrivals": "[110.169998, 108.509995, 109.879997, 109.23999]",
+      "leaf_fall_arrivals": "[110.169998, 108.509995, 109.879997, 109.23999]",
+      "leaf_arc_rr": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "leaf_arc_fr": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "leaf_arc_rf": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "leaf_arc_ff": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "recorded_output_rise": 0,
+      "recorded_output_fall": 0,
+      "recorded_output_worst": 3.40282347e+37,
+      "complete_timing_record": false,
+      "audit_unbounded_output": 126.76998901367188,
+      "audit_leaf_contributions": "[125.75999450683594, 126.68999481201172, 126.61000061035156, 126.76998901367188]",
+      "matching_cost": 23.8603706,
+      "library_cell_area": 1.39999998,
+      "limit": 126.769981,
+      "statuses": "[\"delay_limit\"]",
+      "selected_in_cut": false,
+      "final_best_supergate": 2046,
+      "final_selected": true,
+      "event_index": 2380,
+      "estimated_load": "UNAVAILABLE",
+      "pair_delay": 194.169998
+    },
+    {
+      "variant": "baseline",
+      "function_point": 385,
+      "mapper_node_id": 384,
+      "mapping_mode": 1,
+      "cut_index": 12,
+      "leaves": "[139, 176, 213, 238]",
+      "leaf_mapper_ids": "[138, 175, 212, 237]",
+      "output_phase": 0,
+      "input_phase_mask": 2,
+      "truth_lo": 536879104,
+      "truth_hi": 536879104,
+      "supergate_id": 2047,
+      "cell": "NAND4xp25_ASAP7_75t_L",
+      "physical_pin_to_leaf": "[0, 3, 1, 2]",
+      "critical_leaf_index": 1,
+      "critical_pin": "C",
+      "leaf_rise_arrivals": "[110.169998, 108.509995, 109.879997, 109.23999]",
+      "leaf_fall_arrivals": "[110.169998, 108.509995, 109.879997, 109.23999]",
+      "leaf_arc_rr": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "leaf_arc_fr": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "leaf_arc_rf": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "leaf_arc_ff": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "recorded_output_rise": 125.969986,
+      "recorded_output_fall": 125.969986,
+      "recorded_output_worst": 3.40282347e+37,
+      "complete_timing_record": false,
+      "audit_unbounded_output": 128.05999755859375,
+      "audit_leaf_contributions": "[125.75999450683594, 126.03999328613281, 128.05999755859375, 125.96998596191406]",
+      "matching_cost": 23.8603706,
+      "library_cell_area": 1.39999998,
+      "limit": 126.769981,
+      "statuses": "[\"delay_limit\"]",
+      "selected_in_cut": false,
+      "final_best_supergate": 2046,
+      "final_selected": false,
+      "event_index": 2381,
+      "estimated_load": "UNAVAILABLE",
+      "pair_delay": 194.169998
+    },
+    {
+      "variant": "baseline",
+      "function_point": 385,
+      "mapper_node_id": 384,
+      "mapping_mode": 2,
+      "cut_index": 12,
+      "leaves": "[139, 176, 213, 238]",
+      "leaf_mapper_ids": "[138, 175, 212, 237]",
+      "output_phase": 0,
+      "input_phase_mask": 2,
+      "truth_lo": 536879104,
+      "truth_hi": 536879104,
+      "supergate_id": 2046,
+      "cell": "NAND4xp25_ASAP7_75t_L",
+      "physical_pin_to_leaf": "[0, 2, 3, 1]",
+      "critical_leaf_index": 1,
+      "critical_pin": "D",
+      "leaf_rise_arrivals": "[110.169998, 108.509995, 109.679993, 109.23999]",
+      "leaf_fall_arrivals": "[110.169998, 108.509995, 109.679993, 109.23999]",
+      "leaf_arc_rr": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "leaf_arc_fr": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "leaf_arc_rf": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "leaf_arc_ff": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "recorded_output_rise": 0,
+      "recorded_output_fall": 0,
+      "recorded_output_worst": 3.40282347e+37,
+      "complete_timing_record": false,
+      "audit_unbounded_output": 126.76998901367188,
+      "audit_leaf_contributions": "[125.75999450683594, 126.68999481201172, 126.40998840332031, 126.76998901367188]",
+      "matching_cost": 1.39999998,
+      "library_cell_area": 1.39999998,
+      "limit": 126.769981,
+      "statuses": "[\"delay_limit\"]",
+      "selected_in_cut": false,
+      "final_best_supergate": 2046,
+      "final_selected": true,
+      "event_index": 2821,
+      "estimated_load": "UNAVAILABLE",
+      "pair_delay": 194.169998
+    },
+    {
+      "variant": "baseline",
+      "function_point": 385,
+      "mapper_node_id": 384,
+      "mapping_mode": 2,
+      "cut_index": 12,
+      "leaves": "[139, 176, 213, 238]",
+      "leaf_mapper_ids": "[138, 175, 212, 237]",
+      "output_phase": 0,
+      "input_phase_mask": 2,
+      "truth_lo": 536879104,
+      "truth_hi": 536879104,
+      "supergate_id": 2047,
+      "cell": "NAND4xp25_ASAP7_75t_L",
+      "physical_pin_to_leaf": "[0, 3, 1, 2]",
+      "critical_leaf_index": 1,
+      "critical_pin": "C",
+      "leaf_rise_arrivals": "[110.169998, 108.509995, 109.679993, 109.23999]",
+      "leaf_fall_arrivals": "[110.169998, 108.509995, 109.679993, 109.23999]",
+      "leaf_arc_rr": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "leaf_arc_fr": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "leaf_arc_rf": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "leaf_arc_ff": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "recorded_output_rise": 125.969986,
+      "recorded_output_fall": 125.969986,
+      "recorded_output_worst": 3.40282347e+37,
+      "complete_timing_record": false,
+      "audit_unbounded_output": 127.85999298095703,
+      "audit_leaf_contributions": "[125.75999450683594, 126.03999328613281, 127.85999298095703, 125.96998596191406]",
+      "matching_cost": 1.39999998,
+      "library_cell_area": 1.39999998,
+      "limit": 126.769981,
+      "statuses": "[\"delay_limit\"]",
+      "selected_in_cut": false,
+      "final_best_supergate": 2046,
+      "final_selected": false,
+      "event_index": 2822,
+      "estimated_load": "UNAVAILABLE",
+      "pair_delay": 194.169998
+    },
+    {
+      "variant": "baseline",
+      "function_point": 385,
+      "mapper_node_id": 384,
+      "mapping_mode": 3,
+      "cut_index": 12,
+      "leaves": "[139, 176, 213, 238]",
+      "leaf_mapper_ids": "[138, 175, 212, 237]",
+      "output_phase": 0,
+      "input_phase_mask": 2,
+      "truth_lo": 536879104,
+      "truth_hi": 536879104,
+      "supergate_id": 2046,
+      "cell": "NAND4xp25_ASAP7_75t_L",
+      "physical_pin_to_leaf": "[0, 2, 3, 1]",
+      "critical_leaf_index": 1,
+      "critical_pin": "D",
+      "leaf_rise_arrivals": "[110.169998, 108.509995, 109.679993, 109.23999]",
+      "leaf_fall_arrivals": "[110.169998, 108.509995, 109.679993, 109.23999]",
+      "leaf_arc_rr": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "leaf_arc_fr": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "leaf_arc_rf": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "leaf_arc_ff": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "recorded_output_rise": 0,
+      "recorded_output_fall": 0,
+      "recorded_output_worst": 3.40282347e+37,
+      "complete_timing_record": false,
+      "audit_unbounded_output": 126.76998901367188,
+      "audit_leaf_contributions": "[125.75999450683594, 126.68999481201172, 126.40998840332031, 126.76998901367188]",
+      "matching_cost": 1.39999998,
+      "library_cell_area": 1.39999998,
+      "limit": 126.769981,
+      "statuses": "[\"delay_limit\"]",
+      "selected_in_cut": false,
+      "final_best_supergate": 2046,
+      "final_selected": true,
+      "event_index": 3252,
+      "estimated_load": "UNAVAILABLE",
+      "pair_delay": 194.169998
+    },
+    {
+      "variant": "baseline",
+      "function_point": 385,
+      "mapper_node_id": 384,
+      "mapping_mode": 3,
+      "cut_index": 12,
+      "leaves": "[139, 176, 213, 238]",
+      "leaf_mapper_ids": "[138, 175, 212, 237]",
+      "output_phase": 0,
+      "input_phase_mask": 2,
+      "truth_lo": 536879104,
+      "truth_hi": 536879104,
+      "supergate_id": 2047,
+      "cell": "NAND4xp25_ASAP7_75t_L",
+      "physical_pin_to_leaf": "[0, 3, 1, 2]",
+      "critical_leaf_index": 1,
+      "critical_pin": "C",
+      "leaf_rise_arrivals": "[110.169998, 108.509995, 109.679993, 109.23999]",
+      "leaf_fall_arrivals": "[110.169998, 108.509995, 109.679993, 109.23999]",
+      "leaf_arc_rr": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "leaf_arc_fr": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "leaf_arc_rf": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "leaf_arc_ff": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "recorded_output_rise": 125.969986,
+      "recorded_output_fall": 125.969986,
+      "recorded_output_worst": 3.40282347e+37,
+      "complete_timing_record": false,
+      "audit_unbounded_output": 127.85999298095703,
+      "audit_leaf_contributions": "[125.75999450683594, 126.03999328613281, 127.85999298095703, 125.96998596191406]",
+      "matching_cost": 1.39999998,
+      "library_cell_area": 1.39999998,
+      "limit": 126.769981,
+      "statuses": "[\"delay_limit\"]",
+      "selected_in_cut": false,
+      "final_best_supergate": 2046,
+      "final_selected": false,
+      "event_index": 3253,
+      "estimated_load": "UNAVAILABLE",
+      "pair_delay": 194.169998
+    },
+    {
+      "variant": "candidate",
+      "function_point": 365,
+      "mapper_node_id": 382,
+      "mapping_mode": 0,
+      "cut_index": 10,
+      "leaves": "[338, 339, 322, 340]",
+      "leaf_mapper_ids": "[138, 175, 210, 235]",
+      "output_phase": 0,
+      "input_phase_mask": 2,
+      "truth_lo": 536879104,
+      "truth_hi": 536879104,
+      "supergate_id": 2043,
+      "cell": "NAND4xp25_ASAP7_75t_L",
+      "physical_pin_to_leaf": "[0, 1, 2, 3]",
+      "critical_leaf_index": 1,
+      "critical_pin": "B",
+      "leaf_rise_arrivals": "[109.23999, 108.069992, 106.219986, 109.23999]",
+      "leaf_fall_arrivals": "[109.23999, 108.069992, 106.219986, 109.23999]",
+      "leaf_arc_rr": "[15.5900002, 16.7299995, 17.5300007, 18.1800003]",
+      "leaf_arc_fr": "[15.5900002, 16.7299995, 17.5300007, 18.1800003]",
+      "leaf_arc_rf": "[15.5900002, 16.7299995, 17.5300007, 18.1800003]",
+      "leaf_arc_ff": "[15.5900002, 16.7299995, 17.5300007, 18.1800003]",
+      "recorded_output_rise": 127.419991,
+      "recorded_output_fall": 127.419991,
+      "recorded_output_worst": 127.419991,
+      "complete_timing_record": true,
+      "audit_unbounded_output": 127.41999053955078,
+      "audit_leaf_contributions": "[124.82998657226562, 124.79998779296875, 123.74998474121094, 127.41999053955078]",
+      "matching_cost": 53.1589432,
+      "library_cell_area": 1.39999998,
+      "limit": 128.729996,
+      "statuses": "[\"eligible\", \"selected_in_cut\"]",
+      "selected_in_cut": true,
+      "final_best_supergate": 2047,
+      "final_selected": false,
+      "event_index": 1965,
+      "estimated_load": "UNAVAILABLE",
+      "pair_delay": 193.519989
+    },
+    {
+      "variant": "candidate",
+      "function_point": 365,
+      "mapper_node_id": 382,
+      "mapping_mode": 0,
+      "cut_index": 10,
+      "leaves": "[338, 339, 322, 340]",
+      "leaf_mapper_ids": "[138, 175, 210, 235]",
+      "output_phase": 0,
+      "input_phase_mask": 2,
+      "truth_lo": 536879104,
+      "truth_hi": 536879104,
+      "supergate_id": 2044,
+      "cell": "NAND4xp25_ASAP7_75t_L",
+      "physical_pin_to_leaf": "[0, 1, 3, 2]",
+      "critical_leaf_index": 1,
+      "critical_pin": "B",
+      "leaf_rise_arrivals": "[109.23999, 108.069992, 106.219986, 109.23999]",
+      "leaf_fall_arrivals": "[109.23999, 108.069992, 106.219986, 109.23999]",
+      "leaf_arc_rr": "[15.5900002, 16.7299995, 18.1800003, 17.5300007]",
+      "leaf_arc_fr": "[15.5900002, 16.7299995, 18.1800003, 17.5300007]",
+      "leaf_arc_rf": "[15.5900002, 16.7299995, 18.1800003, 17.5300007]",
+      "leaf_arc_ff": "[15.5900002, 16.7299995, 18.1800003, 17.5300007]",
+      "recorded_output_rise": 126.769989,
+      "recorded_output_fall": 126.769989,
+      "recorded_output_worst": 126.769989,
+      "complete_timing_record": true,
+      "audit_unbounded_output": 126.76998901367188,
+      "audit_leaf_contributions": "[124.82998657226562, 124.79998779296875, 124.39998626708984, 126.76998901367188]",
+      "matching_cost": 53.1589432,
+      "library_cell_area": 1.39999998,
+      "limit": 127.419991,
+      "statuses": "[\"eligible\", \"selected_in_cut\"]",
+      "selected_in_cut": true,
+      "final_best_supergate": 2047,
+      "final_selected": false,
+      "event_index": 1967,
+      "estimated_load": "UNAVAILABLE",
+      "pair_delay": 193.519989
+    },
+    {
+      "variant": "candidate",
+      "function_point": 365,
+      "mapper_node_id": 382,
+      "mapping_mode": 0,
+      "cut_index": 10,
+      "leaves": "[338, 339, 322, 340]",
+      "leaf_mapper_ids": "[138, 175, 210, 235]",
+      "output_phase": 0,
+      "input_phase_mask": 2,
+      "truth_lo": 536879104,
+      "truth_hi": 536879104,
+      "supergate_id": 2046,
+      "cell": "NAND4xp25_ASAP7_75t_L",
+      "physical_pin_to_leaf": "[0, 2, 3, 1]",
+      "critical_leaf_index": 1,
+      "critical_pin": "D",
+      "leaf_rise_arrivals": "[109.23999, 108.069992, 106.219986, 109.23999]",
+      "leaf_fall_arrivals": "[109.23999, 108.069992, 106.219986, 109.23999]",
+      "leaf_arc_rr": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "leaf_arc_fr": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "leaf_arc_rf": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "leaf_arc_ff": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "recorded_output_rise": 126.769989,
+      "recorded_output_fall": 126.769989,
+      "recorded_output_worst": 126.769989,
+      "complete_timing_record": true,
+      "audit_unbounded_output": 126.76998901367188,
+      "audit_leaf_contributions": "[124.82998657226562, 126.24999237060547, 122.94998168945312, 126.76998901367188]",
+      "matching_cost": 53.1589432,
+      "library_cell_area": 1.39999998,
+      "limit": 126.769989,
+      "statuses": "[\"eligible\"]",
+      "selected_in_cut": false,
+      "final_best_supergate": 2047,
+      "final_selected": false,
+      "event_index": 1970,
+      "estimated_load": "UNAVAILABLE",
+      "pair_delay": 193.519989
+    },
+    {
+      "variant": "candidate",
+      "function_point": 365,
+      "mapper_node_id": 382,
+      "mapping_mode": 0,
+      "cut_index": 10,
+      "leaves": "[338, 339, 322, 340]",
+      "leaf_mapper_ids": "[138, 175, 210, 235]",
+      "output_phase": 0,
+      "input_phase_mask": 2,
+      "truth_lo": 536879104,
+      "truth_hi": 536879104,
+      "supergate_id": 2047,
+      "cell": "NAND4xp25_ASAP7_75t_L",
+      "physical_pin_to_leaf": "[0, 3, 1, 2]",
+      "critical_leaf_index": 1,
+      "critical_pin": "C",
+      "leaf_rise_arrivals": "[109.23999, 108.069992, 106.219986, 109.23999]",
+      "leaf_fall_arrivals": "[109.23999, 108.069992, 106.219986, 109.23999]",
+      "leaf_arc_rr": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "leaf_arc_fr": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "leaf_arc_rf": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "leaf_arc_ff": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "recorded_output_rise": 125.969986,
+      "recorded_output_fall": 125.969986,
+      "recorded_output_worst": 125.969986,
+      "complete_timing_record": true,
+      "audit_unbounded_output": 125.96998596191406,
+      "audit_leaf_contributions": "[124.82998657226562, 125.59999084472656, 124.39998626708984, 125.96998596191406]",
+      "matching_cost": 53.1589432,
+      "library_cell_area": 1.39999998,
+      "limit": 126.769989,
+      "statuses": "[\"eligible\", \"selected_in_cut\"]",
+      "selected_in_cut": true,
+      "final_best_supergate": 2047,
+      "final_selected": true,
+      "event_index": 1971,
+      "estimated_load": "UNAVAILABLE",
+      "pair_delay": 193.519989
+    },
+    {
+      "variant": "candidate",
+      "function_point": 365,
+      "mapper_node_id": 382,
+      "mapping_mode": 1,
+      "cut_index": 10,
+      "leaves": "[338, 339, 322, 340]",
+      "leaf_mapper_ids": "[138, 175, 210, 235]",
+      "output_phase": 0,
+      "input_phase_mask": 2,
+      "truth_lo": 536879104,
+      "truth_hi": 536879104,
+      "supergate_id": 2046,
+      "cell": "NAND4xp25_ASAP7_75t_L",
+      "physical_pin_to_leaf": "[0, 2, 3, 1]",
+      "critical_leaf_index": 1,
+      "critical_pin": "D",
+      "leaf_rise_arrivals": "[110.169998, 108.979996, 108.040009, 109.879997]",
+      "leaf_fall_arrivals": "[110.169998, 108.979996, 108.040009, 109.879997]",
+      "leaf_arc_rr": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "leaf_arc_fr": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "leaf_arc_rf": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "leaf_arc_ff": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "recorded_output_rise": 0,
+      "recorded_output_fall": 0,
+      "recorded_output_worst": 3.40282347e+37,
+      "complete_timing_record": false,
+      "audit_unbounded_output": 127.40999603271484,
+      "audit_leaf_contributions": "[125.75999450683594, 127.15999603271484, 124.77000427246094, 127.40999603271484]",
+      "matching_cost": 22.0803375,
+      "library_cell_area": 1.39999998,
+      "limit": 126.769981,
+      "statuses": "[\"delay_limit\"]",
+      "selected_in_cut": false,
+      "final_best_supergate": 2047,
+      "final_selected": false,
+      "event_index": 2382,
+      "estimated_load": "UNAVAILABLE",
+      "pair_delay": 193.519989
+    },
+    {
+      "variant": "candidate",
+      "function_point": 365,
+      "mapper_node_id": 382,
+      "mapping_mode": 1,
+      "cut_index": 10,
+      "leaves": "[338, 339, 322, 340]",
+      "leaf_mapper_ids": "[138, 175, 210, 235]",
+      "output_phase": 0,
+      "input_phase_mask": 2,
+      "truth_lo": 536879104,
+      "truth_hi": 536879104,
+      "supergate_id": 2047,
+      "cell": "NAND4xp25_ASAP7_75t_L",
+      "physical_pin_to_leaf": "[0, 3, 1, 2]",
+      "critical_leaf_index": 1,
+      "critical_pin": "C",
+      "leaf_rise_arrivals": "[110.169998, 108.979996, 108.040009, 109.879997]",
+      "leaf_fall_arrivals": "[110.169998, 108.979996, 108.040009, 109.879997]",
+      "leaf_arc_rr": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "leaf_arc_fr": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "leaf_arc_rf": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "leaf_arc_ff": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "recorded_output_rise": 126.610001,
+      "recorded_output_fall": 126.610001,
+      "recorded_output_worst": 126.610001,
+      "complete_timing_record": true,
+      "audit_unbounded_output": 126.61000061035156,
+      "audit_leaf_contributions": "[125.75999450683594, 126.50999450683594, 126.22000885009766, 126.61000061035156]",
+      "matching_cost": 22.0803375,
+      "library_cell_area": 1.39999998,
+      "limit": 126.769981,
+      "statuses": "[\"eligible\", \"selected_in_cut\"]",
+      "selected_in_cut": true,
+      "final_best_supergate": 2047,
+      "final_selected": true,
+      "event_index": 2383,
+      "estimated_load": "UNAVAILABLE",
+      "pair_delay": 193.519989
+    },
+    {
+      "variant": "candidate",
+      "function_point": 365,
+      "mapper_node_id": 382,
+      "mapping_mode": 2,
+      "cut_index": 10,
+      "leaves": "[338, 339, 322, 340]",
+      "leaf_mapper_ids": "[138, 175, 210, 235]",
+      "output_phase": 0,
+      "input_phase_mask": 2,
+      "truth_lo": 536879104,
+      "truth_hi": 536879104,
+      "supergate_id": 2046,
+      "cell": "NAND4xp25_ASAP7_75t_L",
+      "physical_pin_to_leaf": "[0, 2, 3, 1]",
+      "critical_leaf_index": 1,
+      "critical_pin": "D",
+      "leaf_rise_arrivals": "[110.169998, 108.509995, 106.219986, 109.679993]",
+      "leaf_fall_arrivals": "[110.169998, 108.509995, 106.219986, 109.679993]",
+      "leaf_arc_rr": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "leaf_arc_fr": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "leaf_arc_rf": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "leaf_arc_ff": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "recorded_output_rise": 0,
+      "recorded_output_fall": 0,
+      "recorded_output_worst": 3.40282347e+37,
+      "complete_timing_record": false,
+      "audit_unbounded_output": 127.20999145507812,
+      "audit_leaf_contributions": "[125.75999450683594, 126.68999481201172, 122.94998168945312, 127.20999145507812]",
+      "matching_cost": 1.39999998,
+      "library_cell_area": 1.39999998,
+      "limit": 126.769981,
+      "statuses": "[\"delay_limit\"]",
+      "selected_in_cut": false,
+      "final_best_supergate": 2047,
+      "final_selected": false,
+      "event_index": 2825,
+      "estimated_load": "UNAVAILABLE",
+      "pair_delay": 193.519989
+    },
+    {
+      "variant": "candidate",
+      "function_point": 365,
+      "mapper_node_id": 382,
+      "mapping_mode": 2,
+      "cut_index": 10,
+      "leaves": "[338, 339, 322, 340]",
+      "leaf_mapper_ids": "[138, 175, 210, 235]",
+      "output_phase": 0,
+      "input_phase_mask": 2,
+      "truth_lo": 536879104,
+      "truth_hi": 536879104,
+      "supergate_id": 2047,
+      "cell": "NAND4xp25_ASAP7_75t_L",
+      "physical_pin_to_leaf": "[0, 3, 1, 2]",
+      "critical_leaf_index": 1,
+      "critical_pin": "C",
+      "leaf_rise_arrivals": "[110.169998, 108.509995, 106.219986, 109.679993]",
+      "leaf_fall_arrivals": "[110.169998, 108.509995, 106.219986, 109.679993]",
+      "leaf_arc_rr": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "leaf_arc_fr": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "leaf_arc_rf": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "leaf_arc_ff": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "recorded_output_rise": 126.409988,
+      "recorded_output_fall": 126.409988,
+      "recorded_output_worst": 126.409988,
+      "complete_timing_record": true,
+      "audit_unbounded_output": 126.40998840332031,
+      "audit_leaf_contributions": "[125.75999450683594, 126.03999328613281, 124.39998626708984, 126.40998840332031]",
+      "matching_cost": 1.39999998,
+      "library_cell_area": 1.39999998,
+      "limit": 126.769981,
+      "statuses": "[\"eligible\"]",
+      "selected_in_cut": false,
+      "final_best_supergate": 2047,
+      "final_selected": true,
+      "event_index": 2826,
+      "estimated_load": "UNAVAILABLE",
+      "pair_delay": 193.519989
+    },
+    {
+      "variant": "candidate",
+      "function_point": 365,
+      "mapper_node_id": 382,
+      "mapping_mode": 3,
+      "cut_index": 10,
+      "leaves": "[338, 339, 322, 340]",
+      "leaf_mapper_ids": "[138, 175, 210, 235]",
+      "output_phase": 0,
+      "input_phase_mask": 2,
+      "truth_lo": 536879104,
+      "truth_hi": 536879104,
+      "supergate_id": 2046,
+      "cell": "NAND4xp25_ASAP7_75t_L",
+      "physical_pin_to_leaf": "[0, 2, 3, 1]",
+      "critical_leaf_index": 1,
+      "critical_pin": "D",
+      "leaf_rise_arrivals": "[110.169998, 108.509995, 107.619995, 109.679993]",
+      "leaf_fall_arrivals": "[110.169998, 108.509995, 107.619995, 109.679993]",
+      "leaf_arc_rr": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "leaf_arc_fr": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "leaf_arc_rf": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "leaf_arc_ff": "[15.5900002, 18.1800003, 16.7299995, 17.5300007]",
+      "recorded_output_rise": 0,
+      "recorded_output_fall": 0,
+      "recorded_output_worst": 3.40282347e+37,
+      "complete_timing_record": false,
+      "audit_unbounded_output": 127.20999145507812,
+      "audit_leaf_contributions": "[125.75999450683594, 126.68999481201172, 124.34999084472656, 127.20999145507812]",
+      "matching_cost": 1.39999998,
+      "library_cell_area": 1.39999998,
+      "limit": 126.769981,
+      "statuses": "[\"delay_limit\"]",
+      "selected_in_cut": false,
+      "final_best_supergate": 2047,
+      "final_selected": false,
+      "event_index": 3254,
+      "estimated_load": "UNAVAILABLE",
+      "pair_delay": 193.519989
+    },
+    {
+      "variant": "candidate",
+      "function_point": 365,
+      "mapper_node_id": 382,
+      "mapping_mode": 3,
+      "cut_index": 10,
+      "leaves": "[338, 339, 322, 340]",
+      "leaf_mapper_ids": "[138, 175, 210, 235]",
+      "output_phase": 0,
+      "input_phase_mask": 2,
+      "truth_lo": 536879104,
+      "truth_hi": 536879104,
+      "supergate_id": 2047,
+      "cell": "NAND4xp25_ASAP7_75t_L",
+      "physical_pin_to_leaf": "[0, 3, 1, 2]",
+      "critical_leaf_index": 1,
+      "critical_pin": "C",
+      "leaf_rise_arrivals": "[110.169998, 108.509995, 107.619995, 109.679993]",
+      "leaf_fall_arrivals": "[110.169998, 108.509995, 107.619995, 109.679993]",
+      "leaf_arc_rr": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "leaf_arc_fr": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "leaf_arc_rf": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "leaf_arc_ff": "[15.5900002, 17.5300007, 18.1800003, 16.7299995]",
+      "recorded_output_rise": 126.409988,
+      "recorded_output_fall": 126.409988,
+      "recorded_output_worst": 126.409988,
+      "complete_timing_record": true,
+      "audit_unbounded_output": 126.40998840332031,
+      "audit_leaf_contributions": "[125.75999450683594, 126.03999328613281, 125.79999542236328, 126.40998840332031]",
+      "matching_cost": 1.39999998,
+      "library_cell_area": 1.39999998,
+      "limit": 126.769981,
+      "statuses": "[\"eligible\"]",
+      "selected_in_cut": false,
+      "final_best_supergate": 2047,
+      "final_selected": true,
+      "event_index": 3255,
+      "estimated_load": "UNAVAILABLE",
+      "pair_delay": 193.519989
+    }
+  ],
+  "candidate_manifest": {
+    "root": 197,
+    "internal_root": 301,
+    "region_id": 9,
+    "execution_order": 0,
+    "cut_slot": 2,
+    "preselected": true,
+    "final_status": "ACCEPTED",
+    "status_reason": "",
+    "selected_subgraph": 2,
+    "cut_leaves": [
+      17,
+      33,
+      151,
+      188
+    ],
+    "cut_leaves_internal": [
+      17,
+      33,
+      232,
+      234
+    ],
+    "removable_nodes_before_execution": [
+      193,
+      189,
+      190,
+      191,
+      192,
+      194,
+      195,
+      196,
+      197
+    ],
+    "removable_nodes_before_execution_internal": [
+      63,
+      245,
+      256,
+      257,
+      269,
+      277,
+      288,
+      289,
+      301
+    ],
+    "removable_nodes_before_execution_generated_internal": [],
+    "cut_leaf_status_before_execution": [
+      {
+        "leaf": 17,
+        "leaf_internal": 17,
+        "deleted": false,
+        "first_deleted_by_prior_root": -1,
+        "first_deleted_by_prior_root_internal": -1,
+        "first_deleted_by_prior_execution_order": -1
+      },
+      {
+        "leaf": 33,
+        "leaf_internal": 33,
+        "deleted": false,
+        "first_deleted_by_prior_root": -1,
+        "first_deleted_by_prior_root_internal": -1,
+        "first_deleted_by_prior_execution_order": -1
+      },
+      {
+        "leaf": 151,
+        "leaf_internal": 232,
+        "deleted": false,
+        "first_deleted_by_prior_root": -1,
+        "first_deleted_by_prior_root_internal": -1,
+        "first_deleted_by_prior_execution_order": -1
+      },
+      {
+        "leaf": 188,
+        "leaf_internal": 234,
+        "deleted": false,
+        "first_deleted_by_prior_root": -1,
+        "first_deleted_by_prior_root_internal": -1,
+        "first_deleted_by_prior_execution_order": -1
+      }
+    ],
+    "damaged_cut_leaves": [],
+    "damaged_by_prior_root": [],
+    "damaged_by_prior_execution_order": [],
+    "replacement_identity": {
+      "selected_subgraph": 2,
+      "replace_literal": 1118,
+      "replace_node_internal": 559,
+      "replace_node_original": -1
+    },
+    "saved": 8,
+    "added": 6,
+    "saved_added_evaluated": true,
+    "deleted_nodes_internal": [
+      245,
+      256,
+      257,
+      269,
+      277,
+      288,
+      289
+    ],
+    "deleted_nodes": [
+      189,
+      190,
+      191,
+      192,
+      194,
+      195,
+      196
+    ]
+  },
+  "observer_binary_sha": "f255acd802f928fb011737843419d1b39454f060bbd74968a355d3e476822784",
+  "original_binary_sha": "aa2d17b6de367acd16a622aa894f96da0e92431927dbb68e1ca26462b696c1ae",
+  "library_sha": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+}

@@ -1,0 +1,17 @@
+{
+  "abc": "/data/wushangge/runs/CULS-gate3f-20260922-gate2babc/bin/abc",
+  "abc_command": "read \"/data/wushangge/runs/CULS-gate3f-20260922-gate2babc/input/asap7.lib\"; read \"/data/wushangge/runs/CULS-path-impact-calibration-20260929-v1/input/c1355_orig.aig\"; map; topo; stime; print_delay po11 pi03",
+  "abc_pi": "pi03",
+  "aig": "/data/wushangge/runs/CULS-path-impact-calibration-20260929-v1/input/c1355_orig.aig",
+  "aig_sha256": "2602b10f131a6ba5996521036ba130aab128a4aa15e3ab49ce44f2f02047f0b0",
+  "baseline_matches_exactly": true,
+  "expected_endpoint_delay_ps": 194.4,
+  "library": "/data/wushangge/runs/CULS-gate3f-20260922-gate2babc/input/asap7.lib",
+  "measured_endpoint_delay_ps": 194.4,
+  "observed_arrival_output_resolution_ps": 0.1,
+  "pi_node": 4,
+  "po": 11,
+  "precision_note": "Arrival fields in the ABC print_delay log are printed with one decimal place; use 0.1 ps as observed report resolution.",
+  "prior_gate3f_manifest_precision_ps": 0.01,
+  "timing_precision_ps": 0.1
+}

@@ -1,0 +1,41 @@
+--- a/src/base/io/ioReadAiger.c
++++ b/src/base/io/ioReadAiger.c
+@@ -408,6 +408,11 @@
+         pNode1 = Abc_ObjNotCond( (Abc_Obj_t *)Vec_PtrEntry(vNodes, uLit1 >> 1), uLit1 & 1 );
+         assert( Vec_PtrSize(vNodes) == i + 1 + nInputs + nLatches );
+         Vec_PtrPush( vNodes, Abc_AigAnd((Abc_Aig_t *)pNtkNew->pManFunc, pNode0, pNode1) );
++        if ( getenv("ABC_DUMP_AIGER_MAP") &&
++             (i + 1 + nInputs + nLatches == 151 || i + 1 + nInputs + nLatches == 188 ||
++              i + 1 + nInputs + nLatches == 197) )
++            printf( "AIGER_ORIG var=%d abc_obj_id=%d\n", i + 1 + nInputs + nLatches,
++                    Abc_ObjId(Abc_ObjRegular((Abc_Obj_t *)Vec_PtrEntry(vNodes, i + 1 + nInputs + nLatches))) );
+     }
+     Extra_ProgressBarStop( pProgress );
+ 
+@@ -605,4 +610,3 @@
+ 
+ 
+ ABC_NAMESPACE_IMPL_END
+-
+--- a/src/base/abci/abcTiming.c
++++ b/src/base/abci/abcTiming.c
+@@ -1267,6 +1267,19 @@
+     assert( Abc_NtkIsMappedLogic(pNtk) && Abc_ObjIsCo(pOut) && Abc_ObjIsCi(pIn) );
+ 
+     Abc_NtkTimePrepare(pNtk);
++    if ( getenv("ABC_DUMP_ORIG") && pNtk->vOrigNodeIds )
++    {
++        Abc_NtkForEachNode( pNtk, pObj, i )
++        {
++            int Lit = Abc_ObjId(pObj) < Vec_IntSize(pNtk->vOrigNodeIds) ?
++                      Vec_IntEntry(pNtk->vOrigNodeIds, Abc_ObjId(pObj)) : -1;
++            if ( Lit >= 0 )
++                printf( "MAP_ORIG mapped_id=%d name=%s orig_id=%d phase=%d cell=%s\n",
++                        Abc_ObjId(pObj), Abc_ObjName(pObj), Abc_Lit2Var(Lit),
++                        Abc_LitIsCompl(Lit),
++                        Abc_ObjIsBarBuf(pObj) ? "barbuf" : Mio_GateReadName((Mio_Gate_t *)pObj->pData) );
++        }
++    }
+     pSaved = ABC_ALLOC( Abc_Time_t, Abc_NtkCiNum(pNtk) );
+     Abc_NtkForEachCi( pNtk, pObj, i )
+     {

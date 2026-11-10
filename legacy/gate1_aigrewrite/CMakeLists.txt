@@ -1,0 +1,186 @@
+cmake_minimum_required(VERSION 3.5.0)
+
+include(CMakeParseArguments)
+include(CheckCCompilerFlag)
+include(CheckCXXCompilerFlag)
+
+string(REPLACE "-fno-exceptions" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}") 
+string(REPLACE "-fno-exceptions" "" CMAKE_C_FLAGS    "${CMAKE_C_FLAGS}")
+string(REPLACE "-fno-exceptions" "" CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS}")
+
+add_definitions(-DDISABLE_PRINT)
+add_compile_options(-fexceptions -funwind-tables) 
+
+function(addprefix var prefix)
+    foreach( s ${ARGN} )
+        list(APPEND tmp "-I${s}")
+    endforeach()
+    set(${var} ${tmp} PARENT_SCOPE)
+endfunction()
+
+function(addprefix_g var prefix)
+    foreach( s ${ARGN} )
+        list(APPEND tmp "${prefix}${s}")
+    endforeach()
+    set(${var} ${tmp} PARENT_SCOPE)
+endfunction()
+
+# All print has been disabled in ABC due to this macro, if you want to use print, comment this line
+# add_definitions(-DABC_WITHOUT_PRINT)
+
+# filter out flags that are not appropriate for the compiler being used
+function(target_compile_options_filtered target visibility)
+    foreach( flag ${ARGN} )
+        if( flag MATCHES "^-D.*" )
+            target_compile_options( ${target} ${visibility} ${flag} )
+        else()
+            check_c_compiler_flag( ${flag} C_COMPILER_SUPPORTS__${flag} )
+            if( C_COMPILER_SUPPORTS__${flag} )
+                target_compile_options( ${target} ${visibility} $<$<COMPILE_LANGUAGE:C>:${flag}> )
+            endif()
+
+            check_cxx_compiler_flag( ${flag} CXX_COMPILER_SUPPORTS__${flag} )
+            if( CXX_COMPILER_SUPPORTS__${flag} )
+                target_compile_options( ${target} ${visibility} $<$<COMPILE_LANGUAGE:CXX>:${flag}>  )
+            endif()
+        endif()
+    endforeach()
+endfunction()
+
+set(GPULS_CUDA_FLAGS -arch=compute_89 -code=compute_89,sm_89)
+set(GPULS_CUDA_FLAGS ${GPULS_CUDA_FLAGS} -std=c++17 -O3 --extended-lambda -Xcompiler=-fexceptions)
+
+project(abcg C CXX CUDA)
+
+if(READLINE_FOUND MATCHES TRUE)
+    addprefix(ABC_READLINE_INCLUDES_FLAGS "-I" ${READLINE_INCLUDE})
+    string(REPLACE ";" " " ABC_READLINE_INCLUDES_FLAGS "${ABC_READLINE_INCLUDES_FLAGS}")
+    list(APPEND ABC_READLINE_FLAGS "ABC_READLINE_INCLUDES=${ABC_READLINE_INCLUDES_FLAGS}")
+
+    string(REPLACE ";" " " ABC_READLINE_LIBRARIES_FLAGS "${READLINE_LIBRARIES}")
+    list(APPEND ABC_READLINE_FLAGS "ABC_READLINE_LIBRARIES=${ABC_READLINE_LIBRARIES_FLAGS}")
+elseif(READLINE_FOUND MATCHES FALSE)
+    list(APPEND ABC_READLINE_FLAGS "ABC_USE_NO_READLINE=1")
+endif()
+
+if(ABC_USE_NAMESPACE)
+    set(ABC_USE_NAMESPACE_FLAGS "ABC_USE_NAMESPACE=${ABC_USE_NAMESPACE}")
+endif()
+
+if( APPLE )
+    set(make_env ${CMAKE_COMMAND} -E env SDKROOT=${CMAKE_OSX_SYSROOT})
+endif()
+
+set(ABC_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/abc")
+
+# run make to extract compiler options, linker options and list of source files
+execute_process(
+  COMMAND
+    ${make_env}
+    make
+        ${ABC_READLINE_FLAGS}
+        ${ABC_USE_NAMESPACE_FLAGS}
+        ARCHFLAGS_EXE=${CMAKE_CURRENT_BINARY_DIR}/abc_arch_flags_program.exe
+        ABC_MAKE_NO_DEPS=1
+        CC=${CMAKE_C_COMPILER}
+        CXX=${CMAKE_CXX_COMPILER}
+        LD=${CMAKE_CXX_COMPILER}
+        cmake_info
+  WORKING_DIRECTORY ${ABC_ROOT_DIR}
+  OUTPUT_VARIABLE MAKE_OUTPUT
+)
+
+# extract options from make output
+function(extract_var SEPARATOR DEST_VARIABLE MAKE_OUTPUT)
+  string(REGEX MATCH "${SEPARATOR} .* ${SEPARATOR}" TMP "${MAKE_OUTPUT}")
+  string(REGEX REPLACE "${SEPARATOR} (.*) ${SEPARATOR}" "\\1" TMP "${TMP}")
+
+  separate_arguments(TMP)
+
+  set(${DEST_VARIABLE} ${TMP} PARENT_SCOPE)
+endfunction()
+
+extract_var(SEPARATOR_SRC ABC_SRC ${MAKE_OUTPUT})
+extract_var(SEPARATOR_LIBS ABC_LIBS ${MAKE_OUTPUT})
+extract_var(SEPARATOR_CFLAGS ABC_CFLAGS ${MAKE_OUTPUT})
+extract_var(SEPARATOR_CXXFLAGS ABC_CXXFLAGS ${MAKE_OUTPUT})
+
+string(REPLACE "-fno-exceptions" "" ABC_CFLAGS    "${ABC_CFLAGS}")
+string(REPLACE "-fno-exceptions" "" ABC_CXXFLAGS  "${ABC_CXXFLAGS}")
+
+if(ABC_USE_NAMESPACE)
+    set_source_files_properties(${ABC_SRC} PROPERTIES LANGUAGE CXX)
+endif()
+
+function(abc_properties target visibility)
+    target_include_directories(${target} ${visibility} ${ABC_ROOT_DIR}/src )
+    target_compile_options_filtered(${target} ${visibility} ${ABC_CFLAGS} ${ABC_CXXFLAGS} -Wno-unused-but-set-variable )
+    target_link_libraries(${target} ${visibility} ${ABC_LIBS})
+endfunction()
+
+addprefix_g(ABC_SRC "abc/" ${ABC_SRC})
+
+set(ABC_MAIN_SRC abc/src/base/main/main.c)
+list(REMOVE_ITEM ABC_SRC ${ABC_MAIN_SRC})
+
+add_library(libabc SHARED ${ABC_SRC})
+# message(STATUS ${ABC_SRC})
+# message(${CMAKE_CURRENT_SOURCE_DIR})
+abc_properties(libabc PUBLIC)
+target_compile_options(libabc PRIVATE -w -fexceptions -funwind-tables)
+set_property(TARGET libabc PROPERTY OUTPUT_NAME abc)
+
+
+file(GLOB GPULS_CPU_SOURCES "src/*.cpp")
+file(GLOB GPULS_GPU_SOURCES 
+    "src/*.cu"
+    "src/aig/*.cu"
+    "src/test/*.cu"
+    "src/mem/*.cu"
+    "src/misc/*.cu"
+    "src/algorithms/*.cu"
+    "src/algorithms/map/*.cu"
+    "src/algorithms/rec_opt/*.cu")
+file(GLOB GPULS_PATCH_SOURCES "src/abc_patch/*.cpp")
+list(FILTER GPULS_CPU_SOURCES EXCLUDE REGEX ".*/src/main\.cpp")
+set(GPU_TEST_MAIN "./src/abc_patch/gpu_test/abc_patch_main.cpp")
+list(FILTER GPULS_PATCH_SOURCES EXCLUDE REGEX ${GPU_TEST_MAIN})
+
+# add_library(abcgpu SHARED ${GPULS_CPU_SOURCES} ${GPULS_GPU_SOURCES} ${GPULS_PATCH_SOURCES})
+
+# target_link_libraries(abcgpu PRIVATE libabc)
+
+# target_include_directories(abcgpu PRIVATE "src")
+# target_include_directories(abcgpu PRIVATE "src/hash_table")
+# # target_include_directories(abcgpu PUBLIC "src/base")
+# target_include_directories(abcgpu PUBLIC "include")
+
+# abc_properties(abcgpu PRIVATE)
+
+file(GLOB GPULS_PATCH_TEST "src/abc_patch/gpu_test/src/*.cpp"
+                            "src/abc_patch/gpu_test/src/*.cu")
+add_executable(abcg ${GPULS_CPU_SOURCES} ${GPULS_GPU_SOURCES} 
+                    ${GPULS_PATCH_SOURCES} ${ABC_MAIN_SRC})
+
+
+# target_link_libraries(abcg PRIVATE abcgpu)
+target_link_libraries(abcg PRIVATE libabc)
+target_include_directories(abcg PRIVATE "src")
+target_include_directories(abcg PRIVATE "src/hash_table")
+target_include_directories(abcg PUBLIC "include")
+abc_properties(abcg PRIVATE)
+
+# target_compile_options(abcgpu PRIVATE 
+#     $<$<COMPILE_LANGUAGE:CUDA>:${GPULS_CUDA_FLAGS}> 
+#     $<$<COMPILE_LANGUAGE:CXX>:-fexceptions -funwind-tables>)
+target_compile_options(abcg PRIVATE 
+  $<$<COMPILE_LANGUAGE:CUDA>:${GPULS_CUDA_FLAGS}>
+  $<$<COMPILE_LANGUAGE:CXX>:-fexceptions -funwind-tables>)
+# add_executable(yosys-abc ${ABC_MAIN_SRC})
+# target_link_libraries(yosys-abc PRIVATE libabc)
+# abc_properties(yosys-abc PRIVATE)
+
+# add_library(libabc-pic ${ABC_SRC})
+# abc_properties(libabc-pic PUBLIC)
+# set_property(TARGET libabc-pic PROPERTY POSITION_INDEPENDENT_CODE ON)
+# set_property(TARGET libabc-pic PROPERTY OUTPUT_NAME abc-pic)

@@ -1,0 +1,365 @@
+{
+  "status": "NOT_ALIGNABLE",
+  "scope": "d1=(root=146,cut_slot=0), candidates A/B",
+  "canonical_flow": {
+    "abc_binary": "/home/wushangge/abc_for_cutLib/abc",
+    "technology_library": "/home/wushangge/cutLibOrigin/lib/asap7.lib",
+    "command": "read asap7.lib; read <Gate1 replay>.aig; rewrite -c; map; write_verilog",
+    "python_parser": "src/subutils/Parser.py:Aig2MapParser._build_graph_payload",
+    "cut_constructor": "src/data_preprocess/data_load.py:construct_cut_set",
+    "subg_constructor": "src/subutils/Parser.py:construct_subg_of_cut"
+  },
+  "candidates": [
+    {
+      "candidate_id": "A",
+      "gate1": {
+        "decision_root": 146,
+        "cut_leaves": [
+          2,
+          42,
+          82
+        ],
+        "subgraph_index": 0,
+        "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+        "preserved_root_wrapper": 146,
+        "library_subgraph_root": 5,
+        "nodes_added": 2,
+        "physical_graph_modified": false,
+        "physically_deleted_nodes": [],
+        "replayed_aig": "/data/wushangge/gate1a_AIGRewrite/gate1c_r_out/d1_sub0.aig",
+        "replacement_dag": {
+          "source": "Gate1 BuildSubgr replay (replayed AIG is the lossless artifact)",
+          "library_subgraph_root": 5,
+          "replayed_aig": "/data/wushangge/gate1a_AIGRewrite/gate1c_r_out/d1_sub0.aig"
+        }
+      },
+      "mapping": {
+        "abc_binary": "/home/wushangge/abc_for_cutLib/abc",
+        "technology_library": "/home/wushangge/cutLibOrigin/lib/asap7.lib",
+        "aig2map_log": "/home/wushangge/cutLibOrigin/gate2a_r_out/mapping_A/aig2map.log",
+        "abc_map_log": "/home/wushangge/cutLibOrigin/gate2a_r_out/mapping_A/abc_map.log",
+        "abc_superCreate_log": "/home/wushangge/cutLibOrigin/gate2a_r_out/mapping_A/abc_superCreate.log",
+        "mapper_root_id": 216,
+        "mapper_root_to_aig": 146,
+        "direct_supergate_records_by_mapper_id": [],
+        "direct_supergate_records_by_aig_id": [],
+        "super_create_events_for_mapper_root": [],
+        "root_has_direct_selected_supergate": false,
+        "canonical_parser_graph_stats": {
+          "transformed_graph_nodes": 937,
+          "feat_graph_nodes": 543,
+          "cell_struct_entries": 502
+        },
+        "root_fanout_fusion_evidence": [
+          {
+            "root_to_fanout_edge": {
+              "fanin0": 146,
+              "fanin0_complement": 1,
+              "fanin1": 147,
+              "fanin1_complement": 1,
+              "aig_root": 194
+            },
+            "fanout_aig_root": 194,
+            "fanout_mapper_node_id": 218,
+            "fanout_supergate_records": [
+              {
+                "mapper_node_id": 218,
+                "aig_node_id": 194,
+                "area": 2.1,
+                "truth_table": [
+                  2576980377,
+                  2576980377
+                ],
+                "supergate_leaves": [
+                  9,
+                  13
+                ]
+              }
+            ],
+            "fanout_selected_supergate_index": 1,
+            "fanout_canonical_subg": {
+              "218": [],
+              "216": [
+                [
+                  218,
+                  1
+                ]
+              ],
+              "9": [
+                [
+                  215,
+                  0
+                ],
+                [
+                  216,
+                  0
+                ]
+              ],
+              "215": [
+                [
+                  216,
+                  1
+                ],
+                [
+                  217,
+                  1
+                ]
+              ],
+              "13": [
+                [
+                  215,
+                  0
+                ],
+                [
+                  217,
+                  0
+                ]
+              ],
+              "217": [
+                [
+                  218,
+                  1
+                ]
+              ]
+            },
+            "fanout_canonical_subg_structural_hash": "9449c0d1ca77a3162fabb4562ddbcb6f"
+          }
+        ],
+        "canonical_root_cut_set": [
+          [
+            8738,
+            [
+              9,
+              215
+            ],
+            2
+          ],
+          [
+            8738,
+            [
+              9,
+              13
+            ],
+            2
+          ]
+        ],
+        "canonical_first_cut": [
+          8738,
+          [
+            9,
+            215
+          ],
+          2
+        ],
+        "canonical_first_cut_aig_namespace": {
+          "truth": 8738,
+          "mapper_leaves": [
+            9,
+            215
+          ],
+          "aig_leaves": [
+            10,
+            94
+          ],
+          "n_leaves": 2
+        },
+        "canonical_selected_supergate_index": -1,
+        "canonical_selected_supergate": null,
+        "canonical_subg": null,
+        "canonical_subg_structural_hash": null,
+        "log_sha256": {
+          "aig2map.log": "605762fc3661a07c3e73d81f16b2e7151b06ca68ab0234663b9cea42eca8494c",
+          "abc_map.log": "3c5626ebbf37e6b93ba6a0bea783d6b8694ed1918babd13b9c7d48796016ef14",
+          "abc_superCreate.log": "8bcae3b808df8427e53c054c7e9a959b25604ec8ecf343e65c09422e8f496a9b"
+        }
+      }
+    },
+    {
+      "candidate_id": "B",
+      "gate1": {
+        "decision_root": 146,
+        "cut_leaves": [
+          2,
+          42,
+          82
+        ],
+        "subgraph_index": 1,
+        "installation_kind": "PHYSICAL_REPLACEMENT",
+        "preserved_root_wrapper": 146,
+        "library_subgraph_root": 8,
+        "nodes_added": 3,
+        "physical_graph_modified": true,
+        "physically_deleted_nodes": [],
+        "replayed_aig": "/data/wushangge/gate1a_AIGRewrite/gate1c_r_out/d1_sub1.aig",
+        "replacement_dag": {
+          "source": "Gate1 BuildSubgr replay (replayed AIG is the lossless artifact)",
+          "library_subgraph_root": 8,
+          "replayed_aig": "/data/wushangge/gate1a_AIGRewrite/gate1c_r_out/d1_sub1.aig"
+        }
+      },
+      "mapping": {
+        "abc_binary": "/home/wushangge/abc_for_cutLib/abc",
+        "technology_library": "/home/wushangge/cutLibOrigin/lib/asap7.lib",
+        "aig2map_log": "/home/wushangge/cutLibOrigin/gate2a_r_out/mapping_B/aig2map.log",
+        "abc_map_log": "/home/wushangge/cutLibOrigin/gate2a_r_out/mapping_B/abc_map.log",
+        "abc_superCreate_log": "/home/wushangge/cutLibOrigin/gate2a_r_out/mapping_B/abc_superCreate.log",
+        "mapper_root_id": 218,
+        "mapper_root_to_aig": 146,
+        "direct_supergate_records_by_mapper_id": [],
+        "direct_supergate_records_by_aig_id": [],
+        "super_create_events_for_mapper_root": [],
+        "root_has_direct_selected_supergate": false,
+        "canonical_parser_graph_stats": {
+          "transformed_graph_nodes": 939,
+          "feat_graph_nodes": 544,
+          "cell_struct_entries": 503
+        },
+        "root_fanout_fusion_evidence": [
+          {
+            "root_to_fanout_edge": {
+              "fanin0": 145,
+              "fanin0_complement": 1,
+              "fanin1": 146,
+              "fanin1_complement": 1,
+              "aig_root": 192
+            },
+            "fanout_aig_root": 192,
+            "fanout_mapper_node_id": 219,
+            "fanout_supergate_records": [
+              {
+                "mapper_node_id": 219,
+                "aig_node_id": 192,
+                "area": 2.1,
+                "truth_table": [
+                  2576980377,
+                  2576980377
+                ],
+                "supergate_leaves": [
+                  9,
+                  13
+                ]
+              }
+            ],
+            "fanout_selected_supergate_index": 1,
+            "fanout_canonical_subg": {
+              "219": [],
+              "217": [
+                [
+                  219,
+                  1
+                ]
+              ],
+              "9": [
+                [
+                  216,
+                  0
+                ],
+                [
+                  217,
+                  0
+                ]
+              ],
+              "216": [
+                [
+                  217,
+                  1
+                ],
+                [
+                  218,
+                  1
+                ]
+              ],
+              "13": [
+                [
+                  216,
+                  0
+                ],
+                [
+                  218,
+                  0
+                ]
+              ],
+              "218": [
+                [
+                  219,
+                  1
+                ]
+              ]
+            },
+            "fanout_canonical_subg_structural_hash": "9449c0d1ca77a3162fabb4562ddbcb6f"
+          }
+        ],
+        "canonical_root_cut_set": [
+          [
+            8738,
+            [
+              13,
+              216
+            ],
+            2
+          ],
+          [
+            17476,
+            [
+              9,
+              13
+            ],
+            2
+          ]
+        ],
+        "canonical_first_cut": [
+          8738,
+          [
+            13,
+            216
+          ],
+          2
+        ],
+        "canonical_first_cut_aig_namespace": {
+          "truth": 8738,
+          "mapper_leaves": [
+            13,
+            216
+          ],
+          "aig_leaves": [
+            14,
+            94
+          ],
+          "n_leaves": 2
+        },
+        "canonical_selected_supergate_index": -1,
+        "canonical_selected_supergate": null,
+        "canonical_subg": null,
+        "canonical_subg_structural_hash": null,
+        "log_sha256": {
+          "aig2map.log": "c13453471af71bd973cdf003c0b700c28c1fd97eec97af9b6be3d4dbdb82b752",
+          "abc_map.log": "ad32596712025d084824076f9cce6d8d6df47b45cd1a621e59bcd2ce1d4602cc",
+          "abc_superCreate.log": "0fff9f0fa3098d204e5cec075ad353de2186265315a73a9c4fcb83eb327e8b69"
+        }
+      }
+    }
+  ],
+  "questions": {
+    "a_b_root_mapped_supergate_found": false,
+    "preserved_root_direct_mapper_correspondence": {
+      "answer": "mapper ID exists in aig2map.log, but no direct selected supergate is emitted for either root; netlist identity therefore requires function/boundary matching",
+      "A": 216,
+      "B": 218
+    },
+    "a_b_canonical_supergate_different": "UNDETERMINED_NO_DIRECT_SUPERGATE",
+    "boundary_matches_gate1_fixed_cut": false,
+    "mapping_can_fuse_or_exceed_gate1_region": {
+      "answer": "YES_FUSION_OBSERVED",
+      "evidence": "A root 146 feeds AIG 194, whose selected supergate is mapper 218; B root 146 feeds AIG 192, whose selected supergate is mapper 219. Root 146 has no selected supergate in either mapping."
+    },
+    "different_candidates_same_canonical_supergate": {
+      "answer": "ROOT_UNDETERMINED; FUSED_FANOUT_MANY_TO_ONE_OBSERVED",
+      "fused_fanout_subg_hash_A": "9449c0d1ca77a3162fabb4562ddbcb6f",
+      "fused_fanout_subg_hash_B": "9449c0d1ca77a3162fabb4562ddbcb6f"
+    }
+  },
+  "gate_decision": {
+    "A_B": "STOP_BEFORE_C_D",
+    "reason": "Neither A nor B has a direct canonical selected supergate/subg at the preserved root mapper ID (supergateIndex=-1 and no abc_map/superCreate root record)."
+  }
+}

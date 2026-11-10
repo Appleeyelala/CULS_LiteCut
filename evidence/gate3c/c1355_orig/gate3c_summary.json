@@ -1,0 +1,184 @@
+{
+  "artifact_sha256": {
+    "all_rewrite_decisions.jsonl": "bf245b5c8e65352ea5082ece955d7eefd86f29b779ece420da96984e0e47a8df",
+    "cross_region_decisions.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "decision_region_alignment.csv": "429d9bc4abd89e00f573db7c43d65487ff81af673306f9ad348ac061a6573d53",
+    "executable_rewrite_decisions.jsonl": "95c834163c600521f4ecd0ae3820e69fb0f845579820eaa19fa94ae9608e910b",
+    "gate3c_report.md": "ee9820c583daa7249d136e41797c3dd7839252005ba687c8835e6f235baa6667",
+    "gate3c_summary.json": "4bd93bbb0cf89950bcdabdad3f5698e58347ac3f82fab2d3ee8073df40a205e6",
+    "intra_region_decisions.jsonl": "bf245b5c8e65352ea5082ece955d7eefd86f29b779ece420da96984e0e47a8df",
+    "region_decision_stats.csv": "d83f76ac7ea8fef414edfe23a99c5a8995987b1202630cae96d6cfcfd7e06c1c",
+    "region_to_decisions.json": "3584f0f3a67891091ffff455884619db9e8e7840ee3e1077660dc5caee340e73"
+  },
+  "candidate_identity_source": "GPU rewrite EvaluateNode candidate mask export",
+  "candidate_semantics": "saved_minus_nodes_added_gt_zero",
+  "cross_region_count": 0,
+  "determinism_comparison": [
+    {
+      "file": "all_rewrite_decisions.jsonl",
+      "identical": true,
+      "sha256": [
+        "bf245b5c8e65352ea5082ece955d7eefd86f29b779ece420da96984e0e47a8df",
+        "bf245b5c8e65352ea5082ece955d7eefd86f29b779ece420da96984e0e47a8df"
+      ]
+    },
+    {
+      "file": "executable_rewrite_decisions.jsonl",
+      "identical": true,
+      "sha256": [
+        "95c834163c600521f4ecd0ae3820e69fb0f845579820eaa19fa94ae9608e910b",
+        "95c834163c600521f4ecd0ae3820e69fb0f845579820eaa19fa94ae9608e910b"
+      ]
+    },
+    {
+      "file": "decision_region_alignment.csv",
+      "identical": true,
+      "sha256": [
+        "429d9bc4abd89e00f573db7c43d65487ff81af673306f9ad348ac061a6573d53",
+        "429d9bc4abd89e00f573db7c43d65487ff81af673306f9ad348ac061a6573d53"
+      ]
+    },
+    {
+      "file": "region_to_decisions.json",
+      "identical": true,
+      "sha256": [
+        "3584f0f3a67891091ffff455884619db9e8e7840ee3e1077660dc5caee340e73",
+        "3584f0f3a67891091ffff455884619db9e8e7840ee3e1077660dc5caee340e73"
+      ]
+    },
+    {
+      "file": "region_decision_stats.csv",
+      "identical": true,
+      "sha256": [
+        "d83f76ac7ea8fef414edfe23a99c5a8995987b1202630cae96d6cfcfd7e06c1c",
+        "d83f76ac7ea8fef414edfe23a99c5a8995987b1202630cae96d6cfcfd7e06c1c"
+      ]
+    },
+    {
+      "file": "intra_region_decisions.jsonl",
+      "identical": true,
+      "sha256": [
+        "bf245b5c8e65352ea5082ece955d7eefd86f29b779ece420da96984e0e47a8df",
+        "bf245b5c8e65352ea5082ece955d7eefd86f29b779ece420da96984e0e47a8df"
+      ]
+    },
+    {
+      "file": "cross_region_decisions.jsonl",
+      "identical": true,
+      "sha256": [
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      ]
+    },
+    {
+      "file": "gate3c_summary.json",
+      "identical": true,
+      "sha256": [
+        "638e997b7341c00dffd16c9b66e216d47c89aa66c36d4f307c94c5e33ede1b8a",
+        "638e997b7341c00dffd16c9b66e216d47c89aa66c36d4f307c94c5e33ede1b8a"
+      ]
+    },
+    {
+      "file": "gate3c_report.md",
+      "identical": true,
+      "sha256": [
+        "ee9820c583daa7249d136e41797c3dd7839252005ba687c8835e6f235baa6667",
+        "ee9820c583daa7249d136e41797c3dd7839252005ba687c8835e6f235baa6667"
+      ]
+    }
+  ],
+  "deterministic": true,
+  "deterministic_order": "root ascending, cut_slot ascending, subgraph_index ascending",
+  "executable_cross_region_count": 0,
+  "executable_decisions": 91,
+  "executable_intra_region_count": 91,
+  "forbidden_flows_executed": {
+    "gradient": false,
+    "joint_optimization": false,
+    "litecut": false,
+    "replacement": false
+  },
+  "gate": "Gate 3C",
+  "gate3c_pass": true,
+  "id_space": "original_aig_node_ids",
+  "input_path": "/home/wushangge/cutLibOrigin/open-sourceDataset/OpenABC/c1355_orig.aig",
+  "input_sha256": "2602b10f131a6ba5996521036ba130aab128a4aa15e3ab49ce44f2f02047f0b0",
+  "intra_region_count": 1815,
+  "owner_map_source": "/data/wushangge/runs/CULS-gate3c-20260920-1648/partition/node_to_strict_mffc_region.csv",
+  "partition": "STRICT_MAXIMAL_MFFC_PARTITION",
+  "partition_source": "/data/wushangge/runs/CULS-gate3c-20260920-1648/partition/maximal_standard_mffcs.json",
+  "region_count": 62,
+  "regions_with_rewrite_opportunity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    19,
+    21,
+    22,
+    23,
+    24,
+    27,
+    28,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    37,
+    38,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61
+  ],
+  "regions_with_rewrite_opportunity_count": 54,
+  "regions_without_rewrite_opportunity": [
+    17,
+    18,
+    20,
+    25,
+    26,
+    29,
+    36,
+    39
+  ],
+  "regions_without_rewrite_opportunity_count": 8,
+  "removable_set_semantics": "GPU rewrite CalcMFFC/Decrease ref-deref semantics",
+  "total_decisions": 1815,
+  "total_eligible_gpu_cuts": 1815,
+  "total_replacement_candidates": 326,
+  "zero_candidate_gpu_cuts": 1724
+}

@@ -1,0 +1,19 @@
+{
+  "classification": {
+    "R24_root_386": "NOT_ALIGNABLE",
+    "R9_root_197": "NOT_ALIGNABLE"
+  },
+  "local_mapped_supergate_abc_delay": null,
+  "method": "conservative candidate-preserving correspondence audit",
+  "reason": "The mapped standard-cell netlist has no stable candidate identity that can be proven to represent the pre-mapping rewrite root across all four configurations. ABC may absorb, decompose, or move the root; nearest mapped nodes are not used.",
+  "root_ids": [
+    {
+      "region_id": 9,
+      "root": 197
+    },
+    {
+      "region_id": 24,
+      "root": 386
+    }
+  ]
+}

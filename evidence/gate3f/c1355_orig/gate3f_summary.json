@@ -1,0 +1,352 @@
+{
+  "case_classification": "Case D - timing active + measurable interaction",
+  "cec_pass_count": 4,
+  "configurations": [
+    "GG",
+    "GL",
+    "LG",
+    "LL"
+  ],
+  "determinism": [
+    {
+      "area_equal": true,
+      "cec_equal": true,
+      "config_id": "GG",
+      "global_delay_equal": true,
+      "mapped_gate_count_equal": true,
+      "po11_delay_equal": true,
+      "replay_output_sha_equal": true,
+      "run1_aig_sha256": "1eb8d915b1a27c425bda1747e5ebf52f3faa829e9c982e4bbb8489ba83939d18",
+      "run2_aig_sha256": "1eb8d915b1a27c425bda1747e5ebf52f3faa829e9c982e4bbb8489ba83939d18"
+    },
+    {
+      "area_equal": true,
+      "cec_equal": true,
+      "config_id": "GL",
+      "global_delay_equal": true,
+      "mapped_gate_count_equal": true,
+      "po11_delay_equal": true,
+      "replay_output_sha_equal": true,
+      "run1_aig_sha256": "5164c090f516ba3974d9d224a86e7ac42e073b7a34c5b93d5912b12db72502f9",
+      "run2_aig_sha256": "5164c090f516ba3974d9d224a86e7ac42e073b7a34c5b93d5912b12db72502f9"
+    },
+    {
+      "area_equal": true,
+      "cec_equal": true,
+      "config_id": "LG",
+      "global_delay_equal": true,
+      "mapped_gate_count_equal": true,
+      "po11_delay_equal": true,
+      "replay_output_sha_equal": true,
+      "run1_aig_sha256": "d3c4889c5d499e2243cacba53ee074c235574b153289c81fc165a06f18e8b338",
+      "run2_aig_sha256": "d3c4889c5d499e2243cacba53ee074c235574b153289c81fc165a06f18e8b338"
+    },
+    {
+      "area_equal": true,
+      "cec_equal": true,
+      "config_id": "LL",
+      "global_delay_equal": true,
+      "mapped_gate_count_equal": true,
+      "po11_delay_equal": true,
+      "replay_output_sha_equal": true,
+      "run1_aig_sha256": "403d4349365b091b83ce6810e5d78f62af6f9d830db8c2c6250825de297ba7d6",
+      "run2_aig_sha256": "403d4349365b091b83ce6810e5d78f62af6f9d830db8c2c6250825de297ba7d6"
+    }
+  ],
+  "effect_analysis": {
+    "measurement_precision_ps": 0.01,
+    "metrics": {
+      "global": {
+        "R24_direction_consistent_when_R9_G": true,
+        "R24_direction_consistent_when_R9_L": false,
+        "R24_ranking_reversal": true,
+        "R9_direction_consistent_when_R24_G": true,
+        "R9_direction_consistent_when_R24_L": true,
+        "R9_ranking_reversal": false,
+        "comparison_precision": "ABC stime/print_delay values reported to 0.01 ps; tolerance 0.01 ps",
+        "delta_R24_given_R9_G": -36.03000000000003,
+        "delta_R24_given_R9_L": 19.339999999999975,
+        "delta_R9_given_R24_G": -55.44999999999999,
+        "delta_R9_given_R24_L": -0.07999999999998408,
+        "interaction": 55.370000000000005,
+        "interaction_classification": "MEASURABLE_INTERACTION",
+        "values": {
+          "GG": 425.05,
+          "GL": 389.02,
+          "LG": 369.6,
+          "LL": 388.94
+        }
+      },
+      "po11": {
+        "R24_direction_consistent_when_R9_G": false,
+        "R24_direction_consistent_when_R9_L": true,
+        "R24_ranking_reversal": true,
+        "R9_direction_consistent_when_R24_G": true,
+        "R9_direction_consistent_when_R24_L": true,
+        "R9_ranking_reversal": false,
+        "comparison_precision": "ABC stime/print_delay values reported to 0.01 ps; tolerance 0.01 ps",
+        "delta_R24_given_R9_G": 0.20000000000001705,
+        "delta_R24_given_R9_L": -0.30000000000001137,
+        "delta_R9_given_R24_G": -0.19999999999998863,
+        "delta_R9_given_R24_L": -0.700000000000017,
+        "interaction": -0.5000000000000284,
+        "interaction_classification": "MEASURABLE_INTERACTION",
+        "values": {
+          "GG": 194.1,
+          "GL": 194.3,
+          "LG": 193.9,
+          "LL": 193.6
+        }
+      }
+    }
+  },
+  "fixed_decisions": [
+    {
+      "cut_slot": 2,
+      "gpu_subgraph_index": 0,
+      "litecut_local_best_subgraph_index": 2,
+      "region_id": 9,
+      "root": 197
+    },
+    {
+      "cut_slot": 2,
+      "gpu_subgraph_index": 0,
+      "litecut_local_best_subgraph_index": 2,
+      "region_id": 24,
+      "root": 386
+    }
+  ],
+  "gate": "Gate 3F",
+  "gate3e_input_sha256": "2602b10f131a6ba5996521036ba130aab128a4aa15e3ab49ce44f2f02047f0b0",
+  "gradient_called": false,
+  "litecut_changed": false,
+  "local_alignment": {
+    "classification": {
+      "R24_root_386": "NOT_ALIGNABLE",
+      "R9_root_197": "NOT_ALIGNABLE"
+    },
+    "local_mapped_supergate_abc_delay": null,
+    "method": "conservative candidate-preserving correspondence audit",
+    "reason": "The mapped standard-cell netlist has no stable candidate identity that can be proven to represent the pre-mapping rewrite root across all four configurations. ABC may absorb, decompose, or move the root; nearest mapped nodes are not used.",
+    "root_ids": [
+      {
+        "region_id": 9,
+        "root": 197
+      },
+      {
+        "region_id": 24,
+        "root": 386
+      }
+    ]
+  },
+  "original_aig": "/data/wushangge/runs/CULS-gate3f-20260922-gate2babc/input/c1355_orig.aig",
+  "original_aig_sha256": "2602b10f131a6ba5996521036ba130aab128a4aa15e3ab49ce44f2f02047f0b0",
+  "realized_choices": {
+    "GG": [
+      {
+        "added": 6,
+        "cut_slot": 2,
+        "damaged_by_prior_root": [],
+        "damaged_cut_leaves": [],
+        "execution_order": 0,
+        "final_status": "ACCEPTED",
+        "region_id": 9,
+        "requested_label": "G",
+        "requested_subgraph_index": 0,
+        "root": 197,
+        "saved": 8,
+        "selected_subgraph": 0
+      },
+      {
+        "added": 4,
+        "cut_slot": 2,
+        "damaged_by_prior_root": [],
+        "damaged_cut_leaves": [],
+        "execution_order": 1,
+        "final_status": "ACCEPTED",
+        "region_id": 24,
+        "requested_label": "G",
+        "requested_subgraph_index": 0,
+        "root": 386,
+        "saved": 5,
+        "selected_subgraph": 0
+      }
+    ],
+    "GL": [
+      {
+        "added": 6,
+        "cut_slot": 2,
+        "damaged_by_prior_root": [],
+        "damaged_cut_leaves": [],
+        "execution_order": 0,
+        "final_status": "ACCEPTED",
+        "region_id": 9,
+        "requested_label": "G",
+        "requested_subgraph_index": 0,
+        "root": 197,
+        "saved": 8,
+        "selected_subgraph": 0
+      },
+      {
+        "added": 5,
+        "cut_slot": 2,
+        "damaged_by_prior_root": [],
+        "damaged_cut_leaves": [],
+        "execution_order": 1,
+        "final_status": "ACCEPTED",
+        "region_id": 24,
+        "requested_label": "L",
+        "requested_subgraph_index": 2,
+        "root": 386,
+        "saved": 6,
+        "selected_subgraph": 2
+      }
+    ],
+    "LG": [
+      {
+        "added": 6,
+        "cut_slot": 2,
+        "damaged_by_prior_root": [],
+        "damaged_cut_leaves": [],
+        "execution_order": 0,
+        "final_status": "ACCEPTED",
+        "region_id": 9,
+        "requested_label": "L",
+        "requested_subgraph_index": 2,
+        "root": 197,
+        "saved": 8,
+        "selected_subgraph": 2
+      },
+      {
+        "added": 4,
+        "cut_slot": 2,
+        "damaged_by_prior_root": [],
+        "damaged_cut_leaves": [],
+        "execution_order": 1,
+        "final_status": "ACCEPTED",
+        "region_id": 24,
+        "requested_label": "G",
+        "requested_subgraph_index": 0,
+        "root": 386,
+        "saved": 5,
+        "selected_subgraph": 0
+      }
+    ],
+    "LL": [
+      {
+        "added": 6,
+        "cut_slot": 2,
+        "damaged_by_prior_root": [],
+        "damaged_cut_leaves": [],
+        "execution_order": 0,
+        "final_status": "ACCEPTED",
+        "region_id": 9,
+        "requested_label": "L",
+        "requested_subgraph_index": 2,
+        "root": 197,
+        "saved": 8,
+        "selected_subgraph": 2
+      },
+      {
+        "added": 5,
+        "cut_slot": 2,
+        "damaged_by_prior_root": [],
+        "damaged_cut_leaves": [],
+        "execution_order": 1,
+        "final_status": "ACCEPTED",
+        "region_id": 24,
+        "requested_label": "L",
+        "requested_subgraph_index": 2,
+        "root": 386,
+        "saved": 6,
+        "selected_subgraph": 2
+      }
+    ]
+  },
+  "requested_status_counts": {
+    "GG": {
+      "ACCEPTED": 2,
+      "COMPROMISED": 0,
+      "REVERTED": 0
+    },
+    "GL": {
+      "ACCEPTED": 2,
+      "COMPROMISED": 0,
+      "REVERTED": 0
+    },
+    "LG": {
+      "ACCEPTED": 2,
+      "COMPROMISED": 0,
+      "REVERTED": 0
+    },
+    "LL": {
+      "ACCEPTED": 2,
+      "COMPROMISED": 0,
+      "REVERTED": 0
+    }
+  },
+  "secondary_screening": {
+    "reason": "Main case is retained; no secondary pool was needed for Gate 3F completion.",
+    "started": false
+  },
+  "selected_po": 11,
+  "selected_region_path": [
+    6,
+    9,
+    24,
+    36,
+    37,
+    38
+  ],
+  "status": "PASS",
+  "timing_results": [
+    {
+      "CEC": "PASS",
+      "PO11_delay_ps": 194.1,
+      "R24_choice": "G",
+      "R9_choice": "G",
+      "aig_sha256": "1eb8d915b1a27c425bda1747e5ebf52f3faa829e9c982e4bbb8489ba83939d18",
+      "area": 521.15,
+      "config": "GG",
+      "gates": 396,
+      "global_delay_ps": 425.05,
+      "po_numbering_confirmed": true
+    },
+    {
+      "CEC": "PASS",
+      "PO11_delay_ps": 194.3,
+      "R24_choice": "L",
+      "R9_choice": "G",
+      "aig_sha256": "5164c090f516ba3974d9d224a86e7ac42e073b7a34c5b93d5912b12db72502f9",
+      "area": 504.58,
+      "config": "GL",
+      "gates": 391,
+      "global_delay_ps": 389.02,
+      "po_numbering_confirmed": true
+    },
+    {
+      "CEC": "PASS",
+      "PO11_delay_ps": 193.9,
+      "R24_choice": "G",
+      "R9_choice": "L",
+      "aig_sha256": "d3c4889c5d499e2243cacba53ee074c235574b153289c81fc165a06f18e8b338",
+      "area": 519.28,
+      "config": "LG",
+      "gates": 397,
+      "global_delay_ps": 369.6,
+      "po_numbering_confirmed": true
+    },
+    {
+      "CEC": "PASS",
+      "PO11_delay_ps": 193.6,
+      "R24_choice": "L",
+      "R9_choice": "L",
+      "aig_sha256": "403d4349365b091b83ce6810e5d78f62af6f9d830db8c2c6250825de297ba7d6",
+      "area": 502.02,
+      "config": "LL",
+      "gates": 396,
+      "global_delay_ps": 388.94,
+      "po_numbering_confirmed": true
+    }
+  ]
+}

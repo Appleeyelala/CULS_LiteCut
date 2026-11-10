@@ -1,0 +1,2393 @@
+{
+  "gate": "Gate 2C",
+  "sampling_manifest": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/sampling_manifest.json",
+  "decision_count": 50,
+  "candidate_count": 109,
+  "decisions": [
+    {
+      "decision_id": "c1355_r000146_c000_n000",
+      "design": "c1355.aig",
+      "root": 146,
+      "cut_slot": 0,
+      "cut_leaves": [
+        2,
+        42,
+        82
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        83,
+        146
+      ],
+      "removable_region_boundary": [
+        2,
+        42,
+        82
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000146_c000_n000_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "e3e1b852d8ae692d632db61058764e0d70a8fdcaa156fc4bd449ab517b525313",
+          "feature_hash_19": "7db3f9025ed096502ec257d30241ca3d6a4b560c2ece328934097dd528af50ce",
+          "litecut_predicted_local_abc_delay": 29.53646804117542,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000146_c000_n000_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "64a7598e80205674875ca37ba002b11ae325d4f364b5575ef3d3129750afee32",
+          "feature_hash_19": "9a11e27d7dc2850c678aee25eb73bad9d533026ab0c593bdd24c0c2c8583c82a",
+          "litecut_predicted_local_abc_delay": 24.0842151795256,
+          "aig_sha256": "e4984d4302b74ef1c89fcea03bbf7b6f7fa5329ae13c760eb09d69b0b40fb59f",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000146_c001_n001",
+      "design": "c1355.aig",
+      "root": 146,
+      "cut_slot": 1,
+      "cut_leaves": [
+        1,
+        42,
+        83
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        82,
+        146
+      ],
+      "removable_region_boundary": [
+        1,
+        42,
+        83
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000146_c001_n001_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "f2e2b021f406a675cef4028b23ee3626ff40acfa7c3ef14e6e6e04192d6fdde2",
+          "feature_hash_19": "1fe6952ab4b218a22f4236227cd7fdcaeafb9363701fae77357cc990ab87a31c",
+          "litecut_predicted_local_abc_delay": 29.7403313572705,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000146_c001_n001_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "cb69286c693fbee013e0b7759e61ef18b9d10a9e0c8915ccb6c002e310d16740",
+          "feature_hash_19": "7af4164adc77941ef54606498d4470f77ee634502ffa3dcae6d2990080f4d1df",
+          "litecut_predicted_local_abc_delay": 26.940593511283097,
+          "aig_sha256": "2eef8d8f9ff223e84cc03ebfd9df1ccc9dc13345b8855317ac71e50b74ad547a",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000147_c000_n002",
+      "design": "c1355.aig",
+      "root": 147,
+      "cut_slot": 0,
+      "cut_leaves": [
+        4,
+        43,
+        84
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        85,
+        147
+      ],
+      "removable_region_boundary": [
+        4,
+        43,
+        84
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000147_c000_n002_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "f4327cc93350ea1ef9abb01636143e27548359b6cc5f684f0f5767857f170da1",
+          "feature_hash_19": "999410bcd60c3b1d0a99896055c979efd40fb7d8e728162bf3d1b92d8118557e",
+          "litecut_predicted_local_abc_delay": 31.693759860723446,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000147_c000_n002_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "30d5a93a6df892474cc28ae0f8c8d23c880354ada7dc54bb03be2a8e4749ed3b",
+          "feature_hash_19": "b2c0c1b7f83a614dadd42e2c60b2df7d714f9b407074e1c7fb2c36ddfab57ca9",
+          "litecut_predicted_local_abc_delay": 27.718883877368526,
+          "aig_sha256": "8dfffe94fe359166f1380519a41caa50cd827fc72b63292e3e691676386c702c",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000147_c001_n003",
+      "design": "c1355.aig",
+      "root": 147,
+      "cut_slot": 1,
+      "cut_leaves": [
+        3,
+        43,
+        85
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        84,
+        147
+      ],
+      "removable_region_boundary": [
+        3,
+        43,
+        85
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000147_c001_n003_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "ae596f70ed60e64a6da2f636159ca0547e2efca8a9a60fa0da60a752ae662957",
+          "feature_hash_19": "999410bcd60c3b1d0a99896055c979efd40fb7d8e728162bf3d1b92d8118557e",
+          "litecut_predicted_local_abc_delay": 31.693759860723446,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000147_c001_n003_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "a510304fae954750181ed8f9665deefda33d3f0a91e821fc63af3a689f6899d7",
+          "feature_hash_19": "b2c0c1b7f83a614dadd42e2c60b2df7d714f9b407074e1c7fb2c36ddfab57ca9",
+          "litecut_predicted_local_abc_delay": 27.718883877368526,
+          "aig_sha256": "e29bdbf76af59db402ef58cd7de4cf554414511a83570a50cff934afda32f743",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000148_c000_n004",
+      "design": "c1355.aig",
+      "root": 148,
+      "cut_slot": 0,
+      "cut_leaves": [
+        8,
+        45,
+        86
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        87,
+        148
+      ],
+      "removable_region_boundary": [
+        8,
+        45,
+        86
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000148_c000_n004_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "7b3fabddc0559306ff292a1a2053bf9b5473259b4c639679798a5e83bd0d299e",
+          "feature_hash_19": "10604f4a0d83ac882f03fa7003831dc5257a367981021cc9763b8748088665a1",
+          "litecut_predicted_local_abc_delay": 28.518448020118498,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000148_c000_n004_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "d76994f2380c4cee7341ccb64a7841fab2a0578e155d08a5865b492566bf9b3c",
+          "feature_hash_19": "9ebcb6b1ea2bd14ab9537c100f49f0292f8b1148e0a815949e2ad0a6bf32e794",
+          "litecut_predicted_local_abc_delay": 26.496041439979727,
+          "aig_sha256": "cb4d3d7467f50d5cfe7a8e48826d9bc27a099d8e432a2bbd600b66523a5b2bef",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000148_c001_n005",
+      "design": "c1355.aig",
+      "root": 148,
+      "cut_slot": 1,
+      "cut_leaves": [
+        7,
+        45,
+        87
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        86,
+        148
+      ],
+      "removable_region_boundary": [
+        7,
+        45,
+        87
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000148_c001_n005_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "47f7a3edfe916c3bd09a179dfae4893f1873a528cf5adba977ec0ce34fda8087",
+          "feature_hash_19": "d1bcc125aba35bda91326688d2257419d10c799dbcb28b0cc5607880df637c4b",
+          "litecut_predicted_local_abc_delay": 29.43616567389276,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000148_c001_n005_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "d62b0deaffb08c0fb2fc69a66e02994e3e2152392340490360bb74630b2485c4",
+          "feature_hash_19": "1846ebd415f19abeacfda199bc05c885c9127100d39804ce5bbbbff38bd2f918",
+          "litecut_predicted_local_abc_delay": 26.994620012255897,
+          "aig_sha256": "4fa851ffe550197dc6b929f6af833f5e5761e08fed4023c9711372d6f9703cc2",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000149_c000_n006",
+      "design": "c1355.aig",
+      "root": 149,
+      "cut_slot": 0,
+      "cut_leaves": [
+        10,
+        46,
+        88
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        89,
+        149
+      ],
+      "removable_region_boundary": [
+        10,
+        46,
+        88
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000149_c000_n006_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "a46575eeb02f667d2ecadeb8d336c5f1b8e36c35534a34586066ffd8a3115cd6",
+          "feature_hash_19": "57efe1a024e16b920ded78f4f269ae3f1dc45c7fea459824a3617442f0b24376",
+          "litecut_predicted_local_abc_delay": 29.92028568988952,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000149_c000_n006_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "1945e08c954f672d564f04eeba3e7f54fb990a0ee9f27c5b9e61293c61771040",
+          "feature_hash_19": "517444f1159f959947c93b5e94c1b054aa01030e0c556f317fdf9e1aaec736fc",
+          "litecut_predicted_local_abc_delay": 27.44151372680929,
+          "aig_sha256": "81d71bc1efd9f63b425854bb122006031c7becac2d7927376e752527721aef36",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000149_c001_n007",
+      "design": "c1355.aig",
+      "root": 149,
+      "cut_slot": 1,
+      "cut_leaves": [
+        9,
+        46,
+        89
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        88,
+        149
+      ],
+      "removable_region_boundary": [
+        9,
+        46,
+        89
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000149_c001_n007_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "bd33c1366273f52e9d535b173961b93fc2713d53d0e8bead5ca71a1b34838013",
+          "feature_hash_19": "57efe1a024e16b920ded78f4f269ae3f1dc45c7fea459824a3617442f0b24376",
+          "litecut_predicted_local_abc_delay": 29.92028568988952,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000149_c001_n007_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "02a81fa0d860bfc34f4fd8be4789bc28ce9150376e210933171b8a52b4f453d7",
+          "feature_hash_19": "517444f1159f959947c93b5e94c1b054aa01030e0c556f317fdf9e1aaec736fc",
+          "litecut_predicted_local_abc_delay": 27.44151372680929,
+          "aig_sha256": "519a79a470ec7bbe5957e1a7208da7f3ed0c82a1f40e1fb2c2abfa0a40a8f079",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000150_c000_n008",
+      "design": "c1355.aig",
+      "root": 150,
+      "cut_slot": 0,
+      "cut_leaves": [
+        12,
+        47,
+        90
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        91,
+        150
+      ],
+      "removable_region_boundary": [
+        12,
+        47,
+        90
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000150_c000_n008_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "ece578d5bbfa3e87aa5f93099b7770950577c0fa617f3c37e25628936406c791",
+          "feature_hash_19": "03b2ba28e2d9ad97e0a4a8d260acf964b053740d1bb9594592b7389cfa267c93",
+          "litecut_predicted_local_abc_delay": 41.40850082408929,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000150_c000_n008_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "236f4b49435147409184b02ebb09b96ffa0962b26f926be09812516f69da322e",
+          "feature_hash_19": "7b7d95d572f8bf554d37cbc019d476cf8691b6bb8f787ef9365be5d3a24e7754",
+          "litecut_predicted_local_abc_delay": 26.63463676429591,
+          "aig_sha256": "335cb689056d577d9752db7a2ff2650ce825b04c5df0fb08310838a4c99f5592",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000150_c001_n009",
+      "design": "c1355.aig",
+      "root": 150,
+      "cut_slot": 1,
+      "cut_leaves": [
+        11,
+        47,
+        91
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        90,
+        150
+      ],
+      "removable_region_boundary": [
+        11,
+        47,
+        91
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000150_c001_n009_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "62a043f55361087125c77bd54ff5d55e9f8f1533150e02a587af3f8150eaf33b",
+          "feature_hash_19": "96017fdd8c11e16c6813d548e77b48f2ef8453578a86d8923a142833ee6cb003",
+          "litecut_predicted_local_abc_delay": 28.161864008825617,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000150_c001_n009_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "478a8b419fc32a36e6f4ed9305933d60e94039998ff0f0c15b357da186ccef86",
+          "feature_hash_19": "92705b1bb97930b8c8a033a4e58f60cde98949b639c5a60dccb11b98c0e83281",
+          "litecut_predicted_local_abc_delay": 14.924686483484574,
+          "aig_sha256": "5363897044290a7e4a8cc8ac1d6f39777534f4854e6702ff7c2eb0331516661a",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000151_c000_n010",
+      "design": "c1355.aig",
+      "root": 151,
+      "cut_slot": 0,
+      "cut_leaves": [
+        14,
+        48,
+        92
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        93,
+        151
+      ],
+      "removable_region_boundary": [
+        14,
+        48,
+        92
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000151_c000_n010_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "5f4a386c02cef1486a572cabe0bfb07b324d2060b36ccbd8705c59884306a650",
+          "feature_hash_19": "f935a4581c77e03ff4b4ebbd6a917c5d49297674ae39a212859fd6b3edd4496f",
+          "litecut_predicted_local_abc_delay": 31.59678499700319,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000151_c000_n010_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "92871059eedda68f0996ba02718ce5ced1b979ba518577fd003da0bc1cd704e1",
+          "feature_hash_19": "64ff4dd89594bea4ad995d59479f890be12df0708f3dc8272b4e658d3a0eb4eb",
+          "litecut_predicted_local_abc_delay": 15.263456950153481,
+          "aig_sha256": "b9c2d8121a4dede582b76f6f4ed8583b8b43e8a18d430a6b0a0bbaa5243f8184",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000151_c001_n011",
+      "design": "c1355.aig",
+      "root": 151,
+      "cut_slot": 1,
+      "cut_leaves": [
+        13,
+        48,
+        93
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        92,
+        151
+      ],
+      "removable_region_boundary": [
+        13,
+        48,
+        93
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000151_c001_n011_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "be9b3b70a137c57441bee122ee56fac0be19aa4e50ec7d91f45c16369386b417",
+          "feature_hash_19": "f935a4581c77e03ff4b4ebbd6a917c5d49297674ae39a212859fd6b3edd4496f",
+          "litecut_predicted_local_abc_delay": 31.59678499700319,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000151_c001_n011_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "c3c6dbaa1c22a982e6d31ef65043381c10e1563b37c9033b5443975d03d264cc",
+          "feature_hash_19": "64ff4dd89594bea4ad995d59479f890be12df0708f3dc8272b4e658d3a0eb4eb",
+          "litecut_predicted_local_abc_delay": 15.263456950153481,
+          "aig_sha256": "3e2bba084af03a48f093f987a237baeff39f04d67a28774187f0ecc8b0e5831b",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000152_c000_n012",
+      "design": "c1355.aig",
+      "root": 152,
+      "cut_slot": 0,
+      "cut_leaves": [
+        16,
+        49,
+        94
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        95,
+        152
+      ],
+      "removable_region_boundary": [
+        16,
+        49,
+        94
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000152_c000_n012_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "ddb8a318468cc8495a353d5e190c69fdf54808d95a256b4c23e540d681bce834",
+          "feature_hash_19": "272a62dec1735113168df4936716db3c7ec322d7a535fa313410ed6a3a8c187f",
+          "litecut_predicted_local_abc_delay": 28.446120397383254,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000152_c000_n012_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "8de3c93ffc2b4a6855a447e1b4e28cb8230e0ed2a7c045a9181b3dd29180798a",
+          "feature_hash_19": "68feee7bb104b41a2c2239c3df4c17364c162e79a55e28dae094e8c410cfdfd5",
+          "litecut_predicted_local_abc_delay": 25.821814619717436,
+          "aig_sha256": "57ba3a3b330260911753d70d86f5bb5cc44230f52ec8068791badc14b2fd18c0",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000152_c001_n013",
+      "design": "c1355.aig",
+      "root": 152,
+      "cut_slot": 1,
+      "cut_leaves": [
+        15,
+        49,
+        95
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        94,
+        152
+      ],
+      "removable_region_boundary": [
+        15,
+        49,
+        95
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000152_c001_n013_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "d5c854854eb6ddcedcf685cf653827b57c55fdd71b7bb45e9f5093f44a7df8bf",
+          "feature_hash_19": "272a62dec1735113168df4936716db3c7ec322d7a535fa313410ed6a3a8c187f",
+          "litecut_predicted_local_abc_delay": 28.446120397383254,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000152_c001_n013_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "548b2b18bc5a33fcc82fefbe9bfb232708d3a259d27e6f9e596e9c1061ac4c9e",
+          "feature_hash_19": "68feee7bb104b41a2c2239c3df4c17364c162e79a55e28dae094e8c410cfdfd5",
+          "litecut_predicted_local_abc_delay": 25.821814619717436,
+          "aig_sha256": "20238660aed37d159aaa8136f197a9fe0d7f6c8c86878b9e5d8dba3372d494ef",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000153_c000_n014",
+      "design": "c1355.aig",
+      "root": 153,
+      "cut_slot": 0,
+      "cut_leaves": [
+        18,
+        50,
+        96
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        97,
+        153
+      ],
+      "removable_region_boundary": [
+        18,
+        50,
+        96
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000153_c000_n014_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "cc718357443858d562d8c0c7fe39c2e18178ed683cc7129e5a47bda75261f66d",
+          "feature_hash_19": "af93df9ee824140644b38e2a42c8f5eae3e738099bb3700996503f260f77fb00",
+          "litecut_predicted_local_abc_delay": 23.799774088877836,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000153_c000_n014_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "86cb88d9541efa0502b418ac50271ae1022e9e7268703e6e2ca6dbedc115621e",
+          "feature_hash_19": "e08c4512eaf76e8281c7dec1344ddf8a8bc8a5b766a3de4200cf2a387ec425c1",
+          "litecut_predicted_local_abc_delay": 21.567739528207035,
+          "aig_sha256": "4039b991f14c043e46c17e9aef41de092e96cb9db67110e053aa77a1570c2b84",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000153_c001_n015",
+      "design": "c1355.aig",
+      "root": 153,
+      "cut_slot": 1,
+      "cut_leaves": [
+        17,
+        50,
+        97
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        96,
+        153
+      ],
+      "removable_region_boundary": [
+        17,
+        50,
+        97
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000153_c001_n015_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "0b19edf41f8f550f002726016f51efbed3b61d3027ea68781ee1ae1ecb7cecea",
+          "feature_hash_19": "af93df9ee824140644b38e2a42c8f5eae3e738099bb3700996503f260f77fb00",
+          "litecut_predicted_local_abc_delay": 23.799774088877836,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000153_c001_n015_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "1de0cdc671f2e9912238d98a8d7f642957981486c119297399e501a4cc5f6b1c",
+          "feature_hash_19": "e08c4512eaf76e8281c7dec1344ddf8a8bc8a5b766a3de4200cf2a387ec425c1",
+          "litecut_predicted_local_abc_delay": 21.567739528207035,
+          "aig_sha256": "9e0030992e9d96c21f71bcfa95d8011b7786cbf9eeed4c79e9d343c140c44f82",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000154_c000_n016",
+      "design": "c1355.aig",
+      "root": 154,
+      "cut_slot": 0,
+      "cut_leaves": [
+        21,
+        52,
+        98
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        99,
+        154
+      ],
+      "removable_region_boundary": [
+        21,
+        52,
+        98
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000154_c000_n016_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "bb8e3059bfce003edc4dd17b151f5bcb13cfc04cc272927feb676b86689da328",
+          "feature_hash_19": "ff7fa6897256a1bbc78b10237cc3e7a7aab316d07b944ef6aeb52994208bdec2",
+          "litecut_predicted_local_abc_delay": 25.09069711033649,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000154_c000_n016_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "192476315309bd5bfca62a1cf4c9e58baabb874e0285a464ca66205523d6cc62",
+          "feature_hash_19": "c97eb3b2c798fa4cb21250b1cc278de8ba8ae1e1760ace5253e5fd2a3bc13e56",
+          "litecut_predicted_local_abc_delay": 20.496553422448063,
+          "aig_sha256": "592792745ff6a80b7b20b5b803fe8d770a449b78c63506dbe12212c3bdb04f01",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000154_c001_n017",
+      "design": "c1355.aig",
+      "root": 154,
+      "cut_slot": 1,
+      "cut_leaves": [
+        20,
+        52,
+        99
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        98,
+        154
+      ],
+      "removable_region_boundary": [
+        20,
+        52,
+        99
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000154_c001_n017_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "ab3423b72588f500a3dfadcdbc08aa7c2cc266f6743a4d12a231c4f6f21b4abb",
+          "feature_hash_19": "ff7fa6897256a1bbc78b10237cc3e7a7aab316d07b944ef6aeb52994208bdec2",
+          "litecut_predicted_local_abc_delay": 25.09069711033649,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000154_c001_n017_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "22acc20baa46e6eb2eb35415537f69f5b3dd531047a69353eedd20059983dc2c",
+          "feature_hash_19": "c97eb3b2c798fa4cb21250b1cc278de8ba8ae1e1760ace5253e5fd2a3bc13e56",
+          "litecut_predicted_local_abc_delay": 20.496553422448063,
+          "aig_sha256": "00bcba4c4d3463b002c872c6e142b10bccd443e97939924b8cb8c95d0e504ff7",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000155_c000_n018",
+      "design": "c1355.aig",
+      "root": 155,
+      "cut_slot": 0,
+      "cut_leaves": [
+        23,
+        53,
+        100
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        101,
+        155
+      ],
+      "removable_region_boundary": [
+        23,
+        53,
+        100
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000155_c000_n018_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "cd16562b4c181fb8f5138bca57f9591df78c8abdd15e9d74f072ae099451a907",
+          "feature_hash_19": "8c36e9cdeba4b4ec5ac7e718c9920b5eb53d1b58fa0a92dc7a45f030c4855fd8",
+          "litecut_predicted_local_abc_delay": 27.045322501589077,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000155_c000_n018_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "b10a7c185c574c3dd004b70aa5eea82e20dfb6c551e26ae97c87f8a581860538",
+          "feature_hash_19": "79c5448d723ae727c75ce36ac36dacd0a75e9cf78993ac05d5f2599cddb0435f",
+          "litecut_predicted_local_abc_delay": 30.417299200138956,
+          "aig_sha256": "0e5db6302ca4297e972b33b3f694d9486d7b1167a824afa71b49b80c801378c8",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000155_c001_n019",
+      "design": "c1355.aig",
+      "root": 155,
+      "cut_slot": 1,
+      "cut_leaves": [
+        22,
+        53,
+        101
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        100,
+        155
+      ],
+      "removable_region_boundary": [
+        22,
+        53,
+        101
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000155_c001_n019_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "5e3e8fb0b2d62930b1de3f3ea507c00bc33972f40534977998d81f8e239ef96e",
+          "feature_hash_19": "8c36e9cdeba4b4ec5ac7e718c9920b5eb53d1b58fa0a92dc7a45f030c4855fd8",
+          "litecut_predicted_local_abc_delay": 27.045322501589077,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000155_c001_n019_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "13f59fcda7f0d60e67284582efe5f178b83722fba0a64a68fb94cc68a8c1ae50",
+          "feature_hash_19": "79c5448d723ae727c75ce36ac36dacd0a75e9cf78993ac05d5f2599cddb0435f",
+          "litecut_predicted_local_abc_delay": 30.417299200138956,
+          "aig_sha256": "cffcf96775d0ceffe2f0e11402fadb062eff6fc2e2161e47c14c9eb2f20c3723",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000156_c000_n020",
+      "design": "c1355.aig",
+      "root": 156,
+      "cut_slot": 0,
+      "cut_leaves": [
+        25,
+        54,
+        102
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        103,
+        156
+      ],
+      "removable_region_boundary": [
+        25,
+        54,
+        102
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000156_c000_n020_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "ed6f62da9768e64b2fdcfdfd6e318f5bf84555aa73e2a4431bbd51fc06aaad96",
+          "feature_hash_19": "7fd4f75f1e6cdc5f24d2c1d35b6a139b0537562315b84b3a195b013818a83688",
+          "litecut_predicted_local_abc_delay": 21.13868650817743,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000156_c000_n020_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "9c7c666d0d1ee786042731d64663d9ee8a5719df3ad3084bca473f48f391f53a",
+          "feature_hash_19": "b6e8187adbb733b903b8797fc2e5e12e377f1a550d5a64e3c3d76c5da2c39fe2",
+          "litecut_predicted_local_abc_delay": 22.85367019421173,
+          "aig_sha256": "7eb2044b8b4e15de57b163da642eac9be3c155249b722a69a3963564f6f0d120",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000156_c001_n021",
+      "design": "c1355.aig",
+      "root": 156,
+      "cut_slot": 1,
+      "cut_leaves": [
+        24,
+        54,
+        103
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        102,
+        156
+      ],
+      "removable_region_boundary": [
+        24,
+        54,
+        103
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000156_c001_n021_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "0a2d07417c8666c7a735e7b76766bdf2baf2dea0a829800ecf9fffcfb7593b3b",
+          "feature_hash_19": "6e5f83f2dc4aca8e2038daf5a8074755a9383b147a42e42aeaa8de350c876075",
+          "litecut_predicted_local_abc_delay": 25.88328900203258,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000156_c001_n021_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "583057034a8772aa8eb4551a101d4f5544f5636e01d0284dd573bfe05848cc47",
+          "feature_hash_19": "d77da43beb6488736e5ec5d32591389d0fd8cce3d481bb3a7d0bc32e8681ec3b",
+          "litecut_predicted_local_abc_delay": 25.894361798423628,
+          "aig_sha256": "4375df1780aef507bf77403c1a4999d6d78ff252834e3563ba9cc8e5eb705737",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000157_c000_n022",
+      "design": "c1355.aig",
+      "root": 157,
+      "cut_slot": 0,
+      "cut_leaves": [
+        27,
+        55,
+        104
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        105,
+        157
+      ],
+      "removable_region_boundary": [
+        27,
+        55,
+        104
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000157_c000_n022_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "f16b1007ab5f90bec9ff3802bbc4240bbcbc95d66488bc0a582fe737f7314039",
+          "feature_hash_19": "63a0e98630ad31884e846ad4241b1d6744d7ec12aea101e332412147aba00a3f",
+          "litecut_predicted_local_abc_delay": 26.153435076365994,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000157_c000_n022_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "e357c57ac00bdfea28b79c0bc61f27ea9e5eb71ee3d3c904db334562a8219a06",
+          "feature_hash_19": "9dea399116d683e11f5698791285076093b33f425da6fc9c962affab4e12ae6a",
+          "litecut_predicted_local_abc_delay": 25.981876674506157,
+          "aig_sha256": "0ef26fe96a9163637f1c861f42b3fedaa7357d50604a107e0a0f646b1c737d46",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000157_c001_n023",
+      "design": "c1355.aig",
+      "root": 157,
+      "cut_slot": 1,
+      "cut_leaves": [
+        26,
+        55,
+        105
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        104,
+        157
+      ],
+      "removable_region_boundary": [
+        26,
+        55,
+        105
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000157_c001_n023_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "b070b6a7adc2d46533fa360854472f79f2d92b2bd007a718bc4bb86a01a74abb",
+          "feature_hash_19": "af60d04289d591e6d708edea61c0fafc1a5ce9d959165badede0ec1478d9dbdb",
+          "litecut_predicted_local_abc_delay": 25.872398450797284,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000157_c001_n023_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "b199e09798c6a34b3937c557d9529fc9df3c4d988ca2b25d2e23bb7a3eeab3fb",
+          "feature_hash_19": "8150dc0df175b0e26bc863158831fcfc9058bb80089fd68eea4aef2733e05a97",
+          "litecut_predicted_local_abc_delay": 23.742872048513853,
+          "aig_sha256": "21bd8608916e9ef40b8d8c6fc27ed12c07c6671a37930085612c9ccbad445e5f",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000158_c000_n024",
+      "design": "c1355.aig",
+      "root": 158,
+      "cut_slot": 0,
+      "cut_leaves": [
+        30,
+        57,
+        106
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        107,
+        158
+      ],
+      "removable_region_boundary": [
+        30,
+        57,
+        106
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000158_c000_n024_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "9f04a7248c13ef9ee5b741655109a439b954045f5b37935beba5bf6021faa2f4",
+          "feature_hash_19": "dcab994d0c7226e9015c2cbe0a3dbe5468cb5e44ff97a35e89d377864a99e53b",
+          "litecut_predicted_local_abc_delay": 28.059628187372216,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000158_c000_n024_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "64927975ecfef9e22f8bec40abbe26d7c332211fec4d4470caea3371299dbafb",
+          "feature_hash_19": "8c5e6131859f02956cf79a2f65b1fbb158d1feb5f0a292da78f5cadb8b0601df",
+          "litecut_predicted_local_abc_delay": 15.71034553003039,
+          "aig_sha256": "397164e072e27e5d89e2e0bc936cf2eca3a67590452d2f6f39b9b4617a99268f",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000158_c001_n025",
+      "design": "c1355.aig",
+      "root": 158,
+      "cut_slot": 1,
+      "cut_leaves": [
+        29,
+        57,
+        107
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        106,
+        158
+      ],
+      "removable_region_boundary": [
+        29,
+        57,
+        107
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000158_c001_n025_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "ce7651923d5c8f70340d5954ce5ccae117d8d97d925bb845818de86388afbae0",
+          "feature_hash_19": "43be058317c57db71ace4af23e6e64d5766aab1cbb578d7e709fa5cecf526f38",
+          "litecut_predicted_local_abc_delay": 24.603038416101448,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000158_c001_n025_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "7ccbf57cf021cc7a06325403f89bc9ca88fbc7e73b2926013f2d71db8996c8ec",
+          "feature_hash_19": "bc8a831865da750407b69371100ec813216d2c2d493c260aa570aef8388119bd",
+          "litecut_predicted_local_abc_delay": 18.265664646130304,
+          "aig_sha256": "398c7aedc1ddc80ecb6b7ead2731708b87b5ac215f69045fb8c2e751d08469a7",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000159_c000_n026",
+      "design": "c1355.aig",
+      "root": 159,
+      "cut_slot": 0,
+      "cut_leaves": [
+        32,
+        58,
+        108
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        109,
+        159
+      ],
+      "removable_region_boundary": [
+        32,
+        58,
+        108
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000159_c000_n026_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "c3c97ec31a6285c9ff5c75d1d550b848badd99fb25d4b9f529ee055c92f6589b",
+          "feature_hash_19": "e6c406436dfab904ab4cc42b82518c06860b7559ab59513675468adc957b2139",
+          "litecut_predicted_local_abc_delay": 19.33388692554523,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000159_c000_n026_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "b2f2119f79e7f71e8122280d154f96b6187a20fdd4a691c28c1996563e47af96",
+          "feature_hash_19": "366a7f071ea29bc06c219e17d0726345c1daf935f07bd34d0dc3254bf1d7c8b3",
+          "litecut_predicted_local_abc_delay": 18.62558460645775,
+          "aig_sha256": "5aa8da62f6419bf47488e167ffbb60b149688a44ee99ad1fe4236cde9bfd5438",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000159_c001_n027",
+      "design": "c1355.aig",
+      "root": 159,
+      "cut_slot": 1,
+      "cut_leaves": [
+        31,
+        58,
+        109
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        108,
+        159
+      ],
+      "removable_region_boundary": [
+        31,
+        58,
+        109
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000159_c001_n027_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "1e6d10219346d1af468711575aa7ee69d49ec1cef10541f1040cf88d0f6c4c69",
+          "feature_hash_19": "43be058317c57db71ace4af23e6e64d5766aab1cbb578d7e709fa5cecf526f38",
+          "litecut_predicted_local_abc_delay": 24.603038416101448,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000159_c001_n027_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "a1616c02429f8314533f1126173d633cc07943f86b6757ac200d9c32a286bf4f",
+          "feature_hash_19": "bc8a831865da750407b69371100ec813216d2c2d493c260aa570aef8388119bd",
+          "litecut_predicted_local_abc_delay": 18.265664646130304,
+          "aig_sha256": "0a24b1cbc844d7bd81e5da8f867b6aa6a22c2afc6d20ffe5a9a084a0ad1c4e0c",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000160_c000_n028",
+      "design": "c1355.aig",
+      "root": 160,
+      "cut_slot": 0,
+      "cut_leaves": [
+        34,
+        59,
+        110
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        111,
+        160
+      ],
+      "removable_region_boundary": [
+        34,
+        59,
+        110
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000160_c000_n028_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "0ab8767b3a9231aa0097dd5518041e4bd97a1331ce75d7e97c3303fc6f3debbc",
+          "feature_hash_19": "ecd9abd96c4f2cf9980a6bd3b98398f565315dd77de67be6045f5ac3a1aa5e81",
+          "litecut_predicted_local_abc_delay": 26.854361811536567,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000160_c000_n028_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "276b94709035df3508de9d22b1b225d51adb9611e0cde9f7c3d21554fe982feb",
+          "feature_hash_19": "94f5f0b4dc4073b1e19792ea6aec7ad1b1b7103f884a223931ee3aff73a54ada",
+          "litecut_predicted_local_abc_delay": 24.51748379063055,
+          "aig_sha256": "6f95fe3ceece8bb8da09d082e4ba00120e2fb315b5842426a5e7f3b12eaefc24",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000160_c001_n029",
+      "design": "c1355.aig",
+      "root": 160,
+      "cut_slot": 1,
+      "cut_leaves": [
+        33,
+        59,
+        111
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        110,
+        160
+      ],
+      "removable_region_boundary": [
+        33,
+        59,
+        111
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000160_c001_n029_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "68d55cbbd9425cf4f00ea99b1d52e6ed0abc32944aa90782d3af32a4836b49ab",
+          "feature_hash_19": "46cb1505932e7bd1df175350a873b3a497e625599bc59b3cc40fdddfc9ec4b35",
+          "litecut_predicted_local_abc_delay": 26.696128368213547,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000160_c001_n029_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "94188ff596eb2142676155ff88a1c30874d82cc8be4cdaca9be9a5236a3046ec",
+          "feature_hash_19": "486fb168f5ee2cd2951cf286d0ff01237a39cc2b5529124be62057c4627e22db",
+          "litecut_predicted_local_abc_delay": 23.046448714139,
+          "aig_sha256": "2eda7c767a56b9a6ef972d80d9ab09723b4032e57c9e6cdac83fcec63d556049",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000161_c000_n030",
+      "design": "c1355.aig",
+      "root": 161,
+      "cut_slot": 0,
+      "cut_leaves": [
+        36,
+        60,
+        112
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        113,
+        161
+      ],
+      "removable_region_boundary": [
+        36,
+        60,
+        112
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000161_c000_n030_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "50e955de5f07919fe6cccd0486bd4b5acabf7d20bb46b38dea9c32daf0b0e12f",
+          "feature_hash_19": "2cea87ded52b2f05d4eaff5adde38cfb26303f1a70bf12f20e82a56f8f586422",
+          "litecut_predicted_local_abc_delay": 26.08172434688168,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000161_c000_n030_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "308fca7271f1bcc37f830d7e94b34ee4b21d0d70d3106a5ac1a48a9333014d77",
+          "feature_hash_19": "2b36b621e0938728755c3d7e309d54e6a277704302321290d999471cdaa3b39d",
+          "litecut_predicted_local_abc_delay": 20.972459883949117,
+          "aig_sha256": "25da1d204bb91f51a6cdc0a5e1bbf0a79b5295647c6091c6d39e6d41449c0ec8",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000162_c000_n031",
+      "design": "c1355.aig",
+      "root": 162,
+      "cut_slot": 0,
+      "cut_leaves": [
+        14,
+        62,
+        114
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        115,
+        162
+      ],
+      "removable_region_boundary": [
+        14,
+        62,
+        114
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000162_c000_n031_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "5d5b6f8f84614b472146c7aba456eb755b8565b7c3656b775c074c08b908a4aa",
+          "feature_hash_19": "d677ec36d80a5c1d26bdfcafdd91166774f01b82cbdd984ca0f7323c786ef4ec",
+          "litecut_predicted_local_abc_delay": 24.46872699030207,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000162_c000_n031_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "10986a0ea90c2512e487541940ac4207bb71af0ae000b0c668cc688a165da279",
+          "feature_hash_19": "d11a991b27ee2156977b6f72bd909e7e7b61909e4dd0ea20c8f660c87303072b",
+          "litecut_predicted_local_abc_delay": 22.731403822375647,
+          "aig_sha256": "edf06e7d972a0a71055ad148a69a0d4bee4bcb287bd017c746fa13918def354a",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000163_c000_n032",
+      "design": "c1355.aig",
+      "root": 163,
+      "cut_slot": 0,
+      "cut_leaves": [
+        23,
+        63,
+        116
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        117,
+        163
+      ],
+      "removable_region_boundary": [
+        23,
+        63,
+        116
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000163_c000_n032_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "a309cb32706bf766fab15bef3cc97d63d774f9989b45de584cb0362cac715bda",
+          "feature_hash_19": "29423650dae8640c02eb6f342813282adfa01a8282b78e8d3f1d50cba61ba9f0",
+          "litecut_predicted_local_abc_delay": 14.456172847472864,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000163_c000_n032_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "272e1b5043378e3c9cc6e6d9e2e974373758d0c1bb8f635c118ea30ff133f79f",
+          "feature_hash_19": "2bbe45e7a24e5f2ae486d88695c583d17625a928c5cb68fa089e2029b664fb04",
+          "litecut_predicted_local_abc_delay": 30.81318870379675,
+          "aig_sha256": "9bb437633268063afa0e55c0a7256b086171199337d540d0efbb8be6131c3b9b",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000164_c000_n033",
+      "design": "c1355.aig",
+      "root": 164,
+      "cut_slot": 0,
+      "cut_leaves": [
+        34,
+        65,
+        118
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        119,
+        164
+      ],
+      "removable_region_boundary": [
+        34,
+        65,
+        118
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000164_c000_n033_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "abedf3986efa63df2c11b16deffdcb42dbe8e29cbddb9d565e4e6a68d0a0fdb9",
+          "feature_hash_19": "b4dc20b43ec929e5e47935c9eb3be1f30128e89770866d6914e0775c452f66cf",
+          "litecut_predicted_local_abc_delay": 51.565601881217525,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000164_c000_n033_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "874cd28ab3a9e8dd9d6927849ae60e000a4d3d34437847e2bd94c10046b403e3",
+          "feature_hash_19": "9165c7427c86c1016e5d049b3cdc69a5a37e47978f3ed252a978bb6fffb4d156",
+          "litecut_predicted_local_abc_delay": 49.22204396910793,
+          "aig_sha256": "35ea7ae923feed3b0580baa1c37b90945cc845c223ca05e04258e70f942cec8b",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000165_c000_n034",
+      "design": "c1355.aig",
+      "root": 165,
+      "cut_slot": 0,
+      "cut_leaves": [
+        16,
+        66,
+        120
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        121,
+        165
+      ],
+      "removable_region_boundary": [
+        16,
+        66,
+        120
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000165_c000_n034_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "794a49ef29f3166991657df990f667f98b44fa39f5904b0513a08b27f0df134b",
+          "feature_hash_19": "c3c65e078bb5c0374d1c3b4c36365d29f41614c9847958220b977b9b80ee04da",
+          "litecut_predicted_local_abc_delay": 20.75385492089928,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000165_c000_n034_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "f33929b9013635daa74669304bac76ff9f4bcfe073c76065c8edd72f19810a27",
+          "feature_hash_19": "6b952098aeb109bd3e20b8b06735b5e1cf4d43e98b27ab4477a958f99aaae322",
+          "litecut_predicted_local_abc_delay": 24.037794908916336,
+          "aig_sha256": "362321b1d7361dd7071e6f3c5b4057ba12f0416321c925a012e50ef2a94fc873",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000166_c000_n035",
+      "design": "c1355.aig",
+      "root": 166,
+      "cut_slot": 0,
+      "cut_leaves": [
+        36,
+        67,
+        122
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        123,
+        166
+      ],
+      "removable_region_boundary": [
+        36,
+        67,
+        122
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000166_c000_n035_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "ddc15559feb27cfe1c497864de427ff862621196625ad382c2361076a62918e6",
+          "feature_hash_19": "72be8fb25fb9b725d77f11dd21a5d391b9a8da9c6d66353d2a20e96b56694ecb",
+          "litecut_predicted_local_abc_delay": 27.823697649804668,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000166_c000_n035_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "fc226b7cd73ed67d2b714931fa6f8e9cc9f0c112c97bff95a1cc6fe39740da85",
+          "feature_hash_19": "08a292b40a14d3192f23cb6d1f4b9f6e006f3e92f12b376aab100f6a4e40d2da",
+          "litecut_predicted_local_abc_delay": 25.388047810549445,
+          "aig_sha256": "5650f91cab7a6941eee2e7ea74a014d3ce9715c6207a7af1a828c61bd3f2ee57",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000167_c000_n036",
+      "design": "c1355.aig",
+      "root": 167,
+      "cut_slot": 0,
+      "cut_leaves": [
+        18,
+        68,
+        124
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        125,
+        167
+      ],
+      "removable_region_boundary": [
+        18,
+        68,
+        124
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000167_c000_n036_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "e1d4d42afa5a2e9fcbf25fd732ffea6f342e75736b3970d7367e0a9fc33aa75a",
+          "feature_hash_19": "e712f2e1ef0c1c65bb4de8b2102f27858a96a72d422ac1fa038ff91d160ab73d",
+          "litecut_predicted_local_abc_delay": 27.76307451735497,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000167_c000_n036_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "548725e7d4986f05f5231b176ca174de965c1516857a890fc864a114cff46d1d",
+          "feature_hash_19": "639ff3eb753fc276845eb67ef83ccca539e8bd7e999ef7a271da00bed7248099",
+          "litecut_predicted_local_abc_delay": 14.916292329878688,
+          "aig_sha256": "05ae1a7fd7e6f42e0a61e4e4fb5d62d35d36d202d7cb2360ab70e9d35efc08a3",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000168_c000_n037",
+      "design": "c1355.aig",
+      "root": 168,
+      "cut_slot": 0,
+      "cut_leaves": [
+        13,
+        69,
+        126
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        127,
+        168
+      ],
+      "removable_region_boundary": [
+        13,
+        69,
+        126
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000168_c000_n037_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "222f1453f027a7ff2460f97a34b1c7f923bde6143e36bdb90f574124f9e24e93",
+          "feature_hash_19": "0f9396b92b751b94517fc5e883cc188d58c3b809affabc702b26e7eb46e4aae3",
+          "litecut_predicted_local_abc_delay": 32.8558121905552,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000168_c000_n037_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "3ecc35e207840d6f75961429fecd5cb77d47cb28457e53e36b2ea46a7f231ef7",
+          "feature_hash_19": "aafed640674356a4a8ae9e914f729f189441428fdc7e9117e1359d0815363390",
+          "litecut_predicted_local_abc_delay": 15.715403988729708,
+          "aig_sha256": "89a494861d6dff472c69962764aac85026805cbedcd1e0f23cb5d6002c44b4be",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000169_c000_n038",
+      "design": "c1355.aig",
+      "root": 169,
+      "cut_slot": 0,
+      "cut_leaves": [
+        22,
+        70,
+        128
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        129,
+        169
+      ],
+      "removable_region_boundary": [
+        22,
+        70,
+        128
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000169_c000_n038_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "4c0eef2ff91f68ece98ebb3e78d16c3deb829b2d64f6c85d25ff646485683f0a",
+          "feature_hash_19": "12c1df63cc0eef500074d4651ba43e4ddeb816adf701c84b815f0ce54fb88183",
+          "litecut_predicted_local_abc_delay": 21.958603473662347,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000169_c000_n038_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "180e7a373426f8edc9b203381105293a452a56bc698d24e0d342c96e1a2cc3d3",
+          "feature_hash_19": "ab3689d9f8c514024e417f1c5419f6263fb4237a3c04b4f7b106a9176c477693",
+          "litecut_predicted_local_abc_delay": 17.824393534478986,
+          "aig_sha256": "a1e52757dd3d218d7d62ecd6031253b7be49bb61e83017d2b7cc5c4b267c6f23",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000170_c000_n039",
+      "design": "c1355.aig",
+      "root": 170,
+      "cut_slot": 0,
+      "cut_leaves": [
+        33,
+        72,
+        130
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        131,
+        170
+      ],
+      "removable_region_boundary": [
+        33,
+        72,
+        130
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000170_c000_n039_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "9d9b8776144ce42ef2bca92f70c18a2d7cad5df1f6175206a99446e5d2efbab7",
+          "feature_hash_19": "acfdfad49c62e29c47940fd7c30692b9ff97712a2ba405ddf70ce0d5947ddd13",
+          "litecut_predicted_local_abc_delay": 20.958954842575054,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000170_c000_n039_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "99dc8275f648977fc0439bac6af36e5447c83790d03f718398d89711c24bb884",
+          "feature_hash_19": "f6a71c830407e1af1fc5353dbc688dfe4a58d20b553c77de1ce57fba6a9634e1",
+          "litecut_predicted_local_abc_delay": 16.734706101114625,
+          "aig_sha256": "023d4792b29c2146441576d78b22c5ba68061bf6bdad82018cf6a64b075d1f6e",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000171_c000_n040",
+      "design": "c1355.aig",
+      "root": 171,
+      "cut_slot": 0,
+      "cut_leaves": [
+        15,
+        73,
+        132
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        133,
+        171
+      ],
+      "removable_region_boundary": [
+        15,
+        73,
+        132
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000171_c000_n040_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "58ea1ac903f482ad9cd42e1ab2938610b7c10a0d1c4f0685519f0bcc9059422c",
+          "feature_hash_19": "1521bf8ed1017177777d944a96b5c505160751cd7791bfe424899a2e76720d7a",
+          "litecut_predicted_local_abc_delay": 14.266888587562521,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000171_c000_n040_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "7bfea8d13b2ae3bda85d323c351add6d4dde084916484235775e024403ed3315",
+          "feature_hash_19": "f666e6ad065464ce232c5a6cc326bd69c0f26ef01ce9f375682370afd8b6a9ea",
+          "litecut_predicted_local_abc_delay": 15.690004164472455,
+          "aig_sha256": "9eb24eb7636761a6f85d1fc12a19e340366d40289ce4291c9b1d53b633254f07",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000172_c000_n041",
+      "design": "c1355.aig",
+      "root": 172,
+      "cut_slot": 0,
+      "cut_leaves": [
+        35,
+        74,
+        134
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        135,
+        172
+      ],
+      "removable_region_boundary": [
+        35,
+        74,
+        134
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000172_c000_n041_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "5418c852f2f31c9b86b0f73975f15343bcf027f0acdb9a17e964f6b124eca898",
+          "feature_hash_19": "3d1e86509d3346bd0fe144cb259ea5bc63776c68a668ba7982be353b4104a5c9",
+          "litecut_predicted_local_abc_delay": 15.334408665934943,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000172_c000_n041_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "13084cea6f12f2b61bd0051984adbf5b97b3bd824130e7a74069cc72ef54cc2a",
+          "feature_hash_19": "083dc00ba9a713ab86bcd089600aaf659c71e8cb0117497c3aa6e770d9e6b35e",
+          "litecut_predicted_local_abc_delay": 15.989403048860078,
+          "aig_sha256": "4719c921e0556091cf81767573e5dd4b07bca5e8696e735d944254e661ffb600",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000173_c000_n042",
+      "design": "c1355.aig",
+      "root": 173,
+      "cut_slot": 0,
+      "cut_leaves": [
+        17,
+        75,
+        136
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        137,
+        173
+      ],
+      "removable_region_boundary": [
+        17,
+        75,
+        136
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000173_c000_n042_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "4c1576418c9293fefd172431f219fe75e909303f038e300e8e88b8c507d383a9",
+          "feature_hash_19": "c128500f631292e5eefbc85b3cbccdfc3d2f49ede493774ddd23fc631e334a63",
+          "litecut_predicted_local_abc_delay": 22.56733264483857,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000173_c000_n042_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "e0a5d582c9bfc74a06e700b826f2c27a878282f0c283cc91e6c1e79a40011dd2",
+          "feature_hash_19": "641676d55c3933699197191e284d31d223f19690081446536c47e773a7ac49be",
+          "litecut_predicted_local_abc_delay": 18.704871950602726,
+          "aig_sha256": "f84b4723cb047e0b0a03fa0c06efa0ea26ab707957c98fb874cb4347d73ba49e",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000174_c000_n043",
+      "design": "c1355.aig",
+      "root": 174,
+      "cut_slot": 0,
+      "cut_leaves": [
+        12,
+        76,
+        138
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        139,
+        174
+      ],
+      "removable_region_boundary": [
+        12,
+        76,
+        138
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000174_c000_n043_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "784f24e7b4dde23328888ba7d40855bc94d7d22b24d9c8641eb2c4c1efc32bff",
+          "feature_hash_19": "a52f842bcbdfdef531069e271935f0f99a72961355a2d3f5518515945766e8d1",
+          "litecut_predicted_local_abc_delay": 22.40247556516499,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000174_c000_n043_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "3a7a326d970defefea596220ff27e597ae328c624be3d5821464b05c86087eea",
+          "feature_hash_19": "1e7dbcb27671590d5635f7fdc19e3c11a0a951cb418adb24ae45deb28c34b690",
+          "litecut_predicted_local_abc_delay": 19.379490550879577,
+          "aig_sha256": "d6bac1a25ac19c628ad032bdca3573b288860c2fa0f1436c7df4b2b8e9edfea6",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000175_c000_n044",
+      "design": "c1355.aig",
+      "root": 175,
+      "cut_slot": 0,
+      "cut_leaves": [
+        21,
+        77,
+        140
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        141,
+        175
+      ],
+      "removable_region_boundary": [
+        21,
+        77,
+        140
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000175_c000_n044_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "ba5f489179ce1e59804afc20d6b6ae96122f3a95119a524cb3f81c9fbad8b22e",
+          "feature_hash_19": "4203a82fece36b2bdcf36c19d53863ffc88aa48c3d5cdf1191c4501541b0ed8c",
+          "litecut_predicted_local_abc_delay": 14.067308454816606,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000175_c000_n044_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "5db9f302727c79695c512a5625f59f4e47b739b246441f1abdb6f55226921fca",
+          "feature_hash_19": "87732036faa8c23aea07651da1d3166ac10e8d4df00e3809706095e42f439586",
+          "litecut_predicted_local_abc_delay": 16.47290852867238,
+          "aig_sha256": "2c9d53caa7d7af6ed004cf4f4828b36d225c8cd168cdfc67779e873907cfb31b",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000176_c000_n045",
+      "design": "c1355.aig",
+      "root": 176,
+      "cut_slot": 0,
+      "cut_leaves": [
+        11,
+        79,
+        142
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        143,
+        176
+      ],
+      "removable_region_boundary": [
+        11,
+        79,
+        142
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000176_c000_n045_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "bc5e358faacfd6ea7cb152f2a91ab67c613192f1d0cbdd78925a335e8f26bfaa",
+          "feature_hash_19": "e0424c6136e5e33d91ff3c20dafb074d3080b1c476329c015570cc4b18ceb3c1",
+          "litecut_predicted_local_abc_delay": 15.07268639428797,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000176_c000_n045_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "790add63a7bbdaae859fce1bbafdcf866988e4cfd6b8f94cec5a7719eac83c0d",
+          "feature_hash_19": "35bd06842412542cbc671976bb1773b648024a404a3bb5cf276ac4b7fdd482fc",
+          "litecut_predicted_local_abc_delay": 16.23108555551017,
+          "aig_sha256": "82c0a017961cd55dd357798fefa9e694475aceedd4e3322f356d2784a161559b",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000177_c000_n046",
+      "design": "c1355.aig",
+      "root": 177,
+      "cut_slot": 0,
+      "cut_leaves": [
+        20,
+        80,
+        144
+      ],
+      "candidate_count": 2,
+      "saved_region_nodes": [
+        145,
+        177
+      ],
+      "removable_region_boundary": [
+        20,
+        80,
+        144
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000177_c000_n046_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "replacement_dag_structural_hash": "f377fc143afab2f3c732b1d8033b4d4b59fcd1fd32dc4e34c1853be338216609",
+          "feature_hash_19": "dbbcbaca4649a6c9909cf43626e433dd92500b443158ec40e083d415ff6caa06",
+          "litecut_predicted_local_abc_delay": 24.656411146731152,
+          "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000177_c000_n046_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "9d0927f19ac21c32155d9cf380b254fcaf10ed7078e140507b649c8a90781455",
+          "feature_hash_19": "e604f2172da4f14a30796aadc8854c622b1ed21d72f995a0e36c946d814001b4",
+          "litecut_predicted_local_abc_delay": 23.657103731395516,
+          "aig_sha256": "96f48feefb4db8f17c205872193647c007809883855ed0268d6ad2ce65ccb90d",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "no-op-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000178_c000_n047",
+      "design": "c1355.aig",
+      "root": 178,
+      "cut_slot": 0,
+      "cut_leaves": [
+        1,
+        2,
+        147
+      ],
+      "candidate_count": 5,
+      "saved_region_nodes": [
+        178
+      ],
+      "removable_region_boundary": [
+        146,
+        147
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000178_c000_n047_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "36c1493d0e1fcfeac34ba3df6f175675f7f68b4eb360c1b061d31ad2a4d58c13",
+          "feature_hash_19": "583345e3ca064e663191c1111f94ff7f91907cdd2d55e7dec6f93bda33d83619",
+          "litecut_predicted_local_abc_delay": 23.869954923373072,
+          "aig_sha256": "26c7e575bdda2e3aa9f02f8fd794bd6e98cee18bc9b08711d3dcc12ce578a068",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000178_c000_n047_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "6dee1133d20dd38f5f6ee08450fb463536e245e91b6b5cba884bb9f23b759b5d",
+          "feature_hash_19": "dd5a3d3753e42becbd5ced04b999b47c070785c8059104b4e7a245af749e9633",
+          "litecut_predicted_local_abc_delay": 22.853800490238974,
+          "aig_sha256": "ea3ee65210c26c69f5cb388f363eda83eba4e99c2cea712683eb7bb3bf852d8d",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000178_c000_n047_sub02",
+          "subgraph_index": 2,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "96e8d96ba4ebe250564ce1b8b77f1b428c51bffa226492bac8590e3558e3535f",
+          "feature_hash_19": "80344b2fa8fe5603bc0aaeb149864ae6fa9aafea9dede3ff20edd1104fa0b6a0",
+          "litecut_predicted_local_abc_delay": 32.03446174106197,
+          "aig_sha256": "1e8cb32c669b1bab94d32d89983a4be6068ddb4351450e6f1e27fe93bb373f13",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000178_c000_n047_sub03",
+          "subgraph_index": 3,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "aa0087c1609ec726ffc687c8ee9a4603c0028cfdc007792f43c63f629fc7fd70",
+          "feature_hash_19": "81766368e2ae44022e25a431a24828d8646f53f9ad20f2936ac4bc758b9dffc0",
+          "litecut_predicted_local_abc_delay": 24.602141911817277,
+          "aig_sha256": "119fc7f7821163455d001d4b1f15d64a3ccada05cfc6531e896346c02f1606ac",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000178_c000_n047_sub04",
+          "subgraph_index": 4,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "86697a4107214a2e25af17479d75339571318ae64efca7f95a23f3cf9c4b87c0",
+          "feature_hash_19": "f88b69e20e2ea2acc5cf7ab712b885818df9cc0d64ec48267679cf3b31854c54",
+          "litecut_predicted_local_abc_delay": 23.573388911631667,
+          "aig_sha256": "6f603c27e17ba5abe58259ddaf5fa4695acc46f879c2baa277cd9939543ff6da",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "physical-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000178_c001_n048",
+      "design": "c1355.aig",
+      "root": 178,
+      "cut_slot": 1,
+      "cut_leaves": [
+        1,
+        2,
+        84,
+        85
+      ],
+      "candidate_count": 5,
+      "saved_region_nodes": [
+        178
+      ],
+      "removable_region_boundary": [
+        146,
+        147
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000178_c001_n048_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "a8a6afd8e17df89a29ce77dcf7739cead5c056dcb4869fc8e8e546163de138b2",
+          "feature_hash_19": "0ae0d2ae13304076868eea7d0573e984ca07a84b018ff5b557a19d45bc136d52",
+          "litecut_predicted_local_abc_delay": 27.80917177098215,
+          "aig_sha256": "26c7e575bdda2e3aa9f02f8fd794bd6e98cee18bc9b08711d3dcc12ce578a068",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000178_c001_n048_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "c7647c8f3fa0e37545269fbe97daee5639eefa69f3dcc6a53f71d7dea5ba29bc",
+          "feature_hash_19": "3da19d007c049d4fdf4bac9b7ce9e96ca8fa9d3b254067fa352a5a9ba8958c5a",
+          "litecut_predicted_local_abc_delay": 30.494682252762217,
+          "aig_sha256": "ea3ee65210c26c69f5cb388f363eda83eba4e99c2cea712683eb7bb3bf852d8d",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000178_c001_n048_sub02",
+          "subgraph_index": 2,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "e2fb790f089a211cde375e4cf8b7cee5c34f75d3d83fff0b0e90fce8167ca016",
+          "feature_hash_19": "0ae0d2ae13304076868eea7d0573e984ca07a84b018ff5b557a19d45bc136d52",
+          "litecut_predicted_local_abc_delay": 27.80917177098215,
+          "aig_sha256": "1e8cb32c669b1bab94d32d89983a4be6068ddb4351450e6f1e27fe93bb373f13",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000178_c001_n048_sub03",
+          "subgraph_index": 3,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "b0aa4cb5c831d40d99fb475dad8028188b4c890724491ee14cdbaab06d850d17",
+          "feature_hash_19": "0ae0d2ae13304076868eea7d0573e984ca07a84b018ff5b557a19d45bc136d52",
+          "litecut_predicted_local_abc_delay": 27.80917177098215,
+          "aig_sha256": "119fc7f7821163455d001d4b1f15d64a3ccada05cfc6531e896346c02f1606ac",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000178_c001_n048_sub04",
+          "subgraph_index": 4,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "41efc523db68205a6768bfd1600129b5c8307cdf33bca6dccea59ebb22e6b714",
+          "feature_hash_19": "e9217484eac2409b42153adf08a06f364986aca9f430e620c004b101a436baf5",
+          "litecut_predicted_local_abc_delay": 25.57655862121696,
+          "aig_sha256": "d95e3891b40d9f86f484a150bcedf60480a32dceb54f50cbdaf4c171110c6f56",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "physical-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    },
+    {
+      "decision_id": "c1355_r000179_c000_n049",
+      "design": "c1355.aig",
+      "root": 179,
+      "cut_slot": 0,
+      "cut_leaves": [
+        7,
+        8,
+        149
+      ],
+      "candidate_count": 5,
+      "saved_region_nodes": [
+        179
+      ],
+      "removable_region_boundary": [
+        148,
+        149
+      ],
+      "candidates": [
+        {
+          "candidate_id": "c1355_r000179_c000_n049_sub00",
+          "subgraph_index": 0,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "b516793751e15bb54507e471c6b944dbc9c8465f6d165f45472ce1be4debeec4",
+          "feature_hash_19": "c753dd1102823feb3bb9a9535d947dd94d7009b107c711cb7f52a82a2593b8a8",
+          "litecut_predicted_local_abc_delay": 38.88130163115713,
+          "aig_sha256": "8df8090fb83c2608aecbc1fb2296b11ec12995cbd4ac133f54cdf88f5f21aeec",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000179_c000_n049_sub01",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "58b0be0af9da9a0247e784fc4a95bddd190b3cbbc13e2c6f7b256df00a780a17",
+          "feature_hash_19": "8b4cc9ba8375b9d542ecc5bc24d2ac2348bdec2b70e8d1bc4ccd9694a988a851",
+          "litecut_predicted_local_abc_delay": 52.284687885880736,
+          "aig_sha256": "a5f0abc5ff6f1a6c66ff9f1ad6e7b5618f21708e4ce6e05ef808ff7111b13bd4",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000179_c000_n049_sub02",
+          "subgraph_index": 2,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "69f160c3cc26a6c002b0094eb409cd17036bcd9c96c0aaa573210f2f6c069775",
+          "feature_hash_19": "96fd6156da5e285d01c0c543ce3f89da3895127c7e2f3e47039bc2bdfff25304",
+          "litecut_predicted_local_abc_delay": 47.868272247744436,
+          "aig_sha256": "273c4474a91fb13372898f16c323f0e1ac73e1aa6bc2d7456e0678236a2a5c81",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000179_c000_n049_sub03",
+          "subgraph_index": 3,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "3fa1b5a1215bc30025dae5fb4a7bd961bb28705d0c75a48fd226d642402e3164",
+          "feature_hash_19": "c764cb9396b3d889ae89339c222d572e69981f39ac5347d6099843a45e8cf03f",
+          "litecut_predicted_local_abc_delay": 43.718428548686674,
+          "aig_sha256": "789e1cd9a86b0f495512a76f28379aa8561a537eb6e85265c7e647c031f2378b",
+          "cec_status": "PASS"
+        },
+        {
+          "candidate_id": "c1355_r000179_c000_n049_sub04",
+          "subgraph_index": 4,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "replacement_dag_structural_hash": "b870f6c2cd350b2f2407488f555ddbd67d74b84594e56290ab009ff401488be4",
+          "feature_hash_19": "33ed8ab925121fda999ba97fa387e8abc7ee11dea6d7e4183776d104ab701130",
+          "litecut_predicted_local_abc_delay": 38.40795981352676,
+          "aig_sha256": "1808582b675e1e335d58459762d57383252260c24f64779f840cb27e77aa1dcf",
+          "cec_status": "PASS"
+        }
+      ],
+      "candidate_pair_type": "physical-vs-physical",
+      "candidate_A": 0,
+      "candidate_B": 1
+    }
+  ]
+}

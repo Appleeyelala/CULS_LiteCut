@@ -1,0 +1,27 @@
+# Source and reviewed evidence belong in Git; runtime state belongs in /data.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+.env
+.env.*
+*.o
+*.so
+*.a
+CMakeCache.txt
+CMakeFiles/
+build/
+build_*/
+/runs/
+/data/
+/assets/
+/outputs/
+/checkpoints/
+/cache/
+/tmp/
+/config/local.json
+*.pt
+*.pth
+abc.history

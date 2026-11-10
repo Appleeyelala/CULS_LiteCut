@@ -1,0 +1,89 @@
+{
+  "rows": [
+    {
+      "variant": "baseline",
+      "function_point": 213,
+      "timing_phase": "positive_mode0_all_PI",
+      "full_map_reference_arrival": 109.23999,
+      "local_predicted_arrival": 109.23999,
+      "predicted_delta": 0.0,
+      "absolute_error": 0.0,
+      "relative_error": 0.0,
+      "local_nodes": 49,
+      "evaluated_cuts": 1220,
+      "evaluated_matches": 3356,
+      "evaluated_phases": 3450,
+      "elapsed_time": 0.009016,
+      "match_wall_time": 0.000963,
+      "frontier_pis": 14,
+      "subject_graph_nodes_constructed": 553,
+      "full_candidate_mapping": false,
+      "below_108_59_ps": false
+    },
+    {
+      "variant": "candidate",
+      "function_point": 322,
+      "timing_phase": "positive_mode0_all_PI",
+      "full_map_reference_arrival": 106.219986,
+      "local_predicted_arrival": 106.219986,
+      "predicted_delta": -3.020004,
+      "absolute_error": 0.0,
+      "relative_error": 0.0,
+      "local_nodes": 47,
+      "evaluated_cuts": 944,
+      "evaluated_matches": 2750,
+      "evaluated_phases": 2844,
+      "elapsed_time": 0.00815,
+      "match_wall_time": 0.002564,
+      "frontier_pis": 14,
+      "subject_graph_nodes_constructed": 551,
+      "full_candidate_mapping": false,
+      "below_108_59_ps": true
+    }
+  ],
+  "prediction_sha256": "eabdb447e640a3900249bdace03233c139382cebc188cbf50d3aade16ad65db6",
+  "reference_read_after_prediction_persisted": true,
+  "reference_file": "/data/wushangge/runs/CULS-R9-pin-audit-20261014-iLFKEK/pin_audit_evidence.json",
+  "normal_baseline_maps": 1,
+  "normal_candidate_maps": 0,
+  "baseline_instrumentation_blif_identical": true,
+  "baseline_initial_mode0_preprocessing_wall_s": 0.188846,
+  "preprocessing_time_excludes_library_loading_and_build": true,
+  "frontier_mapping": {
+    "17": {
+      "candidate_node": 17,
+      "polarity": 0,
+      "cec": "PASS"
+    },
+    "33": {
+      "candidate_node": 33,
+      "polarity": 0,
+      "cec": "PASS"
+    },
+    "151": {
+      "candidate_node": 232,
+      "polarity": 0,
+      "cec": "PASS"
+    },
+    "188": {
+      "candidate_node": 234,
+      "polarity": 0,
+      "cec": "PASS"
+    },
+    "197": {
+      "candidate_node": 287,
+      "polarity": 0,
+      "cec": "PASS"
+    },
+    "209": {
+      "candidate_node": 235,
+      "polarity": 0,
+      "cec": "PASS"
+    },
+    "213": {
+      "candidate_node": 322,
+      "polarity": 0,
+      "cec": "PASS"
+    }
+  }
+}

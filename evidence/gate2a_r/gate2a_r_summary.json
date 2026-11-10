@@ -1,0 +1,16 @@
+{
+  "status": "NOT_ALIGNABLE",
+  "candidate_alignment": "NOT_ALIGNABLE",
+  "predictions": null,
+  "local_greedy_configuration": null,
+  "global_sta": null,
+  "blocking_point": "For d1 root 146, canonical mapping has no direct selected supergate/subg at the AIG->mapper root (A: 146->216, B: 146->218; parser supergateIndex=-1). Mapping absorbs the root into selected fanout supergates and reselects a two-leaf interface.",
+  "checkpoint": "/home/wushangge/cutLibOrigin/best.pt",
+  "checkpoint_sha256": "b3f499d2973bdb36fb42690794e9838d4c8359f05d6e141aa8cbe2b9fe3ae64d",
+  "predictions_run": false,
+  "sta_run": false,
+  "scope": "d1=(root=146, cut_slot=0), candidates A/B; C/D not promoted after direct correspondence failure",
+  "canonical_abc": "/home/wushangge/abc_for_cutLib/abc",
+  "technology_library": "/home/wushangge/cutLibOrigin/lib/asap7.lib",
+  "alignment_audit": "gate2a_r_alignment_audit.json"
+}

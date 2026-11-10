@@ -1,0 +1,36 @@
+{
+  "decision_id": "c1355_r000156_c000_n020",
+  "candidates": [
+    {
+      "candidate_id": "c1355_r000156_c000_n020_sub00",
+      "subgraph_index": 0,
+      "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+      "feature_hash_19": "7fd4f75f1e6cdc5f24d2c1d35b6a139b0537562315b84b3a195b013818a83688",
+      "replacement_dag_structural_hash": "ed6f62da9768e64b2fdcfdfd6e318f5bf84555aa73e2a4431bbd51fc06aaad96",
+      "litecut_predicted_local_abc_delay": 21.13868650817743,
+      "litecut_finite": true,
+      "litecut_deterministic": true,
+      "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+      "cec_status": "PASS"
+    },
+    {
+      "candidate_id": "c1355_r000156_c000_n020_sub01",
+      "subgraph_index": 1,
+      "installation_kind": "PHYSICAL_REPLACEMENT",
+      "feature_hash_19": "b6e8187adbb733b903b8797fc2e5e12e377f1a550d5a64e3c3d76c5da2c39fe2",
+      "replacement_dag_structural_hash": "9c7c666d0d1ee786042731d64663d9ee8a5719df3ad3084bca473f48f391f53a",
+      "litecut_predicted_local_abc_delay": 22.85367019421173,
+      "litecut_finite": true,
+      "litecut_deterministic": true,
+      "aig_sha256": "7eb2044b8b4e15de57b163da642eac9be3c155249b722a69a3963564f6f0d120",
+      "cec_status": "PASS"
+    }
+  ],
+  "selected_pair": {
+    "type": "no-op-vs-physical",
+    "A": 0,
+    "B": 1
+  },
+  "litecut_local_preference": "A",
+  "litecut_delta_B_minus_A": 1.7149836860343015
+}

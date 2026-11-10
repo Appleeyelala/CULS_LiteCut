@@ -1,0 +1,41 @@
+{
+  "baseline": {
+    "cec": "PASS",
+    "debug_env": {
+      "AIGREWRITE_MAP_DEBUG_IDS": "17,33,151,188,197,213",
+      "AIGREWRITE_MAP_DEBUG_NODE": "197"
+    },
+    "instrumented_binary_sha": "f255acd802f928fb011737843419d1b39454f060bbd74968a355d3e476822784",
+    "mapped_network_identical": true,
+    "metrics": {
+      "area": 513.22,
+      "gates": 382,
+      "liberty_stime_delay": 360.11,
+      "pair_mio_delay": 194.169998
+    },
+    "original_binary_sha": "aa2d17b6de367acd16a622aa894f96da0e92431927dbb68e1ca26462b696c1ae"
+  },
+  "candidate": {
+    "cec": "PASS",
+    "debug_env": {
+      "AIGREWRITE_MAP_DEBUG_IDS": "17,33,232,234,287,322",
+      "AIGREWRITE_MAP_DEBUG_NODE": "287"
+    },
+    "instrumented_binary_sha": "f255acd802f928fb011737843419d1b39454f060bbd74968a355d3e476822784",
+    "mapped_network_identical": true,
+    "metrics": {
+      "area": 509.72,
+      "gates": 381,
+      "liberty_stime_delay": 360.11,
+      "pair_mio_delay": 193.519989
+    },
+    "original_binary_sha": "aa2d17b6de367acd16a622aa894f96da0e92431927dbb68e1ca26462b696c1ae"
+  },
+  "run_root": "/data/wushangge/runs/CULS-mapper-internal-20261003-34U6OZ",
+  "slurm_jobs": [
+    48504,
+    48505,
+    48508
+  ],
+  "source_commit": "c738ed6e86e6ca10bcef0d4c649cc07d925b4be8"
+}

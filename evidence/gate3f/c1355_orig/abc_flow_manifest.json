@@ -1,0 +1,11 @@
+{
+  "abc_binary": "/data/wushangge/runs/CULS-gate3f-20260922-gate2babc/bin/abc",
+  "abc_sha256": "9b64d35ba403df4b1a2474c4591abdfd298e9a2fe1411f6ba16ae9096b6e2b2f",
+  "abc_version_output": "ABC command line: \"version\".\n\nUC Berkeley, ABC 1.01 (compiled Aug  6 2025 14:07:48)\n",
+  "flow_note": "The canonical mapping/timing commands are unchanged; print_delay/print_io are read-only extraction after stime.",
+  "library": "/data/wushangge/runs/CULS-gate3f-20260922-gate2babc/input/asap7.lib",
+  "library_sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55",
+  "mapping_flow": "read <technology_library>; read <input_aig>; map; topo; stime",
+  "po11_extraction_extension": "print_delay po11; print_io",
+  "timing_precision_ps": 0.01
+}

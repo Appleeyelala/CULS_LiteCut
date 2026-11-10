@@ -1,0 +1,19 @@
+{
+  "gate": "Gate 2C",
+  "run_root": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918",
+  "slurm_job_id": "44416",
+  "slurm_job_name": "gate2c-sm86",
+  "abc_binary": "/data/public/AIGRewrite/abc/abc",
+  "gate1_engine": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/bin/abcg",
+  "original_snapshot": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/input/normalized_original.aig",
+  "original_sha256": "88df0a75b9328378b869843ba675c316d05a8bd812b7de22effc12af51f430ea",
+  "rewrite_library": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/input/rewrite_library.inc",
+  "rewrite_library_sha256": "48864b4f297b3c667c3dd7ddfb7a5f6e1f287838374ed7be0afbe9254fae0884",
+  "checkpoint": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/input/best.pt",
+  "checkpoint_sha256": "b3f499d2973bdb36fb42690794e9838d4c8359f05d6e141aa8cbe2b9fe3ae64d",
+  "python": "/home/share/process/anaconda3/bin/python",
+  "python_version": "3.11.5 (main, Sep 11 2023, 13:54:46) [GCC 11.2.0]",
+  "omp_num_threads": "1",
+  "cuda_visible_devices": "0",
+  "flow": "read \"<technology_library>\"; read \"<input_aig>\"; map; topo; stime"
+}

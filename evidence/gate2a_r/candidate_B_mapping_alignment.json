@@ -1,0 +1,164 @@
+{
+  "candidate_id": "B",
+  "gate1": {
+    "decision_root": 146,
+    "cut_leaves": [
+      2,
+      42,
+      82
+    ],
+    "subgraph_index": 1,
+    "installation_kind": "PHYSICAL_REPLACEMENT",
+    "preserved_root_wrapper": 146,
+    "library_subgraph_root": 8,
+    "nodes_added": 3,
+    "physical_graph_modified": true,
+    "physically_deleted_nodes": [],
+    "replayed_aig": "/data/wushangge/gate1a_AIGRewrite/gate1c_r_out/d1_sub1.aig",
+    "replacement_dag": {
+      "source": "Gate1 BuildSubgr replay (replayed AIG is the lossless artifact)",
+      "library_subgraph_root": 8,
+      "replayed_aig": "/data/wushangge/gate1a_AIGRewrite/gate1c_r_out/d1_sub1.aig"
+    }
+  },
+  "mapping": {
+    "abc_binary": "/home/wushangge/abc_for_cutLib/abc",
+    "technology_library": "/home/wushangge/cutLibOrigin/lib/asap7.lib",
+    "aig2map_log": "/home/wushangge/cutLibOrigin/gate2a_r_out/mapping_B/aig2map.log",
+    "abc_map_log": "/home/wushangge/cutLibOrigin/gate2a_r_out/mapping_B/abc_map.log",
+    "abc_superCreate_log": "/home/wushangge/cutLibOrigin/gate2a_r_out/mapping_B/abc_superCreate.log",
+    "mapper_root_id": 218,
+    "mapper_root_to_aig": 146,
+    "direct_supergate_records_by_mapper_id": [],
+    "direct_supergate_records_by_aig_id": [],
+    "super_create_events_for_mapper_root": [],
+    "root_has_direct_selected_supergate": false,
+    "canonical_parser_graph_stats": {
+      "transformed_graph_nodes": 939,
+      "feat_graph_nodes": 544,
+      "cell_struct_entries": 503
+    },
+    "root_fanout_fusion_evidence": [
+      {
+        "root_to_fanout_edge": {
+          "fanin0": 145,
+          "fanin0_complement": 1,
+          "fanin1": 146,
+          "fanin1_complement": 1,
+          "aig_root": 192
+        },
+        "fanout_aig_root": 192,
+        "fanout_mapper_node_id": 219,
+        "fanout_supergate_records": [
+          {
+            "mapper_node_id": 219,
+            "aig_node_id": 192,
+            "area": 2.1,
+            "truth_table": [
+              2576980377,
+              2576980377
+            ],
+            "supergate_leaves": [
+              9,
+              13
+            ]
+          }
+        ],
+        "fanout_selected_supergate_index": 1,
+        "fanout_canonical_subg": {
+          "219": [],
+          "217": [
+            [
+              219,
+              1
+            ]
+          ],
+          "9": [
+            [
+              216,
+              0
+            ],
+            [
+              217,
+              0
+            ]
+          ],
+          "216": [
+            [
+              217,
+              1
+            ],
+            [
+              218,
+              1
+            ]
+          ],
+          "13": [
+            [
+              216,
+              0
+            ],
+            [
+              218,
+              0
+            ]
+          ],
+          "218": [
+            [
+              219,
+              1
+            ]
+          ]
+        },
+        "fanout_canonical_subg_structural_hash": "9449c0d1ca77a3162fabb4562ddbcb6f"
+      }
+    ],
+    "canonical_root_cut_set": [
+      [
+        8738,
+        [
+          13,
+          216
+        ],
+        2
+      ],
+      [
+        17476,
+        [
+          9,
+          13
+        ],
+        2
+      ]
+    ],
+    "canonical_first_cut": [
+      8738,
+      [
+        13,
+        216
+      ],
+      2
+    ],
+    "canonical_first_cut_aig_namespace": {
+      "truth": 8738,
+      "mapper_leaves": [
+        13,
+        216
+      ],
+      "aig_leaves": [
+        14,
+        94
+      ],
+      "n_leaves": 2
+    },
+    "canonical_selected_supergate_index": -1,
+    "canonical_selected_supergate": null,
+    "canonical_subg": null,
+    "canonical_subg_structural_hash": null,
+    "log_sha256": {
+      "aig2map.log": "c13453471af71bd973cdf003c0b700c28c1fd97eec97af9b6be3d4dbdb82b752",
+      "abc_map.log": "ad32596712025d084824076f9cce6d8d6df47b45cd1a621e59bcd2ce1d4602cc",
+      "abc_superCreate.log": "0fff9f0fa3098d204e5cec075ad353de2186265315a73a9c4fcb83eb327e8b69"
+    }
+  }
+}

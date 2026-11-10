@@ -1,0 +1,154 @@
+{
+  "status": "FOUND",
+  "selection_rule": {
+    "only_timing_active": true,
+    "prefer_both_physical_vs_physical": true,
+    "sort": "decision_id ascending",
+    "do_not_use_timing_delta_for_pair_selection": true
+  },
+  "selected_pair": {
+    "decision_ids": [
+      "c1355_r000148_c000_n004",
+      "c1355_r000149_c000_n006"
+    ],
+    "candidate_pair_types": [
+      "no-op-vs-physical",
+      "no-op-vs-physical"
+    ]
+  },
+  "compatibility": {
+    "compatible": true,
+    "checks": {
+      "removable_regions_disjoint": true,
+      "root_A_not_removed_by_B": true,
+      "root_B_not_removed_by_A": true,
+      "boundary_A_not_removed_by_B": true,
+      "boundary_B_not_removed_by_A": true
+    },
+    "dependencies": [],
+    "root_A": 148,
+    "root_B": 149,
+    "removed_A": [
+      87
+    ],
+    "removed_B": [
+      89
+    ],
+    "boundary_A": [
+      8,
+      45,
+      86
+    ],
+    "boundary_B": [
+      10,
+      46,
+      88
+    ],
+    "method": "Gate 1 preserved-root-wrapper compatibility test"
+  },
+  "checked_pair_count_before_selection": 2,
+  "joint_replay_validation": {
+    "status": "PASS",
+    "all_four_candidate_combinations_replayed": true,
+    "cec_all_four": true,
+    "mapping_or_sta_run": false,
+    "configurations": {
+      "AA": {
+        "candidate_1": {
+          "decision_id": "c1355_r000148_c000_n004",
+          "label": "A",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE"
+        },
+        "candidate_2": {
+          "decision_id": "c1355_r000149_c000_n006",
+          "label": "A",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE"
+        },
+        "forced_spec": "148:0:0,149:0:0",
+        "replay_exit_code": 0,
+        "replay_pass": true,
+        "cec_exit_code": 0,
+        "cec_status": "PASS",
+        "aig": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/next_gate_joint_replay/AA.aig",
+        "aig_sha256": "8ad39b67ad1b703e46c064aa159df8fa4abda42942c1556f7a63c486e5fc7112",
+        "provenance": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/next_gate_joint_replay/AA.json",
+        "replay_log": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/logs/next_gate_AA.engine.log",
+        "cec_log": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/logs/next_gate_AA.cec.log"
+      },
+      "AB": {
+        "candidate_1": {
+          "decision_id": "c1355_r000148_c000_n004",
+          "label": "A",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE"
+        },
+        "candidate_2": {
+          "decision_id": "c1355_r000149_c000_n006",
+          "label": "B",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT"
+        },
+        "forced_spec": "148:0:0,149:0:1",
+        "replay_exit_code": 0,
+        "replay_pass": true,
+        "cec_exit_code": 0,
+        "cec_status": "PASS",
+        "aig": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/next_gate_joint_replay/AB.aig",
+        "aig_sha256": "81d71bc1efd9f63b425854bb122006031c7becac2d7927376e752527721aef36",
+        "provenance": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/next_gate_joint_replay/AB.json",
+        "replay_log": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/logs/next_gate_AB.engine.log",
+        "cec_log": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/logs/next_gate_AB.cec.log"
+      },
+      "BA": {
+        "candidate_1": {
+          "decision_id": "c1355_r000148_c000_n004",
+          "label": "B",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT"
+        },
+        "candidate_2": {
+          "decision_id": "c1355_r000149_c000_n006",
+          "label": "A",
+          "subgraph_index": 0,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE"
+        },
+        "forced_spec": "148:0:1,149:0:0",
+        "replay_exit_code": 0,
+        "replay_pass": true,
+        "cec_exit_code": 0,
+        "cec_status": "PASS",
+        "aig": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/next_gate_joint_replay/BA.aig",
+        "aig_sha256": "cb4d3d7467f50d5cfe7a8e48826d9bc27a099d8e432a2bbd600b66523a5b2bef",
+        "provenance": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/next_gate_joint_replay/BA.json",
+        "replay_log": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/logs/next_gate_BA.engine.log",
+        "cec_log": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/logs/next_gate_BA.cec.log"
+      },
+      "BB": {
+        "candidate_1": {
+          "decision_id": "c1355_r000148_c000_n004",
+          "label": "B",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT"
+        },
+        "candidate_2": {
+          "decision_id": "c1355_r000149_c000_n006",
+          "label": "B",
+          "subgraph_index": 1,
+          "installation_kind": "PHYSICAL_REPLACEMENT"
+        },
+        "forced_spec": "148:0:1,149:0:1",
+        "replay_exit_code": 0,
+        "replay_pass": true,
+        "cec_exit_code": 0,
+        "cec_status": "PASS",
+        "aig": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/next_gate_joint_replay/BB.aig",
+        "aig_sha256": "e6c1fc04c484a35fb7a26203aa4925bbfcca0b4f4647c98f180455229ef905b6",
+        "provenance": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/next_gate_joint_replay/BB.json",
+        "replay_log": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/logs/next_gate_BB.engine.log",
+        "cec_log": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/logs/next_gate_BB.cec.log"
+      }
+    }
+  }
+}

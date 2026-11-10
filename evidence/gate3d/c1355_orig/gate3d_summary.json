@@ -1,0 +1,135 @@
+{
+  "accepted_decisions": 62,
+  "accepted_pair_count": 14,
+  "accepted_pair_relations": {
+    "DISJOINT": 8,
+    "OVERLAPPING": 6
+  },
+  "active_regions_accepted_distribution": {
+    "0": 4,
+    "1": 40,
+    "2": 8,
+    "3": 2
+  },
+  "all_regions_accepted_distribution": {
+    "0": 12,
+    "1": 40,
+    "2": 8,
+    "3": 2
+  },
+  "compromised_damaged_leaf_events": 8,
+  "compromised_decisions": 8,
+  "compromised_with_resolved_prior_accepted_source": 8,
+  "deterministic": true,
+  "deterministic_trace_sha256": "3f8fd74eee1ddf9d64c095b911b1e7ac9bf6f2a47d825d0644218f53effd4e8f",
+  "executable_decisions": 91,
+  "gate": "Gate 3D",
+  "gate3d_pass": true,
+  "input_path": "/data/wushangge/runs/CULS-gate3d-20260921-170519/input/c1355_orig.aig",
+  "legal_decisions": 1815,
+  "max_accepted_region_ids": [
+    16,
+    24
+  ],
+  "max_accepted_rewrites_in_one_region": 3,
+  "mean_accepted_rewrites_per_active_region": 1.1481481481481481,
+  "order_sensitivity": {
+    "any_order_sensitive": true,
+    "regions_tested": 3,
+    "results": [
+      {
+        "order_sensitive": true,
+        "original_accepted": [
+          [
+            74,
+            4
+          ],
+          [
+            86,
+            5
+          ]
+        ],
+        "region_id": 2,
+        "reverse_accepted": [
+          [
+            86,
+            5
+          ],
+          [
+            90,
+            6
+          ]
+        ]
+      },
+      {
+        "order_sensitive": true,
+        "original_accepted": [
+          [
+            123,
+            2
+          ],
+          [
+            135,
+            5
+          ]
+        ],
+        "region_id": 5,
+        "reverse_accepted": [
+          [
+            135,
+            5
+          ],
+          [
+            139,
+            7
+          ]
+        ]
+      },
+      {
+        "order_sensitive": true,
+        "original_accepted": [
+          [
+            160,
+            4
+          ],
+          [
+            172,
+            5
+          ]
+        ],
+        "region_id": 7,
+        "reverse_accepted": [
+          [
+            172,
+            5
+          ],
+          [
+            176,
+            7
+          ]
+        ]
+      }
+    ]
+  },
+  "preselected_decisions": 74,
+  "region_count": 62,
+  "regions_with_0_accepted": 4,
+  "regions_with_1_accepted": 40,
+  "regions_with_2plus_accepted": 10,
+  "regions_with_executable_opportunity": 54,
+  "reverted_decisions": 4,
+  "second_trace_sha256": "3f8fd74eee1ddf9d64c095b911b1e7ac9bf6f2a47d825d0644218f53effd4e8f",
+  "source_semantics": {
+    "cross_region_decisions_used": false,
+    "install_order": "ascending reordered internal root ID; replay only reverses selected region roots",
+    "removable_set": "pre-execution cut-bounded ref/deref-style cone",
+    "selection": "one best cut/subgraph per root from EvaluateNode",
+    "use_zeros": false
+  },
+  "status_counts": {
+    "ACCEPTED": 62,
+    "COMPROMISED": 8,
+    "PRE_EVAL_REJECT": 438,
+    "REVERTED": 4
+  }
+}

@@ -1,0 +1,2630 @@
+{
+  "gate": "Gate 2C",
+  "status": "FROZEN_BEFORE_TIMING",
+  "purpose": "Timing-active rewrite decision screening",
+  "design": "c1355.aig",
+  "original_snapshot": {
+    "source_path": "/data/wushangge/gate1a_AIGRewrite/gate1c_r_out/normalized_original.aig",
+    "sha256": "88df0a75b9328378b869843ba675c316d05a8bd812b7de22effc12af51f430ea",
+    "normalization": "Gate 1C-R normalized original snapshot"
+  },
+  "candidate_enumeration": {
+    "engine": "/data/wushangge/gate1a_AIGRewrite/build_gate1c/abcg",
+    "engine_sha256": "592135b6dd22dc59ec54783d563a15363dd0fa290ab4ffa1b38df985f2366f80",
+    "source_audit": "/data/wushangge/gate1a_AIGRewrite/gate1c_out/c1355_probe.json",
+    "source_audit_sha256": "70f2a8d5bfa079444c533e3071e99ef8af9acf04cc8cdb231f5e474af3aa0a7a",
+    "captured_audit_records": 512,
+    "engine_records_seen": 1723,
+    "audit_record_cap_note": "Gate 1B engine audit stores at most 512 records; the 512 captured records, not records_seen, define this frame.",
+    "frame_filter": "number_of_available_subgraphs >= 2",
+    "frame_size": 512
+  },
+  "sampling_rule": {
+    "type": "deterministic_sorted_prefix",
+    "filter": "candidate_count >= 2",
+    "sort_keys": [
+      "root ascending",
+      "cut_slot ascending"
+    ],
+    "take_first": 50,
+    "seed": null,
+    "random_sampling_used": false,
+    "timing_results_observed_before_selection": false
+  },
+  "sampled_decisions": 50,
+  "selected_decision_ids": [
+    "c1355_r000146_c000_n000",
+    "c1355_r000146_c001_n001",
+    "c1355_r000147_c000_n002",
+    "c1355_r000147_c001_n003",
+    "c1355_r000148_c000_n004",
+    "c1355_r000148_c001_n005",
+    "c1355_r000149_c000_n006",
+    "c1355_r000149_c001_n007",
+    "c1355_r000150_c000_n008",
+    "c1355_r000150_c001_n009",
+    "c1355_r000151_c000_n010",
+    "c1355_r000151_c001_n011",
+    "c1355_r000152_c000_n012",
+    "c1355_r000152_c001_n013",
+    "c1355_r000153_c000_n014",
+    "c1355_r000153_c001_n015",
+    "c1355_r000154_c000_n016",
+    "c1355_r000154_c001_n017",
+    "c1355_r000155_c000_n018",
+    "c1355_r000155_c001_n019",
+    "c1355_r000156_c000_n020",
+    "c1355_r000156_c001_n021",
+    "c1355_r000157_c000_n022",
+    "c1355_r000157_c001_n023",
+    "c1355_r000158_c000_n024",
+    "c1355_r000158_c001_n025",
+    "c1355_r000159_c000_n026",
+    "c1355_r000159_c001_n027",
+    "c1355_r000160_c000_n028",
+    "c1355_r000160_c001_n029",
+    "c1355_r000161_c000_n030",
+    "c1355_r000162_c000_n031",
+    "c1355_r000163_c000_n032",
+    "c1355_r000164_c000_n033",
+    "c1355_r000165_c000_n034",
+    "c1355_r000166_c000_n035",
+    "c1355_r000167_c000_n036",
+    "c1355_r000168_c000_n037",
+    "c1355_r000169_c000_n038",
+    "c1355_r000170_c000_n039",
+    "c1355_r000171_c000_n040",
+    "c1355_r000172_c000_n041",
+    "c1355_r000173_c000_n042",
+    "c1355_r000174_c000_n043",
+    "c1355_r000175_c000_n044",
+    "c1355_r000176_c000_n045",
+    "c1355_r000177_c000_n046",
+    "c1355_r000178_c000_n047",
+    "c1355_r000178_c001_n048",
+    "c1355_r000179_c000_n049"
+  ],
+  "candidate_pair_selection_rule": {
+    "predefined": true,
+    "rule": [
+      "After candidate installation kinds are enumerated, if at least two PHYSICAL_REPLACEMENT candidates exist, choose the two smallest subgraph_index values among them.",
+      "Otherwise choose the smallest subgraph_index NO_OP_FULL_CORRESPONDENCE candidate and the smallest subgraph_index PHYSICAL_REPLACEMENT candidate.",
+      "For physical-vs-physical, label the lower subgraph_index A and the higher B; for no-op-vs-physical, label NO_OP as A and PHYSICAL_REPLACEMENT as B.",
+      "LiteCut scores, STA, and structural hash differences are not used for pair selection."
+    ]
+  },
+  "timing_classification": {
+    "flow": "read \"<technology_library>\"; read \"<input_aig>\"; map; topo; stime",
+    "abc_binary": "/data/public/AIGRewrite/abc/abc",
+    "library": "/home/wushangge/cutLibOrigin/lib/asap7.lib",
+    "library_sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55",
+    "reported_precision_ps": 0.01,
+    "timing_tolerance_ps": 0.01,
+    "borderline_rule": "abs(delta) == tolerance within 1e-12 ps",
+    "active_rule": "abs(delta) > tolerance + 1e-12 ps",
+    "inactive_rule": "abs(delta) < tolerance - 1e-12 ps"
+  },
+  "litecut": {
+    "bridge": "gate2a_candidate_inference.py",
+    "rewrite_library": "/data/wushangge/gate1a_AIGRewrite/src/algorithms/rewrite_library.inc",
+    "rewrite_library_sha256": "48864b4f297b3c667c3dd7ddfb7a5f6e1f287838374ed7be0afbe9254fae0884",
+    "checkpoint": "/home/wushangge/cutLibOrigin/best.pt",
+    "checkpoint_sha256": "b3f499d2973bdb36fb42690794e9838d4c8359f05d6e141aa8cbe2b9fe3ae64d",
+    "model_family": "student_group_fusion_soft_moe",
+    "input_dimension": 19,
+    "prediction_semantics": "LiteCut-predicted local abc_delay",
+    "local_score_difference_tolerance": 1e-12
+  },
+  "replay_requirements": {
+    "same_original_snapshot_for_A_and_B": true,
+    "other_decisions_changed": false,
+    "cec_required": true,
+    "physical_candidate_semantics_source": "Gate 1 engine provenance"
+  },
+  "selected_records": [
+    {
+      "root": 146,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        2,
+        42,
+        82
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        42,
+        82,
+        83,
+        146
+      ],
+      "standard_mffc_boundary": [
+        1,
+        2
+      ],
+      "cut_cone_nodes": [
+        83,
+        146
+      ],
+      "cut_boundary": [
+        2,
+        42,
+        82
+      ],
+      "saved_region_nodes": [
+        83,
+        146
+      ],
+      "removable_region_boundary": [
+        2,
+        42,
+        82
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000146_c000_n000",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 0
+    },
+    {
+      "root": 146,
+      "cut_slot": 1,
+      "raw_cut_slot": 4,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        1,
+        42,
+        83
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        42,
+        82,
+        83,
+        146
+      ],
+      "standard_mffc_boundary": [
+        1,
+        2
+      ],
+      "cut_cone_nodes": [
+        82,
+        146
+      ],
+      "cut_boundary": [
+        1,
+        42,
+        83
+      ],
+      "saved_region_nodes": [
+        82,
+        146
+      ],
+      "removable_region_boundary": [
+        1,
+        42,
+        83
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000146_c001_n001",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 1
+    },
+    {
+      "root": 147,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        4,
+        43,
+        84
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        43,
+        84,
+        85,
+        147
+      ],
+      "standard_mffc_boundary": [
+        3,
+        4
+      ],
+      "cut_cone_nodes": [
+        85,
+        147
+      ],
+      "cut_boundary": [
+        4,
+        43,
+        84
+      ],
+      "saved_region_nodes": [
+        85,
+        147
+      ],
+      "removable_region_boundary": [
+        4,
+        43,
+        84
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000147_c000_n002",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 2
+    },
+    {
+      "root": 147,
+      "cut_slot": 1,
+      "raw_cut_slot": 4,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        3,
+        43,
+        85
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        43,
+        84,
+        85,
+        147
+      ],
+      "standard_mffc_boundary": [
+        3,
+        4
+      ],
+      "cut_cone_nodes": [
+        84,
+        147
+      ],
+      "cut_boundary": [
+        3,
+        43,
+        85
+      ],
+      "saved_region_nodes": [
+        84,
+        147
+      ],
+      "removable_region_boundary": [
+        3,
+        43,
+        85
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000147_c001_n003",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 3
+    },
+    {
+      "root": 148,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        8,
+        45,
+        86
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        45,
+        86,
+        87,
+        148
+      ],
+      "standard_mffc_boundary": [
+        7,
+        8
+      ],
+      "cut_cone_nodes": [
+        87,
+        148
+      ],
+      "cut_boundary": [
+        8,
+        45,
+        86
+      ],
+      "saved_region_nodes": [
+        87,
+        148
+      ],
+      "removable_region_boundary": [
+        8,
+        45,
+        86
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000148_c000_n004",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 4
+    },
+    {
+      "root": 148,
+      "cut_slot": 1,
+      "raw_cut_slot": 4,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        7,
+        45,
+        87
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        45,
+        86,
+        87,
+        148
+      ],
+      "standard_mffc_boundary": [
+        7,
+        8
+      ],
+      "cut_cone_nodes": [
+        86,
+        148
+      ],
+      "cut_boundary": [
+        7,
+        45,
+        87
+      ],
+      "saved_region_nodes": [
+        86,
+        148
+      ],
+      "removable_region_boundary": [
+        7,
+        45,
+        87
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000148_c001_n005",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 5
+    },
+    {
+      "root": 149,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        10,
+        46,
+        88
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        46,
+        88,
+        89,
+        149
+      ],
+      "standard_mffc_boundary": [
+        9,
+        10
+      ],
+      "cut_cone_nodes": [
+        89,
+        149
+      ],
+      "cut_boundary": [
+        10,
+        46,
+        88
+      ],
+      "saved_region_nodes": [
+        89,
+        149
+      ],
+      "removable_region_boundary": [
+        10,
+        46,
+        88
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000149_c000_n006",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 6
+    },
+    {
+      "root": 149,
+      "cut_slot": 1,
+      "raw_cut_slot": 4,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        9,
+        46,
+        89
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        46,
+        88,
+        89,
+        149
+      ],
+      "standard_mffc_boundary": [
+        9,
+        10
+      ],
+      "cut_cone_nodes": [
+        88,
+        149
+      ],
+      "cut_boundary": [
+        9,
+        46,
+        89
+      ],
+      "saved_region_nodes": [
+        88,
+        149
+      ],
+      "removable_region_boundary": [
+        9,
+        46,
+        89
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000149_c001_n007",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 7
+    },
+    {
+      "root": 150,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        12,
+        47,
+        90
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        47,
+        90,
+        91,
+        150
+      ],
+      "standard_mffc_boundary": [
+        11,
+        12
+      ],
+      "cut_cone_nodes": [
+        91,
+        150
+      ],
+      "cut_boundary": [
+        12,
+        47,
+        90
+      ],
+      "saved_region_nodes": [
+        91,
+        150
+      ],
+      "removable_region_boundary": [
+        12,
+        47,
+        90
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000150_c000_n008",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 8
+    },
+    {
+      "root": 150,
+      "cut_slot": 1,
+      "raw_cut_slot": 4,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        11,
+        47,
+        91
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        47,
+        90,
+        91,
+        150
+      ],
+      "standard_mffc_boundary": [
+        11,
+        12
+      ],
+      "cut_cone_nodes": [
+        90,
+        150
+      ],
+      "cut_boundary": [
+        11,
+        47,
+        91
+      ],
+      "saved_region_nodes": [
+        90,
+        150
+      ],
+      "removable_region_boundary": [
+        11,
+        47,
+        91
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000150_c001_n009",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 9
+    },
+    {
+      "root": 151,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        14,
+        48,
+        92
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        48,
+        92,
+        93,
+        151
+      ],
+      "standard_mffc_boundary": [
+        13,
+        14
+      ],
+      "cut_cone_nodes": [
+        93,
+        151
+      ],
+      "cut_boundary": [
+        14,
+        48,
+        92
+      ],
+      "saved_region_nodes": [
+        93,
+        151
+      ],
+      "removable_region_boundary": [
+        14,
+        48,
+        92
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000151_c000_n010",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 10
+    },
+    {
+      "root": 151,
+      "cut_slot": 1,
+      "raw_cut_slot": 4,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        13,
+        48,
+        93
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        48,
+        92,
+        93,
+        151
+      ],
+      "standard_mffc_boundary": [
+        13,
+        14
+      ],
+      "cut_cone_nodes": [
+        92,
+        151
+      ],
+      "cut_boundary": [
+        13,
+        48,
+        93
+      ],
+      "saved_region_nodes": [
+        92,
+        151
+      ],
+      "removable_region_boundary": [
+        13,
+        48,
+        93
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000151_c001_n011",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 11
+    },
+    {
+      "root": 152,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        16,
+        49,
+        94
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        49,
+        94,
+        95,
+        152
+      ],
+      "standard_mffc_boundary": [
+        15,
+        16
+      ],
+      "cut_cone_nodes": [
+        95,
+        152
+      ],
+      "cut_boundary": [
+        16,
+        49,
+        94
+      ],
+      "saved_region_nodes": [
+        95,
+        152
+      ],
+      "removable_region_boundary": [
+        16,
+        49,
+        94
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000152_c000_n012",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 12
+    },
+    {
+      "root": 152,
+      "cut_slot": 1,
+      "raw_cut_slot": 4,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        15,
+        49,
+        95
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        49,
+        94,
+        95,
+        152
+      ],
+      "standard_mffc_boundary": [
+        15,
+        16
+      ],
+      "cut_cone_nodes": [
+        94,
+        152
+      ],
+      "cut_boundary": [
+        15,
+        49,
+        95
+      ],
+      "saved_region_nodes": [
+        94,
+        152
+      ],
+      "removable_region_boundary": [
+        15,
+        49,
+        95
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000152_c001_n013",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 13
+    },
+    {
+      "root": 153,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        18,
+        50,
+        96
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        50,
+        96,
+        97,
+        153
+      ],
+      "standard_mffc_boundary": [
+        17,
+        18
+      ],
+      "cut_cone_nodes": [
+        97,
+        153
+      ],
+      "cut_boundary": [
+        18,
+        50,
+        96
+      ],
+      "saved_region_nodes": [
+        97,
+        153
+      ],
+      "removable_region_boundary": [
+        18,
+        50,
+        96
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000153_c000_n014",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 14
+    },
+    {
+      "root": 153,
+      "cut_slot": 1,
+      "raw_cut_slot": 4,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        17,
+        50,
+        97
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        50,
+        96,
+        97,
+        153
+      ],
+      "standard_mffc_boundary": [
+        17,
+        18
+      ],
+      "cut_cone_nodes": [
+        96,
+        153
+      ],
+      "cut_boundary": [
+        17,
+        50,
+        97
+      ],
+      "saved_region_nodes": [
+        96,
+        153
+      ],
+      "removable_region_boundary": [
+        17,
+        50,
+        97
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000153_c001_n015",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 15
+    },
+    {
+      "root": 154,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        21,
+        52,
+        98
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        52,
+        98,
+        99,
+        154
+      ],
+      "standard_mffc_boundary": [
+        20,
+        21
+      ],
+      "cut_cone_nodes": [
+        99,
+        154
+      ],
+      "cut_boundary": [
+        21,
+        52,
+        98
+      ],
+      "saved_region_nodes": [
+        99,
+        154
+      ],
+      "removable_region_boundary": [
+        21,
+        52,
+        98
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000154_c000_n016",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 16
+    },
+    {
+      "root": 154,
+      "cut_slot": 1,
+      "raw_cut_slot": 4,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        20,
+        52,
+        99
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        52,
+        98,
+        99,
+        154
+      ],
+      "standard_mffc_boundary": [
+        20,
+        21
+      ],
+      "cut_cone_nodes": [
+        98,
+        154
+      ],
+      "cut_boundary": [
+        20,
+        52,
+        99
+      ],
+      "saved_region_nodes": [
+        98,
+        154
+      ],
+      "removable_region_boundary": [
+        20,
+        52,
+        99
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000154_c001_n017",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 17
+    },
+    {
+      "root": 155,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        23,
+        53,
+        100
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        53,
+        100,
+        101,
+        155
+      ],
+      "standard_mffc_boundary": [
+        22,
+        23
+      ],
+      "cut_cone_nodes": [
+        101,
+        155
+      ],
+      "cut_boundary": [
+        23,
+        53,
+        100
+      ],
+      "saved_region_nodes": [
+        101,
+        155
+      ],
+      "removable_region_boundary": [
+        23,
+        53,
+        100
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000155_c000_n018",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 18
+    },
+    {
+      "root": 155,
+      "cut_slot": 1,
+      "raw_cut_slot": 4,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        22,
+        53,
+        101
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        53,
+        100,
+        101,
+        155
+      ],
+      "standard_mffc_boundary": [
+        22,
+        23
+      ],
+      "cut_cone_nodes": [
+        100,
+        155
+      ],
+      "cut_boundary": [
+        22,
+        53,
+        101
+      ],
+      "saved_region_nodes": [
+        100,
+        155
+      ],
+      "removable_region_boundary": [
+        22,
+        53,
+        101
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000155_c001_n019",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 19
+    },
+    {
+      "root": 156,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        25,
+        54,
+        102
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        54,
+        102,
+        103,
+        156
+      ],
+      "standard_mffc_boundary": [
+        24,
+        25
+      ],
+      "cut_cone_nodes": [
+        103,
+        156
+      ],
+      "cut_boundary": [
+        25,
+        54,
+        102
+      ],
+      "saved_region_nodes": [
+        103,
+        156
+      ],
+      "removable_region_boundary": [
+        25,
+        54,
+        102
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000156_c000_n020",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 20
+    },
+    {
+      "root": 156,
+      "cut_slot": 1,
+      "raw_cut_slot": 4,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        24,
+        54,
+        103
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        54,
+        102,
+        103,
+        156
+      ],
+      "standard_mffc_boundary": [
+        24,
+        25
+      ],
+      "cut_cone_nodes": [
+        102,
+        156
+      ],
+      "cut_boundary": [
+        24,
+        54,
+        103
+      ],
+      "saved_region_nodes": [
+        102,
+        156
+      ],
+      "removable_region_boundary": [
+        24,
+        54,
+        103
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000156_c001_n021",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 21
+    },
+    {
+      "root": 157,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        27,
+        55,
+        104
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        55,
+        104,
+        105,
+        157
+      ],
+      "standard_mffc_boundary": [
+        26,
+        27
+      ],
+      "cut_cone_nodes": [
+        105,
+        157
+      ],
+      "cut_boundary": [
+        27,
+        55,
+        104
+      ],
+      "saved_region_nodes": [
+        105,
+        157
+      ],
+      "removable_region_boundary": [
+        27,
+        55,
+        104
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000157_c000_n022",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 22
+    },
+    {
+      "root": 157,
+      "cut_slot": 1,
+      "raw_cut_slot": 4,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        26,
+        55,
+        105
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        55,
+        104,
+        105,
+        157
+      ],
+      "standard_mffc_boundary": [
+        26,
+        27
+      ],
+      "cut_cone_nodes": [
+        104,
+        157
+      ],
+      "cut_boundary": [
+        26,
+        55,
+        105
+      ],
+      "saved_region_nodes": [
+        104,
+        157
+      ],
+      "removable_region_boundary": [
+        26,
+        55,
+        105
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000157_c001_n023",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 23
+    },
+    {
+      "root": 158,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        30,
+        57,
+        106
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        57,
+        106,
+        107,
+        158
+      ],
+      "standard_mffc_boundary": [
+        29,
+        30
+      ],
+      "cut_cone_nodes": [
+        107,
+        158
+      ],
+      "cut_boundary": [
+        30,
+        57,
+        106
+      ],
+      "saved_region_nodes": [
+        107,
+        158
+      ],
+      "removable_region_boundary": [
+        30,
+        57,
+        106
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000158_c000_n024",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 24
+    },
+    {
+      "root": 158,
+      "cut_slot": 1,
+      "raw_cut_slot": 4,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        29,
+        57,
+        107
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        57,
+        106,
+        107,
+        158
+      ],
+      "standard_mffc_boundary": [
+        29,
+        30
+      ],
+      "cut_cone_nodes": [
+        106,
+        158
+      ],
+      "cut_boundary": [
+        29,
+        57,
+        107
+      ],
+      "saved_region_nodes": [
+        106,
+        158
+      ],
+      "removable_region_boundary": [
+        29,
+        57,
+        107
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000158_c001_n025",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 25
+    },
+    {
+      "root": 159,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        32,
+        58,
+        108
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        58,
+        108,
+        109,
+        159
+      ],
+      "standard_mffc_boundary": [
+        31,
+        32
+      ],
+      "cut_cone_nodes": [
+        109,
+        159
+      ],
+      "cut_boundary": [
+        32,
+        58,
+        108
+      ],
+      "saved_region_nodes": [
+        109,
+        159
+      ],
+      "removable_region_boundary": [
+        32,
+        58,
+        108
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000159_c000_n026",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 26
+    },
+    {
+      "root": 159,
+      "cut_slot": 1,
+      "raw_cut_slot": 4,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        31,
+        58,
+        109
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        58,
+        108,
+        109,
+        159
+      ],
+      "standard_mffc_boundary": [
+        31,
+        32
+      ],
+      "cut_cone_nodes": [
+        108,
+        159
+      ],
+      "cut_boundary": [
+        31,
+        58,
+        109
+      ],
+      "saved_region_nodes": [
+        108,
+        159
+      ],
+      "removable_region_boundary": [
+        31,
+        58,
+        109
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000159_c001_n027",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 27
+    },
+    {
+      "root": 160,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        34,
+        59,
+        110
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        59,
+        110,
+        111,
+        160
+      ],
+      "standard_mffc_boundary": [
+        33,
+        34
+      ],
+      "cut_cone_nodes": [
+        111,
+        160
+      ],
+      "cut_boundary": [
+        34,
+        59,
+        110
+      ],
+      "saved_region_nodes": [
+        111,
+        160
+      ],
+      "removable_region_boundary": [
+        34,
+        59,
+        110
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000160_c000_n028",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 28
+    },
+    {
+      "root": 160,
+      "cut_slot": 1,
+      "raw_cut_slot": 4,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        33,
+        59,
+        111
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        59,
+        110,
+        111,
+        160
+      ],
+      "standard_mffc_boundary": [
+        33,
+        34
+      ],
+      "cut_cone_nodes": [
+        110,
+        160
+      ],
+      "cut_boundary": [
+        33,
+        59,
+        111
+      ],
+      "saved_region_nodes": [
+        110,
+        160
+      ],
+      "removable_region_boundary": [
+        33,
+        59,
+        111
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000160_c001_n029",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 29
+    },
+    {
+      "root": 161,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        36,
+        60,
+        112
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        60,
+        112,
+        113,
+        161
+      ],
+      "standard_mffc_boundary": [
+        35,
+        36
+      ],
+      "cut_cone_nodes": [
+        113,
+        161
+      ],
+      "cut_boundary": [
+        36,
+        60,
+        112
+      ],
+      "saved_region_nodes": [
+        113,
+        161
+      ],
+      "removable_region_boundary": [
+        36,
+        60,
+        112
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000161_c000_n030",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 30
+    },
+    {
+      "root": 162,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        14,
+        62,
+        114
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        62,
+        114,
+        115,
+        162
+      ],
+      "standard_mffc_boundary": [
+        10,
+        14
+      ],
+      "cut_cone_nodes": [
+        115,
+        162
+      ],
+      "cut_boundary": [
+        14,
+        62,
+        114
+      ],
+      "saved_region_nodes": [
+        115,
+        162
+      ],
+      "removable_region_boundary": [
+        14,
+        62,
+        114
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000162_c000_n031",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 31
+    },
+    {
+      "root": 163,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        23,
+        63,
+        116
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        63,
+        116,
+        117,
+        163
+      ],
+      "standard_mffc_boundary": [
+        23,
+        32
+      ],
+      "cut_cone_nodes": [
+        117,
+        163
+      ],
+      "cut_boundary": [
+        23,
+        63,
+        116
+      ],
+      "saved_region_nodes": [
+        117,
+        163
+      ],
+      "removable_region_boundary": [
+        23,
+        63,
+        116
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000163_c000_n032",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 32
+    },
+    {
+      "root": 164,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        34,
+        65,
+        118
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        65,
+        118,
+        119,
+        164
+      ],
+      "standard_mffc_boundary": [
+        2,
+        34
+      ],
+      "cut_cone_nodes": [
+        119,
+        164
+      ],
+      "cut_boundary": [
+        34,
+        65,
+        118
+      ],
+      "saved_region_nodes": [
+        119,
+        164
+      ],
+      "removable_region_boundary": [
+        34,
+        65,
+        118
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000164_c000_n033",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 33
+    },
+    {
+      "root": 165,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        16,
+        66,
+        120
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        66,
+        120,
+        121,
+        165
+      ],
+      "standard_mffc_boundary": [
+        16,
+        25
+      ],
+      "cut_cone_nodes": [
+        121,
+        165
+      ],
+      "cut_boundary": [
+        16,
+        66,
+        120
+      ],
+      "saved_region_nodes": [
+        121,
+        165
+      ],
+      "removable_region_boundary": [
+        16,
+        66,
+        120
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000165_c000_n034",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 34
+    },
+    {
+      "root": 166,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        36,
+        67,
+        122
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        67,
+        122,
+        123,
+        166
+      ],
+      "standard_mffc_boundary": [
+        4,
+        36
+      ],
+      "cut_cone_nodes": [
+        123,
+        166
+      ],
+      "cut_boundary": [
+        36,
+        67,
+        122
+      ],
+      "saved_region_nodes": [
+        123,
+        166
+      ],
+      "removable_region_boundary": [
+        36,
+        67,
+        122
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000166_c000_n035",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 35
+    },
+    {
+      "root": 167,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        18,
+        68,
+        124
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        68,
+        124,
+        125,
+        167
+      ],
+      "standard_mffc_boundary": [
+        18,
+        27
+      ],
+      "cut_cone_nodes": [
+        125,
+        167
+      ],
+      "cut_boundary": [
+        18,
+        68,
+        124
+      ],
+      "saved_region_nodes": [
+        125,
+        167
+      ],
+      "removable_region_boundary": [
+        18,
+        68,
+        124
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000167_c000_n036",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 36
+    },
+    {
+      "root": 168,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        13,
+        69,
+        126
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        69,
+        126,
+        127,
+        168
+      ],
+      "standard_mffc_boundary": [
+        9,
+        13
+      ],
+      "cut_cone_nodes": [
+        127,
+        168
+      ],
+      "cut_boundary": [
+        13,
+        69,
+        126
+      ],
+      "saved_region_nodes": [
+        127,
+        168
+      ],
+      "removable_region_boundary": [
+        13,
+        69,
+        126
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000168_c000_n037",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 37
+    },
+    {
+      "root": 169,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        22,
+        70,
+        128
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        70,
+        128,
+        129,
+        169
+      ],
+      "standard_mffc_boundary": [
+        22,
+        31
+      ],
+      "cut_cone_nodes": [
+        129,
+        169
+      ],
+      "cut_boundary": [
+        22,
+        70,
+        128
+      ],
+      "saved_region_nodes": [
+        129,
+        169
+      ],
+      "removable_region_boundary": [
+        22,
+        70,
+        128
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000169_c000_n038",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 38
+    },
+    {
+      "root": 170,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        33,
+        72,
+        130
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        72,
+        130,
+        131,
+        170
+      ],
+      "standard_mffc_boundary": [
+        1,
+        33
+      ],
+      "cut_cone_nodes": [
+        131,
+        170
+      ],
+      "cut_boundary": [
+        33,
+        72,
+        130
+      ],
+      "saved_region_nodes": [
+        131,
+        170
+      ],
+      "removable_region_boundary": [
+        33,
+        72,
+        130
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000170_c000_n039",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 39
+    },
+    {
+      "root": 171,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        15,
+        73,
+        132
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        73,
+        132,
+        133,
+        171
+      ],
+      "standard_mffc_boundary": [
+        15,
+        24
+      ],
+      "cut_cone_nodes": [
+        133,
+        171
+      ],
+      "cut_boundary": [
+        15,
+        73,
+        132
+      ],
+      "saved_region_nodes": [
+        133,
+        171
+      ],
+      "removable_region_boundary": [
+        15,
+        73,
+        132
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000171_c000_n040",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 40
+    },
+    {
+      "root": 172,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        35,
+        74,
+        134
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        74,
+        134,
+        135,
+        172
+      ],
+      "standard_mffc_boundary": [
+        3,
+        35
+      ],
+      "cut_cone_nodes": [
+        135,
+        172
+      ],
+      "cut_boundary": [
+        35,
+        74,
+        134
+      ],
+      "saved_region_nodes": [
+        135,
+        172
+      ],
+      "removable_region_boundary": [
+        35,
+        74,
+        134
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000172_c000_n041",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 41
+    },
+    {
+      "root": 173,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        17,
+        75,
+        136
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        75,
+        136,
+        137,
+        173
+      ],
+      "standard_mffc_boundary": [
+        17,
+        26
+      ],
+      "cut_cone_nodes": [
+        137,
+        173
+      ],
+      "cut_boundary": [
+        17,
+        75,
+        136
+      ],
+      "saved_region_nodes": [
+        137,
+        173
+      ],
+      "removable_region_boundary": [
+        17,
+        75,
+        136
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000173_c000_n042",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 42
+    },
+    {
+      "root": 174,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        12,
+        76,
+        138
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        76,
+        138,
+        139,
+        174
+      ],
+      "standard_mffc_boundary": [
+        8,
+        12
+      ],
+      "cut_cone_nodes": [
+        139,
+        174
+      ],
+      "cut_boundary": [
+        12,
+        76,
+        138
+      ],
+      "saved_region_nodes": [
+        139,
+        174
+      ],
+      "removable_region_boundary": [
+        12,
+        76,
+        138
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000174_c000_n043",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 43
+    },
+    {
+      "root": 175,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        21,
+        77,
+        140
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        77,
+        140,
+        141,
+        175
+      ],
+      "standard_mffc_boundary": [
+        21,
+        30
+      ],
+      "cut_cone_nodes": [
+        141,
+        175
+      ],
+      "cut_boundary": [
+        21,
+        77,
+        140
+      ],
+      "saved_region_nodes": [
+        141,
+        175
+      ],
+      "removable_region_boundary": [
+        21,
+        77,
+        140
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000175_c000_n044",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 44
+    },
+    {
+      "root": 176,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        11,
+        79,
+        142
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        79,
+        142,
+        143,
+        176
+      ],
+      "standard_mffc_boundary": [
+        7,
+        11
+      ],
+      "cut_cone_nodes": [
+        143,
+        176
+      ],
+      "cut_boundary": [
+        11,
+        79,
+        142
+      ],
+      "saved_region_nodes": [
+        143,
+        176
+      ],
+      "removable_region_boundary": [
+        11,
+        79,
+        142
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000176_c000_n045",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 45
+    },
+    {
+      "root": 177,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 3341,
+      "truth_class": 15,
+      "cut_leaves": [
+        20,
+        80,
+        144
+      ],
+      "number_of_available_subgraphs": 2,
+      "gpu_saved_size": 2,
+      "standard_mffc_nodes": [
+        80,
+        144,
+        145,
+        177
+      ],
+      "standard_mffc_boundary": [
+        20,
+        29
+      ],
+      "cut_cone_nodes": [
+        145,
+        177
+      ],
+      "cut_boundary": [
+        20,
+        80,
+        144
+      ],
+      "saved_region_nodes": [
+        145,
+        177
+      ],
+      "removable_region_boundary": [
+        20,
+        80,
+        144
+      ],
+      "cut_cone_subset_of_mffc": true,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": true,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000177_c000_n046",
+      "candidate_count": 2,
+      "source_audit_record_ordinal_after_sort": 46
+    },
+    {
+      "root": 178,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 1542,
+      "truth_class": 13,
+      "cut_leaves": [
+        1,
+        2,
+        147
+      ],
+      "number_of_available_subgraphs": 5,
+      "gpu_saved_size": 1,
+      "standard_mffc_nodes": [
+        178
+      ],
+      "standard_mffc_boundary": [
+        146,
+        147
+      ],
+      "cut_cone_nodes": [
+        42,
+        82,
+        83,
+        146,
+        178
+      ],
+      "cut_boundary": [
+        1,
+        2,
+        147
+      ],
+      "saved_region_nodes": [
+        178
+      ],
+      "removable_region_boundary": [
+        146,
+        147
+      ],
+      "cut_cone_subset_of_mffc": false,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": false,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000178_c000_n047",
+      "candidate_count": 5,
+      "source_audit_record_ordinal_after_sort": 47
+    },
+    {
+      "root": 178,
+      "cut_slot": 1,
+      "raw_cut_slot": 3,
+      "truth": 26208,
+      "truth_class": 125,
+      "cut_leaves": [
+        1,
+        2,
+        84,
+        85
+      ],
+      "number_of_available_subgraphs": 5,
+      "gpu_saved_size": 1,
+      "standard_mffc_nodes": [
+        178
+      ],
+      "standard_mffc_boundary": [
+        146,
+        147
+      ],
+      "cut_cone_nodes": [
+        42,
+        82,
+        83,
+        146,
+        147,
+        178
+      ],
+      "cut_boundary": [
+        1,
+        2,
+        84,
+        85
+      ],
+      "saved_region_nodes": [
+        178
+      ],
+      "removable_region_boundary": [
+        146,
+        147
+      ],
+      "cut_cone_subset_of_mffc": false,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": false,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000178_c001_n048",
+      "candidate_count": 5,
+      "source_audit_record_ordinal_after_sort": 48
+    },
+    {
+      "root": 179,
+      "cut_slot": 0,
+      "raw_cut_slot": 2,
+      "truth": 1542,
+      "truth_class": 13,
+      "cut_leaves": [
+        7,
+        8,
+        149
+      ],
+      "number_of_available_subgraphs": 5,
+      "gpu_saved_size": 1,
+      "standard_mffc_nodes": [
+        179
+      ],
+      "standard_mffc_boundary": [
+        148,
+        149
+      ],
+      "cut_cone_nodes": [
+        45,
+        86,
+        87,
+        148,
+        179
+      ],
+      "cut_boundary": [
+        7,
+        8,
+        149
+      ],
+      "saved_region_nodes": [
+        179
+      ],
+      "removable_region_boundary": [
+        148,
+        149
+      ],
+      "cut_cone_subset_of_mffc": false,
+      "saved_subset_of_mffc": true,
+      "saved_equals_cut_cone": false,
+      "cut_boundary_equals_mffc_boundary": false,
+      "design": "c1355.aig",
+      "decision_id": "c1355_r000179_c000_n049",
+      "candidate_count": 5,
+      "source_audit_record_ordinal_after_sort": 49
+    }
+  ],
+  "provenance": {
+    "prepare_script": "gate2c_prepare.py",
+    "gate1_engine_source_commit": "1870e7218d323774a2b4e1fe8d6bbea05b33ed5a",
+    "gate1_engine_source_tree_dirty": true,
+    "litecut_repo_commit": "077aa1e49b8b97ed6d76013a7272c06bfacabf23",
+    "candidate_semantics_unchanged": true
+  }
+}

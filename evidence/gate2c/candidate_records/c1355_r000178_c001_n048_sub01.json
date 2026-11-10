@@ -1,0 +1,101 @@
+{
+  "root": 178,
+  "cut_slot": 1,
+  "raw_cut_slot": 3,
+  "truth": 26208,
+  "truth_class": 125,
+  "cut_leaves": [
+    1,
+    2,
+    84,
+    85
+  ],
+  "number_of_available_subgraphs": 5,
+  "gpu_saved_size": 1,
+  "standard_mffc_nodes": [
+    178
+  ],
+  "standard_mffc_boundary": [
+    146,
+    147
+  ],
+  "cut_cone_nodes": [
+    42,
+    82,
+    83,
+    146,
+    147,
+    178
+  ],
+  "cut_boundary": [
+    1,
+    2,
+    84,
+    85
+  ],
+  "saved_region_nodes": [
+    178
+  ],
+  "removable_region_boundary": [
+    146,
+    147
+  ],
+  "cut_cone_subset_of_mffc": false,
+  "saved_subset_of_mffc": true,
+  "saved_equals_cut_cone": false,
+  "cut_boundary_equals_mffc_boundary": false,
+  "design": "c1355.aig",
+  "decision_id": "c1355_r000178_c001_n048",
+  "candidate_count": 5,
+  "source_audit_record_ordinal_after_sort": 48,
+  "decision_index": 0,
+  "target_root": 178,
+  "subgraph_index": 1,
+  "library_subgraph_root": 12,
+  "saved_nodes": 1,
+  "nodes_added": 4,
+  "result_level": 4,
+  "phase": 12,
+  "original_filter_result": "negative_gain_filtered",
+  "permutation": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "preserved_root_wrapper": 178,
+  "candidate_selected": true,
+  "installation_kind": "PHYSICAL_REPLACEMENT",
+  "physical_graph_modified": true,
+  "seen": true,
+  "evaluated": true,
+  "built": true,
+  "installed": true,
+  "physically_deleted_nodes": [],
+  "candidate_subgraph_index": 1,
+  "candidate_id": "c1355_r000178_c001_n048_sub01",
+  "replay": {
+    "engine": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/bin/abcg",
+    "command": [
+      "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/bin/abcg",
+      "-c",
+      "gread \"/data/wushangge/gate2c_runs/gate2c_sm86_20260918/input/normalized_original.aig\"; grw; gwrite \"/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/replayed_aigs/c1355_r000178_c001_n048_sub01.aig\""
+    ],
+    "provenance": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/work/replay/c1355_r000178_c001_n048_sub01.provenance.json",
+    "engine_log": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/logs/c1355_r000178_c001_n048_sub01.engine.log"
+  },
+  "aig": {
+    "path": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/replayed_aigs/c1355_r000178_c001_n048_sub01.aig",
+    "sha256": "ea3ee65210c26c69f5cb388f363eda83eba4e99c2cea712683eb7bb3bf852d8d"
+  },
+  "cec": {
+    "status": "PASS",
+    "command": [
+      "/data/public/AIGRewrite/abc/abc",
+      "-c",
+      "cec \"/data/wushangge/gate2c_runs/gate2c_sm86_20260918/input/normalized_original.aig\" \"/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/replayed_aigs/c1355_r000178_c001_n048_sub01.aig\""
+    ],
+    "log": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/logs/c1355_r000178_c001_n048_sub01.cec.log"
+  },
+  "provenance_sha256": "70815b7b8981a51a880472439a179a4f8dc2cb9df7bef2e099cde0ec3322531a"
+}

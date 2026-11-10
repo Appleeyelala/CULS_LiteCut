@@ -1,0 +1,375 @@
+{
+  "candidate_record": {
+    "root": 179,
+    "cut_slot": 0,
+    "raw_cut_slot": 2,
+    "truth": 1542,
+    "truth_class": 13,
+    "cut_leaves": [
+      7,
+      8,
+      149
+    ],
+    "number_of_available_subgraphs": 5,
+    "gpu_saved_size": 1,
+    "standard_mffc_nodes": [
+      179
+    ],
+    "standard_mffc_boundary": [
+      148,
+      149
+    ],
+    "cut_cone_nodes": [
+      45,
+      86,
+      87,
+      148,
+      179
+    ],
+    "cut_boundary": [
+      7,
+      8,
+      149
+    ],
+    "saved_region_nodes": [
+      179
+    ],
+    "removable_region_boundary": [
+      148,
+      149
+    ],
+    "cut_cone_subset_of_mffc": false,
+    "saved_subset_of_mffc": true,
+    "saved_equals_cut_cone": false,
+    "cut_boundary_equals_mffc_boundary": false,
+    "design": "c1355.aig",
+    "decision_id": "c1355_r000179_c000_n049",
+    "candidate_count": 5,
+    "source_audit_record_ordinal_after_sort": 49,
+    "decision_index": 0,
+    "target_root": 179,
+    "subgraph_index": 2,
+    "library_subgraph_root": 13,
+    "saved_nodes": 1,
+    "nodes_added": 3,
+    "result_level": 5,
+    "phase": 0,
+    "original_filter_result": "negative_gain_filtered",
+    "permutation": [
+      3,
+      0,
+      1,
+      2
+    ],
+    "preserved_root_wrapper": 179,
+    "candidate_selected": true,
+    "installation_kind": "PHYSICAL_REPLACEMENT",
+    "physical_graph_modified": true,
+    "seen": true,
+    "evaluated": true,
+    "built": true,
+    "installed": true,
+    "physically_deleted_nodes": [],
+    "candidate_subgraph_index": 2,
+    "candidate_id": "c1355_r000179_c000_n049_sub02",
+    "replay": {
+      "engine": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/bin/abcg",
+      "command": [
+        "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/bin/abcg",
+        "-c",
+        "gread \"/data/wushangge/gate2c_runs/gate2c_sm86_20260918/input/normalized_original.aig\"; grw; gwrite \"/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/replayed_aigs/c1355_r000179_c000_n049_sub02.aig\""
+      ],
+      "provenance": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/work/replay/c1355_r000179_c000_n049_sub02.provenance.json",
+      "engine_log": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/logs/c1355_r000179_c000_n049_sub02.engine.log"
+    },
+    "aig": {
+      "path": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/replayed_aigs/c1355_r000179_c000_n049_sub02.aig",
+      "sha256": "273c4474a91fb13372898f16c323f0e1ac73e1aa6bc2d7456e0678236a2a5c81"
+    },
+    "cec": {
+      "status": "PASS",
+      "command": [
+        "/data/public/AIGRewrite/abc/abc",
+        "-c",
+        "cec \"/data/wushangge/gate2c_runs/gate2c_sm86_20260918/input/normalized_original.aig\" \"/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/replayed_aigs/c1355_r000179_c000_n049_sub02.aig\""
+      ],
+      "log": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/logs/c1355_r000179_c000_n049_sub02.cec.log"
+    },
+    "provenance_sha256": "76fa6a6a639069c5a974a5a79e7e5a231e1d42af21e75779c00becc5c04f4267"
+  },
+  "candidate_id": "c1355_r000179_c000_n049_sub02",
+  "decision_root": 179,
+  "cut_leaves": [
+    7,
+    8,
+    149
+  ],
+  "subgraph_index": 2,
+  "installation_kind": "PHYSICAL_REPLACEMENT",
+  "preserved_root_wrapper": 179,
+  "original_aig": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/input/normalized_original.aig",
+  "original_aig_sha256": "88df0a75b9328378b869843ba675c316d05a8bd812b7de22effc12af51f430ea",
+  "aig_stats": {
+    "max_var": 543,
+    "pi_count": 41,
+    "po_count": 32,
+    "and_count": 502
+  },
+  "feature_names_25": [
+    "R_root",
+    "SlackProxy_root",
+    "Root_Global_Fanout",
+    "Max_L_leaf",
+    "Max_Leaf_Fanout",
+    "Mean_Leaf_Fanout",
+    "Std_Leaf_Fanout",
+    "Frac_Leaf_PI",
+    "Weighted_Depth",
+    "Topo_Depth",
+    "Inv_Penalty",
+    "Node_Count",
+    "Avg_Width",
+    "Max_Internal_Fanout",
+    "Inv_Ratio",
+    "Root_Inv_Count",
+    "Chain_Density",
+    "Fork_Density",
+    "Avg_Curvature",
+    "Lap_Eig1",
+    "Lap_Eig2",
+    "Lap_Eig3",
+    "Lap_Eig4",
+    "Lap_Eig5",
+    "WL_Hash"
+  ],
+  "raw_features_25": [
+    18.0,
+    0.0,
+    2.0,
+    4.0,
+    6.0,
+    4.666666666666667,
+    1.8856180831641267,
+    0.6666666666666666,
+    3.5,
+    3.0,
+    0.5,
+    7.0,
+    1.75,
+    2.0,
+    0.625,
+    1.0,
+    0.12244897959183673,
+    0.04081632653061224,
+    0.265625,
+    7.56570729174339e-17,
+    0.37887069691814806,
+    0.7575705293802477,
+    1.0000000000000002,
+    1.1565565422825106,
+    1826566229.0
+  ],
+  "continuous_features_19": [
+    18.0,
+    0.0,
+    2.0,
+    4.0,
+    6.0,
+    4.666666666666667,
+    1.8856180831641267,
+    0.6666666666666666,
+    3.5,
+    3.0,
+    0.5,
+    7.0,
+    1.75,
+    2.0,
+    0.625,
+    1.0,
+    0.12244897959183673,
+    0.04081632653061224,
+    0.265625
+  ],
+  "laplacian_features_5": [
+    7.56570729174339e-17,
+    0.37887069691814806,
+    0.7575705293802477,
+    1.0000000000000002,
+    1.1565565422825106
+  ],
+  "wl_hash": 1826566229,
+  "replacement_dag": {
+    "7": [
+      [
+        10000000,
+        0
+      ],
+      [
+        10000001,
+        1
+      ]
+    ],
+    "8": [
+      [
+        10000000,
+        0
+      ],
+      [
+        10000001,
+        1
+      ]
+    ],
+    "149": [
+      [
+        10000008,
+        1
+      ]
+    ],
+    "179": [],
+    "10000000": [
+      [
+        10000008,
+        1
+      ]
+    ],
+    "10000001": [
+      [
+        179,
+        1
+      ]
+    ],
+    "10000008": [
+      [
+        179,
+        0
+      ]
+    ]
+  },
+  "replacement_dag_info": {
+    "library_class": 13,
+    "library_subgraph_root": 13,
+    "matched_library_inputs": [
+      0,
+      7,
+      8,
+      149
+    ],
+    "used_library_nodes": [
+      4,
+      5,
+      12,
+      13
+    ],
+    "vertex_mapping": {
+      "0": 0,
+      "1": 7,
+      "2": 8,
+      "3": 149,
+      "4": 10000000,
+      "5": 10000001,
+      "12": 10000008,
+      "13": 179
+    },
+    "synthetic_internal_ids": [
+      10000000,
+      10000001,
+      10000008
+    ]
+  },
+  "checkpoint": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/input/best.pt",
+  "checkpoint_sha256": "b3f499d2973bdb36fb42690794e9838d4c8359f05d6e141aa8cbe2b9fe3ae64d",
+  "model_payload": {
+    "model_family": "student_group_fusion_soft_moe",
+    "input_dim": 19,
+    "group_dims": [
+      8,
+      6,
+      5
+    ],
+    "wl_hash_enters_student_forward": false
+  },
+  "inference": {
+    "scaled_19": [
+      -0.1741369366645813,
+      -0.1864383965730667,
+      0.005354199558496475,
+      -0.12793494760990143,
+      -0.2356112152338028,
+      -0.23266597092151642,
+      -0.2259192168712616,
+      1.1369096040725708,
+      0.8602675199508667,
+      1.192091464996338,
+      -0.03143962100148201,
+      0.7280219793319702,
+      -0.2189761996269226,
+      1.504962682723999,
+      0.6718134880065918,
+      0.004770925734192133,
+      1.328819751739502,
+      1.6140705347061157,
+      -0.8097180724143982
+    ],
+    "raw_model_output": -0.16817384958267212,
+    "inverse_standardized_log_delay": 3.889128356610531,
+    "predicted_raw_abc_delay": 47.868272247744436,
+    "x_mu": [
+      624.9661254882812,
+      97.69066619873047,
+      1.9443938732147217,
+      188.68345642089844,
+      285.53619384765625,
+      137.77073669433594,
+      134.9530029296875,
+      0.3041624128818512,
+      2.4082560539245605,
+      1.8909162282943726,
+      0.5146037340164185,
+      5.305591106414795,
+      1.815821886062622,
+      1.2085622549057007,
+      0.3995716869831085,
+      0.9957764148712158,
+      0.05814245715737343,
+      0.008201525546610355,
+      0.32094115018844604
+    ],
+    "x_inv_sigma": [
+      0.00028689729515463114,
+      0.001908456557430327,
+      0.09628794342279434,
+      0.0006927255308255553,
+      0.0008428647997789085,
+      0.00174800050444901,
+      0.0016977805644273758,
+      3.136265277862549,
+      0.787975549697876,
+      1.0748435258865356,
+      2.1528480052948,
+      0.4296613335609436,
+      3.326799154281616,
+      1.9015554189682007,
+      2.9801647663116455,
+      1.129591464996338,
+      20.66383934020996,
+      49.488895416259766,
+      14.638005256652832
+    ],
+    "y_mu": 4.051357746124268,
+    "y_inv_sigma": 1.03664231300354
+  },
+  "feature_hash_19": "96fd6156da5e285d01c0c543ce3f89da3895127c7e2f3e47039bc2bdfff25304",
+  "finite_features_25": true,
+  "finite_prediction": true,
+  "deterministic_repeat": true,
+  "repeat_prediction": 47.868272247744436,
+  "replacement_dag_structural_hash": "69f160c3cc26a6c002b0094eb409cd17036bcd9c96c0aaa573210f2f6c069775",
+  "inference_repeat_check": {
+    "feature_vectors_exact": true,
+    "raw_features_exact": false,
+    "raw_features_close_abs_tol_1e-12": true,
+    "replacement_dag_exact": true,
+    "prediction_exact": true,
+    "prediction_close_abs_tol_1e-12": true
+  }
+}

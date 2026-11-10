@@ -1,0 +1,2646 @@
+{
+  "stage": "initial_delay_oriented_mode0_before_cover_and_area_recovery",
+  "extraction_source": "single normal baseline map only",
+  "metadata": {
+    "type": "meta",
+    "mode": 0,
+    "root": 213,
+    "root_phase": 1,
+    "root_arrival": 109.23999,
+    "epsilon": 0.00100000005,
+    "delay_target": -1,
+    "skip_fanout": 0,
+    "use_profile": 0,
+    "n_vars_max": 5,
+    "cuts_max_use": 250,
+    "matches_limit": 30,
+    "inverter_delay": {
+      "rise": 10.3199997,
+      "fall": 10.3199997,
+      "worst": 10.3199997
+    },
+    "baseline_cut_wall_s": 0.014161,
+    "baseline_truth_wall_s": 0.168294,
+    "baseline_match_wall_s": 0.006391
+  },
+  "pi_context": [
+    {
+      "type": "pi",
+      "function_point": 1,
+      "mapper_id": 0,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 2,
+      "mapper_id": 1,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 3,
+      "mapper_id": 2,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 4,
+      "mapper_id": 3,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 5,
+      "mapper_id": 4,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 6,
+      "mapper_id": 5,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 7,
+      "mapper_id": 6,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 8,
+      "mapper_id": 7,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 9,
+      "mapper_id": 8,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 10,
+      "mapper_id": 9,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 11,
+      "mapper_id": 10,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 12,
+      "mapper_id": 11,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 13,
+      "mapper_id": 12,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 14,
+      "mapper_id": 13,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 15,
+      "mapper_id": 14,
+      "n_refs": 1,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 16,
+      "mapper_id": 15,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 17,
+      "mapper_id": 16,
+      "n_refs": 1,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 18,
+      "mapper_id": 17,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 19,
+      "mapper_id": 18,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 20,
+      "mapper_id": 19,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 21,
+      "mapper_id": 20,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 22,
+      "mapper_id": 21,
+      "n_refs": 1,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 23,
+      "mapper_id": 22,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 24,
+      "mapper_id": 23,
+      "n_refs": 1,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 25,
+      "mapper_id": 24,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 26,
+      "mapper_id": 25,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 27,
+      "mapper_id": 26,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 28,
+      "mapper_id": 27,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 29,
+      "mapper_id": 28,
+      "n_refs": 1,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 30,
+      "mapper_id": 29,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 31,
+      "mapper_id": 30,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 32,
+      "mapper_id": 31,
+      "n_refs": 1,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 33,
+      "mapper_id": 32,
+      "n_refs": 8,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 34,
+      "mapper_id": 33,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 35,
+      "mapper_id": 34,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 36,
+      "mapper_id": 35,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 37,
+      "mapper_id": 36,
+      "n_refs": 1,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 38,
+      "mapper_id": 37,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 39,
+      "mapper_id": 38,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 40,
+      "mapper_id": 39,
+      "n_refs": 6,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    },
+    {
+      "type": "pi",
+      "function_point": 41,
+      "mapper_id": 40,
+      "n_refs": 1,
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      }
+    }
+  ],
+  "compact_structural_frontier_context": [
+    {
+      "type": "logical_frontier",
+      "function_point": 17,
+      "mapper_id": 16,
+      "n_refs": 1,
+      "n_ref_est": [
+        1,
+        1,
+        1
+      ],
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      },
+      "cuts": [
+        {
+          "leaves": [
+            17
+          ],
+          "leaf_mapper_ids": [
+            16
+          ]
+        }
+      ],
+      "best_phases": [
+        {
+          "phase": 0,
+          "available": false
+        },
+        {
+          "phase": 1,
+          "available": true,
+          "area_flow": 0,
+          "input_phase_mask": 2863311530,
+          "super": null
+        }
+      ]
+    },
+    {
+      "type": "logical_frontier",
+      "function_point": 33,
+      "mapper_id": 32,
+      "n_refs": 8,
+      "n_ref_est": [
+        8,
+        8,
+        8
+      ],
+      "positive": {
+        "rise": 0,
+        "fall": 0,
+        "worst": 0
+      },
+      "negative": {
+        "rise": 10.3199997,
+        "fall": 10.3199997,
+        "worst": 10.3199997
+      },
+      "cuts": [
+        {
+          "leaves": [
+            33
+          ],
+          "leaf_mapper_ids": [
+            32
+          ]
+        }
+      ],
+      "best_phases": [
+        {
+          "phase": 0,
+          "available": false
+        },
+        {
+          "phase": 1,
+          "available": true,
+          "area_flow": 0,
+          "input_phase_mask": 3435973836,
+          "super": null
+        }
+      ]
+    },
+    {
+      "type": "logical_frontier",
+      "function_point": 151,
+      "mapper_id": 150,
+      "n_refs": 4,
+      "n_ref_est": [
+        4,
+        4,
+        4
+      ],
+      "positive": {
+        "rise": 55.6199989,
+        "fall": 55.6199989,
+        "worst": 55.6199989
+      },
+      "negative": {
+        "rise": 55.1499977,
+        "fall": 55.1499977,
+        "worst": 55.1499977
+      },
+      "cuts": [
+        {
+          "leaves": [
+            151
+          ],
+          "leaf_mapper_ids": [
+            150
+          ]
+        },
+        {
+          "leaves": [
+            143,
+            147
+          ],
+          "leaf_mapper_ids": [
+            142,
+            146
+          ]
+        },
+        {
+          "leaves": [
+            149,
+            150
+          ],
+          "leaf_mapper_ids": [
+            148,
+            149
+          ]
+        },
+        {
+          "leaves": [
+            143,
+            145,
+            146
+          ],
+          "leaf_mapper_ids": [
+            142,
+            144,
+            145
+          ]
+        },
+        {
+          "leaves": [
+            141,
+            142,
+            147
+          ],
+          "leaf_mapper_ids": [
+            140,
+            141,
+            146
+          ]
+        },
+        {
+          "leaves": [
+            4,
+            12,
+            143
+          ],
+          "leaf_mapper_ids": [
+            3,
+            11,
+            142
+          ]
+        },
+        {
+          "leaves": [
+            21,
+            34,
+            147
+          ],
+          "leaf_mapper_ids": [
+            20,
+            33,
+            146
+          ]
+        },
+        {
+          "leaves": [
+            147,
+            148,
+            149
+          ],
+          "leaf_mapper_ids": [
+            146,
+            147,
+            148
+          ]
+        },
+        {
+          "leaves": [
+            143,
+            148,
+            150
+          ],
+          "leaf_mapper_ids": [
+            142,
+            147,
+            149
+          ]
+        },
+        {
+          "leaves": [
+            4,
+            143,
+            144,
+            146
+          ],
+          "leaf_mapper_ids": [
+            3,
+            142,
+            143,
+            145
+          ]
+        },
+        {
+          "leaves": [
+            21,
+            140,
+            142,
+            147
+          ],
+          "leaf_mapper_ids": [
+            20,
+            139,
+            141,
+            146
+          ]
+        },
+        {
+          "leaves": [
+            12,
+            143,
+            144,
+            145
+          ],
+          "leaf_mapper_ids": [
+            11,
+            142,
+            143,
+            144
+          ]
+        },
+        {
+          "leaves": [
+            34,
+            140,
+            141,
+            147
+          ],
+          "leaf_mapper_ids": [
+            33,
+            139,
+            140,
+            146
+          ]
+        },
+        {
+          "leaves": [
+            21,
+            34,
+            145,
+            146
+          ],
+          "leaf_mapper_ids": [
+            20,
+            33,
+            144,
+            145
+          ]
+        },
+        {
+          "leaves": [
+            141,
+            142,
+            145,
+            146
+          ],
+          "leaf_mapper_ids": [
+            140,
+            141,
+            144,
+            145
+          ]
+        },
+        {
+          "leaves": [
+            4,
+            12,
+            141,
+            142
+          ],
+          "leaf_mapper_ids": [
+            3,
+            11,
+            140,
+            141
+          ]
+        },
+        {
+          "leaves": [
+            4,
+            12,
+            21,
+            34
+          ],
+          "leaf_mapper_ids": [
+            3,
+            11,
+            20,
+            33
+          ]
+        },
+        {
+          "leaves": [
+            4,
+            12,
+            148,
+            149
+          ],
+          "leaf_mapper_ids": [
+            3,
+            11,
+            147,
+            148
+          ]
+        },
+        {
+          "leaves": [
+            21,
+            34,
+            148,
+            150
+          ],
+          "leaf_mapper_ids": [
+            20,
+            33,
+            147,
+            149
+          ]
+        },
+        {
+          "leaves": [
+            145,
+            146,
+            148,
+            149
+          ],
+          "leaf_mapper_ids": [
+            144,
+            145,
+            147,
+            148
+          ]
+        },
+        {
+          "leaves": [
+            141,
+            142,
+            148,
+            150
+          ],
+          "leaf_mapper_ids": [
+            140,
+            141,
+            147,
+            149
+          ]
+        },
+        {
+          "leaves": [
+            4,
+            141,
+            142,
+            144,
+            146
+          ],
+          "leaf_mapper_ids": [
+            3,
+            140,
+            141,
+            143,
+            145
+          ]
+        },
+        {
+          "leaves": [
+            4,
+            21,
+            34,
+            144,
+            146
+          ],
+          "leaf_mapper_ids": [
+            3,
+            20,
+            33,
+            143,
+            145
+          ]
+        },
+        {
+          "leaves": [
+            21,
+            140,
+            142,
+            145,
+            146
+          ],
+          "leaf_mapper_ids": [
+            20,
+            139,
+            141,
+            144,
+            145
+          ]
+        },
+        {
+          "leaves": [
+            4,
+            12,
+            21,
+            140,
+            142
+          ],
+          "leaf_mapper_ids": [
+            3,
+            11,
+            20,
+            139,
+            141
+          ]
+        },
+        {
+          "leaves": [
+            12,
+            141,
+            142,
+            144,
+            145
+          ],
+          "leaf_mapper_ids": [
+            11,
+            140,
+            141,
+            143,
+            144
+          ]
+        },
+        {
+          "leaves": [
+            12,
+            21,
+            34,
+            144,
+            145
+          ],
+          "leaf_mapper_ids": [
+            11,
+            20,
+            33,
+            143,
+            144
+          ]
+        },
+        {
+          "leaves": [
+            34,
+            140,
+            141,
+            145,
+            146
+          ],
+          "leaf_mapper_ids": [
+            33,
+            139,
+            140,
+            144,
+            145
+          ]
+        },
+        {
+          "leaves": [
+            4,
+            12,
+            34,
+            140,
+            141
+          ],
+          "leaf_mapper_ids": [
+            3,
+            11,
+            33,
+            139,
+            140
+          ]
+        },
+        {
+          "leaves": [
+            12,
+            144,
+            145,
+            148,
+            149
+          ],
+          "leaf_mapper_ids": [
+            11,
+            143,
+            144,
+            147,
+            148
+          ]
+        },
+        {
+          "leaves": [
+            34,
+            140,
+            141,
+            148,
+            150
+          ],
+          "leaf_mapper_ids": [
+            33,
+            139,
+            140,
+            147,
+            149
+          ]
+        },
+        {
+          "leaves": [
+            4,
+            144,
+            146,
+            148,
+            149
+          ],
+          "leaf_mapper_ids": [
+            3,
+            143,
+            145,
+            147,
+            148
+          ]
+        },
+        {
+          "leaves": [
+            21,
+            140,
+            142,
+            148,
+            150
+          ],
+          "leaf_mapper_ids": [
+            20,
+            139,
+            141,
+            147,
+            149
+          ]
+        }
+      ],
+      "best_phases": [
+        {
+          "phase": 0,
+          "available": true,
+          "area_flow": 9.55999947,
+          "input_phase_mask": 3,
+          "super": {
+            "id": 2019,
+            "root_cell": "NAND2xp33_ASAP7_75t_L",
+            "formula": "",
+            "area": 0.930000007,
+            "n_gates": 1,
+            "n_fanins": 2,
+            "fanout_limit": 5,
+            "arcs": [
+              {
+                "pin": 0,
+                "rr": 13.8900003,
+                "fr": 13.8900003,
+                "rf": 13.8900003,
+                "ff": 13.8900003
+              },
+              {
+                "pin": 1,
+                "rr": 13.2399998,
+                "fr": 13.2399998,
+                "rf": 13.2399998,
+                "ff": 13.2399998
+              }
+            ],
+            "implementation": {
+              "cell": "NAND2xp33_ASAP7_75t_L",
+              "fanins": [
+                {
+                  "leaf_pin": 0
+                },
+                {
+                  "leaf_pin": 1
+                }
+              ]
+            }
+          }
+        },
+        {
+          "phase": 1,
+          "available": true,
+          "area_flow": 5.13999987,
+          "input_phase_mask": 1,
+          "super": {
+            "id": 5,
+            "root_cell": "XOR2x2_ASAP7_75t_L",
+            "formula": "",
+            "area": 2.56999993,
+            "n_gates": 1,
+            "n_fanins": 2,
+            "fanout_limit": 5,
+            "arcs": [
+              {
+                "pin": 0,
+                "rr": 27.8099995,
+                "fr": 27.8099995,
+                "rf": 27.8099995,
+                "ff": 27.8099995
+              },
+              {
+                "pin": 1,
+                "rr": 27.5499992,
+                "fr": 27.5499992,
+                "rf": 27.5499992,
+                "ff": 27.5499992
+              }
+            ],
+            "implementation": {
+              "cell": "XOR2x2_ASAP7_75t_L",
+              "fanins": [
+                {
+                  "leaf_pin": 0
+                },
+                {
+                  "leaf_pin": 1
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "logical_frontier",
+      "function_point": 188,
+      "mapper_id": 187,
+      "n_refs": 4,
+      "n_ref_est": [
+        4,
+        4,
+        4
+      ],
+      "positive": {
+        "rise": 55.6199989,
+        "fall": 55.6199989,
+        "worst": 55.6199989
+      },
+      "negative": {
+        "rise": 55.1499977,
+        "fall": 55.1499977,
+        "worst": 55.1499977
+      },
+      "cuts": [
+        {
+          "leaves": [
+            188
+          ],
+          "leaf_mapper_ids": [
+            187
+          ]
+        },
+        {
+          "leaves": [
+            180,
+            184
+          ],
+          "leaf_mapper_ids": [
+            179,
+            183
+          ]
+        },
+        {
+          "leaves": [
+            186,
+            187
+          ],
+          "leaf_mapper_ids": [
+            185,
+            186
+          ]
+        },
+        {
+          "leaves": [
+            180,
+            182,
+            183
+          ],
+          "leaf_mapper_ids": [
+            179,
+            181,
+            182
+          ]
+        },
+        {
+          "leaves": [
+            178,
+            179,
+            184
+          ],
+          "leaf_mapper_ids": [
+            177,
+            178,
+            183
+          ]
+        },
+        {
+          "leaves": [
+            9,
+            30,
+            180
+          ],
+          "leaf_mapper_ids": [
+            8,
+            29,
+            179
+          ]
+        },
+        {
+          "leaves": [
+            5,
+            16,
+            184
+          ],
+          "leaf_mapper_ids": [
+            4,
+            15,
+            183
+          ]
+        },
+        {
+          "leaves": [
+            184,
+            185,
+            186
+          ],
+          "leaf_mapper_ids": [
+            183,
+            184,
+            185
+          ]
+        },
+        {
+          "leaves": [
+            180,
+            185,
+            187
+          ],
+          "leaf_mapper_ids": [
+            179,
+            184,
+            186
+          ]
+        },
+        {
+          "leaves": [
+            30,
+            180,
+            181,
+            183
+          ],
+          "leaf_mapper_ids": [
+            29,
+            179,
+            180,
+            182
+          ]
+        },
+        {
+          "leaves": [
+            5,
+            177,
+            179,
+            184
+          ],
+          "leaf_mapper_ids": [
+            4,
+            176,
+            178,
+            183
+          ]
+        },
+        {
+          "leaves": [
+            9,
+            180,
+            181,
+            182
+          ],
+          "leaf_mapper_ids": [
+            8,
+            179,
+            180,
+            181
+          ]
+        },
+        {
+          "leaves": [
+            16,
+            177,
+            178,
+            184
+          ],
+          "leaf_mapper_ids": [
+            15,
+            176,
+            177,
+            183
+          ]
+        },
+        {
+          "leaves": [
+            5,
+            16,
+            182,
+            183
+          ],
+          "leaf_mapper_ids": [
+            4,
+            15,
+            181,
+            182
+          ]
+        },
+        {
+          "leaves": [
+            178,
+            179,
+            182,
+            183
+          ],
+          "leaf_mapper_ids": [
+            177,
+            178,
+            181,
+            182
+          ]
+        },
+        {
+          "leaves": [
+            9,
+            30,
+            178,
+            179
+          ],
+          "leaf_mapper_ids": [
+            8,
+            29,
+            177,
+            178
+          ]
+        },
+        {
+          "leaves": [
+            5,
+            9,
+            16,
+            30
+          ],
+          "leaf_mapper_ids": [
+            4,
+            8,
+            15,
+            29
+          ]
+        },
+        {
+          "leaves": [
+            9,
+            30,
+            185,
+            186
+          ],
+          "leaf_mapper_ids": [
+            8,
+            29,
+            184,
+            185
+          ]
+        },
+        {
+          "leaves": [
+            5,
+            16,
+            185,
+            187
+          ],
+          "leaf_mapper_ids": [
+            4,
+            15,
+            184,
+            186
+          ]
+        },
+        {
+          "leaves": [
+            182,
+            183,
+            185,
+            186
+          ],
+          "leaf_mapper_ids": [
+            181,
+            182,
+            184,
+            185
+          ]
+        },
+        {
+          "leaves": [
+            178,
+            179,
+            185,
+            187
+          ],
+          "leaf_mapper_ids": [
+            177,
+            178,
+            184,
+            186
+          ]
+        },
+        {
+          "leaves": [
+            30,
+            178,
+            179,
+            181,
+            183
+          ],
+          "leaf_mapper_ids": [
+            29,
+            177,
+            178,
+            180,
+            182
+          ]
+        },
+        {
+          "leaves": [
+            5,
+            16,
+            30,
+            181,
+            183
+          ],
+          "leaf_mapper_ids": [
+            4,
+            15,
+            29,
+            180,
+            182
+          ]
+        },
+        {
+          "leaves": [
+            5,
+            177,
+            179,
+            182,
+            183
+          ],
+          "leaf_mapper_ids": [
+            4,
+            176,
+            178,
+            181,
+            182
+          ]
+        },
+        {
+          "leaves": [
+            5,
+            9,
+            30,
+            177,
+            179
+          ],
+          "leaf_mapper_ids": [
+            4,
+            8,
+            29,
+            176,
+            178
+          ]
+        },
+        {
+          "leaves": [
+            9,
+            178,
+            179,
+            181,
+            182
+          ],
+          "leaf_mapper_ids": [
+            8,
+            177,
+            178,
+            180,
+            181
+          ]
+        },
+        {
+          "leaves": [
+            5,
+            9,
+            16,
+            181,
+            182
+          ],
+          "leaf_mapper_ids": [
+            4,
+            8,
+            15,
+            180,
+            181
+          ]
+        },
+        {
+          "leaves": [
+            16,
+            177,
+            178,
+            182,
+            183
+          ],
+          "leaf_mapper_ids": [
+            15,
+            176,
+            177,
+            181,
+            182
+          ]
+        },
+        {
+          "leaves": [
+            9,
+            16,
+            30,
+            177,
+            178
+          ],
+          "leaf_mapper_ids": [
+            8,
+            15,
+            29,
+            176,
+            177
+          ]
+        },
+        {
+          "leaves": [
+            9,
+            181,
+            182,
+            185,
+            186
+          ],
+          "leaf_mapper_ids": [
+            8,
+            180,
+            181,
+            184,
+            185
+          ]
+        },
+        {
+          "leaves": [
+            16,
+            177,
+            178,
+            185,
+            187
+          ],
+          "leaf_mapper_ids": [
+            15,
+            176,
+            177,
+            184,
+            186
+          ]
+        },
+        {
+          "leaves": [
+            30,
+            181,
+            183,
+            185,
+            186
+          ],
+          "leaf_mapper_ids": [
+            29,
+            180,
+            182,
+            184,
+            185
+          ]
+        },
+        {
+          "leaves": [
+            5,
+            177,
+            179,
+            185,
+            187
+          ],
+          "leaf_mapper_ids": [
+            4,
+            176,
+            178,
+            184,
+            186
+          ]
+        }
+      ],
+      "best_phases": [
+        {
+          "phase": 0,
+          "available": true,
+          "area_flow": 9.55999947,
+          "input_phase_mask": 3,
+          "super": {
+            "id": 2019,
+            "root_cell": "NAND2xp33_ASAP7_75t_L",
+            "formula": "",
+            "area": 0.930000007,
+            "n_gates": 1,
+            "n_fanins": 2,
+            "fanout_limit": 5,
+            "arcs": [
+              {
+                "pin": 0,
+                "rr": 13.8900003,
+                "fr": 13.8900003,
+                "rf": 13.8900003,
+                "ff": 13.8900003
+              },
+              {
+                "pin": 1,
+                "rr": 13.2399998,
+                "fr": 13.2399998,
+                "rf": 13.2399998,
+                "ff": 13.2399998
+              }
+            ],
+            "implementation": {
+              "cell": "NAND2xp33_ASAP7_75t_L",
+              "fanins": [
+                {
+                  "leaf_pin": 0
+                },
+                {
+                  "leaf_pin": 1
+                }
+              ]
+            }
+          }
+        },
+        {
+          "phase": 1,
+          "available": true,
+          "area_flow": 5.13999987,
+          "input_phase_mask": 1,
+          "super": {
+            "id": 5,
+            "root_cell": "XOR2x2_ASAP7_75t_L",
+            "formula": "",
+            "area": 2.56999993,
+            "n_gates": 1,
+            "n_fanins": 2,
+            "fanout_limit": 5,
+            "arcs": [
+              {
+                "pin": 0,
+                "rr": 27.8099995,
+                "fr": 27.8099995,
+                "rf": 27.8099995,
+                "ff": 27.8099995
+              },
+              {
+                "pin": 1,
+                "rr": 27.5499992,
+                "fr": 27.5499992,
+                "rf": 27.5499992,
+                "ff": 27.5499992
+              }
+            ],
+            "implementation": {
+              "cell": "XOR2x2_ASAP7_75t_L",
+              "fanins": [
+                {
+                  "leaf_pin": 0
+                },
+                {
+                  "leaf_pin": 1
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "logical_frontier",
+      "function_point": 209,
+      "mapper_id": 208,
+      "n_refs": 2,
+      "n_ref_est": [
+        2,
+        2,
+        2
+      ],
+      "positive": {
+        "rise": 55.6199989,
+        "fall": 55.6199989,
+        "worst": 55.6199989
+      },
+      "negative": {
+        "rise": 55.1499977,
+        "fall": 55.1499977,
+        "worst": 55.1499977
+      },
+      "cuts": [
+        {
+          "leaves": [
+            209
+          ],
+          "leaf_mapper_ids": [
+            208
+          ]
+        },
+        {
+          "leaves": [
+            201,
+            205
+          ],
+          "leaf_mapper_ids": [
+            200,
+            204
+          ]
+        },
+        {
+          "leaves": [
+            207,
+            208
+          ],
+          "leaf_mapper_ids": [
+            206,
+            207
+          ]
+        },
+        {
+          "leaves": [
+            201,
+            203,
+            204
+          ],
+          "leaf_mapper_ids": [
+            200,
+            202,
+            203
+          ]
+        },
+        {
+          "leaves": [
+            199,
+            200,
+            205
+          ],
+          "leaf_mapper_ids": [
+            198,
+            199,
+            204
+          ]
+        },
+        {
+          "leaves": [
+            3,
+            13,
+            201
+          ],
+          "leaf_mapper_ids": [
+            2,
+            12,
+            200
+          ]
+        },
+        {
+          "leaves": [
+            6,
+            38,
+            205
+          ],
+          "leaf_mapper_ids": [
+            5,
+            37,
+            204
+          ]
+        },
+        {
+          "leaves": [
+            205,
+            206,
+            207
+          ],
+          "leaf_mapper_ids": [
+            204,
+            205,
+            206
+          ]
+        },
+        {
+          "leaves": [
+            201,
+            206,
+            208
+          ],
+          "leaf_mapper_ids": [
+            200,
+            205,
+            207
+          ]
+        },
+        {
+          "leaves": [
+            13,
+            201,
+            202,
+            204
+          ],
+          "leaf_mapper_ids": [
+            12,
+            200,
+            201,
+            203
+          ]
+        },
+        {
+          "leaves": [
+            6,
+            198,
+            200,
+            205
+          ],
+          "leaf_mapper_ids": [
+            5,
+            197,
+            199,
+            204
+          ]
+        },
+        {
+          "leaves": [
+            3,
+            201,
+            202,
+            203
+          ],
+          "leaf_mapper_ids": [
+            2,
+            200,
+            201,
+            202
+          ]
+        },
+        {
+          "leaves": [
+            38,
+            198,
+            199,
+            205
+          ],
+          "leaf_mapper_ids": [
+            37,
+            197,
+            198,
+            204
+          ]
+        },
+        {
+          "leaves": [
+            6,
+            38,
+            203,
+            204
+          ],
+          "leaf_mapper_ids": [
+            5,
+            37,
+            202,
+            203
+          ]
+        },
+        {
+          "leaves": [
+            199,
+            200,
+            203,
+            204
+          ],
+          "leaf_mapper_ids": [
+            198,
+            199,
+            202,
+            203
+          ]
+        },
+        {
+          "leaves": [
+            3,
+            13,
+            199,
+            200
+          ],
+          "leaf_mapper_ids": [
+            2,
+            12,
+            198,
+            199
+          ]
+        },
+        {
+          "leaves": [
+            3,
+            6,
+            13,
+            38
+          ],
+          "leaf_mapper_ids": [
+            2,
+            5,
+            12,
+            37
+          ]
+        },
+        {
+          "leaves": [
+            3,
+            13,
+            206,
+            207
+          ],
+          "leaf_mapper_ids": [
+            2,
+            12,
+            205,
+            206
+          ]
+        },
+        {
+          "leaves": [
+            6,
+            38,
+            206,
+            208
+          ],
+          "leaf_mapper_ids": [
+            5,
+            37,
+            205,
+            207
+          ]
+        },
+        {
+          "leaves": [
+            203,
+            204,
+            206,
+            207
+          ],
+          "leaf_mapper_ids": [
+            202,
+            203,
+            205,
+            206
+          ]
+        },
+        {
+          "leaves": [
+            199,
+            200,
+            206,
+            208
+          ],
+          "leaf_mapper_ids": [
+            198,
+            199,
+            205,
+            207
+          ]
+        },
+        {
+          "leaves": [
+            13,
+            199,
+            200,
+            202,
+            204
+          ],
+          "leaf_mapper_ids": [
+            12,
+            198,
+            199,
+            201,
+            203
+          ]
+        },
+        {
+          "leaves": [
+            6,
+            13,
+            38,
+            202,
+            204
+          ],
+          "leaf_mapper_ids": [
+            5,
+            12,
+            37,
+            201,
+            203
+          ]
+        },
+        {
+          "leaves": [
+            6,
+            198,
+            200,
+            203,
+            204
+          ],
+          "leaf_mapper_ids": [
+            5,
+            197,
+            199,
+            202,
+            203
+          ]
+        },
+        {
+          "leaves": [
+            3,
+            6,
+            13,
+            198,
+            200
+          ],
+          "leaf_mapper_ids": [
+            2,
+            5,
+            12,
+            197,
+            199
+          ]
+        },
+        {
+          "leaves": [
+            3,
+            199,
+            200,
+            202,
+            203
+          ],
+          "leaf_mapper_ids": [
+            2,
+            198,
+            199,
+            201,
+            202
+          ]
+        },
+        {
+          "leaves": [
+            3,
+            6,
+            38,
+            202,
+            203
+          ],
+          "leaf_mapper_ids": [
+            2,
+            5,
+            37,
+            201,
+            202
+          ]
+        },
+        {
+          "leaves": [
+            38,
+            198,
+            199,
+            203,
+            204
+          ],
+          "leaf_mapper_ids": [
+            37,
+            197,
+            198,
+            202,
+            203
+          ]
+        },
+        {
+          "leaves": [
+            3,
+            13,
+            38,
+            198,
+            199
+          ],
+          "leaf_mapper_ids": [
+            2,
+            12,
+            37,
+            197,
+            198
+          ]
+        },
+        {
+          "leaves": [
+            3,
+            202,
+            203,
+            206,
+            207
+          ],
+          "leaf_mapper_ids": [
+            2,
+            201,
+            202,
+            205,
+            206
+          ]
+        },
+        {
+          "leaves": [
+            38,
+            198,
+            199,
+            206,
+            208
+          ],
+          "leaf_mapper_ids": [
+            37,
+            197,
+            198,
+            205,
+            207
+          ]
+        },
+        {
+          "leaves": [
+            13,
+            202,
+            204,
+            206,
+            207
+          ],
+          "leaf_mapper_ids": [
+            12,
+            201,
+            203,
+            205,
+            206
+          ]
+        },
+        {
+          "leaves": [
+            6,
+            198,
+            200,
+            206,
+            208
+          ],
+          "leaf_mapper_ids": [
+            5,
+            197,
+            199,
+            205,
+            207
+          ]
+        }
+      ],
+      "best_phases": [
+        {
+          "phase": 0,
+          "available": true,
+          "area_flow": 9.55999947,
+          "input_phase_mask": 3,
+          "super": {
+            "id": 2019,
+            "root_cell": "NAND2xp33_ASAP7_75t_L",
+            "formula": "",
+            "area": 0.930000007,
+            "n_gates": 1,
+            "n_fanins": 2,
+            "fanout_limit": 5,
+            "arcs": [
+              {
+                "pin": 0,
+                "rr": 13.8900003,
+                "fr": 13.8900003,
+                "rf": 13.8900003,
+                "ff": 13.8900003
+              },
+              {
+                "pin": 1,
+                "rr": 13.2399998,
+                "fr": 13.2399998,
+                "rf": 13.2399998,
+                "ff": 13.2399998
+              }
+            ],
+            "implementation": {
+              "cell": "NAND2xp33_ASAP7_75t_L",
+              "fanins": [
+                {
+                  "leaf_pin": 0
+                },
+                {
+                  "leaf_pin": 1
+                }
+              ]
+            }
+          }
+        },
+        {
+          "phase": 1,
+          "available": true,
+          "area_flow": 5.13999987,
+          "input_phase_mask": 1,
+          "super": {
+            "id": 5,
+            "root_cell": "XOR2x2_ASAP7_75t_L",
+            "formula": "",
+            "area": 2.56999993,
+            "n_gates": 1,
+            "n_fanins": 2,
+            "fanout_limit": 5,
+            "arcs": [
+              {
+                "pin": 0,
+                "rr": 27.8099995,
+                "fr": 27.8099995,
+                "rf": 27.8099995,
+                "ff": 27.8099995
+              },
+              {
+                "pin": 1,
+                "rr": 27.5499992,
+                "fr": 27.5499992,
+                "rf": 27.5499992,
+                "ff": 27.5499992
+              }
+            ],
+            "implementation": {
+              "cell": "XOR2x2_ASAP7_75t_L",
+              "fanins": [
+                {
+                  "leaf_pin": 0
+                },
+                {
+                  "leaf_pin": 1
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "adopted_frontier": "PI-closed R9 transitive fanin cone; NOT scalar-only compact frontier",
+  "adopted_pi_function_points": [
+    3,
+    4,
+    5,
+    6,
+    9,
+    12,
+    13,
+    16,
+    17,
+    21,
+    30,
+    33,
+    34,
+    38
+  ],
+  "clock": "Abc_Clock / CLOCK_MONOTONIC wall seconds",
+  "isolated_context_export_time": null,
+  "context_export_time_note": "not measured independently; no extra baseline map run for timing",
+  "library": {
+    "name": "asap7",
+    "redistributable_library_included": false,
+    "source_library_sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55",
+    "implementation": "native immutable Map_SuperLib_t initialized during baseline map, reused by local managers",
+    "full_table_serialized": false,
+    "baseline_root_best_supergate_arc_metadata": [
+      {
+        "phase": 0,
+        "leaves": [
+          211,
+          212
+        ],
+        "leaf_mapper_ids": [
+          210,
+          211
+        ],
+        "input_phase_mask": 3,
+        "super": {
+          "id": 2020,
+          "root_cell": "NAND2xp33_ASAP7_75t_L",
+          "formula": "",
+          "area": 0.930000007,
+          "n_gates": 1,
+          "n_fanins": 2,
+          "fanout_limit": 5,
+          "arcs": [
+            {
+              "pin": 0,
+              "rr": 13.2399998,
+              "fr": 13.2399998,
+              "rf": 13.2399998,
+              "ff": 13.2399998
+            },
+            {
+              "pin": 1,
+              "rr": 13.8900003,
+              "fr": 13.8900003,
+              "rf": 13.8900003,
+              "ff": 13.8900003
+            }
+          ],
+          "implementation": {
+            "cell": "NAND2xp33_ASAP7_75t_L",
+            "fanins": [
+              {
+                "leaf_pin": 1
+              },
+              {
+                "leaf_pin": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "phase": 1,
+        "leaves": [
+          211,
+          212
+        ],
+        "leaf_mapper_ids": [
+          210,
+          211
+        ],
+        "input_phase_mask": 0,
+        "super": {
+          "id": 1669,
+          "root_cell": "NOR2xp33_ASAP7_75t_L",
+          "formula": "",
+          "area": 0.930000007,
+          "n_gates": 1,
+          "n_fanins": 2,
+          "fanout_limit": 5,
+          "arcs": [
+            {
+              "pin": 0,
+              "rr": 14.5699997,
+              "fr": 14.5699997,
+              "rf": 14.5699997,
+              "ff": 14.5699997
+            },
+            {
+              "pin": 1,
+              "rr": 13.8400002,
+              "fr": 13.8400002,
+              "rf": 13.8400002,
+              "ff": 13.8400002
+            }
+          ],
+          "implementation": {
+            "cell": "NOR2xp33_ASAP7_75t_L",
+            "fanins": [
+              {
+                "leaf_pin": 0
+              },
+              {
+                "leaf_pin": 1
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "rules": {
+    "native_functions": [
+      "Map_MappingCuts",
+      "Map_MappingTruths",
+      "Map_MappingMatches",
+      "Map_MatchNodeCut",
+      "Map_TimeCutComputeArrival",
+      "Map_MatchCompare",
+      "Map_NodeTryDroppingOnePhase",
+      "Map_NodeTransferArrivalTimes"
+    ],
+    "leaf_order": "preserved original full subject-graph Map_Node_t.Num order",
+    "scalar_frontier_expansion_warning": "native cuts can span earlier logical boundaries; PI closure avoids removing them"
+  },
+  "state_policy": {
+    "frozen_external": [
+      "PI positive seeds",
+      "PI structural reference counts",
+      "library delay/match tables",
+      "mode0 mapping flags"
+    ],
+    "locally_recomputed": [
+      "cuts",
+      "truths",
+      "phase matches",
+      "rise/fall arrivals",
+      "area flow"
+    ],
+    "structurally_reconstructed": [
+      "full subject graph IDs/topological order",
+      "candidate internal structural fanout counts"
+    ],
+    "forbidden": [
+      "candidate full-map arrival/matches",
+      "downstream timing",
+      "area-recovery state",
+      "PO delay"
+    ]
+  },
+  "candidate_full_map_state_in_context": false
+}

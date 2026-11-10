@@ -1,0 +1,396 @@
+{
+  "status": "PASS",
+  "design": "c1355.aig",
+  "original_sha256": "88df0a75b9328378b869843ba675c316d05a8bd812b7de22effc12af51f430ea",
+  "decision_1": {
+    "root": 146,
+    "cut_slot": 0,
+    "candidate_A": 0,
+    "candidate_B": 1,
+    "boundary": [
+      2,
+      42,
+      82
+    ]
+  },
+  "decision_2": {
+    "root": 226,
+    "cut_slot": 0,
+    "candidate_C": 0,
+    "candidate_D": 1,
+    "boundary": [
+      3,
+      4,
+      146,
+      178
+    ]
+  },
+  "dependency": {
+    "from": 146,
+    "to": 226,
+    "reason": "root_146_is_boundary_of_root_226"
+  },
+  "compatible": true,
+  "configurations": {
+    "AC": {
+      "cec": "PASS",
+      "rewritten_roots": [
+        146,
+        226
+      ],
+      "decisions": [
+        {
+          "decision_index": 0,
+          "target_root": 146,
+          "cut_slot": 0,
+          "raw_cut_slot": 2,
+          "subgraph_index": 0,
+          "truth": 3341,
+          "truth_class": 15,
+          "library_subgraph_root": 5,
+          "saved_nodes": 2,
+          "nodes_added": 2,
+          "result_level": 3,
+          "phase": 2,
+          "original_filter_result": "zero_gain_filtered",
+          "permutation": [
+            3,
+            1,
+            0,
+            2
+          ],
+          "preserved_root_wrapper": 146,
+          "candidate_selected": true,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "physical_graph_modified": false,
+          "seen": true,
+          "evaluated": true,
+          "built": true,
+          "installed": true,
+          "cut_leaves": [
+            2,
+            42,
+            82
+          ],
+          "physically_deleted_nodes": [
+            83
+          ]
+        },
+        {
+          "decision_index": 1,
+          "target_root": 226,
+          "cut_slot": 0,
+          "raw_cut_slot": 2,
+          "subgraph_index": 0,
+          "truth": 65424,
+          "truth_class": 18,
+          "library_subgraph_root": 8,
+          "saved_nodes": 3,
+          "nodes_added": 5,
+          "result_level": 5,
+          "phase": 16,
+          "original_filter_result": "negative_gain_filtered",
+          "permutation": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "preserved_root_wrapper": 226,
+          "candidate_selected": true,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "physical_graph_modified": true,
+          "seen": true,
+          "evaluated": true,
+          "built": true,
+          "installed": true,
+          "cut_leaves": [
+            3,
+            4,
+            146,
+            178
+          ],
+          "physically_deleted_nodes": [
+            194,
+            195
+          ]
+        }
+      ],
+      "sha256": "ff95290981fb5ff09ed5f2b68c04a92d51988457a4825fd0753cbb6630b5df02",
+      "and_count": null,
+      "level": null
+    },
+    "AD": {
+      "cec": "PASS",
+      "rewritten_roots": [
+        146,
+        226
+      ],
+      "decisions": [
+        {
+          "decision_index": 0,
+          "target_root": 146,
+          "cut_slot": 0,
+          "raw_cut_slot": 2,
+          "subgraph_index": 0,
+          "truth": 3341,
+          "truth_class": 15,
+          "library_subgraph_root": 5,
+          "saved_nodes": 2,
+          "nodes_added": 2,
+          "result_level": 3,
+          "phase": 2,
+          "original_filter_result": "zero_gain_filtered",
+          "permutation": [
+            3,
+            1,
+            0,
+            2
+          ],
+          "preserved_root_wrapper": 146,
+          "candidate_selected": true,
+          "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+          "physical_graph_modified": false,
+          "seen": true,
+          "evaluated": true,
+          "built": true,
+          "installed": true,
+          "cut_leaves": [
+            2,
+            42,
+            82
+          ],
+          "physically_deleted_nodes": [
+            83
+          ]
+        },
+        {
+          "decision_index": 1,
+          "target_root": 226,
+          "cut_slot": 0,
+          "raw_cut_slot": 2,
+          "subgraph_index": 1,
+          "truth": 65424,
+          "truth_class": 18,
+          "library_subgraph_root": 13,
+          "saved_nodes": 3,
+          "nodes_added": 4,
+          "result_level": 5,
+          "phase": 16,
+          "original_filter_result": "negative_gain_filtered",
+          "permutation": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "preserved_root_wrapper": 226,
+          "candidate_selected": true,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "physical_graph_modified": true,
+          "seen": true,
+          "evaluated": true,
+          "built": true,
+          "installed": true,
+          "cut_leaves": [
+            3,
+            4,
+            146,
+            178
+          ],
+          "physically_deleted_nodes": [
+            194,
+            195
+          ]
+        }
+      ],
+      "sha256": "4a50555c3ca2e08863a73929fa28b9e3d66ce2bf86535e3c0e556b23bd45e1ad",
+      "and_count": null,
+      "level": null
+    },
+    "BC": {
+      "cec": "PASS",
+      "rewritten_roots": [
+        146,
+        226
+      ],
+      "decisions": [
+        {
+          "decision_index": 0,
+          "target_root": 146,
+          "cut_slot": 0,
+          "raw_cut_slot": 2,
+          "subgraph_index": 1,
+          "truth": 3341,
+          "truth_class": 15,
+          "library_subgraph_root": 8,
+          "saved_nodes": 2,
+          "nodes_added": 3,
+          "result_level": 4,
+          "phase": 2,
+          "original_filter_result": "negative_gain_filtered",
+          "permutation": [
+            3,
+            1,
+            0,
+            2
+          ],
+          "preserved_root_wrapper": 146,
+          "candidate_selected": true,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "physical_graph_modified": true,
+          "seen": true,
+          "evaluated": true,
+          "built": true,
+          "installed": true,
+          "cut_leaves": [
+            2,
+            42,
+            82
+          ],
+          "physically_deleted_nodes": [
+            83
+          ]
+        },
+        {
+          "decision_index": 1,
+          "target_root": 226,
+          "cut_slot": 0,
+          "raw_cut_slot": 2,
+          "subgraph_index": 0,
+          "truth": 65424,
+          "truth_class": 18,
+          "library_subgraph_root": 8,
+          "saved_nodes": 3,
+          "nodes_added": 5,
+          "result_level": 5,
+          "phase": 16,
+          "original_filter_result": "negative_gain_filtered",
+          "permutation": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "preserved_root_wrapper": 226,
+          "candidate_selected": true,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "physical_graph_modified": true,
+          "seen": true,
+          "evaluated": true,
+          "built": true,
+          "installed": true,
+          "cut_leaves": [
+            3,
+            4,
+            146,
+            178
+          ],
+          "physically_deleted_nodes": [
+            194,
+            195
+          ]
+        }
+      ],
+      "sha256": "d2aaeada2c99ca6790fbd9cccdf79446872128288ac9a950fccdb9d557983498",
+      "and_count": null,
+      "level": null
+    },
+    "BD": {
+      "cec": "PASS",
+      "rewritten_roots": [
+        146,
+        226
+      ],
+      "decisions": [
+        {
+          "decision_index": 0,
+          "target_root": 146,
+          "cut_slot": 0,
+          "raw_cut_slot": 2,
+          "subgraph_index": 1,
+          "truth": 3341,
+          "truth_class": 15,
+          "library_subgraph_root": 8,
+          "saved_nodes": 2,
+          "nodes_added": 3,
+          "result_level": 4,
+          "phase": 2,
+          "original_filter_result": "negative_gain_filtered",
+          "permutation": [
+            3,
+            1,
+            0,
+            2
+          ],
+          "preserved_root_wrapper": 146,
+          "candidate_selected": true,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "physical_graph_modified": true,
+          "seen": true,
+          "evaluated": true,
+          "built": true,
+          "installed": true,
+          "cut_leaves": [
+            2,
+            42,
+            82
+          ],
+          "physically_deleted_nodes": [
+            83
+          ]
+        },
+        {
+          "decision_index": 1,
+          "target_root": 226,
+          "cut_slot": 0,
+          "raw_cut_slot": 2,
+          "subgraph_index": 1,
+          "truth": 65424,
+          "truth_class": 18,
+          "library_subgraph_root": 13,
+          "saved_nodes": 3,
+          "nodes_added": 4,
+          "result_level": 5,
+          "phase": 16,
+          "original_filter_result": "negative_gain_filtered",
+          "permutation": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "preserved_root_wrapper": 226,
+          "candidate_selected": true,
+          "installation_kind": "PHYSICAL_REPLACEMENT",
+          "physical_graph_modified": true,
+          "seen": true,
+          "evaluated": true,
+          "built": true,
+          "installed": true,
+          "cut_leaves": [
+            3,
+            4,
+            146,
+            178
+          ],
+          "physically_deleted_nodes": [
+            194,
+            195
+          ]
+        }
+      ],
+      "sha256": "082cae2fe9ef68eed84a2ecba6e39b253a6ae9b8aa8a6cd33a9f6fa0f75fa59e",
+      "and_count": null,
+      "level": null
+    }
+  },
+  "unexpected_rewritten_roots": [],
+  "deterministic_batch_semantics": true,
+  "jobs": {
+    "stage_b": 43740,
+    "stage_c": 43741,
+    "stage_d": 43742,
+    "determinism": 43743
+  }
+}

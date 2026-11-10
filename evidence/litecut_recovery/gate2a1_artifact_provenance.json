@@ -1,0 +1,85 @@
+{
+  "conclusion": "NOT_REPRODUCIBLE",
+  "repo": "/home/wushangge/cutLibOrigin",
+  "git_commit": "077aa1e49b8b97ed6d76013a7272c06bfacabf23",
+  "artifact_history": {
+    "teacher": {
+      "training_entry_point": "src/entry_script/extract_cutLib.py -> extract_cutlib_teacher.runner_teacher.run",
+      "checkpoint_write_path": "<resolved checkpoint_dir>/latest.pt and <resolved checkpoint_dir>/best.pt",
+      "default_output_directory": "./checkpoints/extract_cutlib_teacher (relative to process cwd)",
+      "cli_override": "--checkpoint_dir; --resume_checkpoint",
+      "normalization_write_path": "embedded in each checkpoint as x_mu, x_inv_sigma, y_mu, y_inv_sigma; optionally prepared_cache_dir/{y_mu,y_inv_sigma}.npy and related arrays",
+      "config_override": "ExtractCutLibConfig.checkpoint_dir, prepared_cache_dir, save_prepared_cache"
+    },
+    "student": {
+      "training_entry_point": "src/entry_script/extract_cutLib_student.py -> extract_cutlib_student.runner_student.run",
+      "checkpoint_write_path": "<resolved checkpoint_dir>/last.pt and <resolved checkpoint_dir>/best.pt",
+      "default_output_directory": "./checkpoints/extract_cutlib_student (relative to process cwd)",
+      "cli_override": "--checkpoint_dir; --result_root + --experiment_name resolves <result_root>/<experiment_name>/checkpoints; --resume_checkpoint",
+      "normalization_write_path": "embedded in each checkpoint as x_mu, x_inv_sigma, y_mu, y_inv_sigma; optionally prepared_cache_dir/{x_mu,x_inv_sigma,y_mu,y_inv_sigma}.npy",
+      "config_override": "ExtractCutLibStudentConfig.checkpoint_dir, result_dir, prepared_cache_dir, save_prepared_cache",
+      "recovered_checkpoint": "/home/wushangge/cutLibOrigin/best.pt",
+      "checkpoint_sha256": "b3f499d2973bdb36fb42690794e9838d4c8359f05d6e141aa8cbe2b9fe3ae64d",
+      "checkpoint_config": {"epoch": 150, "global_step": 7866150, "input_dim": 19, "random_seed": 42, "label_outlier_filter": "mad", "label_outlier_threshold": 10.0, "train_ratio": 0.9}
+    },
+    "historical_path_evidence": [
+      "src/scripts/extract_cutLib.sh references ./checkpoints/extract_cutlib_teacher/best.pt and /data/zhoulingfeng/data_cutLib/cutLibData2",
+      "src/scripts/extract_cutLib_student.sh references ./checkpoints/extract_cutlib_student_group_fusion/best.pt and the same dataset root",
+      "student checkpoint was recovered at /home/wushangge/cutLibOrigin/best.pt; no teacher checkpoint, prepared cache, or training log was found"
+    ]
+  },
+  "normalization_recovery": {
+    "method": "standardize_features: mu=mean(axis=0), sigma=std(axis=0)+1e-12, inv_sigma=1/sigma",
+    "x_population": "concatenated split arrays after preprocessing; teacher uses x_raw[:,:-6], student uses the same continuous schema",
+    "y_population": "concatenated raw abc_delay after optional label outlier filtering, transformed by log1p before standardization",
+    "现场_computation": true,
+    "exact_reconstruction": false,
+    "blocking_missing": [
+      "actual /data/zhoulingfeng/data_cutLib/cutLibData2 files",
+      "historical filtering option and resulting population",
+      "historical prepared cache or equivalent sample manifest"
+    ]
+  },
+  "split_recovery": {
+    "algorithm": "np.random.permutation after seed_all(random_seed), train_size=max(1,int(N*train_ratio)) capped at N-1; remainder validation",
+    "default_seed": 42,
+    "default_train_ratio": 0.9,
+    "design_level_split": false,
+    "exact_membership_recovered": false,
+    "reason": "dataset population and any historical seed/CLI overrides are unavailable; preparation permutation also consumes RNG state before trainer split"
+  },
+  "training_definition": {
+    "source_code": "RECOVERED",
+    "dataset": "MISSING",
+    "split": "MISSING",
+    "feature_preprocessing": "RECOVERED",
+    "architecture": "RECOVERED",
+    "loss": "RECOVERED in trainer.py",
+    "optimizer_hyperparameters": "SOURCE DEFAULTS RECOVERED, historical overrides UNKNOWN",
+    "random_seed": "SOURCE DEFAULT 42, historical invocation UNKNOWN",
+    "historical_checkpoint": "STUDENT RECOVERED; TEACHER MISSING"
+  },
+  "dataset_audit": {
+    "expected_root": "/data/zhoulingfeng/data_cutLib/cutLibData2",
+    "accessible_exact_root": false,
+    "related_public_dataset": {
+      "root": "/data/public/src/data",
+      "design_count": 47,
+      "format": "legacy save_json/<design>/{data.json,data_2.json,label.json}",
+      "abc_delay_present": true,
+      "raw_25_column_feature_record_present": false,
+      "example": "/data/public/src/data/save_json/dft_orig/data_2.json",
+      "example_cell_count": 525762,
+      "example_abc_delay_count": 525762
+    },
+    "repo_open_sourceDataset": "/home/wushangge/cutLibOrigin/open-sourceDataset",
+    "raw_feature_label_sample_found": false,
+    "sample_manifest": null,
+    "file_hashes": null
+  },
+  "candidate_artifacts_rejected": [
+    "/data/public/checkpoints/DeepCutDelay_*.pth: old DeepCut model, incompatible payload and transform",
+    "/home/wushangge/E-gradient/m6: development ridge/pairwise DeltaArea artifacts, not LiteCut delay models"
+  ],
+  "training_performed": false
+}

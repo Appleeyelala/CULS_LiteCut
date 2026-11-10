@@ -1,0 +1,396 @@
+--- a/src/base/io/ioReadAiger.c
++++ b/src/base/io/ioReadAiger.c
+@@ -31,6 +31,7 @@
+ #include "ioAbc.h"
+ 
+ ABC_NAMESPACE_IMPL_START
++extern void Map_DebugRememberAiger(int var, int id, int pol, int size);
+ 
+ 
+ ////////////////////////////////////////////////////////////////////////
+@@ -411,6 +412,13 @@
+     }
+     Extra_ProgressBarStop( pProgress );
+ 
++    if ( getenv("AIGREWRITE_MAP_DEBUG_NODE") )
++        for ( i = 0; i < Vec_PtrSize(vNodes); i++ )
++        {
++            Abc_Obj_t * dObj = (Abc_Obj_t *)Vec_PtrEntry(vNodes, i);
++            Map_DebugRememberAiger(i, Abc_ObjId(Abc_ObjRegular(dObj)), Abc_ObjIsComplement(dObj), Vec_PtrSize(vNodes));
++        }
++
+     // remember the place where symbols begin
+     pSymbols = pCur;
+ 
+@@ -605,4 +613,3 @@
+ 
+ 
+ ABC_NAMESPACE_IMPL_END
+-
+--- a/src/base/abci/abcMap.c
++++ b/src/base/abci/abcMap.c
+@@ -146,6 +146,7 @@
+     if ( pSwitching ) Vec_IntFree( vSwitching );
+     if ( pMan == NULL )
+         return NULL;
++    Map_DebugGraph( pMan );
+ clk = Abc_Clock();
+     Map_ManSetSwitching( pMan, fSwitching );
+     Map_ManSetSkipFanout( pMan, fSkipFanout );
+@@ -161,6 +162,7 @@
+ //    Map_ManPrintStatsToFile( pNtk->pSpec, Map_ManReadAreaFinal(pMan), Map_ManReadRequiredGlo(pMan), Abc_Clock()-clk );
+ 
+     // reconstruct the network after mapping (use buffers when user requested or in the area mode)
++    Map_DebugFinal( pMan );
+     pNtkNew = Abc_NtkFromMap( pMan, pNtk, fUseBuffs || (DelayTarget == (double)ABC_INFINITY) );
+     if ( Mio_LibraryHasProfile(pLib) )
+         Mio_LibraryTransferProfile2( (Mio_Library_t *)Abc_FrameReadLibGen(), pLib );
+@@ -1238,4 +1240,3 @@
+ 
+ 
+ ABC_NAMESPACE_IMPL_END
+-
+--- a/src/map/mapper/module.make
++++ b/src/map/mapper/module.make
+@@ -1,4 +1,5 @@
+ SRC +=  src/map/mapper/mapper.c \
++    src/map/mapper/mapperDebug.c \
+     src/map/mapper/mapperCanon.c \
+     src/map/mapper/mapperCore.c \
+     src/map/mapper/mapperCreate.c \
+--- a/src/map/mapper/mapper.h
++++ b/src/map/mapper/mapper.h
+@@ -31,6 +31,7 @@
+ 
+ 
+ ABC_NAMESPACE_HEADER_START
++extern void Map_DebugRememberAiger(int var, int id, int pol, int size);
+ 
+ 
+ ////////////////////////////////////////////////////////////////////////
+@@ -47,6 +48,8 @@
+ typedef struct Map_HashTableStruct_t_   Map_HashTable_t;
+ typedef struct Map_HashEntryStruct_t_   Map_HashEntry_t;
+ typedef struct Map_TimeStruct_t_        Map_Time_t;
++extern void Map_DebugGraph(Map_Man_t * p);
++extern void Map_DebugFinal(Map_Man_t * p);
+ 
+ // the pair of rise/fall time parameters
+ struct Map_TimeStruct_t_
+--- a/src/map/mapper/mapperInt.h
++++ b/src/map/mapper/mapperInt.h
+@@ -360,6 +360,16 @@
+ /*=== mapperCanon.c =============================================================*/
+ /*=== mapperCut.c ===============================================================*/
+ extern void              Map_MappingCuts( Map_Man_t * p );
++extern void Map_DebugGraph(Map_Man_t * p);
++extern void Map_DebugCutBegin(Map_Node_t * n);
++extern void Map_DebugCutEnd(void);
++extern void Map_DebugCutArray(Map_Cut_t ** cs, int count);
++extern void Map_DebugDominated(Map_Node_t * n, Map_Cut_t * c);
++extern void Map_DebugTruth(Map_Man_t * p, Map_Cut_t * c, unsigned * t);
++extern void Map_DebugCuts(Map_Man_t * p);
++extern void Map_DebugMatch(Map_Node_t * n, Map_Cut_t * c, int f, float limit, const char * status);
++extern void Map_DebugSnapshot(Map_Man_t * p, const char * stage);
++extern void Map_DebugFinal(Map_Man_t * p);
+ /*=== mapperCutUtils.c ===============================================================*/
+ extern Map_Cut_t *       Map_CutAlloc( Map_Man_t * p );
+ extern void              Map_CutFree( Map_Man_t * p, Map_Cut_t * pCut );
+--- a/src/map/mapper/mapperCore.c
++++ b/src/map/mapper/mapperCore.c
+@@ -69,6 +69,7 @@
+     // derive the truth tables 
+     clk = Abc_Clock();
+     Map_MappingTruths( p );
++    Map_DebugCuts( p );
+     p->timeTruth = Abc_Clock() - clk;
+     //////////////////////////////////////////////////////////////////////
+ //ABC_PRT( "Truths", Abc_Clock() - clk );
+@@ -83,6 +84,7 @@
+     // compute the references and collect the nodes used in the mapping
+     Map_MappingSetRefs( p );
+     p->AreaBase = Map_MappingGetArea( p );
++    Map_DebugSnapshot(p,"delay_dp");
+ if ( p->fVerbose )
+ {
+ printf( "Delay    : %s = %8.2f  Flow = %11.1f  Area = %11.1f  %4.1f %%   ", 
+@@ -228,4 +230,3 @@
+     return 1;
+ }
+ ABC_NAMESPACE_IMPL_END
+-
+--- a/src/map/mapper/mapperCut.c
++++ b/src/map/mapper/mapperCut.c
+@@ -236,6 +236,7 @@
+     pList1 = Map_Regular(pNode->p1)->pCuts;
+     pList2 = Map_Regular(pNode->p2)->pCuts;
+     // merge the lists
++    Map_DebugCutBegin( pNode );
+     pList = Map_CutMergeLists( p, pTable, pList1, pList2, 
+         Map_IsComplement(pNode->p1), Map_IsComplement(pNode->p2) );
+     // if there are functionally equivalent nodes, union them with this list
+@@ -262,6 +263,7 @@
+     pNode->pCuts = pCut;
+     // remove the dominated cuts
+     Map_CutFilter( p, pNode );
++    Map_DebugCutEnd();
+     // set the phase correctly
+     if ( pNode->pRepr && Map_NodeComparePhase(pNode, pNode->pRepr) )
+     {
+@@ -321,6 +323,7 @@
+         }
+         if ( pTemp != pCut ) // pTemp contain pCut
+         {
++            Map_DebugDominated( pNode, pCut );
+             pPrev->pNext = pCut->pNext;  // skip pCut
+             // recycle pCut
+             Map_CutFree( p, pCut );
+@@ -1011,6 +1014,7 @@
+             (int (*)(const void *, const void *)) Map_CutSortCutsCompare );
+ //pMan->time2 += Abc_Clock() - clk;
+     // move them back into the list
++    Map_DebugCutArray( p->pCuts1, nCuts );
+     if ( nCuts > MAP_CUTS_MAX_USE - 1 )
+     {
+         // free the remaining cuts
+@@ -1175,4 +1179,3 @@
+ ////////////////////////////////////////////////////////////////////////
+ 
+ ABC_NAMESPACE_IMPL_END
+-
+--- a/src/map/mapper/mapperTruth.c
++++ b/src/map/mapper/mapperTruth.c
+@@ -116,6 +116,7 @@
+     else
+ */
+     Map_TruthsCutOne( p, pCut, uTruth );
++    Map_DebugTruth( p, pCut, uTruth );
+ 
+ 
+     // compute the canonical form for the positive phase
+@@ -312,4 +313,3 @@
+ 
+ 
+ ABC_NAMESPACE_IMPL_END
+-
+--- a/src/map/mapper/mapperMatch.c
++++ b/src/map/mapper/mapperMatch.c
+@@ -191,7 +191,10 @@
+                 Map_TimeCutComputeArrival( pNode, pCut, fPhase, fWorstLimit );
+                 // skip the cut if the arrival times exceed the required times
+                 if ( pMatch->tArrive.Worst > fWorstLimit + p->fEpsilon )
++                {
++                    Map_DebugMatch(pNode,pCut,fPhase,fWorstLimit,"delay_limit");
+                     continue;
++                }
+                 // get the area (area flow)
+                 pMatch->AreaFlow = Map_CutGetAreaFlow( pCut, fPhase );
+             }
+@@ -206,18 +209,26 @@
+                     pMatch->AreaFlow = Map_CutGetAreaFlow( pCut, fPhase );
+                 // skip if the cut is too large
+                 if ( pMatch->AreaFlow > MatchBest.AreaFlow + p->fEpsilon )
++                {
++                    Map_DebugMatch(pNode,pCut,fPhase,fWorstLimit,"area_limit");
+                     continue;
++                }
+                 // get the arrival time
+                 Map_TimeCutComputeArrival( pNode, pCut, fPhase, fWorstLimit );
+                 // skip the cut if the arrival times exceed the required times
+                 if ( pMatch->tArrive.Worst > fWorstLimit + p->fEpsilon )
++                {
++                    Map_DebugMatch(pNode,pCut,fPhase,fWorstLimit,"delay_limit");
+                     continue;
++                }
+             }
+ 
+             // if the cut is non-trivial, compare it
++            Map_DebugMatch(pNode,pCut,fPhase,fWorstLimit,"eligible");
+             if ( Map_MatchCompare( p, &MatchBest, pMatch, p->fMappingMode ) )
+             {
+                 MatchBest = *pMatch;
++                Map_DebugMatch(pNode,pCut,fPhase,fWorstLimit,"selected_in_cut");
+                 // if we are mapping for delay, the worst-case limit should be reduced
+                 if ( p->fMappingMode == 0 )
+                     fWorstLimit = MatchBest.tArrive.Worst;
+@@ -661,4 +672,3 @@
+ ///                       END OF FILE                                ///
+ ////////////////////////////////////////////////////////////////////////
+ ABC_NAMESPACE_IMPL_END
+-
+--- /dev/null
++++ b/src/map/mapper/mapperDebug.c
+@@ -0,0 +1,173 @@
++/* Experimental observation only. No mapper fields, marks, cuts or refs are changed. */
++#include "mapperInt.h"
++ABC_NAMESPACE_IMPL_START
++static int * dIds = NULL, * dPol = NULL, dSize = 0;
++static Map_Node_t * dCutNode = NULL;
++static int DEnabled(void) { return getenv("AIGREWRITE_MAP_DEBUG_NODE") != NULL; }
++void Map_DebugRememberAiger(int var, int id, int pol, int size)
++{
++    if (!DEnabled()) return;
++    if (var == 0) { ABC_FREE(dIds); ABC_FREE(dPol); dSize=size;
++        dIds=ABC_ALLOC(int,size); dPol=ABC_ALLOC(int,size); }
++    dIds[var]=id; dPol[var]=pol;
++}
++static int DVar(Map_Node_t * n)
++{
++    int i, id=Map_NodeReadAigId(n);
++    for(i=0;i<dSize;i++) if(dIds[i]==id) return i;
++    return -1;
++}
++static int DTarget(Map_Node_t * n)
++{
++    int v;
++    if(!DEnabled() || !dIds) return 0;
++    v=atoi(getenv("AIGREWRITE_MAP_DEBUG_NODE"));
++    return v>=0 && v<dSize && Map_NodeReadAigId(n)==dIds[v];
++}
++static Map_Node_t * DFind(Map_Man_t * p)
++{
++    int i; for(i=0;i<p->vMapObjs->nSize;i++)
++        if(DTarget(p->vMapObjs->pArray[i])) return p->vMapObjs->pArray[i];
++    return NULL;
++}
++static void DStr(const char * s)
++{
++    const unsigned char * a=(const unsigned char *)(s?s:""); putchar('"');
++    for(;*a;a++) { if(*a=='"'||*a=='\\') putchar('\\');
++        if(*a>=32) putchar(*a); }
++    putchar('"');
++}
++static void DLeaves(Map_Cut_t * c)
++{
++    int i; printf("\"leaves\":[");
++    for(i=0;i<c->nLeaves;i++) printf("%s%d",i?",":"",DVar(c->ppLeaves[i]));
++    printf("],\"leaf_mapper_ids\":[");
++    for(i=0;i<c->nLeaves;i++) printf("%s%d",i?",":"",c->ppLeaves[i]->Num);
++    printf("]");
++}
++static int DCutIdx(Map_Node_t * n, Map_Cut_t * c)
++{
++    int i=0; Map_Cut_t * a; for(a=n->pCuts;a;a=a->pNext,i++) if(a==c)return i;
++    return -1;
++}
++static void DTime(Map_Time_t * t)
++{ printf("{\"rise\":%.9g,\"fall\":%.9g,\"worst\":%.9g}",t->Rise,t->Fall,t->Worst); }
++static void DTree(Map_Super_t * s)
++{
++    int i;if(!s->pRoot){printf("{\"leaf_pin\":%d}",s->Num);return;}
++    printf("{\"cell\":");DStr(Mio_GateReadName(s->pRoot));printf(",\"fanins\":[");
++    for(i=0;i<(int)s->nFanins;i++){if(i)printf(",");DTree(s->pFanins[i]);}printf("]}");
++}
++static void DSuper(Map_Super_t * s)
++{
++    int i; if(!s){printf("null");return;}
++    printf("{\"id\":%d,\"root_cell\":",s->Num); DStr(s->pRoot?Mio_GateReadName(s->pRoot):"variable");
++    printf(",\"formula\":"); DStr(s->pFormula);
++    printf(",\"area\":%.9g,\"n_gates\":%u,\"n_fanins\":%u,\"fanout_limit\":%u,\"arcs\":[",s->Area,s->nGates,s->nFanins,s->nFanLimit);
++    for(i=0;i<(int)s->nFanins;i++) printf("%s{\"pin\":%d,\"rr\":%.9g,\"fr\":%.9g,\"rf\":%.9g,\"ff\":%.9g}",
++        i?",":"",i,s->tDelaysR[i].Rise,s->tDelaysR[i].Fall,s->tDelaysF[i].Rise,s->tDelaysF[i].Fall);
++    printf("],\"implementation\":");DTree(s);printf("}");
++}
++void Map_DebugGraph(Map_Man_t * p)
++{
++    int i,k,v, wanted; const char * list=getenv("AIGREWRITE_MAP_DEBUG_IDS");
++    Map_Node_t * n; if(!DEnabled())return;
++    printf("MAPDBG {\"type\":\"config\",\"n_vars_max\":%d,\"target_aiger_var\":%d}\n",p->nVarsMax,atoi(getenv("AIGREWRITE_MAP_DEBUG_NODE")));
++    for(i=0;i<p->vMapObjs->nSize;i++) {
++        const char * a; n=p->vMapObjs->pArray[i];v=DVar(n);wanted=DTarget(n);
++        for(a=list;a && *a;){ if(atoi(a)==v)wanted=1; a=strchr(a,',');if(a)a++; }
++        if(!wanted)continue;
++        printf("MAPDBG {\"type\":\"node\",\"aiger_var\":%d,\"abc_obj_id\":%d,\"mapper_id\":%d,\"node_type\":\"%s\",\"fanin_mapper_ids\":[",
++               v,Map_NodeReadAigId(n),n->Num,Map_NodeIsAnd(n)?"AND":"PI");
++        if(Map_NodeIsAnd(n))printf("%d,%d",Map_Regular(n->p1)->Num,Map_Regular(n->p2)->Num);
++        printf("],\"fanin_complemented\":[");
++        if(Map_NodeIsAnd(n))printf("%d,%d",Map_IsComplement(n->p1),Map_IsComplement(n->p2));
++        printf("],\"aiger_to_abc_complemented\":%d}\n",v>=0?dPol[v]:-1);
++    }
++}
++void Map_DebugCutBegin(Map_Node_t * n) { dCutNode=DTarget(n)?n:NULL; }
++void Map_DebugCutEnd(void) { dCutNode=NULL; }
++void Map_DebugCutArray(Map_Cut_t ** cs, int count)
++{
++    int i; if(!dCutNode)return;
++    for(i=0;i<count;i++) {
++        printf("MAPDBG {\"type\":\"cut_stage\",\"stage\":\"sorted_before_limit\",\"mapper_id\":%d,\"rank\":%d,\"limit_retained\":%s,",dCutNode->Num,i,i<249?"true":"false");
++        DLeaves(cs[i]);printf("}\n");
++    }
++}
++void Map_DebugDominated(Map_Node_t * n, Map_Cut_t * c)
++{
++    if(!DTarget(n))return;
++    printf("MAPDBG {\"type\":\"cut_stage\",\"stage\":\"dominated\",\"mapper_id\":%d,",n->Num);
++    DLeaves(c);printf("}\n");
++}
++void Map_DebugTruth(Map_Man_t * p, Map_Cut_t * c, unsigned * t)
++{
++    Map_Node_t * n; if(!DEnabled() || !(n=DFind(p)) || DCutIdx(n,c)<0)return;
++    printf("MAPDBG {\"type\":\"truth\",\"cut_index\":%d,\"truth_lo\":%u,\"truth_hi\":%u,",DCutIdx(n,c),t[0],t[1]);
++    DLeaves(c);printf("}\n");
++}
++void Map_DebugCuts(Map_Man_t * p)
++{
++    Map_Node_t * n;Map_Cut_t * c;Map_Super_t * s;int i,f,j,rank;
++    if(!DEnabled() || !(n=DFind(p)))return;
++    for(c=n->pCuts,i=0;c;c=c->pNext,i++){
++        printf("MAPDBG {\"type\":\"cut\",\"cut_index\":%d,\"n_leaves\":%d,\"volume\":%d,\"cut_phase\":%d,",i,c->nLeaves,c->nVolume,c->Phase);
++        DLeaves(c);printf("}\n");
++        if(c->nLeaves==1)continue;
++        for(f=0;f<2;f++)for(s=c->M[f].pSupers,rank=0;s;s=s->pNext,rank++)for(j=0;j<(int)s->nPhases;j++){
++            printf("MAPDBG {\"type\":\"match_inventory\",\"cut_index\":%d,\"phase\":%d,\"library_rank\":%d,\"phase_index\":%d,\"input_phase_mask\":%u,\"within_match_limit\":%s,\"super\":",
++                    i,f,rank,j,c->M[f].uPhase ^ s->uPhases[j],rank<30?"true":"false");
++            DSuper(s);printf("}\n");
++        }
++    }
++}
++void Map_DebugMatch(Map_Node_t * n, Map_Cut_t * c, int f, float limit, const char * status)
++{
++    int i;Map_Match_t * m=c->M+f;if(!DTarget(n))return;
++    printf("MAPDBG {\"type\":\"match_attempt\",\"mode\":%d,\"cut_index\":%d,\"phase\":%d,\"input_phase_mask\":%u,\"limit\":%.9g,\"status\":",
++            n->p->fMappingMode,DCutIdx(n,c),f,m->uPhaseBest,limit); DStr(status);
++    printf(",\"arrival\":");if(!strcmp(status,"area_limit"))printf("null");else DTime(&m->tArrive);
++    printf(",\"area_cost\":%.9g,\"super\":",m->AreaFlow);DSuper(m->pSuperBest);
++    printf(",\"leaf_arrivals\":[");for(i=0;i<c->nLeaves;i++){
++        printf("%s",i?",":"");DTime(c->ppLeaves[i]->tArrival+((m->uPhaseBest&(1<<i))==0)); }
++    printf("]}\n");
++}
++void Map_DebugSnapshot(Map_Man_t * p, const char * stage)
++{
++    int f;Map_Node_t * n;Map_Cut_t * c;Map_Match_t * m;
++    if(!DEnabled() || !(n=DFind(p)))return;
++    for(f=0;f<2;f++){
++        c=n->pCutBest[f];m=c?c->M+f:NULL;
++        printf("MAPDBG {\"type\":\"best\",\"stage\":");DStr(stage);
++        printf(",\"mode\":%d,\"mapper_id\":%d,\"phase\":%d,\"refs\":[%d,%d,%d],\"node_arrival\":",p->fMappingMode,n->Num,f,n->nRefAct[0],n->nRefAct[1],n->nRefAct[2]);DTime(n->tArrival+f);
++        printf(",\"cut_index\":%d,\"match_arrival\":",c?DCutIdx(n,c):-1);if(m)DTime(&m->tArrive);else printf("null");
++        printf(",\"area_cost\":");if(m)printf("%.9g",m->AreaFlow);else printf("null");
++        printf(",\"input_phase_mask\":%u,\"super\":",m?m->uPhaseBest:0);DSuper(m?m->pSuperBest:NULL);
++        if(c){printf(",");DLeaves(c);}printf("}\n");
++    }
++}
++static int DInside(Map_Node_t * n, Map_Cut_t * c, Map_Node_t * target, unsigned char * seen)
++{
++    int i,found;for(i=0;i<c->nLeaves;i++)if(c->ppLeaves[i]==n)return 0;
++    if(n==target)return 1;if(!Map_NodeIsAnd(n)||seen[n->Num])return 0;seen[n->Num]=1;
++    found=DInside(Map_Regular(n->p1),c,target,seen);
++    return DInside(Map_Regular(n->p2),c,target,seen)||found;
++}
++void Map_DebugFinal(Map_Man_t * p)
++{
++    int i,f,inside;Map_Node_t * target,*n;Map_Cut_t * c;unsigned char * seen;
++    if(!DEnabled() || !(target=DFind(p)))return;
++    Map_DebugSnapshot(p,"final");seen=ABC_CALLOC(unsigned char,p->nNodes+2);
++    for(i=0;i<p->vMapObjs->nSize;i++){
++        n=p->vMapObjs->pArray[i];if(!Map_NodeIsAnd(n)||!n->nRefAct[2])continue;
++        for(f=0;f<2;f++){
++            c=n->pCutBest[f];if(!c || (!n->nRefAct[f] && n->pCutBest[!f]))continue;
++            memset(seen,0,p->nNodes+2);inside=DInside(n,c,target,seen);
++            if(!inside && n!=target)continue;
++            printf("MAPDBG {\"type\":\"cover\",\"output_aiger_var\":%d,\"output_mapper_id\":%d,\"phase\":%d,\"refs\":[%d,%d,%d],\"contains_target_internal\":%s,",DVar(n),n->Num,f,n->nRefAct[0],n->nRefAct[1],n->nRefAct[2],inside&&n!=target?"true":"false");
++            DLeaves(c);printf(",\"arrival\":");DTime(n->tArrival+f);printf(",\"super\":");DSuper(c->M[f].pSuperBest);printf("}\n");
++        }
++    }ABC_FREE(seen);
++}
++ABC_NAMESPACE_IMPL_END

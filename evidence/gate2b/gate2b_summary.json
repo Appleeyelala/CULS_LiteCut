@@ -1,0 +1,110 @@
+{
+  "status": "PASS",
+  "flow": {
+    "abc_binary": "/data/public/AIGRewrite/abc/abc",
+    "library": "/data/wushangge/gate2b_runs/gate2b_20260917/input/asap7.lib",
+    "library_sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55",
+    "script": "read \"<library>\"; read \"<aig>\"; map; topo; stime",
+    "environment": {
+      "PATH": "/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin",
+      "LD_LIBRARY_PATH": null,
+      "OMP_NUM_THREADS": "1"
+    }
+  },
+  "litecut": {
+    "A": 29.53646804117542,
+    "B": 24.0842151795256,
+    "C": 20.574257743484107,
+    "D": 35.493827015539594,
+    "local_greedy_configuration": "BC"
+  },
+  "whole_design_sta": {
+    "original": 263.32,
+    "AC": 263.6,
+    "AD": 263.6,
+    "BC": 263.6,
+    "BD": 263.6
+  },
+  "auxiliary_metrics": {
+    "original": {
+      "area": 557.07,
+      "gate_count": 432
+    },
+    "AC": {
+      "area": 557.54,
+      "gate_count": 435
+    },
+    "AD": {
+      "area": 554.74,
+      "gate_count": 435
+    },
+    "BC": {
+      "area": 556.84,
+      "gate_count": 436
+    },
+    "BD": {
+      "area": 554.74,
+      "gate_count": 435
+    }
+  },
+  "context_effects": {
+    "delta1_C": 0.0,
+    "delta1_D": 0.0,
+    "delta2_A": 0.0,
+    "delta2_B": 0.0
+  },
+  "interaction": {
+    "I": 0.0,
+    "repeatability_tolerance": 0.0,
+    "measurement_precision_ps": 0.01,
+    "comparison_tolerance_ps": 0.01,
+    "meaningful_relative_to_repeatability": false,
+    "identity_errors": {
+      "I_minus_delta1_D_minus_delta1_C": 0.0,
+      "I_minus_delta2_B_minus_delta2_A": 0.0
+    }
+  },
+  "ranking_reversal": {
+    "d1": false,
+    "d2": false,
+    "details": {
+      "d1_under_C": "TIE_WITHIN_TOLERANCE",
+      "d1_under_D": "TIE_WITHIN_TOLERANCE",
+      "d2_under_A": "TIE_WITHIN_TOLERANCE",
+      "d2_under_B": "TIE_WITHIN_TOLERANCE"
+    }
+  },
+  "comparison": {
+    "lowest_measured_configuration_among_4": "AC/AD/BC/BD",
+    "local_greedy_matches_lowest_measured_among_4": true
+  },
+  "repeatability": {
+    "AC": {
+      "delay_abs_difference": 0.0,
+      "area_abs_difference": 0.0,
+      "gate_count_abs_difference": 0.0
+    },
+    "AD": {
+      "delay_abs_difference": 0.0,
+      "area_abs_difference": 0.0,
+      "gate_count_abs_difference": 0.0
+    },
+    "BC": {
+      "delay_abs_difference": 0.0,
+      "area_abs_difference": 0.0,
+      "gate_count_abs_difference": 0.0
+    },
+    "BD": {
+      "delay_abs_difference": 0.0,
+      "area_abs_difference": 0.0,
+      "gate_count_abs_difference": 0.0
+    }
+  },
+  "input_sha256": {
+    "original": "88df0a75b9328378b869843ba675c316d05a8bd812b7de22effc12af51f430ea",
+    "AC": "ff95290981fb5ff09ed5f2b68c04a92d51988457a4825fd0753cbb6630b5df02",
+    "AD": "4a50555c3ca2e08863a73929fa28b9e3d66ce2bf86535e3c0e556b23bd45e1ad",
+    "BC": "d2aaeada2c99ca6790fbd9cccdf79446872128288ac9a950fccdb9d557983498",
+    "BD": "082cae2fe9ef68eed84a2ecba6e39b253a6ae9b8aa8a6cd33a9f6fa0f75fa59e"
+  }
+}

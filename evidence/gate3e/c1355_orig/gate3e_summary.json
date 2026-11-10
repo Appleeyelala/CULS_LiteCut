@@ -1,0 +1,46 @@
+{
+  "candidate_count": 326,
+  "cec_fail_count": 0,
+  "cec_pass_count": 4,
+  "configuration_count": 4,
+  "decisions_with_at_least_two_candidates": 85,
+  "deterministic_order": "root, cut_slot, subgraph_index; path decisions in node_path order; configs lexicographic product order",
+  "differing_path_decisions_used": [
+    {
+      "cut_slot": 2,
+      "gpu_subgraph_index": 0,
+      "litecut_local_best_subgraph_index": 2,
+      "region_id": 9,
+      "root": 197
+    },
+    {
+      "cut_slot": 2,
+      "gpu_subgraph_index": 0,
+      "litecut_local_best_subgraph_index": 2,
+      "region_id": 24,
+      "root": 386
+    }
+  ],
+  "executable_decisions": 91,
+  "gate": "Gate 3E",
+  "gpu_choice_defined_decisions": 74,
+  "gpu_choice_differs_from_litecut_local_best": 22,
+  "gpu_choice_equals_litecut_local_best": 52,
+  "gradient_called": false,
+  "input_path": "/data/wushangge/runs/CULS-gate3e-20260922/input/c1355_orig.aig",
+  "input_sha256": "2602b10f131a6ba5996521036ba130aab128a4aa15e3ab49ce44f2f02047f0b0",
+  "mapping_called": false,
+  "region_state_enumeration": false,
+  "selected_path_executable_decisions": 15,
+  "selected_path_po_id": 11,
+  "selected_path_region_sequence": [
+    6,
+    9,
+    24,
+    36,
+    37,
+    38
+  ],
+  "sta_called": false,
+  "training_called": false
+}

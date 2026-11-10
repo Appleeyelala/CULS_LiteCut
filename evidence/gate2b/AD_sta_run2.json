@@ -1,0 +1,27 @@
+{
+  "configuration": "AD",
+  "run_tag": "run2",
+  "input_aig": "/data/wushangge/gate2b_runs/gate2b_20260917/input/AD.aig",
+  "source_input_aig": "/data/wushangge/gate1a_AIGRewrite/gate1c_r_out/AD.aig",
+  "input_sha256": "4a50555c3ca2e08863a73929fa28b9e3d66ce2bf86535e3c0e556b23bd45e1ad",
+  "gate1_cec_status": "PASS",
+  "gate1_installation_kind": {
+    "d1": "NO_OP_FULL_CORRESPONDENCE",
+    "d2": "PHYSICAL_REPLACEMENT"
+  },
+  "abc_binary": "/data/public/AIGRewrite/abc/abc",
+  "library": "/data/wushangge/gate2b_runs/gate2b_20260917/input/asap7.lib",
+  "library_sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55",
+  "working_directory": "/data/wushangge/gate2b_runs/gate2b_20260917/output/work_AD_run2",
+  "script": "read \"/data/wushangge/gate2b_runs/gate2b_20260917/input/asap7.lib\"; read \"/data/wushangge/gate2b_runs/gate2b_20260917/input/AD.aig\"; map; topo; stime",
+  "mapping_command": "map",
+  "timing_command": "topo; stime",
+  "area": 554.74,
+  "whole_design_delay_ps": 263.6,
+  "gate_count": 435,
+  "raw_timing_line": "Area =      554.74\u001b[0m ( 85.3 %)   \u001b[1;35mDelay =   263.60",
+  "raw_area_line": "Area =      554.74\u001b[0m ( 85.3 %)   \u001b[1;35mDelay =   263.60",
+  "log": "/data/wushangge/gate2b_runs/gate2b_20260917/logs/AD_run2.log",
+  "exit_code": 0,
+  "stdout": "ABC command line: \"read \"/data/wushangge/gate2b_runs/gate2b_20260917/input/asap7.lib\"; read \"/data/wushangge/gate2b_runs/gate2b_20260917/input/AD.aig\"; map; topo; stime\".\n\nLibrary \"asap7\" from \"/data/wushangge/gate2b_runs/gate2b_20260917/input/asap7.lib\" has 159 cells (26 skipped: 23 seq; 0 tri-state; 3 no func; 0 dont_use; 0 with 2 outputs; 0 with 3+ outputs).  Time =     0.67 sec\nWarning: Detected 2 multi-output cells (for example, \"FAx1_ASAP7_75t_L\").\nWireLoad = \"none\"  \u001b[1;33mGates =    435\u001b[0m ( 14.7 %)   \u001b[1;32mCap =  0.9 ff\u001b[0m (  2.7 %)   \u001b[1;36mArea =      554.74\u001b[0m ( 85.3 %)   \u001b[1;35mDelay =   263.60 ps\u001b[0m  ( 40.0 %)               \n"
+}

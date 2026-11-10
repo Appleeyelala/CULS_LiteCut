@@ -1,0 +1,131 @@
+{
+  "determinism_comparison": [
+    {
+      "file": "input_manifest.json",
+      "identical": true,
+      "run1_canonical_sha256": "f5859feb87bbc4ae13f5d65173e1b59f17e7374159d2baee4fd5fe07731413a2",
+      "run2_canonical_sha256": "f5859feb87bbc4ae13f5d65173e1b59f17e7374159d2baee4fd5fe07731413a2"
+    },
+    {
+      "file": "partition_consistency.json",
+      "identical": true,
+      "run1_canonical_sha256": "b1c5974d05025b285e5411ec895889d4c63949613ec9d3ac2cfe6372b2713d6d",
+      "run2_canonical_sha256": "b1c5974d05025b285e5411ec895889d4c63949613ec9d3ac2cfe6372b2713d6d"
+    },
+    {
+      "file": "region_dag.json",
+      "identical": true,
+      "run1_canonical_sha256": "67562319cdf74b240a411cda935b5e451c8c4f7b8c5b0d1816955599a2340165",
+      "run2_canonical_sha256": "67562319cdf74b240a411cda935b5e451c8c4f7b8c5b0d1816955599a2340165"
+    },
+    {
+      "file": "region_edges.csv",
+      "identical": true,
+      "run1_canonical_sha256": "dfea79f3ecf636c243e29a37abf5fef054d39026a67684ec830735c86e6e8025",
+      "run2_canonical_sha256": "dfea79f3ecf636c243e29a37abf5fef054d39026a67684ec830735c86e6e8025"
+    },
+    {
+      "file": "region_metadata.jsonl",
+      "identical": true,
+      "run1_canonical_sha256": "4ed9f2c4e5dfafa65e72bf6cc45a81434fe86954bd1496018ed1cd618c529740",
+      "run2_canonical_sha256": "4ed9f2c4e5dfafa65e72bf6cc45a81434fe86954bd1496018ed1cd618c529740"
+    },
+    {
+      "file": "pi_region_edges.csv",
+      "identical": true,
+      "run1_canonical_sha256": "96b930e565ee683b029a4cb1ee0b3ff7e53cf2753be78b2bd3af9af4131e5fd6",
+      "run2_canonical_sha256": "96b930e565ee683b029a4cb1ee0b3ff7e53cf2753be78b2bd3af9af4131e5fd6"
+    },
+    {
+      "file": "region_po_edges.csv",
+      "identical": true,
+      "run1_canonical_sha256": "ff47c84e64dc876d1f5f9d205b3f67510ab440df07208e645bc047ca2eb04c6f",
+      "run2_canonical_sha256": "ff47c84e64dc876d1f5f9d205b3f67510ab440df07208e645bc047ca2eb04c6f"
+    },
+    {
+      "file": "example_pi_po_paths.jsonl",
+      "identical": true,
+      "run1_canonical_sha256": "cf11a95b5e65ab00f200493338f86eb76ad48881efdfc62de912b189c46355d9",
+      "run2_canonical_sha256": "cf11a95b5e65ab00f200493338f86eb76ad48881efdfc62de912b189c46355d9"
+    },
+    {
+      "file": "dag_checks.json",
+      "identical": true,
+      "run1_canonical_sha256": "3df6e435fc1e89591cd70aac4e7c326a5b9ea43573eec0031c7e93ddadae262f",
+      "run2_canonical_sha256": "3df6e435fc1e89591cd70aac4e7c326a5b9ea43573eec0031c7e93ddadae262f"
+    },
+    {
+      "file": "path_projection_checks.json",
+      "identical": true,
+      "run1_canonical_sha256": "ddf7c6dd879c2c04395ad345b78db86daaacd6b5e8e057e1bec04125b47393b3",
+      "run2_canonical_sha256": "ddf7c6dd879c2c04395ad345b78db86daaacd6b5e8e057e1bec04125b47393b3"
+    },
+    {
+      "file": "region_path_stats.json",
+      "identical": true,
+      "run1_canonical_sha256": "7096f154ccf7e193d88fb0a1e39346fdce63f0d8fc93f09265f9d2c9cced1ac8",
+      "run2_canonical_sha256": "7096f154ccf7e193d88fb0a1e39346fdce63f0d8fc93f09265f9d2c9cced1ac8"
+    },
+    {
+      "file": "region_dag.dot",
+      "identical": true,
+      "run1_canonical_sha256": "c1e804ea72fb49a3b4731ce099e9bd39cfdb2b70d041437abd568b3b1bbb68f6",
+      "run2_canonical_sha256": "c1e804ea72fb49a3b4731ce099e9bd39cfdb2b70d041437abd568b3b1bbb68f6"
+    }
+  ],
+  "deterministic": true,
+  "forbidden_flows_executed": {
+    "abc_mapping": false,
+    "gradient": false,
+    "litecut": false,
+    "rewrite_replacement": false,
+    "sta": false
+  },
+  "gate": "Gate 3B",
+  "gate3b_pass": true,
+  "input_sha256": "2602b10f131a6ba5996521036ba130aab128a4aa15e3ab49ce44f2f02047f0b0",
+  "partition": "STRICT_MAXIMAL_MFFC_PARTITION",
+  "partition_consistent": true,
+  "q1": {
+    "and": 512,
+    "pi": 41,
+    "po": 32,
+    "region_count": 62
+  },
+  "q2_region_dag_region_count": 62,
+  "q3_cycle_count": 0,
+  "q3_topological_sort_covers_all_regions": true,
+  "q4_cross_region_edges_all_present": true,
+  "q4_pi_region_edges_complete": true,
+  "q4_region_po_edges_complete": true,
+  "q5_edge_complete_path_projection": true,
+  "q6_example_paths": 32,
+  "q6_example_paths_valid": true,
+  "q7_reentered_region_path_count": 0,
+  "region_path_stats": {
+    "all_examples_have_pi": true,
+    "all_examples_valid_node_paths": true,
+    "all_examples_valid_region_paths": true,
+    "average_and_node_path_length": 29.0,
+    "average_node_path_length": 30.0,
+    "average_region_path_length": 6.0,
+    "maximum_node_path_length": 30,
+    "maximum_region_path_length": 6,
+    "median_node_path_length": 30.0,
+    "median_region_path_length": 6.0,
+    "path_example_count": 32,
+    "paths_with_region_segment_without_root": [],
+    "po_count": 32,
+    "reentered_region_path_count": 0,
+    "reentered_region_paths": [],
+    "region_path_segment_count": 192,
+    "region_root_hit_count": 192,
+    "region_segments_without_root_count": 0,
+    "unavailable_path_po_ids": []
+  },
+  "region_segments_without_root_count": 0,
+  "report": "/home/wushangge/CULS/gate3b_out/c1355_orig/gate3b_report.md",
+  "root_required_for_mapping": false,
+  "selected_design": "c1355_orig",
+  "selected_input": "/home/wushangge/cutLibOrigin/open-sourceDataset/OpenABC/c1355_orig.aig"
+}

@@ -1,0 +1,281 @@
+{
+  "phases": [
+    {
+      "area_cost": 45.2150002,
+      "cut_index": 2,
+      "input_phase_mask": 3,
+      "leaf_mapper_ids": [
+        192,
+        193
+      ],
+      "leaves": [
+        277,
+        278
+      ],
+      "mapper_id": 194,
+      "match_arrival": {
+        "fall": 88.8499908,
+        "rise": 88.8499908,
+        "worst": 88.8499908
+      },
+      "mode": 0,
+      "node_arrival": {
+        "fall": 88.8499908,
+        "rise": 88.8499908,
+        "worst": 88.8499908
+      },
+      "phase": 0,
+      "refs": [
+        0,
+        0,
+        0
+      ],
+      "stage": "delay_dp",
+      "super": {
+        "arcs": [
+          {
+            "ff": 13.2399998,
+            "fr": 13.2399998,
+            "pin": 0,
+            "rf": 13.2399998,
+            "rr": 13.2399998
+          },
+          {
+            "ff": 13.8900003,
+            "fr": 13.8900003,
+            "pin": 1,
+            "rf": 13.8900003,
+            "rr": 13.8900003
+          }
+        ],
+        "area": 0.930000007,
+        "fanout_limit": 5,
+        "formula": "",
+        "id": 2020,
+        "implementation": {
+          "cell": "NAND2xp33_ASAP7_75t_L",
+          "fanins": [
+            {
+              "leaf_pin": 1
+            },
+            {
+              "leaf_pin": 0
+            }
+          ]
+        },
+        "n_fanins": 2,
+        "n_gates": 1,
+        "root_cell": "NAND2xp33_ASAP7_75t_L"
+      },
+      "type": "best"
+    },
+    {
+      "area_cost": 45.2150002,
+      "cut_index": 2,
+      "input_phase_mask": 0,
+      "leaf_mapper_ids": [
+        192,
+        193
+      ],
+      "leaves": [
+        277,
+        278
+      ],
+      "mapper_id": 194,
+      "match_arrival": {
+        "fall": 90.019989,
+        "rise": 90.019989,
+        "worst": 90.019989
+      },
+      "mode": 0,
+      "node_arrival": {
+        "fall": 90.019989,
+        "rise": 90.019989,
+        "worst": 90.019989
+      },
+      "phase": 1,
+      "refs": [
+        0,
+        0,
+        0
+      ],
+      "stage": "delay_dp",
+      "super": {
+        "arcs": [
+          {
+            "ff": 14.5699997,
+            "fr": 14.5699997,
+            "pin": 0,
+            "rf": 14.5699997,
+            "rr": 14.5699997
+          },
+          {
+            "ff": 13.8400002,
+            "fr": 13.8400002,
+            "pin": 1,
+            "rf": 13.8400002,
+            "rr": 13.8400002
+          }
+        ],
+        "area": 0.930000007,
+        "fanout_limit": 5,
+        "formula": "",
+        "id": 1669,
+        "implementation": {
+          "cell": "NOR2xp33_ASAP7_75t_L",
+          "fanins": [
+            {
+              "leaf_pin": 0
+            },
+            {
+              "leaf_pin": 1
+            }
+          ]
+        },
+        "n_fanins": 2,
+        "n_gates": 1,
+        "root_cell": "NOR2xp33_ASAP7_75t_L"
+      },
+      "type": "best"
+    },
+    {
+      "area_cost": 0.930000007,
+      "cut_index": 2,
+      "input_phase_mask": 3,
+      "leaf_mapper_ids": [
+        192,
+        193
+      ],
+      "leaves": [
+        277,
+        278
+      ],
+      "mapper_id": 194,
+      "match_arrival": {
+        "fall": 89.4199982,
+        "rise": 89.4199982,
+        "worst": 89.4199982
+      },
+      "mode": 3,
+      "node_arrival": {
+        "fall": 89.4199982,
+        "rise": 89.4199982,
+        "worst": 89.4199982
+      },
+      "phase": 0,
+      "refs": [
+        0,
+        0,
+        0
+      ],
+      "stage": "final",
+      "super": {
+        "arcs": [
+          {
+            "ff": 13.2399998,
+            "fr": 13.2399998,
+            "pin": 0,
+            "rf": 13.2399998,
+            "rr": 13.2399998
+          },
+          {
+            "ff": 13.8900003,
+            "fr": 13.8900003,
+            "pin": 1,
+            "rf": 13.8900003,
+            "rr": 13.8900003
+          }
+        ],
+        "area": 0.930000007,
+        "fanout_limit": 5,
+        "formula": "",
+        "id": 2020,
+        "implementation": {
+          "cell": "NAND2xp33_ASAP7_75t_L",
+          "fanins": [
+            {
+              "leaf_pin": 1
+            },
+            {
+              "leaf_pin": 0
+            }
+          ]
+        },
+        "n_fanins": 2,
+        "n_gates": 1,
+        "root_cell": "NAND2xp33_ASAP7_75t_L"
+      },
+      "type": "best"
+    },
+    {
+      "area_cost": 0.930000007,
+      "cut_index": 2,
+      "input_phase_mask": 0,
+      "leaf_mapper_ids": [
+        192,
+        193
+      ],
+      "leaves": [
+        277,
+        278
+      ],
+      "mapper_id": 194,
+      "match_arrival": {
+        "fall": 90.7499924,
+        "rise": 90.7499924,
+        "worst": 90.7499924
+      },
+      "mode": 3,
+      "node_arrival": {
+        "fall": 90.7499924,
+        "rise": 90.7499924,
+        "worst": 90.7499924
+      },
+      "phase": 1,
+      "refs": [
+        0,
+        0,
+        0
+      ],
+      "stage": "final",
+      "super": {
+        "arcs": [
+          {
+            "ff": 13.8400002,
+            "fr": 13.8400002,
+            "pin": 0,
+            "rf": 13.8400002,
+            "rr": 13.8400002
+          },
+          {
+            "ff": 14.5699997,
+            "fr": 14.5699997,
+            "pin": 1,
+            "rf": 14.5699997,
+            "rr": 14.5699997
+          }
+        ],
+        "area": 0.930000007,
+        "fanout_limit": 5,
+        "formula": "",
+        "id": 1670,
+        "implementation": {
+          "cell": "NOR2xp33_ASAP7_75t_L",
+          "fanins": [
+            {
+              "leaf_pin": 1
+            },
+            {
+              "leaf_pin": 0
+            }
+          ]
+        },
+        "n_fanins": 2,
+        "n_gates": 1,
+        "root_cell": "NOR2xp33_ASAP7_75t_L"
+      },
+      "type": "best"
+    }
+  ],
+  "timing_semantics": "mapper all-PI arrival; phase0 negative / phase1 positive; not source-restricted pair delay"
+}

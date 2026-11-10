@@ -1,0 +1,283 @@
+--- a/src/base/abc/abc.h
++++ b/src/base/abc/abc.h
+@@ -982,6 +982,7 @@
+ extern ABC_DLL Abc_Time_t *       Abc_NtkGetCiArrivalTimes( Abc_Ntk_t * pNtk );
+ extern ABC_DLL Abc_Time_t *       Abc_NtkGetCoRequiredTimes( Abc_Ntk_t * pNtk );
+ extern ABC_DLL float              Abc_NtkDelayTrace( Abc_Ntk_t * pNtk, Abc_Obj_t * pOut, Abc_Obj_t * pIn, int fPrint );
++extern ABC_DLL int                Abc_NtkPairDelayTrace( Abc_Ntk_t * pNtk, Abc_Obj_t * pOut, Abc_Obj_t * pIn, int fTrace, int fCheck );
+ extern ABC_DLL int                Abc_ObjLevelNew( Abc_Obj_t * pObj );
+ extern ABC_DLL int                Abc_ObjReverseLevelNew( Abc_Obj_t * pObj );
+ extern ABC_DLL int                Abc_ObjRequiredLevel( Abc_Obj_t * pObj );
+--- a/src/base/abci/abc.c
++++ b/src/base/abci/abc.c
+@@ -104,6 +104,7 @@
+ static int Abc_CommandPrintMiter             ( Abc_Frame_t * pAbc, int argc, char ** argv );
+ static int Abc_CommandPrintStatus            ( Abc_Frame_t * pAbc, int argc, char ** argv );
+ static int Abc_CommandPrintDelay             ( Abc_Frame_t * pAbc, int argc, char ** argv );
++static int Abc_CommandPrintPairDelay         ( Abc_Frame_t * pAbc, int argc, char ** argv );
+ 
+ static int Abc_CommandShow                   ( Abc_Frame_t * pAbc, int argc, char ** argv );
+ static int Abc_CommandShowBdd                ( Abc_Frame_t * pAbc, int argc, char ** argv );
+@@ -922,6 +923,7 @@
+     Cmd_CommandAdd( pAbc, "Printing",     "print_miter",   Abc_CommandPrintMiter,       0 );
+     Cmd_CommandAdd( pAbc, "Printing",     "print_status",  Abc_CommandPrintStatus,      0 );
+     Cmd_CommandAdd( pAbc, "Printing",     "print_delay",   Abc_CommandPrintDelay,       0 );
++    Cmd_CommandAdd( pAbc, "Printing",     "print_pair_delay", Abc_CommandPrintPairDelay, 0 );
+ 
+     Cmd_CommandAdd( pAbc, "Printing",     "show",          Abc_CommandShow,             0 );
+     Cmd_CommandAdd( pAbc, "Printing",     "show_bdd",      Abc_CommandShowBdd,          0 );
+@@ -3279,6 +3281,50 @@
+     return 1;
+ }
+ 
++/** Experimental source-restricted MIO timing query. */
++int Abc_CommandPrintPairDelay( Abc_Frame_t * pAbc, int argc, char ** argv )
++{
++    Abc_Ntk_t * pNtk = Abc_FrameReadNtk(pAbc);
++    Abc_Obj_t * pObjIn, * pObjOut;
++    int c, fTrace = 0, fCheck = 0, Num;
++    Extra_UtilGetoptReset();
++    while ( (c = Extra_UtilGetopt(argc, argv, "tvh")) != EOF )
++    {
++        if ( c == 't' ) fTrace = 1;
++        else if ( c == 'v' ) fCheck = 1;
++        else goto usage;
++    }
++    if ( pNtk == NULL || !Abc_NtkIsMappedLogic(pNtk) )
++    {
++        Abc_Print( -1, "print_pair_delay requires a mapped standard-cell network.\n" );
++        return 1;
++    }
++    if ( argc != globalUtilOptind + 2 )
++        goto usage;
++    Num = Nm_ManFindIdByName( pNtk->pManName, argv[globalUtilOptind], ABC_OBJ_PO );
++    if ( Num < 0 ) Num = Nm_ManFindIdByName( pNtk->pManName, argv[globalUtilOptind], ABC_OBJ_BI );
++    if ( Num < 0 )
++    {
++        Abc_Print( -1, "Cannot find combinational output \"%s\".\n", argv[globalUtilOptind] );
++        return 1;
++    }
++    pObjOut = Abc_NtkObj( pNtk, Num );
++    Num = Nm_ManFindIdByName( pNtk->pManName, argv[globalUtilOptind+1], ABC_OBJ_PI );
++    if ( Num < 0 ) Num = Nm_ManFindIdByName( pNtk->pManName, argv[globalUtilOptind+1], ABC_OBJ_BO );
++    if ( Num < 0 )
++    {
++        Abc_Print( -1, "Cannot find combinational input \"%s\".\n", argv[globalUtilOptind+1] );
++        return 1;
++    }
++    pObjIn = Abc_NtkObj( pNtk, Num );
++    return Abc_NtkPairDelayTrace( pNtk, pObjOut, pObjIn, fTrace, fCheck ) ? 0 : 1;
++usage:
++    Abc_Print( -2, "usage: print_pair_delay [-tv] <CO_name> <CI_name>\n" );
++    Abc_Print( -2, "\t-t : print source-restricted critical traceback\n" );
++    Abc_Print( -2, "\t-v : compare with all-PI PO arrival and original timing engine under single-source CI seeds\n" );
++    return 1;
++}
++
+ /**Function*************************************************************
+ 
+   Synopsis    []
+--- a/src/base/abci/abcTiming.c
++++ b/src/base/abci/abcTiming.c
+@@ -1154,6 +1154,196 @@
+     return tArrivalMax;
+ }
+ 
++/* The experimental pair query reuses Abc_NodeDelayTraceArrival verbatim.
++   Source restriction changes only CI initialization and skips nodes with no
++   path from the selected CI. Mapped MIO pin phase/delay semantics are unchanged.
++   In a mapped logic network inversion is represented by MIO gate/pin timing
++   phase; AIG complemented literals are not timed as separate mapped arcs. */
++typedef struct Abc_PairTraceStep_t_ Abc_PairTraceStep_t;
++struct Abc_PairTraceStep_t_
++{
++    Abc_Obj_t * pFanin;
++    int iPin;
++    int fInputRise;
++    float ArcDelay;
++    float Candidate;
++};
++
++static void Abc_NtkPairTraceConsider( Abc_PairTraceStep_t * pStep, Abc_Obj_t * pFanin,
++                                     int iPin, int fInputRise, float ArcDelay )
++{
++    Abc_Time_t * pTimeIn = Abc_NodeArrival(pFanin);
++    float Candidate = (fInputRise ? pTimeIn->Rise : pTimeIn->Fall) + ArcDelay;
++    if ( pStep->pFanin == NULL || pStep->Candidate < Candidate )
++    {
++        pStep->pFanin = pFanin;
++        pStep->iPin = iPin;
++        pStep->fInputRise = fInputRise;
++        pStep->ArcDelay = ArcDelay;
++        pStep->Candidate = Candidate;
++    }
++}
++
++/* Select a predecessor for the already-computed transition. This duplicates
++   only the argmax needed for traceback, not the forward arrival calculation. */
++static int Abc_NtkPairTraceStep( Abc_Obj_t * pNode, int fRise,
++                                 unsigned char * pReach, Abc_PairTraceStep_t * pStep )
++{
++    Abc_Obj_t * pFanin;
++    Mio_Pin_t * pPin;
++    Mio_PinPhase_t Phase;
++    float Delay;
++    int i;
++    memset( pStep, 0, sizeof(Abc_PairTraceStep_t) );
++    if ( Abc_ObjIsBarBuf(pNode) )
++    {
++        pFanin = Abc_ObjFanin0(pNode);
++        if ( !pReach[Abc_ObjId(pFanin)] ) return 0;
++        Abc_NtkPairTraceConsider( pStep, pFanin, 0, fRise, 0.0f );
++        return 1;
++    }
++    pPin = Mio_GateReadPins((Mio_Gate_t *)pNode->pData);
++    Abc_ObjForEachFanin( pNode, pFanin, i )
++    {
++        if ( pReach[Abc_ObjId(pFanin)] )
++        {
++            Phase = Mio_PinReadPhase(pPin);
++            Delay = fRise ? (float)Mio_PinReadDelayBlockRise(pPin)
++                          : (float)Mio_PinReadDelayBlockFall(pPin);
++            if ( Phase != MIO_PHASE_INV )
++                Abc_NtkPairTraceConsider( pStep, pFanin, i, fRise, Delay );
++            if ( Phase != MIO_PHASE_NONINV )
++                Abc_NtkPairTraceConsider( pStep, pFanin, i, !fRise, Delay );
++        }
++        pPin = Mio_PinReadNext(pPin);
++    }
++    return pStep->pFanin != NULL;
++}
++
++static int Abc_NtkPairPrintTrace_rec( Abc_Obj_t * pNode, Abc_Obj_t * pSource,
++                                      int fRise, unsigned char * pReach )
++{
++    Abc_PairTraceStep_t Step;
++    Abc_Time_t * pTime = Abc_NodeArrival(pNode);
++    float Actual = fRise ? pTime->Rise : pTime->Fall;
++    if ( Abc_ObjIsCi(pNode) )
++    {
++        if ( pNode != pSource ) return 0;
++        printf( "PAIR_TRACE kind=pi node_id=%d name=%s transition=%s arrival=%.9g rise_arrival=%.9g fall_arrival=%.9g\n",
++                Abc_ObjId(pNode), Abc_ObjName(pNode), fRise ? "rise" : "fall",
++                Actual, pTime->Rise, pTime->Fall );
++        return 1;
++    }
++    if ( !Abc_ObjIsNode(pNode) || !Abc_NtkPairTraceStep(pNode, fRise, pReach, &Step) )
++        return 0;
++    if ( Step.Candidate != Actual )
++    {
++        printf( "PAIR_TRACE_ERROR node_id=%d expected=%.9g computed=%.9g\n",
++                Abc_ObjId(pNode), Actual, Step.Candidate );
++        return 0;
++    }
++    if ( !Abc_NtkPairPrintTrace_rec(Step.pFanin, pSource, Step.fInputRise, pReach) )
++        return 0;
++    printf( "PAIR_TRACE kind=gate node_id=%d name=%s cell=%s input_id=%d pin=%d input_transition=%s output_transition=%s arc_delay=%.9g input_arrival=%.9g arrival=%.9g rise_arrival=%.9g fall_arrival=%.9g\n",
++            Abc_ObjId(pNode), Abc_ObjName(pNode),
++            Abc_ObjIsBarBuf(pNode) ? "barbuf" : Mio_GateReadName((Mio_Gate_t *)pNode->pData),
++            Abc_ObjId(Step.pFanin), Step.iPin,
++            Step.fInputRise ? "rise" : "fall", fRise ? "rise" : "fall",
++            Step.ArcDelay, Step.fInputRise ? Abc_NodeArrival(Step.pFanin)->Rise : Abc_NodeArrival(Step.pFanin)->Fall,
++            Actual, pTime->Rise, pTime->Fall );
++    return 1;
++}
++
++int Abc_NtkPairDelayTrace( Abc_Ntk_t * pNtk, Abc_Obj_t * pOut, Abc_Obj_t * pIn,
++                           int fTrace, int fCheck )
++{
++    Abc_Obj_t * pObj, * pDriver = Abc_ObjFanin0(pOut);
++    Abc_Time_t * pSaved, * pTime;
++    Vec_Ptr_t * vNodes;
++    unsigned char * pReach;
++    float Rise = 0, Fall = 0, GlobalRise = 0, GlobalFall = 0;
++    float CheckRise = 0, CheckFall = 0;
++    int i, k, fReachable, fAny, fSuccess = 1, fSeedsZero = 1;
++    assert( Abc_NtkIsMappedLogic(pNtk) && Abc_ObjIsCo(pOut) && Abc_ObjIsCi(pIn) );
++
++    Abc_NtkTimePrepare(pNtk);
++    pSaved = ABC_ALLOC( Abc_Time_t, Abc_NtkCiNum(pNtk) );
++    Abc_NtkForEachCi( pNtk, pObj, i )
++    {
++        pSaved[i] = *Abc_NodeArrival(pObj);
++        if ( pSaved[i].Rise != 0 || pSaved[i].Fall != 0 ) fSeedsZero = 0;
++    }
++    if ( fCheck )
++    {
++        Abc_NtkDelayTrace( pNtk, pOut, NULL, 0 );
++        GlobalRise = Abc_NodeArrival(pDriver)->Rise;
++        GlobalFall = Abc_NodeArrival(pDriver)->Fall;
++        Abc_NtkTimePrepare(pNtk);
++    }
++
++    pReach = ABC_CALLOC( unsigned char, Abc_NtkObjNumMax(pNtk) );
++    Abc_NtkForEachCi( pNtk, pObj, i )
++    {
++        pTime = Abc_NodeArrival(pObj);
++        pTime->Rise = pTime->Fall = pObj == pIn ? 0.0f : -ABC_INFINITY;
++        pReach[Abc_ObjId(pObj)] = pObj == pIn;
++    }
++    vNodes = Abc_NtkDfs( pNtk, 1 );
++    Vec_PtrForEachEntry( Abc_Obj_t *, vNodes, pObj, i )
++    {
++        Abc_Obj_t * pFanin;
++        fAny = 0;
++        Abc_ObjForEachFanin( pObj, pFanin, k )
++            if ( pReach[Abc_ObjId(pFanin)] ) { fAny = 1; break; }
++        if ( !fAny ) continue;
++        pReach[Abc_ObjId(pObj)] = 1;
++        Abc_NodeDelayTraceArrival( pObj, NULL );
++    }
++    fReachable = pReach[Abc_ObjId(pDriver)];
++    if ( fReachable )
++    {
++        Rise = Abc_NodeArrival(pDriver)->Rise;
++        Fall = Abc_NodeArrival(pDriver)->Fall;
++        printf( "PAIR_RESULT source_pi=%s source_obj_id=%d target_po=%s target_obj_id=%d reachable=1 rise_arrival=%.9g fall_arrival=%.9g pair_delay=%.9g unit=ps precision=float32_9g timing_model=print_delay_mio_source_restricted\n",
++                Abc_ObjName(pIn), Abc_ObjId(pIn), Abc_ObjName(pOut), Abc_ObjId(pOut),
++                Rise, Fall, Abc_MaxFloat(Rise, Fall) );
++    }
++    else
++        printf( "PAIR_RESULT source_pi=%s source_obj_id=%d target_po=%s target_obj_id=%d reachable=0 rise_arrival=NA fall_arrival=NA pair_delay=NA unit=ps precision=float32_9g timing_model=print_delay_mio_source_restricted\n",
++                Abc_ObjName(pIn), Abc_ObjId(pIn), Abc_ObjName(pOut), Abc_ObjId(pOut) );
++
++    if ( fTrace && fReachable )
++    {
++        if ( !Abc_NtkPairPrintTrace_rec(pDriver, pIn, Rise >= Fall, pReach) )
++            fSuccess = 0;
++        else
++            printf( "PAIR_TRACE kind=po node_id=%d name=%s driver_id=%d arrival=%.9g\n",
++                    Abc_ObjId(pOut), Abc_ObjName(pOut), Abc_ObjId(pDriver),
++                    Abc_MaxFloat(Rise, Fall) );
++    }
++    if ( fCheck )
++    {
++        int fUpper = !fReachable || !fSeedsZero ||
++            Abc_MaxFloat(Rise, Fall) <= Abc_MaxFloat(GlobalRise, GlobalFall) + 0.0002f;
++        Abc_NtkDelayTrace( pNtk, pOut, NULL, 0 );
++        CheckRise = Abc_NodeArrival(pDriver)->Rise;
++        CheckFall = Abc_NodeArrival(pDriver)->Fall;
++        printf( "PAIR_CHECK source_pi=%s target_po=%s all_pi_ci_zero=%d global_po_rise=%.9g global_po_fall=%.9g global_po_delay=%.9g single_source_rise=%.9g single_source_fall=%.9g upper_bound=%s single_source_consistent=%s\n",
++                Abc_ObjName(pIn), Abc_ObjName(pOut), fSeedsZero,
++                GlobalRise, GlobalFall, Abc_MaxFloat(GlobalRise, GlobalFall),
++                CheckRise, CheckFall, fUpper ? "PASS" : "FAIL",
++                !fReachable ? "NA" : (CheckRise == Rise && CheckFall == Fall ? "PASS" : "FAIL") );
++        if ( fReachable && ( !fUpper || CheckRise != Rise || CheckFall != Fall ) )
++            fSuccess = 0;
++    }
++    Abc_NtkForEachCi( pNtk, pObj, i )
++        *Abc_NodeArrival(pObj) = pSaved[i];
++    Vec_PtrFree( vNodes );
++    ABC_FREE( pReach );
++    ABC_FREE( pSaved );
++    return fSuccess;
++}
++
+ 
+ 
+ /**Function*************************************************************
+@@ -1437,4 +1627,3 @@
+ 
+ 
+ ABC_NAMESPACE_IMPL_END
+-

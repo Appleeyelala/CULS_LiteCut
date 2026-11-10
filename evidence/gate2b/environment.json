@@ -1,0 +1,15 @@
+{
+  "successful_slurm_job_id": "44300",
+  "run_root": "/data/wushangge/gate2b_runs/gate2b_20260917",
+  "abc_binary": "/data/public/AIGRewrite/abc/abc",
+  "abc_version": "UC Berkeley ABC 1.01 (compiled Aug 6 2025 14:07:48)",
+  "technology_library_source": "/home/wushangge/cutLibOrigin/lib/asap7.lib",
+  "technology_library_execution_copy": "/data/wushangge/gate2b_runs/gate2b_20260917/input/asap7.lib",
+  "mapping_command": "map",
+  "topology_command": "topo",
+  "timing_command": "stime",
+  "threads": 1,
+  "omp_num_threads": 1,
+  "partition": "Compute*",
+  "resource_request": {"cpus_per_task": 2, "mem": "4G", "time": "00:30:00"}
+}

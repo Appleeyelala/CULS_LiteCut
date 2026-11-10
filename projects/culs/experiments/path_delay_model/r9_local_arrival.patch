@@ -1,0 +1,123 @@
+diff --git a/src/base/abci/abc.c b/src/base/abci/abc.c
+index d7f6a17..5b76f4a 100644
+--- a/src/base/abci/abc.c
++++ b/src/base/abci/abc.c
+@@ -105,6 +105,7 @@ static int Abc_CommandPrintMiter             ( Abc_Frame_t * pAbc, int argc, cha
+ static int Abc_CommandPrintStatus            ( Abc_Frame_t * pAbc, int argc, char ** argv );
+ static int Abc_CommandPrintDelay             ( Abc_Frame_t * pAbc, int argc, char ** argv );
+ static int Abc_CommandPrintPairDelay         ( Abc_Frame_t * pAbc, int argc, char ** argv );
++extern int Abc_CommandLocalR9Arrival( Abc_Frame_t *, int, char ** );
+ 
+ static int Abc_CommandShow                   ( Abc_Frame_t * pAbc, int argc, char ** argv );
+ static int Abc_CommandShowBdd                ( Abc_Frame_t * pAbc, int argc, char ** argv );
+@@ -924,6 +925,7 @@ void Abc_Init( Abc_Frame_t * pAbc )
+     Cmd_CommandAdd( pAbc, "Printing",     "print_status",  Abc_CommandPrintStatus,      0 );
+     Cmd_CommandAdd( pAbc, "Printing",     "print_delay",   Abc_CommandPrintDelay,       0 );
+     Cmd_CommandAdd( pAbc, "Printing",     "print_pair_delay", Abc_CommandPrintPairDelay, 0 );
++    Cmd_CommandAdd( pAbc, "Printing",     "local_r9_arrival", Abc_CommandLocalR9Arrival, 0 );
+ 
+     Cmd_CommandAdd( pAbc, "Printing",     "show",          Abc_CommandShow,             0 );
+     Cmd_CommandAdd( pAbc, "Printing",     "show_bdd",      Abc_CommandShowBdd,          0 );
+diff --git a/src/map/mapper/mapperCore.c b/src/map/mapper/mapperCore.c
+index cbfa43f..e5a6e17 100644
+--- a/src/map/mapper/mapperCore.c
++++ b/src/map/mapper/mapperCore.c
+@@ -81,6 +81,8 @@ int Map_Mapping( Map_Man_t * p )
+     if ( !Map_MappingMatches( p ) )
+         return 0;
+     p->timeMatch = Abc_Clock() - clk;
++    /* Read-only capture of initial mode0 context; no candidate state. */
++    { extern void Map_R9CaptureFrozen( Map_Man_t * ); Map_R9CaptureFrozen(p); }
+     // compute the references and collect the nodes used in the mapping
+     Map_MappingSetRefs( p );
+     p->AreaBase = Map_MappingGetArea( p );
+diff --git a/src/map/mapper/mapperDebug.c b/src/map/mapper/mapperDebug.c
+index fc759d5..2c26284 100644
+--- a/src/map/mapper/mapperDebug.c
++++ b/src/map/mapper/mapperDebug.c
+@@ -170,4 +170,85 @@ void Map_DebugFinal(Map_Man_t * p)
+         }
+     }ABC_FREE(seen);
+ }
++/* R9 experiment orchestration. Native mapping rules are not modified.
++   A full subject graph is constructed for identity/order/structural refs,
++   but cuts/truths/matches are computed ONLY for the root's PI-closed TFI.
++   No candidate Map_Mapping(), recovery, covering, or netlist is called. */
++#include "base/abc/abc.h"
++#include "base/main/main.h"
++extern Abc_Ntk_t * Io_ReadAiger( char *, int );
++extern Map_Man_t * Abc_NtkToMap( Abc_Ntk_t *, double, int, float *, int );
++static Map_Time_t r9Pi[64];
++static int r9Refs[64], r9NumPi=0, r9Skip=0, r9Profile=0;
++static float r9Baseline=0;
++static double Abc_Clock2Sec( abctime ticks ) { return (double)ticks / (double)CLOCKS_PER_SEC; }
++static void R9MarkTFI( Map_Node_t * n, unsigned char * marks )
++{
++    n=Map_Regular(n);
++    if(n->Num<0 || marks[n->Num]) return;
++    marks[n->Num]=1;
++    if(Map_NodeIsAnd(n)) { R9MarkTFI(n->p1,marks); R9MarkTFI(n->p2,marks); }
++}
++void Map_R9CaptureFrozen( Map_Man_t * p )
++{
++    int i,f,frontier[5]={17,33,151,188,209}; Map_Node_t *n; Map_Cut_t *c;
++    if(!getenv("AIGREWRITE_R9_LOCAL"))return;
++    assert(p->fMappingMode==0 && p->nInputs<=64 && !p->pNodeDelays && !p->nChoices);
++    n=DFind(p); assert(n && DVar(n)==213);
++    r9Baseline=n->tArrival[1].Worst;
++    r9NumPi=p->nInputs;r9Skip=p->fSkipFanout;r9Profile=p->fUseProfile;
++    printf("R9CTX {\"type\":\"meta\",\"mode\":0,\"root\":213,\"root_phase\":1,\"root_arrival\":%.9g,\"epsilon\":%.9g,\"delay_target\":%.9g,\"skip_fanout\":%d,\"use_profile\":%d,\"n_vars_max\":%d,\"cuts_max_use\":250,\"matches_limit\":30,\"baseline_cut_cpu_s\":%.9g,\"baseline_truth_cpu_s\":%.9g,\"baseline_match_cpu_s\":%.9g,\"inverter_delay\":",r9Baseline,p->fEpsilon,p->DelayTarget,p->fSkipFanout,p->fUseProfile,p->nVarsMax,Abc_Clock2Sec(p->timeCuts),Abc_Clock2Sec(p->timeTruth),Abc_Clock2Sec(p->timeMatch));
++    DTime(&p->pSuperLib->tDelayInv);printf("}\n");
++    for(i=0;i<p->nInputs;i++){
++        n=p->pInputs[i];r9Pi[i]=n->tArrival[1];r9Refs[i]=n->nRefs;
++        printf("R9CTX {\"type\":\"pi\",\"function_point\":%d,\"mapper_id\":%d,\"n_refs\":%d,\"positive\":",DVar(n),n->Num,n->nRefs);DTime(n->tArrival+1);printf(",\"negative\":");DTime(n->tArrival);printf("}\n");
++    }
++    for(i=0;i<p->vMapObjs->nSize;i++){
++        int wanted=0,k;n=p->vMapObjs->pArray[i];for(k=0;k<5;k++)if(DVar(n)==frontier[k])wanted=1;if(!wanted)continue;
++        printf("R9CTX {\"type\":\"logical_frontier\",\"function_point\":%d,\"mapper_id\":%d,\"n_refs\":%d,\"n_ref_est\":[%.9g,%.9g,%.9g],\"positive\":",DVar(n),n->Num,n->nRefs,n->nRefEst[0],n->nRefEst[1],n->nRefEst[2]);DTime(n->tArrival+1);printf(",\"negative\":");DTime(n->tArrival);
++        printf(",\"cuts\":[");k=0;for(c=n->pCuts;c;c=c->pNext){if(k++)printf(",");printf("{");DLeaves(c);printf("}");}printf("],\"best_phases\":[");
++        for(f=0;f<2;f++){if(f)printf(",");c=n->pCutBest[f];printf("{\"phase\":%d,\"available\":%s",f,c?"true":"false");if(c){printf(",\"area_flow\":%.9g,\"input_phase_mask\":%u,\"super\":",c->M[f].AreaFlow,c->M[f].uPhaseBest);DSuper(c->M[f].pSuperBest);}printf("}");}printf("]}\n");
++    }
++}
++static int R9LocalCalculate( char * path, int rootVar, const char *variant, float *result )
++{
++    Abc_Ntk_t *ntk;Map_Man_t *q;Map_NodeVec_t *all,*active;Map_Node_t *root=NULL,*n;Map_Cut_t *c;
++    unsigned char *marks;int i,f,nAnd=0,nCuts=0,nUsedPi=0,phase,fullNodes;
++    abctime start=Abc_Clock(), matchStart;
++    ntk=Io_ReadAiger(path,1);if(!ntk)return 0;
++    q=Abc_NtkToMap(ntk,-1,1,NULL,0);if(!q){Abc_NtkDelete(ntk);return 0;}
++    if(q->nInputs!=r9NumPi || q->nChoices){Map_ManFree(q);Abc_NtkDelete(ntk);return 0;}
++    q->fSkipFanout=r9Skip;q->fUseProfile=r9Profile;
++    all=q->vMapObjs;fullNodes=all->nSize;
++    for(i=0;i<all->nSize;i++)if(Map_NodeReadAigId(all->pArray[i])==dIds[rootVar])root=all->pArray[i];
++    if(!root){Map_ManFree(q);Abc_NtkDelete(ntk);return 0;}
++    phase=1-dPol[rootVar];marks=ABC_CALLOC(unsigned char,q->nNodes+2);R9MarkTFI(root,marks);
++    active=Map_NodeVecAlloc(all->nSize);
++    for(i=0;i<all->nSize;i++){
++        n=all->pArray[i];if(Map_NodeIsVar(n) || marks[n->Num])Map_NodeVecPush(active,n);
++        if(marks[n->Num]){if(Map_NodeIsAnd(n))nAnd++;else if(Map_NodeIsVar(n))nUsedPi++;}
++    }
++    q->vMapObjs=active;
++    q->pInputArrivals=ABC_ALLOC(Map_Time_t,q->nInputs);
++    for(i=0;i<q->nInputs;i++){q->pInputArrivals[i]=r9Pi[i];q->pInputs[i]->nRefs=r9Refs[i];}
++    Map_MappingSetChoiceLevels(q);
++    Map_MappingCuts(q);Map_MappingTruths(q);
++    for(i=0;i<active->nSize;i++){n=active->pArray[i];if(Map_NodeIsAnd(n))for(c=n->pCuts;c;c=c->pNext)if(c->nLeaves>1)nCuts++;}
++    matchStart=Abc_Clock();q->fMappingMode=0;
++    if(!Map_MappingMatches(q)){q->vMapObjs=all;Map_NodeVecFree(active);ABC_FREE(marks);Map_ManFree(q);Abc_NtkDelete(ntk);return 0;}
++    *result=root->tArrival[phase].Worst;
++    printf("R9LOCAL {\"variant\":\"%s\",\"function_point\":%d,\"mapper_id\":%d,\"phase\":%d,\"rise\":%.9g,\"fall\":%.9g,\"arrival\":%.9g,\"local_ands\":%d,\"frontier_pis\":%d,\"subject_graph_nodes_constructed\":%d,\"evaluated_cuts\":%d,\"evaluated_matches\":%d,\"evaluated_phases\":%d,\"elapsed_cpu_s\":%.9g,\"match_cpu_s\":%.9g,\"candidate_full_mapping_called\":false,\"downstream_matched\":false,\"best\":[",variant,rootVar,root->Num,phase,root->tArrival[phase].Rise,root->tArrival[phase].Fall,*result,nAnd,nUsedPi,fullNodes,nCuts,q->nMatches,q->nPhases,Abc_Clock2Sec(Abc_Clock()-start),Abc_Clock2Sec(Abc_Clock()-matchStart));
++    for(f=0;f<2;f++){if(f)printf(",");c=root->pCutBest[f];printf("{\"phase\":%d",f);if(c){printf(",");DLeaves(c);printf(",\"input_phase_mask\":%u,\"super\":",c->M[f].uPhaseBest);DSuper(c->M[f].pSuperBest);}printf("}");}printf("]}\n");
++    q->vMapObjs=all;Map_NodeVecFree(active);ABC_FREE(marks);Map_ManFree(q);Abc_NtkDelete(ntk);return 1;
++}
++int Abc_CommandLocalR9Arrival( Abc_Frame_t *frame, int argc, char **argv )
++{
++    float base,cand;(void)frame;
++    if(argc!=3 || !r9NumPi){printf("R9STOP missing baseline mode0 context or arguments\n");return 1;}
++    if(!R9LocalCalculate(argv[1],213,"baseline",&base)){printf("R9STOP baseline local calculation failed\n");return 1;}
++    if(fabs(base-r9Baseline)>0.00002f){printf("R9STOP baseline mismatch predicted=%.9g actual=%.9g\n",base,r9Baseline);return 1;}
++    printf("R9CHECK baseline_local=PASS\n");
++    if(!R9LocalCalculate(argv[2],322,"candidate",&cand)){printf("R9STOP candidate local calculation failed\n");return 1;}
++    return 0;
++}
+ ABC_NAMESPACE_IMPL_END

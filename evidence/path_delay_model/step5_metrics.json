@@ -1,0 +1,43 @@
+{
+  "run_id": "CULS-path-delay-model-20260929-v3",
+  "slurm_job_id": 48211,
+  "sample_count": 15,
+  "sample_policy": "minimum LiteCut delta candidate per executable decision, up to 15, on highest-ranked existing Gate3B path",
+  "endpoint_pair": {
+    "pi_node": 4,
+    "abc_pi": "pi03",
+    "po_id": 11,
+    "baseline_delay_ps": 194.4,
+    "global_baseline_delay_ps": 360.11,
+    "timing_precision_ps": 0.01
+  },
+  "neutral_epsilon_ps": 0.01,
+  "replay": {
+    "accepted": 15,
+    "cec_pass": 15,
+    "valid_endpoint_pair_measurements": 15
+  },
+  "true_delta_sign_counts": {
+    "negative": 8,
+    "neutral": 5,
+    "positive": 2
+  },
+  "predicted_delta_sign_counts": {
+    "negative": 15,
+    "neutral": 0,
+    "positive": 0
+  },
+  "non_neutral_sign_accuracy": {
+    "correct": 8,
+    "compared": 10,
+    "fraction": 0.8
+  },
+  "prediction_error_all_15": {
+    "mae": 17.138471588040122,
+    "rmse": 19.915053818580194,
+    "pearson": 0.6441674872041989,
+    "spearman": 0.36321216516393956
+  },
+  "true_delta_range_ps": [-6.300000000000011, 6.900000000000006],
+  "interpretation": "diagnostic only; selection-conditioned small sample; current LiteCut score is a current cut-cone proxy, not a mapped current supergate ground truth"
+}

@@ -1,0 +1,90 @@
+{
+  "abc": "/data/wushangge/runs/CULS-gate3f-20260922-gate2babc/bin/abc",
+  "abc_mapping_flow": "read <ASAP7 lib>; read <AIG>; map; topo; stime; print_delay poNN piMM",
+  "abc_sha256": "9b64d35ba403df4b1a2474c4591abdfd298e9a2fe1411f6ba16ae9096b6e2b2f",
+  "baseline_abc_command": "read \"/data/wushangge/runs/CULS-gate3f-20260922-gate2babc/input/asap7.lib\"; read \"/data/wushangge/runs/CULS-path-impact-calibration-20260929-v1/input/c1355_orig.aig\"; map; topo; stime; print_delay po11 pi03",
+  "baseline_endpoint_ps": 194.4,
+  "cv_group": "(region_id, root_id, cut_id)",
+  "cv_seed": 20260929,
+  "epsilon_ps": 0.01,
+  "fixed_endpoint": {
+    "abc_pi_index": 3,
+    "aig_pi_node": 4,
+    "po": 11
+  },
+  "fixed_mffc_region_path": [
+    6,
+    9,
+    24,
+    36,
+    37,
+    38
+  ],
+  "gpuls": "/data/wushangge/runs/CULS-path-delay-model-20260929-v3/bin/gpuls",
+  "gpuls_sha256": "6de7b007a7891c5de410acb6d3419885af77a3012e8c4f36103ccd861a52a111",
+  "input_aig": "/data/wushangge/runs/CULS-path-impact-calibration-20260929-v1/input/c1355_orig.aig",
+  "input_aig_sha256": "2602b10f131a6ba5996521036ba130aab128a4aa15e3ab49ce44f2f02047f0b0",
+  "library": "/data/wushangge/runs/CULS-gate3f-20260922-gate2babc/input/asap7.lib",
+  "library_sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55",
+  "litecut_delta_csv": "/data/wushangge/runs/CULS-path-impact-calibration-20260929-v1/input/litecut_candidate_delta.csv",
+  "litecut_delta_csv_sha256": "7442cb28d095f158eb3175513c54728d2ad3b0f8556a953b40df2162a989c1aa",
+  "mode": "single_candidate_calibration",
+  "neutral_epsilon_ps": 0.01,
+  "observed_arrival_output_resolution_ps": 0.1,
+  "path_catalog": "/data/wushangge/runs/CULS-path-impact-calibration-20260929-v1/input/path_catalog.csv",
+  "path_catalog_sha256": "7fc6d78a6862a4c00b063a89e5edae2d124631c0ba2640a071fa026aa2df1f4c",
+  "pilot_csv": "/data/wushangge/runs/CULS-path-impact-calibration-20260929-v1/input/single_candidate_validation.csv",
+  "pilot_csv_sha256": "dcf73aa7b029cc3bda1a793d53c4b7bbc08c1c62b547c9c420ebec60b70de725",
+  "pilot_replay_root": "/data/wushangge/runs/CULS-path-delay-model-20260929-v3/output/work/replay",
+  "prior_gate3f_manifest_precision_ps": 0.01,
+  "region_map": "/data/wushangge/runs/CULS-path-impact-calibration-20260929-v1/input/node_to_strict_mffc_region.csv",
+  "region_map_sha256": "784ee279dfee24741abee92777a349d2318d8a6bfcfa68cbb7e9590df5dcc030",
+  "selection": {
+    "abc_pi": "pi03",
+    "candidate_count": 67,
+    "decision_count": 16,
+    "fixed_region_sequence": [
+      6,
+      9,
+      24,
+      36,
+      37,
+      38
+    ],
+    "path_id": "po11_pi_node004",
+    "pi_node": 4,
+    "po": 11,
+    "region_counts": {
+      "24": {
+        "candidates": 37,
+        "decisions": 8
+      },
+      "36": {
+        "candidates": 0,
+        "decisions": 0
+      },
+      "37": {
+        "candidates": 1,
+        "decisions": 1
+      },
+      "38": {
+        "candidates": 2,
+        "decisions": 1
+      },
+      "6": {
+        "candidates": 10,
+        "decisions": 2
+      },
+      "9": {
+        "candidates": 17,
+        "decisions": 4
+      }
+    },
+    "regions_without_candidates": [
+      36
+    ],
+    "selection_policy": "all saved Gate3E executable candidates in the six fixed PO11 path regions; deterministic order by path region, root, cut, LiteCut delta, subgraph index; no best-only filter"
+  },
+  "timing_precision_note": "Arrival fields printed by ABC print_delay contain one decimal place; observed report resolution is 0.1 ps.",
+  "timing_precision_ps": 0.1
+}

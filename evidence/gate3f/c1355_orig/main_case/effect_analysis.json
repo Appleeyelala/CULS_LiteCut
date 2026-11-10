@@ -1,0 +1,47 @@
+{
+  "measurement_precision_ps": 0.01,
+  "metrics": {
+    "global": {
+      "R24_direction_consistent_when_R9_G": true,
+      "R24_direction_consistent_when_R9_L": false,
+      "R24_ranking_reversal": true,
+      "R9_direction_consistent_when_R24_G": true,
+      "R9_direction_consistent_when_R24_L": true,
+      "R9_ranking_reversal": false,
+      "comparison_precision": "ABC stime/print_delay values reported to 0.01 ps; tolerance 0.01 ps",
+      "delta_R24_given_R9_G": -36.03000000000003,
+      "delta_R24_given_R9_L": 19.339999999999975,
+      "delta_R9_given_R24_G": -55.44999999999999,
+      "delta_R9_given_R24_L": -0.07999999999998408,
+      "interaction": 55.370000000000005,
+      "interaction_classification": "MEASURABLE_INTERACTION",
+      "values": {
+        "GG": 425.05,
+        "GL": 389.02,
+        "LG": 369.6,
+        "LL": 388.94
+      }
+    },
+    "po11": {
+      "R24_direction_consistent_when_R9_G": false,
+      "R24_direction_consistent_when_R9_L": true,
+      "R24_ranking_reversal": true,
+      "R9_direction_consistent_when_R24_G": true,
+      "R9_direction_consistent_when_R24_L": true,
+      "R9_ranking_reversal": false,
+      "comparison_precision": "ABC stime/print_delay values reported to 0.01 ps; tolerance 0.01 ps",
+      "delta_R24_given_R9_G": 0.20000000000001705,
+      "delta_R24_given_R9_L": -0.30000000000001137,
+      "delta_R9_given_R24_G": -0.19999999999998863,
+      "delta_R9_given_R24_L": -0.700000000000017,
+      "interaction": -0.5000000000000284,
+      "interaction_classification": "MEASURABLE_INTERACTION",
+      "values": {
+        "GG": 194.1,
+        "GL": 194.3,
+        "LG": 193.9,
+        "LL": 193.6
+      }
+    }
+  }
+}

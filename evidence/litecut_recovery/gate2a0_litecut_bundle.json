@@ -1,0 +1,49 @@
+{
+  "status": "PARTIAL",
+  "repo": "/home/wushangge/cutLibOrigin",
+  "git_commit": "077aa1e49b8b97ed6d76013a7272c06bfacabf23",
+  "model_family": {
+    "canonical_source": "teacher/student LiteCut source tree",
+    "teacher": "TeacherTwoBranchModel",
+    "student": "StudentModel (group fusion, optional MoE)",
+    "classification": "NEW TEACHER / NEW STUDENT; artifacts missing"
+  },
+  "checkpoint": null,
+  "checkpoint_sha256": null,
+  "feature_extractor": "src/data_preprocess/feat_extraction_v3.py",
+  "feature_version": "CompleteCutFeatureExtractor v3 source",
+  "feature_names": [
+    "R_root", "SlackProxy_root", "Root_Global_Fanout", "Max_L_leaf",
+    "Max_Leaf_Fanout", "Mean_Leaf_Fanout", "Std_Leaf_Fanout", "Frac_Leaf_PI",
+    "Weighted_Depth", "Topo_Depth", "Inv_Penalty", "Node_Count",
+    "Avg_Width", "Max_Internal_Fanout", "Inv_Ratio", "Root_Inv_Count",
+    "Chain_Density", "Fork_Density", "Avg_Curvature", "Lap_Eig1",
+    "Lap_Eig2", "Lap_Eig3", "Lap_Eig4", "Lap_Eig5", "WL_Hash"
+  ],
+  "input_dimension": {
+    "continuous_features": 19,
+    "full_export_with_wl_hash": 25,
+    "student_with_context8": 19,
+    "student_without_context8": 11,
+    "teacher_feature_input_dim": 19,
+    "checkpoint_input_dimension": null,
+    "dimension_consistency": "source-consistent; checkpoint unavailable"
+  },
+  "feature_scaler": null,
+  "scaling_source": "training-time standardize_features in src/extract_cutlib_teacher/preprocess.py and src/extract_cutlib_student/preprocess.py; fitted arrays are saved only in training checkpoints/cache",
+  "label_transform": "raw abc_delay -> np.log1p -> standardize",
+  "normalization_metadata": null,
+  "inverse_transform_source": "src/validate/eval_prediction_accuracy.py: denormalize_y; expm1(y_scaled / y_inv_sigma + y_mu), with log clamp [-10,10]",
+  "inference_entry_point": "src/validate/eval_prediction_accuracy.py (load_teacher_model/load_student_model/infer_teacher/infer_student)",
+  "whole_aig_context": "CompleteCutFeatureExtractor._precompute_global_context computes global L, reverse R, global_depth and SlackProxy=D-(L+R) from the supplied whole-AIG graph",
+  "historical_sample_reproduction": "FAIL_NOT_RUN_MISSING_BUNDLE",
+  "missing_required_artifacts": [
+    "teacher or student best.pt/last.pt checkpoint",
+    "checkpoint-embedded x_mu/x_inv_sigma/y_mu/y_inv_sigma",
+    "historical sample containing raw features and abc_delay"
+  ],
+  "excluded_candidates": [
+    "/data/public/checkpoints/DeepCutDelay_*.pth: ORIGINAL/OLD MODEL only; contains checkpoint/optimizer and no new LiteCut normalization metadata",
+    "/home/wushangge/E-gradient/m6: development ridge/pairwise DeltaArea artifacts, not canonical LiteCut delay predictor"
+  ]
+}

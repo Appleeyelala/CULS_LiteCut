@@ -1,0 +1,333 @@
+{
+  "abc_binary": "/data/wushangge/runs/CULS-path-delay-model-20260929-v3/bin/abc",
+  "endpoint_pair_by_po": {
+    "0": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 1,
+      "po_id": 0
+    },
+    "1": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 1,
+      "po_id": 1
+    },
+    "2": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 1,
+      "po_id": 2
+    },
+    "3": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 3,
+      "po_id": 3
+    },
+    "4": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 3,
+      "po_id": 4
+    },
+    "5": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 1,
+      "po_id": 5
+    },
+    "6": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 1,
+      "po_id": 6
+    },
+    "7": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 1,
+      "po_id": 7
+    },
+    "8": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 3,
+      "po_id": 8
+    },
+    "9": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 1,
+      "po_id": 9
+    },
+    "10": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 1,
+      "po_id": 10
+    },
+    "11": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 3,
+      "po_id": 11
+    },
+    "12": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 3,
+      "po_id": 12
+    },
+    "13": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 1,
+      "po_id": 13
+    },
+    "14": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 3,
+      "po_id": 14
+    },
+    "15": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 3,
+      "po_id": 15
+    },
+    "16": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 3,
+      "po_id": 16
+    },
+    "17": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 3,
+      "po_id": 17
+    },
+    "18": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 3,
+      "po_id": 18
+    },
+    "19": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 1,
+      "po_id": 19
+    },
+    "20": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 1,
+      "po_id": 20
+    },
+    "21": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 3,
+      "po_id": 21
+    },
+    "22": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 1,
+      "po_id": 22
+    },
+    "23": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 3,
+      "po_id": 23
+    },
+    "24": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 3,
+      "po_id": 24
+    },
+    "25": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 1,
+      "po_id": 25
+    },
+    "26": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 1,
+      "po_id": 26
+    },
+    "27": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 3,
+      "po_id": 27
+    },
+    "28": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 3,
+      "po_id": 28
+    },
+    "29": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 1,
+      "po_id": 29
+    },
+    "30": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 3,
+      "po_id": 30
+    },
+    "31": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 1,
+      "po_id": 31
+    }
+  },
+  "endpoint_pair_script": "read \"/data/wushangge/runs/CULS-path-delay-model-20260929-v3/input/asap7.lib\"; read \"/data/wushangge/runs/CULS-path-delay-model-20260929-v3/input/c1355_orig.aig\"; map; topo; stime; print_delay po00 pi01; print_delay po01 pi01; print_delay po02 pi01; print_delay po03 pi03; print_delay po04 pi03; print_delay po05 pi01; print_delay po06 pi01; print_delay po07 pi01; print_delay po08 pi03; print_delay po09 pi01; print_delay po10 pi01; print_delay po11 pi03; print_delay po12 pi03; print_delay po13 pi01; print_delay po14 pi03; print_delay po15 pi03; print_delay po16 pi03; print_delay po17 pi03; print_delay po18 pi03; print_delay po19 pi01; print_delay po20 pi01; print_delay po21 pi03; print_delay po22 pi01; print_delay po23 pi03; print_delay po24 pi03; print_delay po25 pi01; print_delay po26 pi01; print_delay po27 pi03; print_delay po28 pi03; print_delay po29 pi01; print_delay po30 pi03; print_delay po31 pi01; print_io",
+  "global_critical_delay_ps": 360.11,
+  "library": "/data/wushangge/runs/CULS-path-delay-model-20260929-v3/input/asap7.lib",
+  "po_endpoint_max_by_po": {
+    "0": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 10,
+      "po_id": 0
+    },
+    "1": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 10,
+      "po_id": 1
+    },
+    "2": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 10,
+      "po_id": 2
+    },
+    "3": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 7,
+      "po_id": 3
+    },
+    "4": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 7,
+      "po_id": 4
+    },
+    "5": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 10,
+      "po_id": 5
+    },
+    "6": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 10,
+      "po_id": 6
+    },
+    "7": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 10,
+      "po_id": 7
+    },
+    "8": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 7,
+      "po_id": 8
+    },
+    "9": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 10,
+      "po_id": 9
+    },
+    "10": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 10,
+      "po_id": 10
+    },
+    "11": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 7,
+      "po_id": 11
+    },
+    "12": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 7,
+      "po_id": 12
+    },
+    "13": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 10,
+      "po_id": 13
+    },
+    "14": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 7,
+      "po_id": 14
+    },
+    "15": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 7,
+      "po_id": 15
+    },
+    "16": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 7,
+      "po_id": 16
+    },
+    "17": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 7,
+      "po_id": 17
+    },
+    "18": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 7,
+      "po_id": 18
+    },
+    "19": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 10,
+      "po_id": 19
+    },
+    "20": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 10,
+      "po_id": 20
+    },
+    "21": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 7,
+      "po_id": 21
+    },
+    "22": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 10,
+      "po_id": 22
+    },
+    "23": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 7,
+      "po_id": 23
+    },
+    "24": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 7,
+      "po_id": 24
+    },
+    "25": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 10,
+      "po_id": 25
+    },
+    "26": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 10,
+      "po_id": 26
+    },
+    "27": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 7,
+      "po_id": 27
+    },
+    "28": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 7,
+      "po_id": 28
+    },
+    "29": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 10,
+      "po_id": 29
+    },
+    "30": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 7,
+      "po_id": 30
+    },
+    "31": {
+      "arrival_ps": 194.4,
+      "critical_pi_index": 10,
+      "po_id": 31
+    }
+  },
+  "po_max_script": "read \"/data/wushangge/runs/CULS-path-delay-model-20260929-v3/input/asap7.lib\"; read \"/data/wushangge/runs/CULS-path-delay-model-20260929-v3/input/c1355_orig.aig\"; map; topo; stime; print_delay po00; print_delay po01; print_delay po02; print_delay po03; print_delay po04; print_delay po05; print_delay po06; print_delay po07; print_delay po08; print_delay po09; print_delay po10; print_delay po11; print_delay po12; print_delay po13; print_delay po14; print_delay po15; print_delay po16; print_delay po17; print_delay po18; print_delay po19; print_delay po20; print_delay po21; print_delay po22; print_delay po23; print_delay po24; print_delay po25; print_delay po26; print_delay po27; print_delay po28; print_delay po29; print_delay po30; print_delay po31; print_io",
+  "timing_command_help": "usage: help [-a] [-d] [-h]\n       prints the list of available commands by group\n -a       toggle printing hidden commands [default = no]\n -d       print usage details to all commands [default = no]\n -h       print the command usage\nABC command line: \"help print_delay; help stime; help set_input_delay; help set_input_arrival; help set_delay\".\n\n",
+  "timing_precision_ps": 0.01
+}

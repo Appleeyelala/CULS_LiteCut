@@ -1,0 +1,20 @@
+{
+  "cross_region_edges_all_present": true,
+  "edge_complete_path_projection": true,
+  "example_node_paths_valid": true,
+  "example_path_count": 32,
+  "example_paths_available": true,
+  "example_paths_have_pi": true,
+  "example_region_paths_valid": true,
+  "global_no_reentry_from_dag_acyclic": true,
+  "owner_mapping_consistent": true,
+  "owner_mapping_source": "/home/wushangge/CULS/gate3a_out/c1355_orig/node_to_strict_mffc_region.csv",
+  "partition_source": "/home/wushangge/CULS/gate3a_out/c1355_orig/maximal_standard_mffcs.json",
+  "pass": true,
+  "projection_rule": "For every node on a path, map AND nodes through owner[node]; omit PI/constant nodes from the region sequence; compress adjacent duplicate region IDs.",
+  "proof_basis": "Every original cross-region AND->AND edge is represented in the quotient DAG; therefore mapping any node-level path and compressing adjacent equal owners produces a legal region-DAG path. This is a structural proof, not path sampling.",
+  "reentered_region_path_count": 0,
+  "reentered_region_paths": [],
+  "region_segments_without_root_count": 0,
+  "root_is_not_required_for_mapping": true
+}

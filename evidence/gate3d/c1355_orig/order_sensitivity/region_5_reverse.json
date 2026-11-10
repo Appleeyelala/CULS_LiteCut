@@ -1,0 +1,38 @@
+{
+  "accepted_count": 2,
+  "accepted_decision_keys": [
+    [
+      139,
+      7
+    ],
+    [
+      135,
+      5
+    ]
+  ],
+  "compromised_count": 0,
+  "execution_order": [
+    {
+      "cut_slot": 7,
+      "execution_order": 189,
+      "final_status": "ACCEPTED",
+      "root": 139
+    },
+    {
+      "cut_slot": 2,
+      "execution_order": 190,
+      "final_status": "REVERTED",
+      "root": 123
+    },
+    {
+      "cut_slot": 5,
+      "execution_order": 191,
+      "final_status": "ACCEPTED",
+      "root": 135
+    }
+  ],
+  "mode": "reverse",
+  "preselected_count": 3,
+  "region_id": 5,
+  "reverted_count": 1
+}

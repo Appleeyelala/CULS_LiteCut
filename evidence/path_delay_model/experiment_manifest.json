@@ -1,0 +1,14 @@
+{
+  "abc": "/data/wushangge/runs/CULS-path-delay-model-20260929-v3/bin/abc",
+  "baseline_abc_command": "read \"/data/wushangge/runs/CULS-path-delay-model-20260929-v3/input/asap7.lib\"; read \"/data/wushangge/runs/CULS-path-delay-model-20260929-v3/input/c1355_orig.aig\"; map; topo; stime; print_delay po00 pi01; print_delay po01 pi01; print_delay po02 pi01; print_delay po03 pi03; print_delay po04 pi03; print_delay po05 pi01; print_delay po06 pi01; print_delay po07 pi01; print_delay po08 pi03; print_delay po09 pi01; print_delay po10 pi01; print_delay po11 pi03; print_delay po12 pi03; print_delay po13 pi01; print_delay po14 pi03; print_delay po15 pi03; print_delay po16 pi03; print_delay po17 pi03; print_delay po18 pi03; print_delay po19 pi01; print_delay po20 pi01; print_delay po21 pi03; print_delay po22 pi01; print_delay po23 pi03; print_delay po24 pi03; print_delay po25 pi01; print_delay po26 pi01; print_delay po27 pi03; print_delay po28 pi03; print_delay po29 pi01; print_delay po30 pi03; print_delay po31 pi01; print_io",
+  "design": "c1355_orig",
+  "gate3e_replay_command": "read /data/wushangge/runs/CULS-path-delay-model-20260929-v3/input/c1355_orig.aig; gate3e_execution_replay -o /data/wushangge/runs/CULS-path-delay-model-20260929-v3/output/work/replay --region-map /data/wushangge/runs/CULS-path-delay-model-20260929-v3/input/node_to_strict_mffc_region.csv --config /data/wushangge/runs/CULS-path-delay-model-20260929-v3/output/work/single_choices.input",
+  "gpuls": "/data/wushangge/runs/CULS-path-delay-model-20260929-v3/bin/gpuls",
+  "input_aig": "/data/wushangge/runs/CULS-path-delay-model-20260929-v3/input/c1355_orig.aig",
+  "input_sha256": "2602b10f131a6ba5996521036ba130aab128a4aa15e3ab49ce44f2f02047f0b0",
+  "library": "/data/wushangge/runs/CULS-path-delay-model-20260929-v3/input/asap7.lib",
+  "library_sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55",
+  "selected_candidate_count": 15,
+  "timing_precision_ps": 0.01,
+  "worktree_core_modified": false
+}

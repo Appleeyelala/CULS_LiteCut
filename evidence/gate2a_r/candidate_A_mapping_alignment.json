@@ -1,0 +1,164 @@
+{
+  "candidate_id": "A",
+  "gate1": {
+    "decision_root": 146,
+    "cut_leaves": [
+      2,
+      42,
+      82
+    ],
+    "subgraph_index": 0,
+    "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+    "preserved_root_wrapper": 146,
+    "library_subgraph_root": 5,
+    "nodes_added": 2,
+    "physical_graph_modified": false,
+    "physically_deleted_nodes": [],
+    "replayed_aig": "/data/wushangge/gate1a_AIGRewrite/gate1c_r_out/d1_sub0.aig",
+    "replacement_dag": {
+      "source": "Gate1 BuildSubgr replay (replayed AIG is the lossless artifact)",
+      "library_subgraph_root": 5,
+      "replayed_aig": "/data/wushangge/gate1a_AIGRewrite/gate1c_r_out/d1_sub0.aig"
+    }
+  },
+  "mapping": {
+    "abc_binary": "/home/wushangge/abc_for_cutLib/abc",
+    "technology_library": "/home/wushangge/cutLibOrigin/lib/asap7.lib",
+    "aig2map_log": "/home/wushangge/cutLibOrigin/gate2a_r_out/mapping_A/aig2map.log",
+    "abc_map_log": "/home/wushangge/cutLibOrigin/gate2a_r_out/mapping_A/abc_map.log",
+    "abc_superCreate_log": "/home/wushangge/cutLibOrigin/gate2a_r_out/mapping_A/abc_superCreate.log",
+    "mapper_root_id": 216,
+    "mapper_root_to_aig": 146,
+    "direct_supergate_records_by_mapper_id": [],
+    "direct_supergate_records_by_aig_id": [],
+    "super_create_events_for_mapper_root": [],
+    "root_has_direct_selected_supergate": false,
+    "canonical_parser_graph_stats": {
+      "transformed_graph_nodes": 937,
+      "feat_graph_nodes": 543,
+      "cell_struct_entries": 502
+    },
+    "root_fanout_fusion_evidence": [
+      {
+        "root_to_fanout_edge": {
+          "fanin0": 146,
+          "fanin0_complement": 1,
+          "fanin1": 147,
+          "fanin1_complement": 1,
+          "aig_root": 194
+        },
+        "fanout_aig_root": 194,
+        "fanout_mapper_node_id": 218,
+        "fanout_supergate_records": [
+          {
+            "mapper_node_id": 218,
+            "aig_node_id": 194,
+            "area": 2.1,
+            "truth_table": [
+              2576980377,
+              2576980377
+            ],
+            "supergate_leaves": [
+              9,
+              13
+            ]
+          }
+        ],
+        "fanout_selected_supergate_index": 1,
+        "fanout_canonical_subg": {
+          "218": [],
+          "216": [
+            [
+              218,
+              1
+            ]
+          ],
+          "9": [
+            [
+              215,
+              0
+            ],
+            [
+              216,
+              0
+            ]
+          ],
+          "215": [
+            [
+              216,
+              1
+            ],
+            [
+              217,
+              1
+            ]
+          ],
+          "13": [
+            [
+              215,
+              0
+            ],
+            [
+              217,
+              0
+            ]
+          ],
+          "217": [
+            [
+              218,
+              1
+            ]
+          ]
+        },
+        "fanout_canonical_subg_structural_hash": "9449c0d1ca77a3162fabb4562ddbcb6f"
+      }
+    ],
+    "canonical_root_cut_set": [
+      [
+        8738,
+        [
+          9,
+          215
+        ],
+        2
+      ],
+      [
+        8738,
+        [
+          9,
+          13
+        ],
+        2
+      ]
+    ],
+    "canonical_first_cut": [
+      8738,
+      [
+        9,
+        215
+      ],
+      2
+    ],
+    "canonical_first_cut_aig_namespace": {
+      "truth": 8738,
+      "mapper_leaves": [
+        9,
+        215
+      ],
+      "aig_leaves": [
+        10,
+        94
+      ],
+      "n_leaves": 2
+    },
+    "canonical_selected_supergate_index": -1,
+    "canonical_selected_supergate": null,
+    "canonical_subg": null,
+    "canonical_subg_structural_hash": null,
+    "log_sha256": {
+      "aig2map.log": "605762fc3661a07c3e73d81f16b2e7151b06ca68ab0234663b9cea42eca8494c",
+      "abc_map.log": "3c5626ebbf37e6b93ba6a0bea783d6b8694ed1918babd13b9c7d48796016ef14",
+      "abc_superCreate.log": "8bcae3b808df8427e53c054c7e9a959b25604ec8ecf343e65c09422e8f496a9b"
+    }
+  }
+}

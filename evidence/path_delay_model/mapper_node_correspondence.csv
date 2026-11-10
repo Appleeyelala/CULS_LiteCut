@@ -1,0 +1,13 @@
+variant,original_function_point,serialized_aiger_var,abc_aig_id,abc_aig_name,mapper_node_id,node_type,fanin_mapper_ids,fanin_complemented,correspondence_verified
+baseline,17,17,17,pi16,16,PI,[],[],True
+baseline,33,33,33,pi32,32,PI,[],[],True
+baseline,151,151,183,UNNAMED_INTERNAL_AIGER_NODE,150,AND,"[148,149]","[1,1]",True
+baseline,188,188,220,UNNAMED_INTERNAL_AIGER_NODE,187,AND,"[185,186]","[1,1]",True
+baseline,197,197,229,UNNAMED_INTERNAL_AIGER_NODE,196,AND,"[194,195]","[1,1]",True
+baseline,213,213,245,UNNAMED_INTERNAL_AIGER_NODE,212,AND,"[210,211]","[1,1]",True
+candidate,17,17,17,pi16,16,PI,[],[],True
+candidate,33,33,33,pi32,32,PI,[],[],True
+candidate,151,232,264,UNNAMED_INTERNAL_AIGER_NODE,150,AND,"[148,149]","[1,1]",True
+candidate,188,234,266,UNNAMED_INTERNAL_AIGER_NODE,187,AND,"[185,186]","[1,1]",True
+candidate,197,287,319,UNNAMED_INTERNAL_AIGER_NODE,194,AND,"[192,193]","[1,1]",True
+candidate,213,322,353,UNNAMED_INTERNAL_AIGER_NODE,210,AND,"[208,209]","[1,1]",True

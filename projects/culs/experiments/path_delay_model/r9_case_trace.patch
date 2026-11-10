@@ -1,0 +1,67 @@
+diff --git a/src/base/io/ioReadAiger.c b/src/base/io/ioReadAiger.c
+index 3d6b6ff..8f4f92e 100644
+--- a/src/base/io/ioReadAiger.c
++++ b/src/base/io/ioReadAiger.c
+@@ -419,6 +419,14 @@ Abc_Ntk_t * Io_ReadAiger( char * pFileName, int fCheck )
+             Map_DebugRememberAiger(i, Abc_ObjId(Abc_ObjRegular(dObj)), Abc_ObjIsComplement(dObj), Vec_PtrSize(vNodes));
+         }
+ 
++    /* Read-only serialized-variable correspondence for this single case. */
++    if ( getenv("AIGREWRITE_PAIR_CASE") )
++        for ( i = 0; i < Vec_PtrSize(vNodes); i++ )
++        {
++            Abc_Obj_t * dObj = (Abc_Obj_t *)Vec_PtrEntry(vNodes, i);
++            printf("AIG_CASE aiger_var=%d abc_obj_id=%d polarity=%d\n", i,
++                Abc_ObjId(Abc_ObjRegular(dObj)), Abc_ObjIsComplement(dObj));
++        }
+     // remember the place where symbols begin
+     pSymbols = pCur;
+ 
+diff --git a/src/base/abci/abcTiming.c b/src/base/abci/abcTiming.c
+index 7a1a616..5d213b3 100644
+--- a/src/base/abci/abcTiming.c
++++ b/src/base/abci/abcTiming.c
+@@ -1244,6 +1244,25 @@ static int Abc_NtkPairPrintTrace_rec( Abc_Obj_t * pNode, Abc_Obj_t * pSource,
+     }
+     if ( !Abc_NtkPairPrintTrace_rec(Step.pFanin, pSource, Step.fInputRise, pReach) )
+         return 0;
++    /* Read-only provenance/alternative arcs. No timing state or selection changes. */
++    if ( getenv("AIGREWRITE_PAIR_CASE") )
++    {
++        Abc_Obj_t * pFanin;
++        Mio_Pin_t * pPin = Mio_GateReadPins((Mio_Gate_t *)pNode->pData);
++        int k, Lit = pNode->pNtk->vOrigNodeIds && pNode->Id < Vec_IntSize(pNode->pNtk->vOrigNodeIds)
++            ? Vec_IntEntry(pNode->pNtk->vOrigNodeIds, pNode->Id) : -1;
++        printf("PAIR_CASE node_id=%d orig_lit=%d\n", pNode->Id, Lit);
++        Abc_ObjForEachFanin( pNode, pFanin, k )
++        {
++            int InLit = pNode->pNtk->vOrigNodeIds && pFanin->Id < Vec_IntSize(pNode->pNtk->vOrigNodeIds)
++                ? Vec_IntEntry(pNode->pNtk->vOrigNodeIds, pFanin->Id) : -1;
++            printf("PAIR_ARC node_id=%d pin=%d pin_name=%s input_id=%d input_orig_lit=%d reachable=%d phase=%d delay_rise=%.9g delay_fall=%.9g input_rise=%.9g input_fall=%.9g\n",
++                pNode->Id, k, Mio_PinReadName(pPin), pFanin->Id, InLit, pReach[pFanin->Id],
++                Mio_PinReadPhase(pPin), (float)Mio_PinReadDelayBlockRise(pPin),
++                (float)Mio_PinReadDelayBlockFall(pPin), Abc_NodeArrival(pFanin)->Rise, Abc_NodeArrival(pFanin)->Fall);
++            pPin = Mio_PinReadNext(pPin);
++        }
++    }
+     printf( "PAIR_TRACE kind=gate node_id=%d name=%s cell=%s input_id=%d pin=%d input_transition=%s output_transition=%s arc_delay=%.9g input_arrival=%.9g arrival=%.9g rise_arrival=%.9g fall_arrival=%.9g\n",
+             Abc_ObjId(pNode), Abc_ObjName(pNode),
+             Abc_ObjIsBarBuf(pNode) ? "barbuf" : Mio_GateReadName((Mio_Gate_t *)pNode->pData),
+@@ -1299,6 +1318,17 @@ int Abc_NtkPairDelayTrace( Abc_Ntk_t * pNtk, Abc_Obj_t * pOut, Abc_Obj_t * pIn,
+         pReach[Abc_ObjId(pObj)] = 1;
+         Abc_NodeDelayTraceArrival( pObj, NULL );
+     }
++    if ( getenv("AIGREWRITE_PAIR_CASE") && pNtk->vOrigNodeIds )
++        Vec_PtrForEachEntry( Abc_Obj_t *, vNodes, pObj, i )
++        {
++            Abc_Obj_t * pFanin;
++            int Lit = pObj->Id < Vec_IntSize(pNtk->vOrigNodeIds) ? Vec_IntEntry(pNtk->vOrigNodeIds,pObj->Id) : -1;
++            printf("CASE_NET node_id=%d orig_lit=%d cell=%s reachable=%d rise=%.9g fall=%.9g fanins=",
++                pObj->Id, Lit, Mio_GateReadName((Mio_Gate_t *)pObj->pData), pReach[pObj->Id],
++                Abc_NodeArrival(pObj)->Rise, Abc_NodeArrival(pObj)->Fall);
++            Abc_ObjForEachFanin( pObj, pFanin, k ) printf("%s%d", k?",":"",pFanin->Id);
++            printf("\n");
++        }
+     fReachable = pReach[Abc_ObjId(pDriver)];
+     if ( fReachable )
+     {

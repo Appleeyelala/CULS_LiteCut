@@ -1,0 +1,411 @@
+{
+  "status": "PASS_MAPPING_FREE_INPUT_AND_INFERENCE_WITH_D1_NOOP_CAVEAT",
+  "mapping_called": false,
+  "sta_called": false,
+  "training_called": false,
+  "canonical_sources": {
+    "feature_extractor": "src/data_preprocess/feat_extraction_v3.py:CompleteCutFeatureExtractor.extract_all",
+    "global_context": "CompleteCutFeatureExtractor._precompute_global_context",
+    "student_model": "src/extract_cutlib_student/modeling.py:StudentModel.forward",
+    "extractor_output_dimension": 25,
+    "student_input_dimension": 19,
+    "checkpoint_input_dimension": 19,
+    "student_group_slices": {
+      "group1": [
+        0,
+        8
+      ],
+      "group2": [
+        8,
+        14
+      ],
+      "group3": [
+        14,
+        19
+      ]
+    },
+    "wl_hash_forward_input": false,
+    "normalization": "checkpoint x_mu/x_inv_sigma; (x_raw-x_mu)*x_inv_sigma",
+    "inverse_transform": "clamp(y_scaled/y_inv_sigma+y_mu,-10,10); expm1",
+    "checkpoint_state_dict_compatibility": "canonical legacy-name upgrade (group1_encoder→group_encoders.0, experts.*→experts.*.head)"
+  },
+  "student_forward_required_inputs": {
+    "x_scaled_19": "required; derived from canonical raw columns 1-19 and checkpoint x_mu/x_inv_sigma",
+    "wl_hash": "not consumed by StudentModel.forward (dataset auxiliary only)",
+    "group_inputs": "three slices of x_scaled_19: [0:8], [8:14], [14:19]",
+    "model_weights": "checkpoint model_state_dict (legacy key translation only)",
+    "label_stats": "checkpoint y_mu/y_inv_sigma for inverse transform"
+  },
+  "feature_audit": [
+    {
+      "name": "R_root",
+      "index_1based": 1,
+      "category": "root/context",
+      "mapping_free_source": "original feat_graph + fixed cut",
+      "changes_between_d1_A_B": false,
+      "enters_student_forward": true,
+      "student_group": "group1",
+      "student_input_position_0based": 0,
+      "mapping_free_derivable": true,
+      "depends_on_post_mapping": false
+    },
+    {
+      "name": "SlackProxy_root",
+      "index_1based": 2,
+      "category": "root/context",
+      "mapping_free_source": "original feat_graph + fixed cut",
+      "changes_between_d1_A_B": false,
+      "enters_student_forward": true,
+      "student_group": "group1",
+      "student_input_position_0based": 1,
+      "mapping_free_derivable": true,
+      "depends_on_post_mapping": false
+    },
+    {
+      "name": "Root_Global_Fanout",
+      "index_1based": 3,
+      "category": "root/context",
+      "mapping_free_source": "original feat_graph + fixed cut",
+      "changes_between_d1_A_B": false,
+      "enters_student_forward": true,
+      "student_group": "group1",
+      "student_input_position_0based": 2,
+      "mapping_free_derivable": true,
+      "depends_on_post_mapping": false
+    },
+    {
+      "name": "Max_L_leaf",
+      "index_1based": 4,
+      "category": "leaf/boundary",
+      "mapping_free_source": "original feat_graph + fixed cut",
+      "changes_between_d1_A_B": false,
+      "enters_student_forward": true,
+      "student_group": "group1",
+      "student_input_position_0based": 3,
+      "mapping_free_derivable": true,
+      "depends_on_post_mapping": false
+    },
+    {
+      "name": "Max_Leaf_Fanout",
+      "index_1based": 5,
+      "category": "leaf/boundary",
+      "mapping_free_source": "original feat_graph + fixed cut",
+      "changes_between_d1_A_B": false,
+      "enters_student_forward": true,
+      "student_group": "group1",
+      "student_input_position_0based": 4,
+      "mapping_free_derivable": true,
+      "depends_on_post_mapping": false
+    },
+    {
+      "name": "Mean_Leaf_Fanout",
+      "index_1based": 6,
+      "category": "leaf/boundary",
+      "mapping_free_source": "original feat_graph + fixed cut",
+      "changes_between_d1_A_B": false,
+      "enters_student_forward": true,
+      "student_group": "group1",
+      "student_input_position_0based": 5,
+      "mapping_free_derivable": true,
+      "depends_on_post_mapping": false
+    },
+    {
+      "name": "Std_Leaf_Fanout",
+      "index_1based": 7,
+      "category": "leaf/boundary",
+      "mapping_free_source": "original feat_graph + fixed cut",
+      "changes_between_d1_A_B": false,
+      "enters_student_forward": true,
+      "student_group": "group1",
+      "student_input_position_0based": 6,
+      "mapping_free_derivable": true,
+      "depends_on_post_mapping": false
+    },
+    {
+      "name": "Frac_Leaf_PI",
+      "index_1based": 8,
+      "category": "leaf/boundary",
+      "mapping_free_source": "original feat_graph + fixed cut",
+      "changes_between_d1_A_B": false,
+      "enters_student_forward": true,
+      "student_group": "group1",
+      "student_input_position_0based": 7,
+      "mapping_free_derivable": true,
+      "depends_on_post_mapping": false
+    },
+    {
+      "name": "Weighted_Depth",
+      "index_1based": 9,
+      "category": "candidate-local",
+      "mapping_free_source": "materialized replacement DAG",
+      "changes_between_d1_A_B": false,
+      "enters_student_forward": true,
+      "student_group": "group2",
+      "student_input_position_0based": 8,
+      "mapping_free_derivable": true,
+      "depends_on_post_mapping": false
+    },
+    {
+      "name": "Topo_Depth",
+      "index_1based": 10,
+      "category": "candidate-local",
+      "mapping_free_source": "materialized replacement DAG",
+      "changes_between_d1_A_B": false,
+      "enters_student_forward": true,
+      "student_group": "group2",
+      "student_input_position_0based": 9,
+      "mapping_free_derivable": true,
+      "depends_on_post_mapping": false
+    },
+    {
+      "name": "Inv_Penalty",
+      "index_1based": 11,
+      "category": "candidate-local",
+      "mapping_free_source": "materialized replacement DAG",
+      "changes_between_d1_A_B": false,
+      "enters_student_forward": true,
+      "student_group": "group2",
+      "student_input_position_0based": 10,
+      "mapping_free_derivable": true,
+      "depends_on_post_mapping": false
+    },
+    {
+      "name": "Node_Count",
+      "index_1based": 12,
+      "category": "candidate-local",
+      "mapping_free_source": "materialized replacement DAG",
+      "changes_between_d1_A_B": true,
+      "enters_student_forward": true,
+      "student_group": "group2",
+      "student_input_position_0based": 11,
+      "mapping_free_derivable": true,
+      "depends_on_post_mapping": false
+    },
+    {
+      "name": "Avg_Width",
+      "index_1based": 13,
+      "category": "candidate-local",
+      "mapping_free_source": "materialized replacement DAG",
+      "changes_between_d1_A_B": true,
+      "enters_student_forward": true,
+      "student_group": "group2",
+      "student_input_position_0based": 12,
+      "mapping_free_derivable": true,
+      "depends_on_post_mapping": false
+    },
+    {
+      "name": "Max_Internal_Fanout",
+      "index_1based": 14,
+      "category": "candidate-local",
+      "mapping_free_source": "materialized replacement DAG",
+      "changes_between_d1_A_B": true,
+      "enters_student_forward": true,
+      "student_group": "group2",
+      "student_input_position_0based": 13,
+      "mapping_free_derivable": true,
+      "depends_on_post_mapping": false
+    },
+    {
+      "name": "Inv_Ratio",
+      "index_1based": 15,
+      "category": "candidate-local",
+      "mapping_free_source": "materialized replacement DAG",
+      "changes_between_d1_A_B": true,
+      "enters_student_forward": true,
+      "student_group": "group3",
+      "student_input_position_0based": 14,
+      "mapping_free_derivable": true,
+      "depends_on_post_mapping": false
+    },
+    {
+      "name": "Root_Inv_Count",
+      "index_1based": 16,
+      "category": "candidate-local",
+      "mapping_free_source": "materialized replacement DAG",
+      "changes_between_d1_A_B": false,
+      "enters_student_forward": true,
+      "student_group": "group3",
+      "student_input_position_0based": 15,
+      "mapping_free_derivable": true,
+      "depends_on_post_mapping": false
+    },
+    {
+      "name": "Chain_Density",
+      "index_1based": 17,
+      "category": "candidate-local",
+      "mapping_free_source": "materialized replacement DAG",
+      "changes_between_d1_A_B": true,
+      "enters_student_forward": true,
+      "student_group": "group3",
+      "student_input_position_0based": 16,
+      "mapping_free_derivable": true,
+      "depends_on_post_mapping": false
+    },
+    {
+      "name": "Fork_Density",
+      "index_1based": 18,
+      "category": "candidate-local",
+      "mapping_free_source": "materialized replacement DAG",
+      "changes_between_d1_A_B": true,
+      "enters_student_forward": true,
+      "student_group": "group3",
+      "student_input_position_0based": 17,
+      "mapping_free_derivable": true,
+      "depends_on_post_mapping": false
+    },
+    {
+      "name": "Avg_Curvature",
+      "index_1based": 19,
+      "category": "candidate-local",
+      "mapping_free_source": "materialized replacement DAG",
+      "changes_between_d1_A_B": true,
+      "enters_student_forward": true,
+      "student_group": "group3",
+      "student_input_position_0based": 18,
+      "mapping_free_derivable": true,
+      "depends_on_post_mapping": false
+    },
+    {
+      "name": "Lap_Eig1",
+      "index_1based": 20,
+      "category": "spectral",
+      "mapping_free_source": "materialized replacement DAG",
+      "changes_between_d1_A_B": false,
+      "enters_student_forward": false,
+      "student_group": null,
+      "student_input_position_0based": null,
+      "mapping_free_derivable": true,
+      "depends_on_post_mapping": false
+    },
+    {
+      "name": "Lap_Eig2",
+      "index_1based": 21,
+      "category": "spectral",
+      "mapping_free_source": "materialized replacement DAG",
+      "changes_between_d1_A_B": true,
+      "enters_student_forward": false,
+      "student_group": null,
+      "student_input_position_0based": null,
+      "mapping_free_derivable": true,
+      "depends_on_post_mapping": false
+    },
+    {
+      "name": "Lap_Eig3",
+      "index_1based": 22,
+      "category": "spectral",
+      "mapping_free_source": "materialized replacement DAG",
+      "changes_between_d1_A_B": false,
+      "enters_student_forward": false,
+      "student_group": null,
+      "student_input_position_0based": null,
+      "mapping_free_derivable": true,
+      "depends_on_post_mapping": false
+    },
+    {
+      "name": "Lap_Eig4",
+      "index_1based": 23,
+      "category": "spectral",
+      "mapping_free_source": "materialized replacement DAG",
+      "changes_between_d1_A_B": true,
+      "enters_student_forward": false,
+      "student_group": null,
+      "student_input_position_0based": null,
+      "mapping_free_derivable": true,
+      "depends_on_post_mapping": false
+    },
+    {
+      "name": "Lap_Eig5",
+      "index_1based": 24,
+      "category": "spectral",
+      "mapping_free_source": "materialized replacement DAG",
+      "changes_between_d1_A_B": true,
+      "enters_student_forward": false,
+      "student_group": null,
+      "student_input_position_0based": null,
+      "mapping_free_derivable": true,
+      "depends_on_post_mapping": false
+    },
+    {
+      "name": "WL_Hash",
+      "index_1based": 25,
+      "category": "WL/hash auxiliary",
+      "mapping_free_source": "materialized replacement DAG",
+      "changes_between_d1_A_B": true,
+      "enters_student_forward": false,
+      "student_group": null,
+      "student_input_position_0based": null,
+      "mapping_free_derivable": true,
+      "depends_on_post_mapping": false
+    }
+  ],
+  "candidate_alignment": "MAPPING_FREE_REPRESENTABLE",
+  "candidate_semantics_note": "d1 subgraph 0 is NO_OP_FULL_CORRESPONDENCE in Gate1 provenance; d1 subgraph 1 is PHYSICAL_REPLACEMENT. Thus the existing d1 A/B pair is not two physical candidates.",
+  "candidates": [
+    {
+      "candidate_id": "d1_sub0",
+      "root": 146,
+      "cut_leaves": [
+        2,
+        42,
+        82
+      ],
+      "subgraph_index": 0,
+      "installation_kind": "NO_OP_FULL_CORRESPONDENCE",
+      "finite_features": true,
+      "finite_prediction": true,
+      "predicted_raw_abc_delay": 29.53646804117542,
+      "repeat_exact": true
+    },
+    {
+      "candidate_id": "d1_sub1",
+      "root": 146,
+      "cut_leaves": [
+        2,
+        42,
+        82
+      ],
+      "subgraph_index": 1,
+      "installation_kind": "PHYSICAL_REPLACEMENT",
+      "finite_features": true,
+      "finite_prediction": true,
+      "predicted_raw_abc_delay": 24.0842151795256,
+      "repeat_exact": true
+    },
+    {
+      "candidate_id": "d2_sub0",
+      "root": 226,
+      "cut_leaves": [
+        3,
+        4,
+        146,
+        178
+      ],
+      "subgraph_index": 0,
+      "installation_kind": "PHYSICAL_REPLACEMENT",
+      "finite_features": true,
+      "finite_prediction": true,
+      "predicted_raw_abc_delay": 20.574257743484107,
+      "repeat_exact": true
+    },
+    {
+      "candidate_id": "d2_sub1",
+      "root": 226,
+      "cut_leaves": [
+        3,
+        4,
+        146,
+        178
+      ],
+      "subgraph_index": 1,
+      "installation_kind": "PHYSICAL_REPLACEMENT",
+      "finite_features": true,
+      "finite_prediction": true,
+      "predicted_raw_abc_delay": 35.493827015539594,
+      "repeat_exact": true
+    }
+  ],
+  "determinism": {
+    "repeat_dir": "gate2a_mapping_free_repeat_final",
+    "all_requested_repeats_exact": true
+  }
+}

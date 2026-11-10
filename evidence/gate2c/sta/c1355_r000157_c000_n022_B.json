@@ -1,0 +1,18 @@
+{
+  "tag": "c1355_r000157_c000_n022_B",
+  "input_aig": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/replayed_aigs/c1355_r000157_c000_n022_B.aig",
+  "input_aig_sha256": "0ef26fe96a9163637f1c861f42b3fedaa7357d50604a107e0a0f646b1c737d46",
+  "abc_binary": "/data/public/AIGRewrite/abc/abc",
+  "library": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/input/asap7.lib",
+  "library_sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55",
+  "command": "read \"/data/wushangge/gate2c_runs/gate2c_sm86_20260918/input/asap7.lib\"; read \"/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/replayed_aigs/c1355_r000157_c000_n022_B.aig\"; map; topo; stime",
+  "working_directory": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/work/sta/c1355_r000157_c000_n022_B",
+  "log": "/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/logs/c1355_r000157_c000_n022_B.sta.log",
+  "exit_code": 0,
+  "timed_out": false,
+  "area": 559.64,
+  "whole_design_delay_ps": 263.6,
+  "gate_count": 436,
+  "raw_timing_line": "Area =      559.64\u001b[0m ( 85.6 %)   \u001b[1;35mDelay =   263.60",
+  "stdout": "ABC command line: \"read \"/data/wushangge/gate2c_runs/gate2c_sm86_20260918/input/asap7.lib\"; read \"/data/wushangge/gate2c_runs/gate2c_sm86_20260918/output/replayed_aigs/c1355_r000157_c000_n022_B.aig\"; map; topo; stime\".\n\nLibrary \"asap7\" from \"/data/wushangge/gate2c_runs/gate2c_sm86_20260918/input/asap7.lib\" has 159 cells (26 skipped: 23 seq; 0 tri-state; 3 no func; 0 dont_use; 0 with 2 outputs; 0 with 3+ outputs).  Time =     0.79 sec\nWarning: Detected 2 multi-output cells (for example, \"FAx1_ASAP7_75t_L\").\nWireLoad = \"none\"  \u001b[1;33mGates =    436\u001b[0m ( 14.4 %)   \u001b[1;32mCap =  0.9 ff\u001b[0m (  2.6 %)   \u001b[1;36mArea =      559.64\u001b[0m ( 85.6 %)   \u001b[1;35mDelay =   263.60 ps\u001b[0m  ( 40.1 %)               \n"
+}

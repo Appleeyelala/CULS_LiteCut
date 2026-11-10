@@ -1,0 +1,63 @@
+{
+  "D_original": 263.32,
+  "D": {
+    "AC": 263.6,
+    "AD": 263.6,
+    "BC": 263.6,
+    "BD": 263.6
+  },
+  "baseline_deltas": {
+    "AC": 0.28000000000002956,
+    "AD": 0.28000000000002956,
+    "BC": 0.28000000000002956,
+    "BD": 0.28000000000002956
+  },
+  "delta1_C": 0.0,
+  "delta1_D": 0.0,
+  "delta2_A": 0.0,
+  "delta2_B": 0.0,
+  "interaction_I": 0.0,
+  "identity_errors": {
+    "I_minus_delta1_D_minus_delta1_C": 0.0,
+    "I_minus_delta2_B_minus_delta2_A": 0.0
+  },
+  "repeatability": {
+    "AC": {
+      "delay_abs_difference": 0.0,
+      "area_abs_difference": 0.0,
+      "gate_count_abs_difference": 0.0
+    },
+    "AD": {
+      "delay_abs_difference": 0.0,
+      "area_abs_difference": 0.0,
+      "gate_count_abs_difference": 0.0
+    },
+    "BC": {
+      "delay_abs_difference": 0.0,
+      "area_abs_difference": 0.0,
+      "gate_count_abs_difference": 0.0
+    },
+    "BD": {
+      "delay_abs_difference": 0.0,
+      "area_abs_difference": 0.0,
+      "gate_count_abs_difference": 0.0
+    }
+  },
+  "repeatability_noise_ps": 0.0,
+  "measurement_precision_ps": 0.01,
+  "comparison_tolerance_ps": 0.01,
+  "interaction_abs_ps": 0.0,
+  "interaction_vs_noise_ratio": null,
+  "meaningful_relative_to_repeatability": false,
+  "ranking": {
+    "d1_under_C": "TIE_WITHIN_TOLERANCE",
+    "d1_under_D": "TIE_WITHIN_TOLERANCE",
+    "d2_under_A": "TIE_WITHIN_TOLERANCE",
+    "d2_under_B": "TIE_WITHIN_TOLERANCE"
+  },
+  "ranking_reversal_d1": false,
+  "ranking_reversal_d2": false,
+  "lowest_measured_configuration_among_4": "AC/AD/BC/BD",
+  "litecut_local_greedy_configuration": "BC",
+  "local_greedy_matches_lowest_measured_among_4": true
+}

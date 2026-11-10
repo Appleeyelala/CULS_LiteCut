@@ -1,0 +1,15 @@
+region_id,left_root,left_cut,right_root,right_cut,relation,removable_intersection,removable_intersection_count,left_root_in_right_removable,right_root_in_left_removable,left_cut_depends_on_right_root,right_cut_depends_on_left_root,left_removable_subset_right,right_removable_subset_left
+2,74,4,86,5,DISJOINT,[],0,False,False,False,False,False,False
+5,123,2,135,5,DISJOINT,[],0,False,False,False,False,False,False
+7,160,4,172,5,DISJOINT,[],0,False,False,False,False,False,False
+9,197,2,209,5,DISJOINT,[],0,False,False,False,False,False,False
+10,222,2,234,5,DISJOINT,[],0,False,False,False,False,False,False
+12,259,4,271,5,DISJOINT,[],0,False,False,False,False,False,False
+14,296,4,308,5,DISJOINT,[],0,False,False,False,False,False,False
+15,321,5,333,5,DISJOINT,[],0,False,False,False,False,False,False
+16,349,2,350,2,OVERLAPPING,"[345,346,347,348,349]",5,True,False,False,False,False,False
+16,349,2,351,6,OVERLAPPING,[349],1,True,False,False,False,False,False
+16,350,2,351,6,OVERLAPPING,"[342,343,349,350]",4,True,False,False,False,False,False
+24,386,2,387,2,OVERLAPPING,"[382,383,384,385,386]",5,True,False,False,False,False,False
+24,386,2,388,6,OVERLAPPING,[386],1,True,False,False,False,False,False
+24,387,2,388,6,OVERLAPPING,"[379,380,386,387]",4,True,False,False,False,False,False

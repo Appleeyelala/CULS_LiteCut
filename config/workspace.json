@@ -1,0 +1,18 @@
+{
+  "project": "CULS_LiteCut",
+  "data_root": "/data/wushangge/CULS_LiteCut",
+  "runs_dir": "runs",
+  "source_projects": {
+    "culs": "projects/culs",
+    "litecut": "projects/litecut",
+    "gate1": "legacy/gate1_aigrewrite",
+    "abc_base": "third_party/abc"
+  },
+  "resource_budget": {
+    "aggregate_cpus": 64,
+    "aggregate_memory_gib": 256,
+    "aggregate_gpus": 2,
+    "include_pending_jobs": true
+  },
+  "execution_policy": "Stage sources and inputs under data_root; substantial computation requires Slurm. Workspace preparation never submits a job."
+}

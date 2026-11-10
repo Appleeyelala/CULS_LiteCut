@@ -1,0 +1,44 @@
+{
+  "checked_at": "2026-11-10T07:18:06.945518+00:00",
+  "source_repositories": [
+    {
+      "name": "culs",
+      "head_unchanged": true,
+      "status_unchanged": true
+    },
+    {
+      "name": "litecut",
+      "head_unchanged": true,
+      "status_unchanged": true
+    },
+    {
+      "name": "gate1",
+      "head_unchanged": true,
+      "status_unchanged": true
+    },
+    {
+      "name": "abc",
+      "head_unchanged": true,
+      "status_unchanged": true
+    }
+  ],
+  "new_helper_python_syntax": [
+    "scripts/import_history.py",
+    "scripts/verify_import.py",
+    "scripts/prepare_run.py"
+  ],
+  "broken_document_links": [],
+  "new_experiment_run_count": 0,
+  "experimental_programs_executed": false,
+  "builds_executed": false,
+  "training_executed": false,
+  "slurm_jobs_submitted": false,
+  "import_hash_verification": {
+    "copied_files": 4924,
+    "original_plus_copy_checks": 9848,
+    "historical_links": 27,
+    "result": "PASS"
+  },
+  "prepare_run_validation": "AST parse and --help only; no run directory was created",
+  "git_normalization_record": "provenance/git_normalization.json"
+}

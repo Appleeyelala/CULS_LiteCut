@@ -23,4 +23,4 @@ Gate3C summary 的 `artifact_sha256` 中自身文件的哈希与最终文件不�
 
 Git沿用ABC上游`.gitattributes`：三个Windows IDE文件以LF存储、CRLF检出，两种哈希见 [git_normalization.json](../provenance/git_normalization.json)。`git archive`也会按上游`export-subst`展开ABC的`.gitcommit`占位符；ABC原始upstream commit以`source_repositories.json`为准。
 
-`history/links`是对原有大运行目录的符号链接，不是独立备份。`history/imports`和`assets`是逐文件校验过的实际副本。完整数据集仍保留在原位置，本轮仅复制固定c1355输入；后续使用其他设计时须先将选定输入暂存到新`/data`运行目录。
+`history/links`是对原有大运行目录的符号链接，不是独立备份。`history/imports`和`assets`是逐文件校验过的实际副本。初始整理仅复制固定c1355输入；随后按用户要求，将完整数据集迁至`/home/wushangge/CULS_LiteCut/open-sourceDataset`，旧位置保留兼容链接。后续统一通过`config/workspace.json`选择该数据集中的输入，准备工具将选定设计复制到新`/data`运行目录并记录哈希。历史输入副本与实验记录保持原样。

@@ -36,9 +36,13 @@ python -B scripts/verify_import.py --check-originals
 
 ```bash
 python -B scripts/prepare_run.py --name <short-name> --purpose '<本次运行目的>'
+# 选择其他设计时，路径相对于本仓库的 open-sourceDataset：
+python -B scripts/prepare_run.py --name <short-name> --purpose '<本次运行目的>' --design OpenABC/c1355_orig.aig
 ```
 
-准备工具要求干净Git工作区，生成`runs/<UTC时间>-<name>-<随机后缀>/`，包含`src/ input/ output/ logs/ tmp/ cache/ build/`和`run.json`。`src/`来自确定的Git commit，`input/`链接到数据区冻结资产；不会调用任何实验程序或提交Slurm。历史工具的旧路径需在本次运行配置/适配脚本中显式处理，不能直接执行原来的固定路径Slurm脚本。
+准备工具要求干净Git工作区，生成`runs/<UTC时间>-<name>-<随机后缀>/`，包含`src/ input/ output/ logs/ tmp/ cache/ build/`和`run.json`。`src/`来自确定的Git commit，`input/`链接到数据区冻结模型、库和工具；电路输入从`config/workspace.json`的`dataset_root`选取并复制为`input/design.aig`（AAG输入为`design.aag`），在`run.json`的`dataset`字段记录来源、相对路径、SHA256和运行内路径。默认使用`OpenABC/c1355_orig.aig`，其旧`input/c1355_orig`入口仅作为指向该运行副本的兼容链接。运行命令应使用`dataset.staged_path`。工具不会调用实验程序或提交Slurm。历史工具的旧路径需在本次运行配置/适配脚本中显式处理，不能直接执行原来的固定路径Slurm脚本。
+
+完整数据集按用户要求迁至`/home/wushangge/CULS_LiteCut/open-sourceDataset`，旧位置保留兼容链接；数据集目录已被Git忽略。计算节点使用上述`/data`运行副本，无需访问`/home`数据目录。历史冻结输入和历史来源清单保留原样。
 
 每次真正提交前：
 

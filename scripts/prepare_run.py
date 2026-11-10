@@ -6,6 +6,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import tarfile
 import uuid
@@ -13,6 +14,34 @@ import uuid
 
 def git(repo, *args):
     return subprocess.check_output(['git', '-C', str(repo), *args]).decode().strip()
+
+
+def digest(path):
+    checksum = hashlib.sha256()
+    with path.open('rb') as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b''):
+            checksum.update(chunk)
+    return checksum.hexdigest()
+
+
+def select_design(config, requested=None):
+    root = Path(config['dataset_root']).resolve(strict=True)
+    relative = Path(requested if requested is not None else config['default_design'])
+    if relative.is_absolute():
+        raise ValueError('--design must be relative to the configured dataset root.')
+    source = (root / relative).resolve(strict=True)
+    if not source.is_relative_to(root) or not source.is_file():
+        raise ValueError('Design must be a file inside the configured dataset root.')
+    if source.suffix.lower() not in ('.aig', '.aag'):
+        raise ValueError('Design must be an AIG or AAG file.')
+    return root, source, digest(source)
+
+
+def stage_design(source, destination, expected_sha256):
+    with source.open('rb') as incoming, destination.open('xb') as outgoing:
+        shutil.copyfileobj(incoming, outgoing)
+    if digest(destination) != expected_sha256:
+        raise ValueError('Dataset input changed while preparing its run snapshot.')
 
 
 def extract_source(archive, destination):
@@ -34,6 +63,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--name', required=True, help='short lowercase name for the authorized task')
     parser.add_argument('--purpose', required=True, help='concrete purpose of the authorized task')
+    parser.add_argument('--design', help='dataset-relative AIG/AAG path; defaults to config default_design')
     args = parser.parse_args()
     if not re.fullmatch(r'[a-z][a-z0-9_-]{0,47}', args.name):
         parser.error('--name must start with a-z and contain at most 48 lowercase letters, digits, - or _')
@@ -48,17 +78,19 @@ def main():
         raise SystemExit('Project data root does not exist: ' + str(data))
     if git(repo, 'status', '--porcelain', '--untracked-files=normal'):
         raise SystemExit('Commit source/configuration changes before preparing an immutable run.')
+    try:
+        dataset_root, design_source, design_sha256 = select_design(config, args.design)
+    except (OSError, ValueError) as exc:
+        raise SystemExit('Invalid dataset input: ' + str(exc)) from exc
     commit = git(repo, 'rev-parse', 'HEAD')
-    assets = json.loads((repo / 'provenance/assets.json').read_text())
+    # Keep the historical asset registry intact; new runs take their design from the dataset.
+    assets = [asset for asset in json.loads((repo / 'provenance/assets.json').read_text())
+              if asset['name'] != 'c1355_orig']
     for asset in assets:
         path = Path(asset['path']).resolve()
         if not path.is_relative_to(data) or not path.is_file():
             raise SystemExit('Missing or external asset: ' + asset['path'])
-        checksum = hashlib.sha256()
-        with path.open('rb') as stream:
-            for chunk in iter(lambda: stream.read(1024 * 1024), b''):
-                checksum.update(chunk)
-        if checksum.hexdigest() != asset['sha256']:
+        if digest(path) != asset['sha256']:
             raise SystemExit('Frozen asset checksum changed: ' + asset['path'])
     runs = data / config['runs_dir']
     if not runs.resolve().is_relative_to(data):
@@ -68,10 +100,14 @@ def main():
     name = now.strftime('%Y%m%dT%H%M%SZ') + '-' + args.name + '-' + uuid.uuid4().hex[:8]
     run = runs / name
     run.mkdir(exist_ok=False)
+    staged_design = run / 'input' / ('design' + design_source.suffix.lower())
     metadata = {'name': name, 'purpose': args.purpose, 'created_at': now.isoformat(),
                 'source_commit': commit, 'source_repository': str(repo), 'source_snapshot': str(run / 'src'),
                 'state': 'PREPARING', 'slurm_job_id': None, 'command': None,
                 'resources': None, 'environment': None, 'assets': assets,
+                'dataset': {'root': str(dataset_root), 'source': str(design_source),
+                            'relative_path': str(design_source.relative_to(dataset_root)),
+                            'sha256': design_sha256, 'staged_path': str(staged_design)},
                 'resource_budget': config['resource_budget'], 'experiment_executed': False}
     manifest = run / 'run.json'
 
@@ -88,6 +124,9 @@ def main():
         archive.unlink()
         for asset in assets:
             (run / 'input' / asset['name']).symlink_to(Path(asset['path']))
+        stage_design(design_source, staged_design, design_sha256)
+        if design_source.relative_to(dataset_root) == Path('OpenABC/c1355_orig.aig'):
+            (run / 'input' / 'c1355_orig').symlink_to(staged_design.name)
         metadata['state'] = 'PREPARED_NOT_SUBMITTED'
         save()
         (run / 'README.txt').write_text(
@@ -95,6 +134,7 @@ def main():
             'Review the task command and adapt historical absolute paths explicitly.\n'
             'Inspect cluster configuration and the aggregate user resource budget before submission.\n'
             'Keep job.slurm, logs, build, cache, TMPDIR and outputs in this run directory.\n'
+            'Use the dataset.staged_path recorded in run.json as the circuit input.\n'
             'Record command/environment/resources/job ID and completion status in run.json.\n')
     except Exception as exc:
         metadata['state'] = 'PREPARATION_FAILED'

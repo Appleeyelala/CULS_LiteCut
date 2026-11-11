@@ -15,6 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from global_timing.common import save_json
 from global_timing.cohort import analysis_sources
 from global_timing.reporting import write_report
+from global_timing.evaluation import native_baseline_metrics
 from global_timing.structure import aig_structure_digest
 
 
@@ -37,8 +38,11 @@ def canonical_outcomes(summary, include_byte_hash=True):
         return {'observations': [observation(row) for row in item['observations']],
                 'selected_best': observation(item['best']) if item.get('best') else None}
 
+    native = native_baseline_metrics(summary)
+    native_result = (measurement(native) if native is not None else
+                     {'status': 'FAIL', 'stage': summary['native_abc_attempt']['stage'], 'metrics': None})
     return {'config': summary['config'], 'original': measurement(summary['original']),
-            'native_abc': measurement(summary['native_abc']), 'noop': observation(summary['replay_noop']),
+            'native_abc': native_result, 'noop': observation(summary['replay_noop']),
             'greedy': group(summary['greedy_litecut']),
             'independent': group(summary['independent_regions']),
             'random': [observation(r) for r in summary['random_search']],
@@ -46,7 +50,8 @@ def canonical_outcomes(summary, include_byte_hash=True):
 
 
 def saved_graphs(benchmark, summary):
-    paths = {'native_abc': benchmark / 'native_abc/rewritten.aig'}
+    paths = ({'native_abc': benchmark / 'native_abc/rewritten.aig'}
+             if native_baseline_metrics(summary) is not None else {})
     paths['original'] = Path(summary['original']['provenance']['original']['path'])
     groups = {'noop': [summary['replay_noop']], 'random': summary['random_search'],
               'greedy': summary['greedy_litecut']['observations'],

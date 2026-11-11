@@ -62,6 +62,7 @@ def main():
     env = dict(os.environ, PYTHONPATH=str(run / 'src'))
     sys.path.insert(0, str(run / 'src'))
     from global_timing.reporting import write_report
+    from global_timing.evaluation import failed_comparisons
     from global_timing.processes import terminate_tree
     records = []
 
@@ -100,8 +101,7 @@ def main():
                 if process.returncode or not (output / 'summary.json').is_file():
                     raise RuntimeError('Case failed or timed out; inspect preserved log and intermediate results.')
                 result = json.loads((output / 'summary.json').read_text())
-                failed_methods = [name for name in ['greedy_litecut', 'independent_regions']
-                                  if result[name].get('best') is None]
+                failed_methods = failed_comparisons(result)
                 record.update(status='PARTIAL' if failed_methods else 'PASS', failed_methods=failed_methods,
                               summary=str(output / 'summary.json'))
         except Exception as exc:

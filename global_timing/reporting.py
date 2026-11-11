@@ -7,6 +7,7 @@ import torch
 import numpy as np
 
 from .common import save_json
+from .evaluation import failed_comparisons, native_baseline_metrics
 from .surrogate import scalar_objective
 
 
@@ -49,7 +50,13 @@ def write_report(benchmark: Path, output: Path):
 
     add('Original AIG', original, applied=0, runtime=original.get('runtime_s'))
     add('Replay no-op', baseline, [summary['replay_noop']], 0)
-    add('Native ABC rewrite', summary['native_abc'], runtime=summary.get('exclusive_native_runtime_s'))
+    native = native_baseline_metrics(summary)
+    if native is not None:
+        add('Native ABC rewrite', native, runtime=summary.get('exclusive_native_runtime_s'))
+    failures = failed_comparisons(summary)
+    save_json(output / 'method_failures.json', {'failed_comparisons': failures,
+        'native_abc_attempt': summary.get('native_abc_attempt'),
+        'scope': 'Failed methods have no ranked numeric substitute; original and no-op remain separate controls.'})
     for name in ['greedy_litecut', 'independent_regions']:
         item = summary[name]
         # Support the first historical development run without rewriting it.
@@ -127,6 +134,7 @@ def write_report(benchmark: Path, output: Path):
         row['metrics']['critical_po_indices'] != baseline['critical_po_indices'] for row in observations)
     diagnostics['unsuccessful_deterministic_methods'] = [name for name in ['greedy_litecut', 'independent_regions']
         if summary[name].get('status') == 'FAIL']
+    diagnostics['unsuccessful_comparisons'] = failures
     diagnostics['total_runtime_including_preparation_s'] = summary.get('total_runtime_including_preparation_s')
     diagnostics['preparation_runtime_s'] = summary.get('preparation_runtime_s')
     if predictions:
@@ -185,6 +193,8 @@ def write_report(benchmark: Path, output: Path):
     for row in comparison:
         improvement = 'N/A' if row['delay_improvement_pct'] is None else f"{row['delay_improvement_pct']:.3f}"
         lines.append(f"| {row['method']} | {row['delay_ps']:.6f} | {row['area']:.6f} | {row['adp']:.3f} | {improvement} | {row['evaluations_including_baseline']} | {row['failed_requests']} |")
+    if failures:
+        lines += ['', '未完成的独立对照/方法：' + ', '.join(failures) + '。完整失败记录见method_failures.json；数值表不填补其缺失指标。']
     lines += ['', '预测评估为自适应搜索中的预先预测，不代表跨设计泛化。基线锚定不计作预测准确性的证明。',
               '面积约束参考no-op replay面积；所有失败、warmup和显式修复都计入实际搜索预算。',
               '原始输入与no-op replay分别保留；Native ABC未导出rewrite数量，不用AIG节点减少量冒充rewrite次数。',

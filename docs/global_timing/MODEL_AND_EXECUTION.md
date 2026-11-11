@@ -36,6 +36,8 @@ Region DAG传播默认由`arrival.py`显式执行一阶逆拓扑求导，保存�
 
 原始 baseline、ABC 原生 rewrite、LiteCut 贪心、独立 region、随机搜索和联合搜索都使用同一输入、库、二进制和映射命令。随机与联合搜索有相同真实评估上限；确定性单次方法报告其较小调用数，不能只比较忽略校准成本的优化时间。主结果同时报告相对原始输入和相对 replay no-op 的变化。
 
+原始输入和no-op测量是搜索的必要条件，任一失败仍中止。Native ABC rewrite是独立对照：其工具/CEC/mapping失败单独保存为`native_abc/attempt.json`，summary的`native_abc`为null，禁止替代数值；其余方法继续各自的真实验证。只要有独立对照未成功，完整案例仍为PARTIAL，报告列出缺失方法。成功路径分析只引用已验证测量，不给失败native产物生成路径标签。旧版在native失败后整体中止的结果原样保留。
+
 ## 最大arrival路径审计
 
 `CULS_GLOBAL_TIMING_PATH_REPORT=1`启用独立ABC构建中的可选只读observer；默认关闭。它为arrival达到全局值95%的每个PO输出一条最大arrival链，包括该端点的rise/fall相位、前驱相位、cell/pin、实际load/slew下的arc delay和累计arrival。直接PI/常量端点也有明确终点类型。

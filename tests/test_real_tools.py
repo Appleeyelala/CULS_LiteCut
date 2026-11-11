@@ -1,9 +1,10 @@
-"""Real c1355 rewrite, CEC and Liberty regression; no mocked EDA tools."""
+"""Real EDA regressions, including an explicitly injected control-only failure."""
 import json
 import os
 from pathlib import Path
 import unittest
 import uuid
+import sys
 
 from global_timing.common import ToolError, legacy, read_jsonl, run_tool
 from global_timing.evaluation import Evaluator
@@ -102,6 +103,51 @@ class RealToolTests(unittest.TestCase):
         self.assertEqual(record['status'], 'FAIL')
         self.assertEqual(record['cec'], 'PASS')
         self.assertNotIn('delay_ps', record)
+
+    def test_native_control_failure_preserves_real_other_method_evaluations(self):
+        from global_timing.evaluation import failed_comparisons
+        from global_timing.path_changes import references
+        from global_timing.pipeline import Experiment, SearchConfig
+        from global_timing.reporting import write_report
+        from scripts.summarize_benchmarks import canonical_outcomes, saved_graphs
+        wrapper = self.work / 'abc_control_fixture.py'
+        wrapper.write_text('#!' + sys.executable + '\n'
+            'import os, sys\n'
+            'command = sys.argv[-1]\n'
+            'if command.startswith("cec -n ") and "/native_abc/rewritten.aig" in command:\n'
+            '    print("TEST FIXTURE: injected native-control CEC failure", flush=True)\n'
+            '    sys.exit(19)\n'
+            f'os.execv({str(self.abc)!r}, [{str(self.abc)!r}, *sys.argv[1:]])\n')
+        wrapper.chmod(0o700)
+        output = self.work / 'native_control_failure'
+        experiment = Experiment(self.input, self.gpuls, wrapper, self.run_root / 'input/asap7',
+            self.run_root / 'input/student_checkpoint', output,
+            SearchConfig(evaluation_budget=4, warmup_evaluations=1, gradient_steps=2, calibration_steps=2))
+        summary = experiment.run()
+        self.assertEqual(summary['status'], 'COMPLETED_WITH_FAILURES')
+        self.assertIsNone(summary['native_abc'])
+        self.assertIn('native_abc', failed_comparisons(summary))
+        self.assertEqual(summary['native_abc_attempt']['stage'], 'cec_and_mapping')
+        self.assertIn('TEST FIXTURE', summary['native_abc_attempt']['error'])
+        native = json.loads((output / 'native_abc/evaluation/result.json').read_text())
+        self.assertEqual(native['status'], 'FAIL')
+        self.assertNotIn('delay_ps', native)
+        self.assertFalse((output / 'native_abc/evaluation/mapped.v').exists())
+        self.assertEqual(summary['original']['cec'], 'PASS')
+        self.assertEqual(summary['replay_noop']['metrics']['cec'], 'PASS')
+        for method in ['greedy_litecut', 'independent_regions']:
+            self.assertTrue(summary[method]['observations'])
+        for item in summary['gradient_search'].values():
+            self.assertEqual(item['best']['metrics']['cec'], 'PASS')
+            self.assertGreater(len(item['observations']), 1)
+            self.assertLessEqual(len(item['observations']), 4)
+        comparison = write_report(output, output / 'report')
+        self.assertNotIn('Native ABC rewrite', [r['method'] for r in comparison])
+        self.assertNotIn('native_abc', [r['method'] for r in references(summary)])
+        self.assertNotIn('native_abc', saved_graphs(output, summary))
+        self.assertEqual(canonical_outcomes(summary)['native_abc']['status'], 'FAIL')
+        failures = json.loads((output / 'report/method_failures.json').read_text())
+        self.assertIn('native_abc', failures['failed_comparisons'])
 
     def test_named_io_is_checked_in_preserved_aiger_order(self):
         binary = b'aig 5 3 0 1 2\n10\n' + bytes([4, 2, 2, 2])

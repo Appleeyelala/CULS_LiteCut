@@ -11,6 +11,40 @@ from .common import ToolError, digest, run_tool, save_json, tool_path
 from .structure import aig_structure_digest
 
 
+def native_baseline_metrics(summary):
+    """Read legacy successes or an explicit failed independent ABC control.
+
+    A failed control has no usable timing dictionary, even when an intermediate
+    evaluation file contains partial measurements. Missing data alone is not a
+    failure declaration and must never silently remove a required comparison.
+    """
+    metrics = summary['native_abc']
+    attempt = summary.get('native_abc_attempt')
+    if attempt is None:
+        if not isinstance(metrics, dict):
+            raise ValueError('Missing native ABC metrics without a declared failed attempt.')
+        return metrics
+    if attempt.get('status') == 'FAIL':
+        if metrics is not None or not attempt.get('error'):
+            raise ValueError('Failed native ABC control must have an error and no timing metrics.')
+        return None
+    if (attempt.get('status') != 'PASS' or not isinstance(metrics, dict) or
+            metrics.get('status') != 'PASS' or metrics.get('cec') != 'PASS'):
+        raise ValueError('Native ABC attempt and verified metrics disagree.')
+    return metrics
+
+
+def failed_comparisons(summary):
+    """Independent control failures make a completed search comparison partial."""
+    failed = ['native_abc'] if native_baseline_metrics(summary) is None else []
+    for name in ['greedy_litecut', 'independent_regions']:
+        item = summary[name]
+        best = item.get('best', item if item.get('status') == 'PASS' else None)
+        if best is None:
+            failed.append(name)
+    return failed
+
+
 def cec_passed(text: str) -> bool:
     if re.search(r'not\s+equivalent|verification\s+failed|\bUNDECIDED\b|\bUNSATISFIABLE\s+.*failed', text, re.I):
         return False

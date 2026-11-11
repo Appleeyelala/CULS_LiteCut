@@ -34,3 +34,15 @@ class ReportingTests(unittest.TestCase):
         altered = copy.deepcopy(summary)
         altered['gradient_search']['joint']['best'] = altered['gradient_search']['joint']['observations'][1]
         self.assertNotEqual(canonical_outcomes(summary), canonical_outcomes(altered))
+
+    def test_repeat_control_failure_is_distinct_from_a_successful_measurement(self):
+        row = {'status': 'PASS', 'choices': [0], 'metrics': {'delay_ps': 10}}
+        group = {'observations': [row], 'best': row}
+        summary = {'config': {}, 'original': {}, 'native_abc': {}, 'replay_noop': row,
+                   'greedy_litecut': group, 'independent_regions': group,
+                   'random_search': [row], 'gradient_search': {'joint': group}}
+        altered = copy.deepcopy(summary)
+        altered.update(native_abc=None, native_abc_attempt={'status': 'FAIL', 'stage': 'cec_and_mapping', 'error': 'unit timeout'})
+        self.assertNotEqual(canonical_outcomes(summary), canonical_outcomes(altered))
+        result = canonical_outcomes(altered)['native_abc']
+        self.assertEqual(result, {'status': 'FAIL', 'stage': 'cec_and_mapping', 'metrics': None})

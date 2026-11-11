@@ -15,7 +15,7 @@ import traceback
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from global_timing.common import digest, save_json
-from global_timing.evaluation import Evaluator
+from global_timing.evaluation import Evaluator, native_baseline_metrics
 from global_timing.path_analysis import parse_paths
 from global_timing.structure import parse_aig
 
@@ -102,9 +102,11 @@ def analyze(args):
         groups = {'replay_noop': [summary['replay_noop']], 'random_search': summary['random_search']}
         groups.update({name: summary[name]['observations'] for name in ['greedy_litecut', 'independent_regions']})
         groups.update({'gradient_' + name: item['observations'] for name, item in summary['gradient_search'].items()})
-        requests = [('original', None, original, summary['original'], benchmark / 'original/mapped.v'),
-                    ('native_abc', None, benchmark / 'native_abc/rewritten.aig', summary['native_abc'],
-                     benchmark / 'native_abc/evaluation/mapped.v')]
+        requests = [('original', None, original, summary['original'], benchmark / 'original/mapped.v')]
+        native = native_baseline_metrics(summary)
+        if native is not None:
+            requests.append(('native_abc', None, benchmark / 'native_abc/rewritten.aig', native,
+                             benchmark / 'native_abc/evaluation/mapped.v'))
         for name, rows in groups.items():
             for row in rows:
                 if row['status'] == 'PASS':
@@ -159,6 +161,8 @@ def analyze(args):
                   'tool_timeout_s': timeout,
                   'status': 'PASS' if all(row['status'] == 'PASS' for row in measurements) else 'FAIL',
                   'scope': 'Maximizing Liberty arrival chains, one per near-critical PO. PI/PO indices are preserved interface identities. Mapped node IDs are not aligned across mappings; changed endpoint pairs do not assert unique logical path identity.'}
+        if native is None:
+            report['unavailable_comparisons'] = {'native_abc': summary['native_abc_attempt']}
         save_json(work / 'summary.json', report)
         records.append({'benchmark': str(benchmark), 'status': report['status'], 'summary': str(work / 'summary.json'),
                         'unique_traced_mappings': len(measurements), 'successful_observation_references': len(requests),

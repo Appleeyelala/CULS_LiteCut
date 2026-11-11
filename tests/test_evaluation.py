@@ -2,11 +2,34 @@
 import unittest
 
 from global_timing.common import ToolError, tool_path
-from global_timing.evaluation import cec_passed, parse_timing
+from global_timing.evaluation import cec_passed, failed_comparisons, native_baseline_metrics, parse_timing
 from pathlib import Path
 
 
 class EvaluationTests(unittest.TestCase):
+    def test_native_control_failure_requires_explicit_error_and_no_numeric_substitute(self):
+        import copy
+        metrics = {'status': 'PASS', 'cec': 'PASS', 'delay_ps': 10}
+        summary = {'native_abc': metrics, 'greedy_litecut': {'best': {'metrics': metrics}},
+                   'independent_regions': {'best': None}}
+        self.assertIs(native_baseline_metrics(summary), metrics)
+        self.assertEqual(failed_comparisons(summary), ['independent_regions'])
+        summary.update(native_abc=None, native_abc_attempt={'status': 'FAIL', 'error': 'unit timeout'})
+        self.assertIsNone(native_baseline_metrics(summary))
+        self.assertEqual(failed_comparisons(summary), ['native_abc', 'independent_regions'])
+        for corruption in ['substitute', 'missing_error', 'missing_attempt', 'false_pass', 'unfinished']:
+            changed = copy.deepcopy(summary)
+            if corruption == 'substitute':
+                changed['native_abc'] = metrics
+            elif corruption == 'missing_error':
+                del changed['native_abc_attempt']['error']
+            elif corruption == 'missing_attempt':
+                del changed['native_abc_attempt']
+            else:
+                changed['native_abc_attempt']['status'] = 'PASS' if corruption == 'false_pass' else 'RUNNING'
+            with self.subTest(corruption=corruption), self.assertRaises(ValueError):
+                native_baseline_metrics(changed)
+
     def test_cec_requires_positive_certificate(self):
         self.assertTrue(cec_passed('Networks are equivalent. Time = 0.00 sec'))
         for text in ['Networks are NOT EQUIVALENT.', 'equivalent', 'UNDECIDED',

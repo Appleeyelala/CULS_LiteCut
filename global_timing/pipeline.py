@@ -10,8 +10,8 @@ import time
 import torch
 
 from .candidates import enumerate_candidates, replay
-from .common import digest, run_tool, save_json, tool_path
-from .evaluation import Evaluator
+from .common import ToolError, digest, run_tool, save_json, tool_path
+from .evaluation import Evaluator, failed_comparisons
 from .cut_validation import validate_catalogue
 from .litecut import score_catalogue
 from .optimization import gradient_proposals
@@ -258,20 +258,36 @@ class Experiment:
                   for d, choice in zip(self.catalogue.decisions, combined)]
         return self.catalogue.project(logits)
 
+    def native_baseline(self):
+        """Measure an independent control without substituting another result."""
+        native = self.output / 'native_abc'
+        native.mkdir()
+        native_aig = native / 'rewritten.aig'
+        started = time.monotonic()
+        metrics = None
+        attempt = {'status': 'RUNNING', 'stage': 'rewrite', 'aig': str(native_aig)}
+        try:
+            command = f'read_aiger {tool_path(self.aig)}; strash; rewrite; write_aiger {tool_path(native_aig)}'
+            run_tool([self.evaluator.abc, '-c', command], native, 'rewrite', self.config.timeout_s)
+            attempt['stage'] = 'cec_and_mapping'
+            metrics = self.evaluator.evaluate(native_aig, native / 'evaluation')
+            attempt['status'] = 'PASS'
+        except Exception as exc:
+            attempt.update(status='FAIL', error=f'{type(exc).__name__}: {exc}')
+            if not isinstance(exc, (ToolError, OSError, ValueError)):
+                raise
+        finally:
+            attempt['runtime_s'] = time.monotonic() - started
+            save_json(native / 'attempt.json', attempt)
+        return metrics, attempt
+
     def run(self):
         started = time.monotonic()
         original = self.evaluator.evaluate(self.aig, self.output / 'original')
         baseline = self.evaluate_choice(self.noop, 'replay_noop', 0)
         if baseline['status'] != 'PASS':
             raise RuntimeError('No-rewrite replay baseline failed; search cannot continue.')
-        native = self.output / 'native_abc'
-        native.mkdir()
-        native_aig = native / 'rewritten.aig'
-        native_started = time.monotonic()
-        command = f'read_aiger {tool_path(self.aig)}; strash; rewrite; write_aiger {tool_path(native_aig)}'
-        run_tool([self.evaluator.abc, '-c', command], native, 'rewrite', self.config.timeout_s)
-        native_metrics = self.evaluator.evaluate(native_aig, native / 'evaluation')
-        native_runtime = time.monotonic() - native_started
+        native_metrics, native_attempt = self.native_baseline()
         selecting_started = time.monotonic()
         local_scores = [[] for _ in self.catalogue.decisions]
         for row in self.scores:
@@ -299,16 +315,20 @@ class Experiment:
         random_runtime = time.monotonic() - random_started
         searches = {mode: self.gradient_search(baseline, mode) for mode in self.config.modes}
         summary = {'status': 'COMPLETED', 'original': original, 'replay_noop': baseline,
-                   'native_abc': native_metrics, 'greedy_litecut': greedy, 'independent_regions': independent,
+                   'native_abc': native_metrics, 'native_abc_attempt': native_attempt,
+                   'greedy_litecut': greedy, 'independent_regions': independent,
                    'random_search': random_rows, 'gradient_search': searches,
                    'candidate_count': sum(d['candidate_count'] for d in self.catalogue.decisions),
                    'cut_validation_counts': {k: self.cut_audit[k] for k in
                        ['raw_executable_decisions', 'verified_decisions', 'excluded_decisions']},
                    'region_count': len(self.partition.regions), 'config': asdict(self.config),
                    'preparation_runtime_s': self.preparation_runtime_s,
-                   'exclusive_native_runtime_s': native_runtime, 'exclusive_random_runtime_s': random_runtime,
+                   'exclusive_native_runtime_s': native_attempt['runtime_s'], 'exclusive_random_runtime_s': random_runtime,
                    'total_runtime_including_preparation_s': time.monotonic() - started + self.preparation_runtime_s,
                    'serialization_control': 'Original and zero-choice replay are measured separately; graph serialization may alter mapping.',
                    'scope': 'Measured benchmark outcomes; this run does not establish generalization to other designs.'}
+        summary['failed_comparisons'] = failed_comparisons(summary)
+        if summary['failed_comparisons']:
+            summary['status'] = 'COMPLETED_WITH_FAILURES'
         save_json(self.output / 'summary.json', summary)
         return summary

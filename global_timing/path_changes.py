@@ -8,6 +8,7 @@ import math
 import statistics
 
 from .search_analysis import analyze_search
+from .evaluation import native_baseline_metrics
 
 
 def references(summary):
@@ -17,9 +18,10 @@ def references(summary):
     groups.update({'gradient_' + mode: item['observations'] for mode, item in summary['gradient_search'].items()})
     best = {name: summary[name]['best'] for name in ['greedy_litecut', 'independent_regions']}
     best.update({'gradient_' + mode: item['best'] for mode, item in summary['gradient_search'].items()})
+    controls = ['original'] + (['native_abc'] if native_baseline_metrics(summary) is not None else [])
     items = [{'method': name, 'index': None, 'metrics': summary[name], 'observation': None,
               'baseline_anchor': name == 'original', 'is_saved_final_selection': False,
-              'failed_requests_since_previous_success': 0} for name in ['original', 'native_abc']]
+              'failed_requests_since_previous_success': 0} for name in controls]
     for name, rows in groups.items():
         indices = [row['index'] for row in rows]
         if indices != sorted(set(indices)):

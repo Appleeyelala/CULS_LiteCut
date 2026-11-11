@@ -41,6 +41,18 @@ def fixture():
 
 
 class PathChangeTests(unittest.TestCase):
+    def test_failed_native_control_has_no_fabricated_path_reference(self):
+        summary, report, states = fixture()
+        summary.update(native_abc=None, native_abc_attempt={'status': 'FAIL', 'error': 'unit timeout'})
+        report['selection_path_changes'] = [r for r in report['selection_path_changes'] if r['method'] != 'native_abc']
+        self.assertNotIn('native_abc', [r['method'] for r in references(summary)])
+        result = analyze_case(summary, report, states)
+        self.assertTrue(result['serialization_control']['observed_critical_pairs_changed'])
+        self.assertNotIn('native_abc', result['successful_reference_counts'])
+        summary['native_abc'] = summary['original']
+        with self.assertRaises(ValueError):
+            references(summary)
+
     def test_predictions_join_only_same_successful_path_observations(self):
         from test_search_analysis import summary_fixture
         summary = summary_fixture()

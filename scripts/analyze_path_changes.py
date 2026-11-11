@@ -173,7 +173,7 @@ def main():
         attempt = attempts[index]
         record = attempt['record']
         row['benchmark_source_commit'] = benchmark_sources[attempt['source']]['source_commit']
-        if identity['status'] != 'PASS':
+        if identity['status'] not in {'PASS', 'PARTIAL'}:
             row.update(analysis_status='BENCHMARK_NOT_PASS', reason=record.get('reason'))
             continue
         summary_path = Path(record['summary']).resolve()
@@ -214,7 +214,8 @@ def main():
     report = {'cohort': str(args.cohort.resolve()), 'cohort_sha256': digest(args.cohort),
         'expected_inputs': cohort['expected_inputs'], 'recorded_inputs': cohort['recorded_inputs'],
         'benchmark_coverage_complete': cohort['coverage_complete'], 'analyzed_inputs': len(cases),
-        'all_selected_pass_cases_analyzed': len(cases) == cohort['case_status_counts'].get('PASS', 0),
+        'all_selected_pass_cases_analyzed': sum(case['status'] == 'PASS' for case in cases) == cohort['case_status_counts'].get('PASS', 0),
+        'all_selected_reported_cases_analyzed': len(cases) == sum(cohort['case_status_counts'].get(s, 0) for s in ['PASS', 'PARTIAL']),
         'coverage_counts': dict(Counter(row['analysis_status'] for row in coverage)),
         'audit_failure_count': sum(row['analysis_status'] == 'ANALYSIS_ERROR' for row in coverage),
         'aggregate': aggregate_cases(cases), 'audit_sources': audit_sources, 'invalid_report_snapshots': invalid,
@@ -264,7 +265,7 @@ def main():
         fig.savefig(output / ('path_changes.' + extension), dpi=160)
     plt.close(fig)
     lines = ['# 已保存的关键端点与arrival链变化', '',
-        f'冻结清单：{cohort["recorded_inputs"]}/{cohort["expected_inputs"]}有终态记录；路径分析{len(cases)}个成功设计。',
+        f'冻结清单：{cohort["recorded_inputs"]}/{cohort["expected_inputs"]}有终态记录；分析{len(cases)}个设计的成功测量，原PASS/PARTIAL状态保留。',
         f'覆盖状态：{report["coverage_counts"]}；源码/observer分层见summary.json。', '',
         '| 方法 | 成功非锚点观察 | PO集合变化 | PO不变但观测PI变化 | 跨失败请求的成功转移 |',
         '|---|---:|---:|---:|---:|']

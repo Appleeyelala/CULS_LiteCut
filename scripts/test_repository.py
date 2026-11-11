@@ -41,6 +41,9 @@ def functional_evidence(root, runs):
         'test_reused_baseline_resolves_record_provenance_at_variable_depth': ['scripts/analyze_timing_paths.py']}
     specific['test_student_features_equal_full_prefix_without_computing_unused_columns'] = [
         'projects/litecut/src/data_preprocess/feat_extraction_v3.py']
+    specific['test_native_control_failure_preserves_real_other_method_evaluations'] = [
+        'global_timing/pipeline.py', 'global_timing/evaluation.py', 'global_timing/reporting.py',
+        'global_timing/path_changes.py', 'scripts/summarize_benchmarks.py']
     for name in ['test_raw_measurement_validation_rejects_tampered_cec_paths_and_netlist',
                  'test_report_priority_preserves_failure_and_exact_source_path']:
         specific[name] = ['scripts/analyze_path_changes.py']

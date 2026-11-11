@@ -24,6 +24,8 @@
 
 原生修改的独立验证现已完成：64389重建工具，实际链接solver检查三节点环、两个fanin的传递依赖、补相及100001级合法别名链，并通过两次常量输出CEC。64341.6随后记录69/69真实核心PASS，完整c1355和index197比较PASS；同一20项旧循环选择明确CYCLE_REJECT，另一次13项修复安装CEC/mapping PASS。c1355全部数值、选择与图结构保持不变。复核记录为`output/cycle_regression.json`，详细来源见[NATIVE_REPLAY_CYCLES.md](NATIVE_REPLAY_CYCLES.md)。
 
+`94909a7`的独立native对照失败隔离增加5项CPU检查及1项真实工具故障注入。64392的75项矩阵为63 PASS/12 SKIP；64341.8随后75/75真实核心PASS，验证必要original/no-op失败仍中止、内部错误重新抛出、缺失native不替代数值/路径，以及其他方法继续真实验证。故障仅注入native的CEC；其余9份实际映射、12个成功路径引用、3个预测关联通过。正常c1355/index197完整比较PASS，c1355数值/选择/图结构与原参照相同；故障fixture不作为性能benchmark。
+
 `20261111T132425Z-student-feature-regression-9184e32c`的CPU矩阵为32 PASS、10个真实工具入口SKIP；不能把这些SKIP算作CPU任务完成了GPU验证。其保留输入复核另行重算c1355的417条、div的122,869条原实现/候选特征及预测，与旧25维提取流程保存的全部score记录完全相同。没有训练模型或更换权重。
 
 `20261111T130741Z-selection-cost-regression-3cba9919`检查候选归一化、24组标量/批量坐标成本及可获得的旧独立选择。缺失完整旧选择的div和缺失旧完整catalogue的hyp明确为`NO_SAVED_REFERENCE`，不冒称做过这些完整对照。
@@ -32,7 +34,9 @@
 
 ## 全程序矩阵
 
-最新已完成矩阵`20261111T175518Z-acyclic-cohort-program-audit-333c8796`（源码`cefb56a`，64390）覆盖2,510项源码/入口：1,613项语法PASS、1,395个编译translation units、142项import PASS、17 FAIL、1 SKIP、58项CLI smoke PASS。106个文件有来源字节匹配的命名功能证据；这不是行覆盖率，其余项目明确不宣称逐文件功能覆盖。新增的证据关联入口实际为rewrite头文件/实现、candidate与pipeline附上64341.6的循环拒绝/修复记录，且逐文件字节相同。该任务复用已执行的69项真实核心及原生CPU证据，没有再次执行GPU测试或mapping；6m50s、MaxRSS539592 KiB。
+最新已完成矩阵`20261111T182419Z-native-control-real-regression-2c5d4d0b`（源码`94909a7`，64341.8）覆盖2,510项源码/入口：1,613项语法PASS、1,395个编译translation units、142项import PASS、17 FAIL、1 SKIP、58项CLI smoke PASS。108个文件有来源字节匹配的命名功能证据；这不是行覆盖率，其余项目明确不宣称逐文件功能覆盖。同一任务完成75项真实核心、两个完整benchmark、受控native失败后的真实测量/路径验证和已有导入工具检查。13m17s、MaxRSS839268 KiB；原生源码未变，复用64389实际构建。
+
+此前`20261111T175518Z-acyclic-cohort-program-audit-333c8796`（源码`cefb56a`，64390）的同规模矩阵及106个有命名功能证据的文件完整保留。它为rewrite头文件/实现、candidate与pipeline附上来源匹配的64341.6循环拒绝/修复记录，复用69项真实核心及原生CPU证据，没有再次执行GPU测试或mapping；6m50s、MaxRSS539592 KiB。
 
 此前`20261111T173748Z-acyclic-replay-real-regression-e1510460`（源码`20e7aba`，原生代码与`d2065ab`相同，64341.6）的同规模矩阵完整保留。同一运行有69项真实核心测试、两个完整benchmark和实际循环拒绝/修复检查；原生CPU证据来自相同源码的64389。9m27s、MaxRSS810424 KiB，旧原生源码PASS不冒充本次验证，历史依赖缺项仍明确保留。
 

@@ -82,7 +82,7 @@
 | 64391 | `20261111T180508Z-hyp-saved-gradient-profile-8d6186eb` | COMPLETED：只读旧3600 s超时的ACE hyp保存数据，重构首轮3样本校准及2×20步提案；全部loss/参数/梯度trace精确相同。117509 regions、16269层；含profiler的校准90.58 s、提案113.57 s。3m40s、MaxRSS902432 KiB；无新增rewrite/mapping/时序标签，不替代完整补验 |
 | 64340.13 | `20261111T181423Z-openabc-hyp-terminal-retry-ace13171` | RUNNING：59的3600 s尝试已终止后，在新目录用已验证无环工具和缓存实现补验；仍每搜索8次预算，显式7200 s单例/900 s工具时限。保存旧完整records/run元数据及hash；不重复启动live147或122，不新增GPU allocation。源码`f984581`，原生/优化器与已验证版本相同；共享资源计时不能用于独占性能比较 |
 | 64392 | `20261111T182248Z-native-control-failure-regression-7ef427ca` | COMPLETED_WITH_GPU_OMISSIONS：`94909a7`隔离独立native对照失败，75项CPU矩阵63 PASS/12 SKIP；检查必要基线失败中止、内部错误重新抛出、缺失对照禁止数值/路径替代及重复结果状态。11 s；真实工具另行验证 |
-| 64341.8 | `20261111T182419Z-native-control-real-regression-2c5d4d0b` | RUNNING：75/75真实核心PASS；c1355/index197完整8预算双目标比较69.22/225.77 s PASS，c1355数值/选择/图结构不变，循环修复仍为13项CEC PASS。独立native CEC故障注入保留FAIL，其余真实测量的9份映射/12个路径引用/3个预测关联通过。导入工具检查通过，全程序矩阵收尾中；人为故障不计入benchmark性能 |
+| 64341.8 | `20261111T182419Z-native-control-real-regression-2c5d4d0b` | COMPLETED_WITH_EXPLICIT_OMISSIONS：75/75真实核心PASS；c1355/index197完整比较69.22/225.77 s PASS，c1355数值/选择/图结构不变，循环修复仍为13项CEC PASS。独立native故障保留FAIL，其余真实测量的9份映射/12个路径引用/3个预测关联通过。2510项矩阵完成：142 import PASS/17 FAIL/1 SKIP、58 CLI smoke PASS、1395编译TU、108文件有命名证据。13m17s、MaxRSS839268 KiB；故障注入不计入benchmark性能 |
 | 64393 | `20261111T182725Z-completed116-path-analysis-3a705938` | COMPLETED_WITH_EXPLICIT_OMISSIONS：只读复核64381全部116设计/1870份映射/2218引用，错误0，原39设计全部分析精确一致。50/116个original→no-op代表PI/PO对变化；9个失败及780未记录保留。5m25s、MaxRSS998472 KiB；没有新增rewrite/CEC/mapping，统计与解释见PATH_CHANGE_ANALYSIS.md |
 
 ## 首次真实闭环的有限结论

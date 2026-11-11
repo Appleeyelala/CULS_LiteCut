@@ -84,6 +84,7 @@
 | 64392 | `20261111T182248Z-native-control-failure-regression-7ef427ca` | COMPLETED_WITH_GPU_OMISSIONS：`94909a7`隔离独立native对照失败，75项CPU矩阵63 PASS/12 SKIP；检查必要基线失败中止、内部错误重新抛出、缺失对照禁止数值/路径替代及重复结果状态。11 s；真实工具另行验证 |
 | 64341.8 | `20261111T182419Z-native-control-real-regression-2c5d4d0b` | COMPLETED_WITH_EXPLICIT_OMISSIONS：75/75真实核心PASS；c1355/index197完整比较69.22/225.77 s PASS，c1355数值/选择/图结构不变，循环修复仍为13项CEC PASS。独立native故障保留FAIL，其余真实测量的9份映射/12个路径引用/3个预测关联通过。2510项矩阵完成：142 import PASS/17 FAIL/1 SKIP、58 CLI smoke PASS、1395编译TU、108文件有命名证据。13m17s、MaxRSS839268 KiB；故障注入不计入benchmark性能 |
 | 64393 | `20261111T182725Z-completed116-path-analysis-3a705938` | COMPLETED_WITH_EXPLICIT_OMISSIONS：只读复核64381全部116设计/1870份映射/2218引用，错误0，原39设计全部分析精确一致。50/116个original→no-op代表PI/PO对变化；9个失败及780未记录保留。5m25s、MaxRSS998472 KiB；没有新增rewrite/CEC/mapping，统计与解释见PATH_CHANGE_ANALYSIS.md |
+| 64340.14 | `20261111T184033Z-isolated-native-backend-retry-813f3b26` | RUNNING：75项真实核心再次PASS后，使用已验证失败隔离流程重验已终止的108；每搜索8次预算、7200 s单例/900 s工具限制，实际ABC没有故障注入。旧900 s native失败及源记录前缀已冻结；本次native证明仍按真实结果决定状态，不以旧失败强制本次失败。源码`0355cae`，代码与已验证`94909a7`相同；共享既有allocation，不重复其他live输入 |
 
 ## 首次真实闭环的有限结论
 

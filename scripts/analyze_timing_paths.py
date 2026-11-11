@@ -24,6 +24,28 @@ def netlist_body(path):
     return '\n'.join(line for line in path.read_text().splitlines() if not line.lstrip().startswith('//'))
 
 
+def evaluation_directory(aig, benchmark, expected_input_hash):
+    """Locate the originating observation, without assuming replay depth."""
+    aig, benchmark = aig.resolve(), benchmark.resolve()
+    if not aig.is_relative_to(benchmark):
+        raise ValueError('Replay artifact is outside its saved benchmark.')
+    for parent in aig.parents:
+        if not parent.is_relative_to(benchmark):
+            break
+        record = parent / 'observation.json'
+        if not record.is_file():
+            continue
+        stored = json.loads(record.read_text())
+        if stored['status'] != 'PASS' or Path(stored['aig']).resolve() != aig:
+            raise ValueError('Observation does not identify this replay artifact.')
+        evaluated = parent / 'evaluation'
+        metrics = json.loads((evaluated / 'result.json').read_text())
+        if metrics['input_sha256'] != expected_input_hash:
+            raise ValueError('Observation input hash does not match its measured artifact.')
+        return evaluated
+    raise FileNotFoundError('No originating observation for replay artifact: ' + str(aig))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--run', type=Path, required=True)
@@ -85,15 +107,14 @@ def analyze(args):
                 if row['status'] == 'PASS':
                     # A reused no-op row can be relabeled with a search method
                     # while retaining its original replay/evaluation artifacts.
-                    evaluated = Path(row['aig']).parents[2] / 'evaluation'
-                    stored = json.loads((evaluated / 'result.json').read_text())
-                    if stored['input_sha256'] != row['metrics']['input_sha256']:
-                        raise ValueError('Observation does not identify its actual evaluation directory.')
+                    evaluated = evaluation_directory(Path(row['aig']), benchmark, row['metrics']['input_sha256'])
                     mapped = evaluated / 'mapped.v'
                     requests.append((name, row['index'], Path(row['aig']), row['metrics'], mapped))
         cached, measurements, changes, previous = {}, [], [], {}
         for name, index, aig, reference, mapped in requests:
             input_hash = digest(aig)
+            if digest(mapped) != reference['mapped_sha256']:
+                raise ValueError('Saved mapped netlist checksum changed.')
             mapped_hash = hashlib.sha256(netlist_body(mapped).encode()).hexdigest()
             key = input_hash + ':' + mapped_hash
             if input_hash != reference['input_sha256'] or reference['cec'] != 'PASS':

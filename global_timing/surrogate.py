@@ -12,10 +12,16 @@ import numpy as np
 import torch
 from torch import nn
 
+from .arrival import prepare_arrival_layers, reference_arrivals, smooth_arrivals
+
 
 class TimingSurrogate(nn.Module):
-    def __init__(self, partition, catalogue, scores, baseline, temperature_ratio=0.005):
+    def __init__(self, partition, catalogue, scores, baseline, temperature_ratio=0.005,
+                 propagation_backend='bounded_tape'):
         super().__init__()
+        if propagation_backend not in {'bounded_tape', 'reference'}:
+            raise ValueError('Unknown arrival propagation backend.')
+        self.propagation_backend = propagation_backend
         self.partition = partition
         self.catalogue = catalogue
         self.counts = [d['candidate_count'] + 1 for d in catalogue.decisions]
@@ -118,6 +124,7 @@ class TimingSurrogate(nn.Module):
                 destinations.extend([position] * len(edge_by_target[rid]))
             self.layers.append((torch.tensor(nodes, dtype=torch.long), torch.tensor(edges, dtype=torch.long),
                                 torch.tensor(destinations, dtype=torch.long)))
+        self.arrival_layers = prepare_arrival_layers(self.edge_sources, self.layers)
         self.register_buffer('output_regions', torch.tensor([partition.owner.get(lit >> 1, -1)
                                                             for lit in partition.aig.po_literals], dtype=torch.long))
         structural_arrivals = {}
@@ -227,18 +234,8 @@ class TimingSurrogate(nn.Module):
         interaction = region_features[:, self.edge_targets, :] * upstream_features
         log_scale = (local * self.local_weights).sum(-1) + (interaction * self.interaction_weights).sum(-1)
         costs = self.edge_depths[None, :] * self.depth_to_ps * torch.exp(2.0 * torch.tanh(log_scale / 2.0))
-        arrivals = expected.new_zeros((batch, self.n_regions))
-        for nodes, edges, destination in self.layers:
-            sources = self.edge_sources[edges]
-            upstream = arrivals[:, sources.clamp_min(0)] * (sources >= 0)[None, :]
-            values = upstream + costs[:, edges]
-            index = destination[None, :].expand(batch, -1)
-            maximum = values.new_full((batch, len(nodes)), -torch.inf).scatter_reduce(1, index, values,
-                                                                                   reduce='amax').detach()
-            sums = values.new_zeros(maximum.shape).scatter_add(1, index, torch.exp(
-                (values - maximum.gather(1, index)) / self.temperature))
-            stage = maximum + self.temperature * sums.log()
-            arrivals = arrivals.index_copy(1, nodes, stage)
+        propagate = reference_arrivals if self.propagation_backend == 'reference' else smooth_arrivals
+        arrivals = propagate(costs, self.arrival_layers, self.n_regions, self.temperature)
         po = arrivals[:, self.output_regions.clamp_min(0)] * (self.output_regions >= 0)[None, :]
         return po, arrivals.T
 
@@ -287,6 +284,8 @@ class TimingSurrogate(nn.Module):
         self.requires_grad_(False)
         return {'samples': len(usable), 'losses': losses,
                 'parameters': {name: p.detach().tolist() for name, p in self.named_parameters()},
+                'arrival_propagation_backend': self.propagation_backend,
+                'supported_derivative_order': 1 if self.propagation_backend == 'bounded_tape' else None,
                 'scope': 'Training fit only; new evaluations must be predicted before their labels are observed.'}
 
 

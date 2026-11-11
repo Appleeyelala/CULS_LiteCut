@@ -135,7 +135,10 @@ def replay(gpuls, aig, owner_csv, catalogue, choices, output, timeout=300):
         if set(selected) != set(requested):
             raise ToolError('Replay did not preselect exactly the requested candidates.')
         rejected = {str(key): row['final_status'] for key, row in selected.items() if row['final_status'] != 'ACCEPTED'}
-        result.update(applied_rewrites=sum(row['final_status'] == 'ACCEPTED' for row in trace), rejected=rejected)
+        result.update(applied_rewrites=sum(row['final_status'] == 'ACCEPTED' for row in trace), rejected=rejected,
+                      rejected_requests=[{'root': key[0], 'cut_slot': key[1], 'subgraph_index': key[2],
+                                          'status': row['final_status']}
+                                         for key, row in selected.items() if row['final_status'] != 'ACCEPTED'])
         if rejected:
             raise ToolError('Candidate combination was not fully accepted; refusing a substituted result.')
         path = raw / 'aigs/choice.aig'

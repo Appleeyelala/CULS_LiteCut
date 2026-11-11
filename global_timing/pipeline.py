@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-import hashlib
 import json
 from pathlib import Path
 import random
@@ -76,9 +75,46 @@ class Experiment:
             result.update(status='PASS', metrics=metrics, applied_rewrites=execution['applied_rewrites'], aig=str(candidate))
         except Exception as exc:
             result.update(status='FAIL', error=f'{type(exc).__name__}: {exc}')
+            trace_summary = work / 'rewrite/replay.json'
+            if trace_summary.exists():
+                result['execution_failure'] = json.loads(trace_summary.read_text())
         result['runtime_s'] = time.monotonic() - start
         save_json(work / 'observation.json', result)
         return result
+
+    def repair_choice(self, observation):
+        """A new, explicit request, never reinterpret a failed partial replay."""
+        rejected = observation.get('execution_failure', {}).get('rejected_requests', [])
+        if not rejected:
+            return None
+        failed = {(row['root'], row['cut_slot']) for row in rejected}
+        choices = observation['choices'].copy()
+        for index, decision in enumerate(self.catalogue.decisions):
+            if (decision['root'], decision['cut_slot']) in failed:
+                choices[index] = 0
+        self.catalogue.validate(choices)
+        return choices if choices != observation['choices'] else None
+
+    def deterministic_baseline(self, choices, method, baseline):
+        rows = []
+        seen = set()
+        while len(rows) < self.config.evaluation_budget and tuple(choices) not in seen:
+            seen.add(tuple(choices))
+            reason = None if not rows else {'source': 'explicit_feasibility_repair', 'parent_index': rows[-1]['index']}
+            observation = self.evaluate_choice(choices, method, len(rows), reason)
+            rows.append(observation)
+            if observation['status'] == 'PASS':
+                break
+            choices = self.repair_choice(observation)
+            if choices is None:
+                break
+        successful = [row for row in rows if row['status'] == 'PASS']
+        summary = {'method': method, 'observations': rows, 'status': 'PASS' if successful else 'FAIL',
+                   'best': successful[-1] if successful else None,
+                   'fallback_noop': baseline if not successful else None,
+                   'evaluations': len(rows), 'repair_is_new_replay': True}
+        save_json(self.output / method / 'summary.json', summary)
+        return summary
 
     def random_choice(self, rng):
         # Variable-density search includes sparse and joint configurations.
@@ -120,10 +156,14 @@ class Experiment:
         seen = {tuple(self.noop)}
         rng = random.Random(self.config.seed)
         iteration, stop_reason = 0, 'evaluation_budget_reached'
+        repair_pending = []
         while len(observations) < self.config.evaluation_budget:
             remaining = self.config.evaluation_budget - len(observations)
             candidates = []
-            if len(observations) <= self.config.warmup_evaluations:
+            if repair_pending:
+                candidates = repair_pending[:min(remaining, self.config.feedback_batch)]
+                repair_pending = repair_pending[len(candidates):]
+            elif len(observations) <= self.config.warmup_evaluations:
                 choices = self.fresh_random(rng, seen)
                 if choices is not None:
                     candidates = [{'choices': choices, 'source': 'calibration_warmup'}]
@@ -153,6 +193,10 @@ class Experiment:
                 observation = self.evaluate_choice(choices, method, len(observations), prediction)
                 observations.append(observation)
                 seen.add(tuple(choices))
+                repaired = self.repair_choice(observation)
+                if repaired is not None and tuple(repaired) not in seen:
+                    repair_pending.append({'choices': repaired, 'source': 'explicit_feasibility_repair',
+                                           'parent_index': observation['index'], 'parent_source': candidate['source']})
                 best = min(observations, key=lambda row: self.rank_actual(row, baseline['metrics'], mode))
                 save_json(self.output / method / f'progress_{len(observations):04d}.json',
                           {'best_choices': best['choices'], 'best_metrics': best.get('metrics'),
@@ -210,16 +254,19 @@ class Experiment:
         local_scores = [[] for _ in self.catalogue.decisions]
         for row in self.scores:
             local_scores[row['decision_index']].append(-row['predicted_local_abc_delay'])
-        greedy = self.evaluate_choice(self.catalogue.project(local_scores), 'greedy_litecut', 0)
-        independent = self.evaluate_choice(self.independent_choices(baseline['metrics']), 'independent_regions', 0)
+        greedy = self.deterministic_baseline(self.catalogue.project(local_scores), 'greedy_litecut', baseline)
+        independent = self.deterministic_baseline(self.independent_choices(baseline['metrics']), 'independent_regions', baseline)
         rng = random.Random(self.config.seed)
         random_rows, seen = [dict(baseline, baseline_reused=True)], {tuple(self.noop)}
+        repair = None
         while len(random_rows) < self.config.evaluation_budget:
-            choices = self.fresh_random(rng, seen)
+            choices = repair if repair is not None and tuple(repair) not in seen else self.fresh_random(rng, seen)
             if choices is None:
                 break
-            random_rows.append(self.evaluate_choice(choices, 'random_search', len(random_rows)))
+            random_rows.append(self.evaluate_choice(choices, 'random_search', len(random_rows),
+                               {'source': 'explicit_feasibility_repair' if repair == choices else 'random'}))
             seen.add(tuple(choices))
+            repair = self.repair_choice(random_rows[-1])
         save_json(self.output / 'random_search/observations.json', random_rows)
         searches = {mode: self.gradient_search(baseline, mode) for mode in self.config.modes}
         summary = {'status': 'COMPLETED', 'original': original, 'replay_noop': baseline,

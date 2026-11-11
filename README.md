@@ -1,6 +1,6 @@
 # CULS LiteCut research workspace
 
-这里集中管理梯度下降与 LiteCut 研究的已有源码、证据和项目历史，研究对象是 AIG rewriting、strict maximal MFFC、候选局部 delay 与映射后 timing。长期目标是形成论文；本次建立可追溯的工作基线，后续研究方向留待讨论。
+这里集中管理梯度下降与 LiteCut 研究的源码、证据和项目历史，研究对象是 AIG rewriting、strict maximal MFFC、候选局部 delay 与映射后 timing。长期目标是形成论文。当前已按用户的新任务进入完整优化框架的实现与验证阶段；[验收矩阵](docs/global_timing/IMPLEMENTATION_STATUS.md)记录尚未完成的要求，[运行记录](docs/global_timing/RUN_LOG.md)区分历史证据与新实验。
 
 源码工作区是 `/home/wushangge/CULS_LiteCut`，运行与数据根目录是 `/data/wushangge/CULS_LiteCut`。
 
@@ -19,6 +19,9 @@
 | `provenance/` | 文件来源及 SHA256、原仓库 commit/状态/差异、资产及历史运行索引 |
 | `scripts/` | 导入核验、未来运行目录准备工具，不自动执行实验 |
 | `config/` | 数据根目录、工程位置和资源上限 |
+| `global_timing/` | 新增分区、候选、批量推理、时序代理、梯度搜索与真实验证闭环 |
+| `tests/` | 结构参照、数值梯度、候选可行性及真实 CULS/ABC 回归 |
+| `framework/abc/` | 独立 ABC 构建的只读 Liberty 端点报告插桩 |
 
 历史证据覆盖 Gate1、Gate2、Gate3A 至 Gate3F，以及后续 timing 标签更正、source-restricted timing、R9 机制分析和局部 mapper arrival 验证。Gate3F 的四组结果、R9 单案例与局部 arrival 验证具有不同测量目标，不能合并为一个已验证的全局优化算法。
 

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import math
 
+import numpy as np
 import torch
 from torch import nn
 
@@ -139,14 +140,20 @@ class TimingSurrogate(nn.Module):
         allowed = set(self.catalogue.region_decisions[rid])
         if not set(choices) <= allowed:
             raise ValueError('Independent selection includes another region.')
-        values = []
-        for port, depth in self.partition.transfers[rid].items():
+        local_features = []
+        for port in self.partition.transfers[rid]:
             local = self.features.new_zeros(4)
             for index in self.port_decisions[rid, port]:
                 choice = choices.get(index, 0)
                 if not 0 <= choice < self.counts[index]:
                     raise ValueError('Invalid local candidate choice.')
                 local = local + self.features[index, choice]
+            local_features.append(local)
+        return self._independent_arrival_from_ports(rid, local_features)
+
+    def _independent_arrival_from_ports(self, rid, local_features):
+        values = []
+        for (port, depth), local in zip(self.partition.transfers[rid].items(), local_features):
             scale = (local * self.local_weights).sum()
             cost = depth * self.depth_to_ps * torch.exp(2 * torch.tanh(scale / 2))
             upstream = self.partition.owner.get(port)
@@ -154,6 +161,47 @@ class TimingSurrogate(nn.Module):
                 cost = cost + self.baseline_region_arrivals[upstream]
             values.append(cost)
         return self.temperature * torch.logsumexp(torch.stack(values) / self.temperature, dim=0)
+
+    def independent_region_options(self, rid, choices, index):
+        """Batch the independent baseline's coordinate options on the CPU.
+
+        Ordered add.accumulate preserves the reference's left-to-right feature
+        additions. It avoids a Python/Torch operation for every (port, decision,
+        candidate) triple. No incremental cache or regrouped sum is used. This
+        is a non-differentiable baseline helper, not the joint surrogate path.
+        """
+        allowed = set(self.catalogue.region_decisions[rid])
+        if index not in allowed or not set(choices) <= allowed:
+            raise ValueError('Independent selection includes another region.')
+        if any(type(c) is not int or not 0 <= c < self.counts[i] for i, c in choices.items()):
+            raise ValueError('Invalid local candidate choice.')
+        if self.features.device.type != 'cpu' or self.features.dtype != torch.float64:
+            raise ValueError('Independent baseline batching requires float64 CPU features.')
+        count = self.counts[index]
+        features = self.features.detach().numpy()
+        ports = list(self.partition.transfers[rid])
+        local = np.zeros((count, len(ports), 4), dtype=np.float64)
+        for position, port in enumerate(ports):
+            indices = self.port_decisions[rid, port]
+            if not indices:
+                continue
+            selected = features[indices, [choices.get(i, 0) for i in indices]]
+            if index in indices:
+                # Leading zero mirrors the scalar reference's initial value.
+                terms = np.zeros((count, len(indices) + 1, 4), dtype=np.float64)
+                terms[:, 1:, :] = selected
+                terms[:, indices.index(index) + 1, :] = features[index, :count]
+                np.add.accumulate(terms, axis=1, out=terms)
+                local[:, position, :] = terms[:, -1, :]
+            else:
+                terms = np.concatenate((np.zeros((1, 4), dtype=np.float64), selected))
+                np.add.accumulate(terms, axis=0, out=terms)
+                local[:, position, :] = terms[-1]
+        with torch.no_grad():
+            # Keep the scalar transcendental/reduction kernels too: vectorized
+            # exp/tanh can round differently and perturb deterministic ties.
+            values = torch.from_numpy(local)
+            return torch.stack([self._independent_arrival_from_ports(rid, values[c]) for c in range(count)])
 
     def one_hot(self, choices):
         self.catalogue.validate(choices)

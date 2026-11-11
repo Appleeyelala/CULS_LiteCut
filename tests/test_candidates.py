@@ -1,6 +1,8 @@
 import unittest
+from types import SimpleNamespace
 
-from global_timing.candidates import Catalogue, conflict_reason
+from global_timing.candidates import Catalogue, conflict_reason, catalogue_from_raw
+from global_timing.common import legacy
 
 
 def decision(root, members, leaves):
@@ -9,6 +11,23 @@ def decision(root, members, leaves):
 
 
 class CandidateTests(unittest.TestCase):
+    def test_catalogue_matches_imported_normalization_and_pairwise_conflicts(self):
+        rows = [decision(10, [8, 10], [1, 2, 3]), decision(12, [12], [8, 5, 6]),
+                decision(14, [14], [1, 2, 3]), decision(16, [16], [4, 5, 6])]
+        rows[-1].update(candidate_count=0, candidate_subgraph_indices=[])
+        for row in rows:
+            row.update(truth=128, truth_class=3, saved_count=len(row['removable_nodes']))
+        partition = SimpleNamespace(regions=[{}, {}], owner={8: 0, 10: 0, 12: 1, 14: 1, 16: 1})
+        actual = catalogue_from_raw(list(reversed(rows)), partition)
+        normalize = legacy('gate3c_analyze').normalize_decision
+        expected = [normalize(row, f'd{i}', partition.owner, {0, 1}) for i, row in enumerate(rows[:-1])]
+        for row in expected:
+            row['noop'] = {'choice_index': 0, 'subgraph_index': None, 'semantics': 'ORIGINAL_AIG'}
+        self.assertEqual(actual.decisions, expected)
+        self.assertEqual(actual.conflicts, [(i, j) for i in range(len(expected)) for j in range(i + 1, len(expected))
+                                            if conflict_reason(expected[i], expected[j])])
+        self.assertEqual(actual.region_decisions, {0: [0], 1: [1, 2]})
+
     def test_conflict_types(self):
         a = decision(10, [8, 10], [1, 2, 3])
         self.assertEqual(conflict_reason(a, decision(10, [10], [4, 5, 6])), 'SAME_ROOT')

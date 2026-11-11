@@ -75,8 +75,11 @@ def conflict_reason(left, right):
 def catalogue_from_raw(rows, partition):
     normalize = legacy('gate3c_analyze').normalize_decision
     decisions = []
+    # The imported normalizer only reads membership. Rebuilding this invariant
+    # for every cut made normalization O(number_of_cuts * number_of_regions).
+    region_ids = frozenset(range(len(partition.regions)))
     for row in sorted(rows, key=lambda r: (r['root'], r['cut_slot'])):
-        decision = normalize(row, f'd{len(decisions)}', partition.owner, set(range(len(partition.regions))))
+        decision = normalize(row, f'd{len(decisions)}', partition.owner, region_ids)
         if decision['candidate_count'] == 0:
             continue
         if decision['classification'] != 'INTRA_REGION':

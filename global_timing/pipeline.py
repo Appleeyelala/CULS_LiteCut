@@ -242,14 +242,11 @@ class Experiment:
                 active = set()
                 for _ in range(2):
                     for index in indices:
-                        ranked = []
-                        for choice in range(model.counts[index]):
-                            if choice and neighbors[index] & (active - {index}):
-                                continue
-                            trial = local.copy()
-                            trial[index] = choice
-                            ranked.append((float(model.independent_region_arrival(rid, trial)), choice))
-                        local[index] = min(ranked)[1]
+                        if neighbors[index] & (active - {index}):
+                            local[index] = 0  # the only feasible option
+                        else:
+                            costs = model.independent_region_options(rid, local, index)
+                            local[index] = min((float(cost), choice) for choice, cost in enumerate(costs))[1]
                         active.discard(index)
                         if local[index]:
                             active.add(index)

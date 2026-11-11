@@ -1,5 +1,6 @@
 """Analytical unit fixtures, not experimental timing labels."""
 import unittest
+import random
 
 import torch
 
@@ -31,6 +32,39 @@ def model_fixture():
 
 
 class SurrogateTests(unittest.TestCase):
+    def test_batched_independent_options_preserve_ordered_costs_and_ties(self):
+        # A single region with many nested decision roots and differing port
+        # dependencies stresses the repeated-sum case; these are unit features.
+        nodes = [(2, 4)] + [(2 * (3 + i), 6 if i % 2 else 4) for i in range(1, 33)]
+        partition = make_partition(fixture(3, nodes, [2 * (3 + len(nodes))]))
+        decisions = [{'root': 4 + i, 'candidate_count': 3} for i in range(len(nodes))]
+        catalogue = Catalogue(decisions, [], {0: list(range(len(nodes)))})
+        scores = []
+        rng = random.Random(73)
+        for i in range(len(nodes)):
+            for c in range(4):
+                features = [0.] * 19
+                features[8], features[11] = 1 + rng.random(), 2 + rng.random()
+                scores.append({'decision_index': i, 'choice_index': c,
+                               'predicted_local_abc_delay': 1 + rng.random(),
+                               'continuous_features_19': features})
+        model = TimingSurrogate(partition, catalogue, scores,
+                                {'delay_ps': 100., 'area': 20., 'po_arrivals_ps': [100.]})
+        # Include tied options; the deterministic smaller-index rule must hold.
+        model.features[:, 3] = model.features[:, 2]
+        choices = {i: rng.randrange(4) for i in range(len(nodes))}
+        with torch.no_grad():
+            for index in range(len(nodes)):
+                actual = model.independent_region_options(0, choices, index)
+                expected = torch.stack([model.independent_region_arrival(0, choices | {index: c})
+                                        for c in range(4)])
+                torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+                self.assertEqual(int(actual.argmin()), int(expected.argmin()))
+        with self.assertRaises(ValueError):
+            model.independent_region_options(0, {999: 1}, 0)
+        with self.assertRaises(ValueError):
+            model.independent_region_options(0, {0: 4}, 0)
+
     def test_baseline_anchor_and_multiple_endpoints(self):
         model = model_fixture()
         po, area = model(model.one_hot([0, 0]))

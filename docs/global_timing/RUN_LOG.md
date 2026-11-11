@@ -57,6 +57,7 @@
 | 64340.5 | `20261111T145230Z-alu-replay-diagnosis-ecc3c927` | COMPLETED_DIAGNOSTIC / PASS_NOT_REPRODUCED：同一旧gpuls/ALU输入的GDB重放未复现SIGSEGV，零rewrite并CEC/mapping通过；原全量失败保留，根因尚未证明 |
 | 64365 | `20261111T145549Z-checked-cuda-tool-build-2623c263` | BUILT_NOT_RUNTIME_VALIDATED：50项CPU矩阵39 PASS/11 SKIP；CULS增加CUDA初始化返回值检查并初始化heap输出变量，独立ABC observer保持原源码；两工具重新构建完成，实际工具回归单独记录 |
 | 64340.6 | `20261111T150227Z-bounded-arrival-real-regression-b71177d2` | COMPLETED_WITH_EXPLICIT_OMISSIONS：`b288fe1`的50项真实核心测试全部通过，含无GPU初始化错误检查；c1355完整双目标8预算比较完成，两模式仍为360.111877 ps / 513.216003 area、未改善。实际writer/Gate1工具/Gia检查通过；2504项程序矩阵完成，136 import PASS/17 FAIL/1 SKIP、56 CLI smoke PASS、1395个编译TU，100文件附来源匹配的命名功能证据 |
+| 64340.7 | `20261111T151256Z-bounded-arrival-failed-case-retry-9d4f505b` | RUNNING：先通过50项真实核心测试；仅重验当时已终止的7项失败，按91/38/32/54/53/62/59顺序单worker执行，仍每种搜索8次预算、3600 s单例限制。旧失败记录及其来源hash已冻结；新manifest只调整行顺序，保留全部905输入身份。不重复64341.4中正在执行/等待的ACE div/hyp，不取消原任务 |
 
 ## 首次真实闭环的有限结论
 

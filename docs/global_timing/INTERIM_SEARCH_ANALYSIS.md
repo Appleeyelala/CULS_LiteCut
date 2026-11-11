@@ -1,0 +1,50 @@
+# 部分全量扫描的搜索质量审计
+
+这是开发中间结果，不是905输入的最终结论。审计运行是`/data/wushangge/CULS_LiteCut/runs/20261111T134520Z-search-quality-audit-0b22b5c7`（Slurm 64358）。它冻结修复版`acd74fc`两个suite的完整JSONL记录，没有重新执行rewrite/mapping或训练。
+
+快照包含46/905个输入：44 PASS、2次超时（div、hyp）。44个完成输入通过新的预测来源检查，审计错误0。新增4项分析测试与原CPU矩阵共46项：36 PASS、10个真实工具入口SKIP。CSV、图及逐文件hash在该运行的`output/search_quality/`；后续扫描不会改写这份快照。
+
+## 数值及解释边界
+
+| 项目 | 面积约束目标 | delay-area联合目标 |
+|---|---:|---:|
+| 可分析设计 | 44 | 44 |
+| 成功实际评估前保存的预测样本 | 163 | 164 |
+| 按设计平均的归一化Δdelay MAE | 0.11182 | 0.11258 |
+| 实际发生变化样本的平均方向一致率 | 0.49948 | 0.38339 |
+| 直接梯度请求通过/总数 | 87/185 | 92/189 |
+| 最终选点直接来自梯度提案 | 12 | 11 |
+| 最终选点来自显式修复 | 22 | 23 |
+| 最终选点来自校准采样 | 2 | 1 |
+| 最终选点保留no-op | 8 | 9 |
+
+误差以各设计的实测no-op global delay归一化，再对有预测的设计等权平均；不是以实际优化后delay为分母的MAPE。43个设计有可归一化预测，arbiter没有新的成功预测样本。方向一致率只纳入实际变化超过容差的样本，再按41个有这种样本的设计平均；不能据此直接与随机分类器比较。
+
+327条成功预测均在各自真实评估前保存，检查其拟合索引只指向更早的成功观察；失败请求的预测也检查标签来源，但不填充实际delay。no-op锚点不计作准确性样本。模型在搜索过程中更新，因此这些统计不是固定模型排序测试，也不是未见设计泛化结果。
+
+最终选择来源不是因果贡献：修复可能继承梯度提案；`selected_parent_source`保留直接父来源。单种子、小预算、按文件序推进且未完成的样本不能支持稳定优势或显著性结论。特别不能把“框架最终改善”全部算作直接梯度提案的收益。
+
+## 已保存的动态不可执行实例
+
+来源是`20261111T121809Z-corrected-full-shard1-29165762/output/suite/case_0001`（`ACE/DSP_comb.aig`），面积约束搜索的`eval_0001`。以下均为该输入的**原始AIG节点编号及初始region标签**，不是GPU内部ID或mapped-cell ID。
+
+| 数据 | 前序decision | 后序decision |
+|---|---|---|
+| 身份 | root20035 / cut4 / candidate1 | root20097 / cut6 / candidate6 |
+| 初始owner | R3353 | R3374 |
+| 初始导出removable nodes | `[20035]` | `[20096, 20097]` |
+| 执行序号 | 317 | 322 |
+| 实际执行前removable nodes | `[20019, 20035]` | `[20096, 20097]` |
+| 结果 | ACCEPTED，删除20019 | COMPROMISED，cut leaf20019已删除 |
+
+两者不在初始目录的静态冲突对中。节点20019的初始owner是R3347。trace明确记录其首次删除者为root20035、序号317，并在后序安装前拒绝损坏的cut；后序`saved_added_evaluated=false`。这证明初始原图排除规则不足以保证运行时可执行性，也不能把初始INTRA_REGION分类解释为执行时删除集合永远局限于同一原始region。
+
+这些记录只直接证明删除集合与叶子存活状态发生了上述变化，不单凭该trace推断全部引用计数变化原因或重新建立执行后maximal MFFC。完整配置被框架记为FAIL，部分安装不作为它的成功时序标签；修复创建新请求并占用预算。
+
+可复核文件：
+
+- `cut_validation/verified_catalogue.json`，SHA256 `59e51a5c6bc8384281e136071e6e30625a9376b32ce77e62640dd1e5b7cf1746`。
+- `gradient_area_constraint/eval_0001/rewrite/raw/traces/choice.jsonl`，SHA256 `48a113e349130d66c93fa3642ca340a0170dc0e1451f61fd9165bda3a46f70ca`。
+- `partition/owners.csv`、同一eval目录的`observation.json`及`rewrite/replay.json`。
+
+当前44设计两种搜索中，失败请求共含748条NO_OP、3,657条REVERTED和10条COMPROMISED的被拒绝decision记录。它们可以重复出现，不能当作不同候选的数量。此类拒绝与代理预测误差需要分开分析；功能等价性与真实timing仍由完整接受后的独立检查确认。

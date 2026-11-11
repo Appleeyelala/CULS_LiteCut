@@ -44,6 +44,8 @@
 | 64356 | `20261111T131747Z-updated-program-matrix-4d80fce4` | COMPLETED_WITH_RECORDED_OMISSIONS：2494项矩阵；126 import PASS、17 FAIL、1 SKIP、51 CLI smoke PASS，45个文件有来源匹配的命名功能证据 |
 | 64357 | `20261111T132425Z-student-feature-regression-9184e32c` | COMPLETED：42项CPU矩阵（32 PASS、10 SKIP）；19维快捷提取重新计算c1355全部417条、div全部122,869条score，特征和预测及其记录与旧结果完全一致；div重算31.40 s |
 | 64341.2 | `20261111T132506Z-student-native-regression-7773e417` | COMPLETED_WITH_RECORDED_OMISSIONS：19维快捷提取的42项真实核心回归全部通过；2495项程序矩阵完成，127 import PASS、17 FAIL、1 SKIP、51 CLI smoke PASS |
+| 64358 | `20261111T134520Z-search-quality-audit-0b22b5c7` | COMPLETED：46项CPU矩阵（36 PASS、10 SKIP）；冻结46个已记录输入（44 PASS、2 timeout），审计44个实际搜索的预测来源及最终选点来源，错误0，保存CSV/PNG/PDF；不调用rewrite/mapping |
+| 64341.3 | `20261111T134714Z-final-feature-e2e-retry-aa36f9d5` | RUNNING：在确认64340.3中div单例已超时后，用19维快捷提取重验div及c1355，保持8次预算和1800 s单例限制；旧失败保留 |
 
 ## 首次真实闭环的有限结论
 

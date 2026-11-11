@@ -114,6 +114,12 @@
 
 各批完成的逐例报告位于`output/arrival_paths/*/summary.json`；原搜索结果保持不变。未来批次应排除所有前批选择清单中已分配的目录，避免重复运行；若确需重试失败审计，必须保留失败报告及单独声明的新尝试。最终使用`analyze_path_changes.py --audit-runs`合并各批证据，匹配最终905输入cohort选定的精确benchmark目录，不以相同输入hash的旧开发运行代替。各批冻结范围及未记录状态不随后续扫描回写。
 
+## 统一版本Division完整结果
+
+64397的`output/suite/case_0147`已完整PASS，整例3533.11 s、无缺失比较方法；源码`160b218`、每搜索8次预算、900 s工具/7200 s整例限制。原图/no-op/native delay分别26611.9902/26990.9844/25177.2832 ps。面积约束最终为25095.3848 ps / 30426.7109 area，较原图改善5.699%、较no-op改善7.023%，满足no-op面积的1.05倍约束。联合目标最终为25950.4219 ps / 31717.6816 area，较原图改善2.486%；该模式没有硬面积上限，其选点不满足另一模式的1.05倍约束。
+
+两模式各8条观察、5次失败、4次直接梯度请求；四次直接梯度组合均未完全ACCEPTED而被明确拒绝。最终成功点分别来自显式可行性修复eval7/eval2，不能将收益归为未修复梯度组合的直接成功。联合模式与同预算random joint的最终数值相同。原始CEC日志证实native及两最终点等价；证据见`report/comparison.csv`（SHA256 `b72bb05f84dbafcf8a83dd29a3a266e3d73d3e171cce052b2c519562549a712b`）和`report/observations.csv`（`284e12f4ebe0e50e9120da4f33c94a670d94dfee8e4e4d2cd1f25b5284f37323`）。旧64340.9的7200 s超时保留为FAIL；不同版本、工具和负载下的墙钟差异不作速度提升结论。本案例属于预先声明的统一全量分片，未根据结果额外挑选重跑。
+
 ## 统一版本c1355复现
 
 统一版本c1355的独立复现见64397.0的`output/verification.json`、`output/comparison/repeat_comparison.json`及`output/accounting.json`。参照是64397的`output/suite/case_0047`；两种梯度模式都保持360.111877 ps / 513.216003 area，CEC PASS，与original/no-op相同，未改善。每种搜索8条观察；比较包括中间成功/失败状态、全部PO、area/ADP和选择，墙钟时间不作为一致性条件。移除唯一ABC写入时间注释后，native输出字节相同；原文件与hash均保留。新运行的准备/分析源码为`58b3e6f`，实际优化器运行源码明确复用`160b218`，两种职责及hash分开记录。这是单设计复现，不代表全905结果可重复或优化有效。

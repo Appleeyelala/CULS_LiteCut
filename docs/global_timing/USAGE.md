@@ -39,6 +39,8 @@ python -B RUN/src/scripts/run_framework_experiment.py \
 
 全数据集先用 `stage_benchmarks.py` 生成逐文件hash清单；再用 `run_benchmark_suite.py --manifest … --shard-count 2 --shard-index 0` 及另一个索引1覆盖数据。`--workers`受CPU配额限制，共享当前已分配GPU，不额外申请资源。单例超时会终止其工具后代进程并保留记录。
 
+可先在CPU Slurm任务中执行`validate_partitions.py --run RUN --manifest INVENTORY_JSON --workers 4`，核验清单内全部输入的strict maximal MFFC、精确Region DAG及各边界端口到root的AND深度，保留每例partition、owner、hash和certificate。该检查使用独立fanout闭合条件和从root反向计算距离，不调用构造器的deref遍历；它不运行GPU、CEC、mapping或搜索，不能替代后续完整比较。
+
 批量入口的`--case-timeout`限制整个设计，`--tool-timeout`限制单条rewrite/CEC/mapping命令，默认分别为3600/300秒；后者转交底层CLI的`--timeout`。延长限制需保留旧失败并在新运行记录原因，不改变实际评估次数预算。汇总清单检查声明的工具时限与每个成功案例的配置一致；旧版未声明该参数的suite按其固定300秒默认值核验。
 
 本地持续集成入口为：

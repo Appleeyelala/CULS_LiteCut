@@ -27,6 +27,7 @@ def functional_evidence(root, runs):
 
     modules = {'test_structure': ['structure'], 'test_candidates': ['candidates'], 'test_arrival': ['arrival'],
                'test_cohort': ['cohort'], 'test_failure_analysis': ['failure_analysis'],
+               'test_partition_validation': ['partition_validation'],
                'test_evaluation': ['evaluation'], 'test_pipeline': ['pipeline'],
                'test_processes': ['processes', 'common'], 'test_surrogate': ['surrogate', 'optimization'],
                'test_truth': ['truth', 'litecut'], 'test_paths': ['path_analysis'],
@@ -99,6 +100,14 @@ def functional_evidence(root, runs):
                     scope = 'Actual mapped CEC and reachable/unreachable pair checks; optional mapper/local-arrival diagnostics. Named command coverage only; build script helper exercised without rebuilding.'
                 for relative in targets:
                     add(run, relative, report, 'rebuilt_native:' + record['variant'], record['status'], scope)
+        report = run / 'output/partition_validation/summary.json'
+        if report.is_file():
+            record = json.loads(report.read_text())
+            for relative in ['scripts/validate_partitions.py', 'global_timing/partition_validation.py',
+                             'global_timing/structure.py']:
+                add(run, relative, report, 'staged_partition_certificates', record['status'],
+                    'Independent structural checks on the declared inventory, not mapped timing or candidate execution; '
+                    + str(record['recorded_inputs']) + ' recorded inputs.')
         for directory, targets, label in [
             ('path_changes', ['scripts/analyze_path_changes.py', 'global_timing/path_changes.py'],
              'Retained CEC/timing/netlist/trace integrity and cross-selection endpoint comparisons; no new mapping.'),

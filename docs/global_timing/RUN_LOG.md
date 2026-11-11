@@ -40,12 +40,18 @@
 | 64353 | `20261111T124930Z-saved-path-analysis-regression-c851ab7f` | FAIL：首次修复假设了错误的replay路径层数；随后改为按实际observation路径和输入hash定位，并增加回归 |
 | 64354 | `20261111T125125Z-path-provenance-regression-1876ee41` | COMPLETED：39项CPU矩阵（29 PASS、10 SKIP）；8设计168个成功观察引用对应124份映射，重新CEC、全部PO/global/area、网表正文与逐arc路径重构全部通过 |
 | 64355 | `20261111T130741Z-selection-cost-regression-3cba9919` | COMPLETED：41项CPU矩阵（31 PASS、10 SKIP）；c1355/des_perf/div的完整catalogue均与保存结果一致，24组坐标选项成本与标量参考逐位相同；c1355/des_perf完整选择一致。hyp归一化完成但无旧完整catalogue可比；div无旧完整选择可比，均明确标记 |
-| 64340.3 | `20261111T131145Z-selection-scale-e2e-f53fa37e` | RUNNING：性能修改后的41项真实核心回归全部通过；继续执行div/hyp/c1355的相同8预算完整对照，旧超时产物保留 |
+| 64340.3 | `20261111T131145Z-selection-scale-e2e-f53fa37e` | COMPLETED_WITH_FAILURES：41项真实核心回归通过；div/hyp均在1800 s单例限制超时，c1355完整比较通过；Step退出0不代表所有case通过 |
 | 64356 | `20261111T131747Z-updated-program-matrix-4d80fce4` | COMPLETED_WITH_RECORDED_OMISSIONS：2494项矩阵；126 import PASS、17 FAIL、1 SKIP、51 CLI smoke PASS，45个文件有来源匹配的命名功能证据 |
 | 64357 | `20261111T132425Z-student-feature-regression-9184e32c` | COMPLETED：42项CPU矩阵（32 PASS、10 SKIP）；19维快捷提取重新计算c1355全部417条、div全部122,869条score，特征和预测及其记录与旧结果完全一致；div重算31.40 s |
 | 64341.2 | `20261111T132506Z-student-native-regression-7773e417` | COMPLETED_WITH_RECORDED_OMISSIONS：19维快捷提取的42项真实核心回归全部通过；2495项程序矩阵完成，127 import PASS、17 FAIL、1 SKIP、51 CLI smoke PASS |
 | 64358 | `20261111T134520Z-search-quality-audit-0b22b5c7` | COMPLETED：46项CPU矩阵（36 PASS、10 SKIP）；冻结46个已记录输入（44 PASS、2 timeout），审计44个实际搜索的预测来源及最终选点来源，错误0，保存CSV/PNG/PDF；不调用rewrite/mapping |
-| 64341.3 | `20261111T134714Z-final-feature-e2e-retry-aa36f9d5` | RUNNING：在确认64340.3中div单例已超时后，用19维快捷提取重验div及c1355，保持8次预算和1800 s单例限制；旧失败保留 |
+| 64341.3 | `20261111T134714Z-final-feature-e2e-retry-aa36f9d5` | COMPLETED_WITH_FAILURES：46项真实核心测试全部通过；19维快捷提取下div仍在1800 s超时，c1355通过且两模式均未改善360.111877 ps / 513.216003 area；旧失败保留 |
+| 64359 | `20261111T141136Z-native-variant-regression-e8da9407` | FAILED：5个历史ABC变体及Gate1全部编译成功；新测试驱动未在新进程载入library，mapped BLIF无法读入，5项CEC检查失败；不是已经证明不等价。Gate1仅记录BUILT_NOT_GPU_VALIDATED |
+| 64360 | `20261111T142227Z-native-variant-validation-46576b83` | COMPLETED：修正测试驱动的library加载，按源文件/二进制hash复用5个已建变体，5/5实际命令测试通过；不改旧日志或重复编译 |
+| 64340.4 | `20261111T142618Z-gate1-native-replay-validation-9a03312d` | COMPLETED：重建Gate1的normalize及AC/AD/BC/BD四组真实GPU replay通过；原始502-AND输入CEC、两decision完整安装、历史provenance及序列化图结构全部一致 |
+| 64361 | `20261111T142532Z-saved-gradient-profile-5baf3f8e` | COMPLETED：保留div输入的首轮面积约束校准及完整梯度trace精确复现；诊断4183层DAG、51140个decision的实际CPU开销，不执行rewrite/mapping；初版误把mutable run.json列入input hashes，后续排除该项 |
+| 64362 | `20261111T142809Z-native-aware-program-matrix-571ab8dd` | COMPLETED_WITH_RECORDED_OMISSIONS：46项CPU矩阵36 PASS/10 SKIP；2501项程序清单、1395个编译TU、133 import PASS/17 FAIL/1 SKIP、55 CLI smoke PASS；97文件附来源匹配的命名功能证据 |
+| 64363 | `20261111T143301Z-gradient-overhead-regression-62411fb5` | COMPLETED：46项CPU矩阵36 PASS/10 SKIP；移除逐层重复扫描及逐decision张量转换后，保留div首轮校准的全部loss/参数及完整40步梯度trace精确一致；初始化2.60 s、校准99.05 s、提案105.82 s，均含profiler |
 
 ## 首次真实闭环的有限结论
 
@@ -84,3 +90,5 @@
 64355在CPU任务中只读取保留的实际输入，不执行rewrite/mapping。`div`有51,140个executable decisions，最大region含1,016个decision；8组坐标选项的旧标量累计耗时7.41 s，优化后0.327 s，成本逐位一致。完整独立region选择耗时39.61 s；旧全量运行在此阶段超过1800 s单例上限，没有完成的旧选择可比较。`des_perf`完整选择与已保存请求完全相同，当前22.45 s；历史90.54 s来自不同并发负载，只能作诊断。
 
 `hyp`有117,509个region、979,378个legal cuts。共享只读region集合后，完整catalogue耗时4.52 s；512条实际cut的归一化参考耗时1.027 s、优化后0.00304 s，内容相同。此处不把子集计时外推为整个优化框架的加速，也不把纯CPU诊断记作完整benchmark通过。后续须补齐超时设计的真实E2E。
+
+64361用保存的真实输入与反馈标签重构div首轮校准及梯度提案，损失、参数、完整trace均与保存值完全相同。30步校准104.46 s（backward占75.67 s），两次restart各20步提案127.31 s（backward占55.94 s）；均含cProfile开销。主要瓶颈位于4183层DAG的传播/求导，另有逐decision转换与one-hot构造开销。不能把共享分配内的实际超时和该CPU剖析时间直接相除作为加速比。细节见[性能检查](PERFORMANCE_AUDIT.md)。

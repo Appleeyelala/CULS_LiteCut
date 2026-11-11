@@ -4,7 +4,7 @@
 
 ## 核心与实际工具
 
-`20261111T132506Z-student-native-regression-7773e417/output/tests.json`记录42项核心测试全部通过，包含MFFC参照、冲突与空候选、有限差分梯度、两种目标、失败CEC、上下文cut证明、真实GPU候选/replay、常量导出、Student推理缓存、Liberty端点及路径重构。随后完整程序矩阵生成完毕，Slurm step 64341.2最终为COMPLETED；其中明确保留历史环境缺失。
+`20261111T134714Z-final-feature-e2e-retry-aa36f9d5/output/tests.json`记录46项核心测试全部通过，包含MFFC参照、冲突与空候选、有限差分梯度、两种目标、失败CEC、上下文cut证明、真实GPU候选/replay、常量导出、Student推理缓存、Liberty端点/路径及预测来源审计。其c1355完整比较通过，div超时；核心测试通过不替代每个benchmark的完成状态。随后梯度重复计算修复的回归单独记录，不把旧测试冒充新源码验证。
 
 `20261111T132425Z-student-feature-regression-9184e32c`的CPU矩阵为32 PASS、10个真实工具入口SKIP；不能把这些SKIP算作CPU任务完成了GPU验证。其保留输入复核另行重算c1355的417条、div的122,869条原实现/候选特征及预测，与旧25维提取流程保存的全部score记录完全相同。没有训练模型或更换权重。
 
@@ -14,7 +14,11 @@
 
 ## 全程序矩阵
 
-最新已完成矩阵`20261111T132506Z-student-native-regression-7773e417`覆盖2,495项源码/入口：1,553项语法PASS、1,350个编译translation units、127项import PASS、17 FAIL、1 SKIP、51项CLI smoke PASS。45个文件有来源字节匹配的命名功能证据；这不是行覆盖率，其余项目明确不宣称逐文件功能覆盖。并发完成的64357重算核验另有完整报告，不回写已生成矩阵。
+最新已完成矩阵`20261111T142809Z-native-aware-program-matrix-571ab8dd`（源码`157987c`）覆盖2,501项源码/入口：1,604项语法PASS、1,395个编译translation units、133项import PASS、17 FAIL、1 SKIP、55项CLI smoke PASS。97个文件有来源字节匹配的命名功能证据；这不是行覆盖率，其余项目明确不宣称逐文件功能覆盖。该任务的CPU核心矩阵为36 PASS、10 SKIP，并按字节匹配附上此前46项真实工具测试。随后修改过的源码必须使用对应新回归，不回写此矩阵。
+
+历史原生程序已独立重建：`64359`保存5个ABC overlay及Gate1的完整编译记录；首次mapped-BLIF CEC入口缺少加载library而失败，不能记为不等价。`64360`复用hash核对的二进制，在新目录重新检查后5/5通过，包括reachable/unreachable pair、开启/关闭mapper观察的网表正文与pair一致，以及local arrival的109.239990/106.219986 ps对照。该reachable smoke查询名字`pi04`→`po11`，不是历史R9机制分析的`pi03`→`po11`，两者不混用。
+
+`64340.4`实际运行重建的Gate1。原始输入为502-AND的历史c1355；AC/AD/BC/BD输出分别504/503/505/504 AND，全部与原输入CEC等价，两个请求均`installed=true`，provenance与保存的历史JSON完全相同，输出精确图结构hash相同。`NO_OP_FULL_CORRESPONDENCE`仍区分于物理替换；不能据此宣称一般的独立decision安装性质。
 
 导入失败/跳过的实际原因如下；具体逐文件记录在`output/repository_tests/test_matrix.json`：
 

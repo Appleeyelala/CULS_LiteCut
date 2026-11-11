@@ -73,6 +73,10 @@ python -B RUN/src/scripts/analyze_timing_paths.py --run RUN \
 
 `analyze_search_quality.py --output NEW_OUTPUT --suites SAVED_SUITE_0 SAVED_SUITE_1 --expected-inputs 905 --cohort-label LABEL`在CPU Slurm任务中审计已有搜索，不执行rewrite/mapping或拟合。它冻结各suite当前完整JSONL记录，拒绝同一输入重复混入，输出预测误差、校准标签来源检查、梯度请求接受率、最终选点来源和图表。正在扫描的suite会明确显示尚未全覆盖；失败请求不填充时序数值。预测统计属于模型不断更新的自适应搜索，不解释为固定模型排序或跨设计泛化。
 
+`profile_gradient.py --run RUN --benchmark SAVED_CASE --mode area_constraint --iteration 2`在CPU Slurm内重构已保存的首轮校准与梯度提案。要求参数、loss及完整trace精确相同，输出逐阶段cProfile。后续轮次还依赖旧模型状态，当前入口无法重建时会明确FAIL。它不产生新的timing标签。
+
+历史原生工具使用`build_native_variants.py --run RUN --jobs 8`重建：每个ABC overlay各自覆盖一份基线，Gate1单独链接其ABC依赖。随后使用`test_native_variants.py --run NEW_RUN --build-run NATIVE_BUILD_RUN --scope abc`，或在GPU分配内用`--scope gate1 --abc CEC_BINARY`。新验证核对全部相关源码与二进制hash，输出到新目录。mapped BLIF的CEC必须先加载同一library。`test_repository.py`支持`--native-build-run`和多个`--evidence-run`，把实际对象文件及来源匹配的命名检查加入逐程序矩阵。
+
 ## 失败与恢复
 
 任何CEC否定/未决、工具超时、缺失时序或部分安装都保留FAIL，不写入虚构指标。结构冲突在GPU前拒绝；运行时REVERTED必须创建一个新修复请求，不能把原失败请求改写为成功。保留旧结果，在新提交、新目录中修复并重跑相关回归。缺失依赖和历史硬编码入口分别报告，不自动重放旧训练或覆盖历史目录。

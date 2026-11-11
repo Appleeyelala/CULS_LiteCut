@@ -5,10 +5,12 @@ Read-only reuse of prior inputs. This does not invoke rewriting or mapping;
 new profiles and selections are written only in the prepared Slurm run.
 """
 import argparse
+import cProfile
 import json
 import os
 from pathlib import Path
 import random
+import pstats
 import sys
 import time
 import traceback
@@ -16,7 +18,7 @@ import traceback
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 
-def profile(benchmark, output, catalogue_only, student_checkpoint=None):
+def profile(benchmark, output, catalogue_only, student_checkpoint=None, options_only=False, option_checks=8):
     import torch
     from global_timing.candidates import Catalogue, catalogue_from_raw
     from global_timing.common import digest, legacy, read_jsonl, save_json
@@ -95,19 +97,32 @@ def profile(benchmark, output, catalogue_only, student_checkpoint=None):
             model = TimingSurrogate(partition, catalogue, scores, baseline)
             record['model_init_s'] = time.monotonic() - started
             rid, indices = max(catalogue.region_decisions.items(), key=lambda item: len(item[1]))
+            record['largest_region'] = {'region': rid, 'decisions': len(indices),
+                'boundary_ports': len(partition.transfers[rid]),
+                'port_decision_incidences': sum(len(model.port_decisions[rid, port]) for port in partition.transfers[rid])}
             local = {i: random.Random(i + 17).randrange(model.counts[i]) for i in indices}
             option_records = []
             with torch.no_grad():
-                for index in indices[:8]:
+                for index in indices[:option_checks]:
+                    profiler = cProfile.Profile() if options_only else None
                     started = time.monotonic()
+                    if profiler is not None:
+                        profiler.enable()
                     actual = model.independent_region_options(rid, local, index)
+                    if profiler is not None:
+                        profiler.disable()
                     fast_s = time.monotonic() - started
+                    if profiler is not None:
+                        profiler.dump_stats(str(output / f'option_{index}.prof'))
+                        with (output / f'option_{index}.txt').open('x') as stream:
+                            pstats.Stats(profiler, stream=stream).sort_stats('cumulative').print_stats(40)
                     started = time.monotonic()
                     expected = torch.stack([model.independent_region_arrival(rid, local | {index: c})
                                             for c in range(model.counts[index])])
                     slow_s = time.monotonic() - started
                     row = {'region': rid, 'region_decisions': len(indices), 'decision': index,
                            'options': model.counts[index], 'reference_s': slow_s, 'optimized_s': fast_s,
+                           'optimized_time_includes_cprofile': profiler is not None,
                            'exact_equal': bool(torch.equal(actual, expected)),
                            'max_abs_error': float((actual - expected).abs().max())}
                     option_records.append(row)
@@ -117,23 +132,27 @@ def profile(benchmark, output, catalogue_only, student_checkpoint=None):
                         raise AssertionError('Batched independent costs differ from ordered scalar reference.')
             record['option_checks'] = option_records
             del model
-            experiment = Experiment.__new__(Experiment)
-            experiment.partition, experiment.catalogue, experiment.scores = partition, catalogue, scores
-            experiment.noop = [0] * len(catalogue.decisions)
-            started = time.monotonic()
-            choices = experiment.independent_choices(baseline)
-            record['full_independent_selection_s'] = time.monotonic() - started
-            catalogue.validate(choices)
-            save_json(output / 'independent_choices.json', {'choices': choices})
-            record['selection_sha256'] = digest(output / 'independent_choices.json')
-            prior_path = benchmark / 'independent_regions/eval_0000/observation.json'
-            if prior_path.is_file():
-                reference = read('independent_regions/eval_0000/observation.json')['choices']
-                if choices != reference:
-                    raise AssertionError('Independent selection differs from saved pre-repair request.')
-                record['selection_comparison'] = 'EXACT_MATCH'
+            record['full_independent_selection_executed'] = not options_only
+            if options_only:
+                record['selection_comparison'] = 'NOT_RUN_OPTIONS_ONLY'
             else:
-                record['selection_comparison'] = 'NO_SAVED_REFERENCE'
+                experiment = Experiment.__new__(Experiment)
+                experiment.partition, experiment.catalogue, experiment.scores = partition, catalogue, scores
+                experiment.noop = [0] * len(catalogue.decisions)
+                started = time.monotonic()
+                choices = experiment.independent_choices(baseline)
+                record['full_independent_selection_s'] = time.monotonic() - started
+                catalogue.validate(choices)
+                save_json(output / 'independent_choices.json', {'choices': choices})
+                record['selection_sha256'] = digest(output / 'independent_choices.json')
+                prior_path = benchmark / 'independent_regions/eval_0000/observation.json'
+                if prior_path.is_file():
+                    reference = read('independent_regions/eval_0000/observation.json')['choices']
+                    if choices != reference:
+                        raise AssertionError('Independent selection differs from saved pre-repair request.')
+                    record['selection_comparison'] = 'EXACT_MATCH'
+                else:
+                    record['selection_comparison'] = 'NO_SAVED_REFERENCE'
         record['status'] = 'PASS'
     except Exception as exc:
         record.update(status='FAIL', error=str(exc), traceback=traceback.format_exc())
@@ -148,7 +167,12 @@ def main():
     parser.add_argument('--catalogue-only', type=Path, nargs='*', default=[])
     parser.add_argument('--student-rescore', action='store_true',
                         help='Recompute all saved scores with the prepared checkpoint and require exact equality.')
+    parser.add_argument('--options-only', action='store_true',
+                        help='Profile/check bounded coordinate options; do not execute the complete independent selection.')
+    parser.add_argument('--option-checks', type=int, default=8, help='Number of leading decisions in the largest region to check.')
     args = parser.parse_args()
+    if args.option_checks < 1:
+        parser.error('--option-checks must be positive.')
     run = args.run.resolve()
     if not os.environ.get('SLURM_JOB_ID') or not run.is_relative_to('/data/wushangge'):
         parser.error('Profiles require a prepared /data run and Slurm allocation.')
@@ -163,7 +187,8 @@ def main():
         benchmark = benchmark.resolve()
         key = hashlib.sha256(str(benchmark).encode()).hexdigest()[:12]
         record = profile(benchmark, run / 'output/selection_profiles' / key, catalogue_only,
-                         run / 'input/student_checkpoint' if args.student_rescore else None)
+                         run / 'input/student_checkpoint' if args.student_rescore else None,
+                         options_only=args.options_only, option_checks=args.option_checks)
         records.append(record)
         print(json.dumps({k: record.get(k) for k in ['benchmark', 'status', 'error', 'full_independent_selection_s']}), flush=True)
     save_json(run / 'output/selection_profiles/summary.json', {'source_commit': metadata['source_commit'],

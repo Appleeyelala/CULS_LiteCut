@@ -112,6 +112,9 @@ def functional_evidence(root, runs):
                         if directory == 'selection_profiles' and relative in {
                                 'global_timing/surrogate.py', 'global_timing/pipeline.py'} and 'option_checks' not in record:
                             continue
+                        if (directory == 'selection_profiles' and relative == 'global_timing/pipeline.py' and
+                                record.get('full_independent_selection_executed') is False):
+                            continue
                         add(run, relative, report, directory + ':' + record['benchmark'], record['status'], scope)
         report = run / 'output/historical_baseline/commands.json'
         if report.is_file():

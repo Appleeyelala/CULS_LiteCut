@@ -69,6 +69,8 @@ python -B RUN/src/scripts/analyze_timing_paths.py --run RUN \
 
 `profile_selection.py --run RUN --benchmarks SAVED_CASE_DIRECTORY`只读取已保存输入、候选与LiteCut分数，比较优化后的候选归一化、标量参考成本和历史独立region选择，不执行rewrite或mapping。`--catalogue-only`可诊断尚未完成推理的大设计。成本相等、选择相等与耗时分别报告；缺失历史选择时明确写`NO_SAVED_REFERENCE`。
 
+若完整独立选择本身耗时过长，可加`--options-only --option-checks 1`。它只检查最大region的一个coordinate及其全部候选成本，保存cProfile、标量对照和实际边界端口/decision关联规模；完整选择明确标为`NOT_RUN_OPTIONS_ONLY`。该剖析不重启正在运行的benchmark，也不把一个coordinate通过当作完整选择或E2E通过。
+
 加`--student-rescore`会用准备目录的checkpoint重新提取19维特征并推理，要求全部score记录与保存的旧结果完全相同。新的`extract_all(..., student_only=True)`跳过模型未使用的5个谱特征及WL hash；默认25维接口保留。缓存键包含提取器和adapter源码hash，因此旧缓存不会被无声复用为新版本的核验证据。具体测试范围及缺失依赖见[测试证据](TEST_COVERAGE.md)。
 
 `analyze_search_quality.py --output NEW_OUTPUT --suites SAVED_SUITE_0 SAVED_SUITE_1 --expected-inputs 905 --cohort-label LABEL`在CPU Slurm任务中审计已有搜索，不执行rewrite/mapping或拟合。它冻结各suite当前完整JSONL记录，拒绝同一输入重复混入，输出预测误差、校准标签来源检查、梯度请求接受率、最终选点来源和图表。正在扫描的suite会明确显示尚未全覆盖；失败请求不填充时序数值。预测统计属于模型不断更新的自适应搜索，不解释为固定模型排序或跨设计泛化。

@@ -40,6 +40,7 @@
 | 64353 | `20261111T124930Z-saved-path-analysis-regression-c851ab7f` | FAIL：首次修复假设了错误的replay路径层数；随后改为按实际observation路径和输入hash定位，并增加回归 |
 | 64354 | `20261111T125125Z-path-provenance-regression-1876ee41` | COMPLETED：39项CPU矩阵（29 PASS、10 SKIP）；8设计168个成功观察引用对应124份映射，重新CEC、全部PO/global/area、网表正文与逐arc路径重构全部通过 |
 | 64355 | `20261111T130741Z-selection-cost-regression-3cba9919` | COMPLETED：41项CPU矩阵（31 PASS、10 SKIP）；c1355/des_perf/div的完整catalogue均与保存结果一致，24组坐标选项成本与标量参考逐位相同；c1355/des_perf完整选择一致。hyp归一化完成但无旧完整catalogue可比；div无旧完整选择可比，均明确标记 |
+| 64340.3 | `20261111T131145Z-selection-scale-e2e-f53fa37e` | RUNNING：性能修改后的41项真实核心回归全部通过；继续执行div/hyp/c1355的相同8预算完整对照，旧超时产物保留 |
 
 ## 首次真实闭环的有限结论
 

@@ -65,6 +65,22 @@ def functional_evidence(root, runs):
         if report.is_file():
             for record in json.loads(report.read_text())['records']:
                 add(run, record['source_relative'], report, 'retained_R9_analysis', record['status'], record['scope'])
+        for directory, targets, scope in [
+            ('selection_profiles', ['scripts/profile_selection.py', 'global_timing/candidates.py',
+                'global_timing/surrogate.py', 'global_timing/pipeline.py'],
+             'Saved-input catalogue/ordered-cost checks; prior selections compared only where explicitly available.'),
+            ('arrival_paths', ['scripts/analyze_timing_paths.py', 'global_timing/path_analysis.py',
+                'framework/abc/path_report.c.inc'],
+             'Fresh CEC, unchanged saved measurements/netlist, and reconstructed near-critical arrival chains.')]:
+            report = run / 'output' / directory / 'summary.json'
+            if report.is_file():
+                for record in json.loads(report.read_text())['records']:
+                    for relative in targets:
+                        # A catalogue-only profile does not exercise selection.
+                        if directory == 'selection_profiles' and relative in {
+                                'global_timing/surrogate.py', 'global_timing/pipeline.py'} and 'option_checks' not in record:
+                            continue
+                        add(run, relative, report, directory + ':' + record['benchmark'], record['status'], scope)
         report = run / 'output/historical_baseline/commands.json'
         if report.is_file():
             for record in json.loads(report.read_text()):

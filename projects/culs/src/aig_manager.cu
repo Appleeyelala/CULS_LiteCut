@@ -25,9 +25,9 @@ AIGMan::AIGMan(int mainManager):
     mainManager(mainManager), verbose(1)
 {
     if (mainManager) {
-        size_t dynamicHeapSize;
-        cudaDeviceSetLimit(cudaLimitMallocHeapSize, (size_t)2048 * 1024 * 1024); // 2GB
-        cudaDeviceGetLimit(&dynamicHeapSize, cudaLimitMallocHeapSize);
+        size_t dynamicHeapSize = 0;
+        CHECK_CUDA(cudaDeviceSetLimit(cudaLimitMallocHeapSize, (size_t)2048 * 1024 * 1024)); // 2GB
+        CHECK_CUDA(cudaDeviceGetLimit(&dynamicHeapSize, cudaLimitMallocHeapSize));
         printf(">> Dynamic heap size changed to: %.2lf MB\n", (double)dynamicHeapSize / 1024.0 / 1024.0);
     }
 }

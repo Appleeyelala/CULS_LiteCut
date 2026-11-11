@@ -32,6 +32,18 @@ class RealToolTests(unittest.TestCase):
         self.assertEqual(actual, expected)
         self.assertEqual(len(self.partition.edges), 128)
 
+    def test_cuda_initialization_failure_is_explicit(self):
+        work = self.work / 'unavailable_cuda'
+        env = dict(os.environ, CUDA_VISIBLE_DEVICES='-1')
+        with self.assertRaises(ToolError):
+            run_tool([self.gpuls, '-c', f'read {self.input}'], work, 'startup', 60, env)
+        command = json.loads((work / 'startup.command.json').read_text())
+        text = (work / 'startup.log').read_text()
+        self.assertGreater(command['returncode'], 0)
+        self.assertIn('CUDA Runtime Error', text)
+        self.assertIn('cudaDeviceSetLimit', text)
+        self.assertNotIn('Dynamic heap size changed', text)
+
     def test_empty_replay_and_four_cross_region_choices(self):
         config = self.work / 'choices.txt'
         config.write_text('NONE -1 -1 -1\n' + ''.join(

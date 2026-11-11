@@ -71,4 +71,3 @@
 64387（`20261111T170329Z-backend-catalogue-diagnosis-dcbb55ab`）检查index108 `forgeEDA/Back_End_With_Decode.aig`。原`acd74fc`完整流程在1800.94 s被单例时限终止，已保存完整GPU导出但没有`catalogue.json`。当前实现只读其1,638,237条cut，构建catalogue耗时7.43 s，得到22,477个executable decisions和43,734个region。512条旧/新normalizer结果精确相同，分别耗时0.3761/0.0031 s。
 
 旧完整catalogue缺失，因此完整对照明确为`NO_SAVED_REFERENCE`。不能把原流程时限除以上述局部耗时作为加速比；该诊断没有rewrite、mapping或完整搜索，不把index108旧FAIL改为PASS。Slurm 34 s，MaxRSS约3.16 GiB。此前共享region集合的修复已存在，本次没有新增优化器改动。
-

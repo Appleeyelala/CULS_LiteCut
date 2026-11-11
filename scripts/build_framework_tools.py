@@ -15,6 +15,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--run', type=Path, required=True)
     parser.add_argument('--jobs', type=int, default=4)
+    parser.add_argument('--build-only', action='store_true',
+                        help='Compile without GPU runtime tests; records BUILT_NOT_RUNTIME_VALIDATED explicitly.')
     args = parser.parse_args()
     run = args.run.resolve()
     if not str(run).startswith('/data/wushangge/') or not os.environ.get('SLURM_JOB_ID'):
@@ -64,6 +66,9 @@ def main():
         report['binaries'] = {}
         for name, path in {'gpuls': root / 'culs/gpuls', 'abc': abc_src / 'abc'}.items():
             report['binaries'][name] = {'path': str(path), 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
+        if args.build_only:
+            report['state'] = 'BUILT_NOT_RUNTIME_VALIDATED'
+            return
         env = dict(os.environ, CULS_TEST_RUN=str(run), CULS_TEST_GPULS=str(root / 'culs/gpuls'),
                    CULS_TEST_ABC=str(abc_src / 'abc'), PYTHONPATH=str(src))
         with (run / 'logs/framework_tests.log').open('x') as log:

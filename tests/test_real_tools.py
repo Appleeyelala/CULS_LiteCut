@@ -101,6 +101,33 @@ class RealToolTests(unittest.TestCase):
         self.assertEqual(result['cec'], 'PASS')
         self.assertIn('POSITIONAL_ORDER', result['cec_interface'])
 
+    def test_replay_preserves_constant_literals_and_inputs(self):
+        # Actual binary AIG: constant outputs, constant AND fanins and live logic.
+        fanins = [(0, 2), (1, 4), (2, 4), (8, 10), (12, 6)]
+        content = bytearray(b'aig 8 3 0 5 5\n0\n1\n8\n10\n16\n')
+        for node, pair in enumerate(fanins, 4):
+            low, high = sorted(pair)
+            for value in [node * 2 - high, high - low]:
+                while value >= 128:
+                    content.append((value & 127) | 128)
+                    value >>= 7
+                content.append(value)
+        aig = self.work / 'constants.aig'
+        aig.write_bytes(content)
+        partition = make_partition(parse_aig(aig))
+        partition.write(self.work / 'constant_partition')
+        config = self.work / 'constant_choices.txt'
+        config.write_text('NONE -1 -1 -1\nAGAIN -1 -1 -1\n')
+        raw = self.work / 'constant_replay'
+        run_tool([self.gpuls, '-c', f'read {aig}; gate3e_execution_replay -o {raw} '
+                  f'--region-map {self.work / "constant_partition/owners.csv"} --config {config}'],
+                 self.work, 'constant_replay', 120)
+        evaluator = Evaluator(self.abc, self.run_root / 'input/asap7', aig)
+        for name in ['NONE', 'AGAIN']:
+            result = raw / 'aigs' / (name + '.aig')
+            self.assertEqual(parse_aig(result).po_literals[:2], (0, 1))
+            self.assertEqual(evaluator.evaluate(result, self.work / ('constant_' + name))['cec'], 'PASS')
+
     def test_context_cut_cec_accepts_relations_and_rejects_wrong_function(self):
         from global_timing.candidates import Catalogue
         from global_timing.cut_validation import validate_catalogue

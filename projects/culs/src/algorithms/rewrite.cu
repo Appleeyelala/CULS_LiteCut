@@ -1033,6 +1033,17 @@ void CPUSolver::Reset(int nInputs, int nOutputs, int nTotal,
     numOutputs = nOutputs;
     n = nTotal;
 
+    // CPUSolver uses AIGER literals (0=false, 1=true), unlike AIGMan.
+    // Reorder/phase propagation must not rely on freshly allocated pages being
+    // zero, particularly for constant outputs and repeated replay instances.
+    std::fill_n(fanin0, numInputs + 1, 0);
+    std::fill_n(fanin1, numInputs + 1, 0);
+    std::fill_n(phase, n + 1, 0);
+    std::fill_n(level, n + 1, 0);
+    std::fill_n(isDeleted, n + 1, 0);
+    std::fill_n(visMark, n + 1, 0);
+    order[0] = 0;
+
     for (int i = 0; i < nAnds; i++) {
         size_t thisIdx = (size_t)(i + 1 + nInputs);
         fanin0[thisIdx] = invertConstTrueFalse(pFanin0[thisIdx]);
@@ -1677,6 +1688,9 @@ void CPUSolver::Init() {
 void CPUSolver::Reorder() {
     auto startTime = clock();
 
+    level[0] = 0;
+    order[0] = 0;
+
     for(int i = 1; i <= n; i++)
         level[i] = i <= numInputs ? 0 : -1;
     auto startTime2 = clock();
@@ -1720,7 +1734,7 @@ void CPUSolver::WriteAig(const char * path) const {
     file << "aig " << n << ' ' << numInputs << " 0 " << numOutputs << ' '
          << (n - numInputs) << '\n';
     for (int i = 0; i < numOutputs; ++i)
-        file << invertConstTrueFalse(static_cast<unsigned>(output[i])) << '\n';
+        file << static_cast<unsigned>(output[i]) << '\n';
 
     auto writeVarint = [&](unsigned value) {
         while (value >= 0x80U) {
@@ -1731,8 +1745,8 @@ void CPUSolver::WriteAig(const char * path) const {
     };
     for (int node = numInputs + 1; node <= n; ++node) {
         unsigned lhs = static_cast<unsigned>(2 * node);
-        unsigned lit0 = invertConstTrueFalse(static_cast<unsigned>(fanin0[node]));
-        unsigned lit1 = invertConstTrueFalse(static_cast<unsigned>(fanin1[node]));
+        unsigned lit0 = static_cast<unsigned>(fanin0[node]);
+        unsigned lit1 = static_cast<unsigned>(fanin1[node]);
         if (lit0 > lit1)
             std::swap(lit0, lit1);
         if (lhs < lit1 || lit1 < lit0)

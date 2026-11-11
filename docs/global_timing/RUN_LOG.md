@@ -92,7 +92,7 @@
 | 64396 | `20261111T194041Z-consistent-cohort-submit-guard-e5f1d667` | ALL_DECLARED_SHARDS_SUBMITTED / SlurmCOMPLETED：父64341及64340分别自然结束后，重新检查集群、用户全部请求及冻结hash，于2026-11-11 21:22:13和22:35:55 UTC依次提交64397/64399。两份成功回执与衔接记录保留，没有待提交分片，禁止重复提交。2h52m26s、MaxRSS30916 KiB，申请1 CPU/1 GiB（实际2 CPU）、无GPU；退出后当前两个benchmark加路径审计共18 CPU/152 GiB/2 GPU |
 | 64397 | `20261111T184753Z-consistent-full-shard1-175169c2` | RUNNING：统一版本奇数452输入分片，源码`160b218`、64389工具。启动75/75真实核心PASS，已进入4 worker benchmark；8 CPU/64 GiB/1 GPU、5天，每搜索8预算、warmup2、梯度20/校准30步、整例7200 s/工具900 s，原定参数未变。由64396提交，准备及提交清单保持独立；不是整分片或全905完成声明 |
 | 64397.0 | `20261111T214331Z-consistent-c1355-exact-repeat-0e387139` | COMPLETED / reproduction PASS：独立执行c1355，使用全量奇数分片的同一`160b218`源码快照、工具/资产、固定种子及全部搜索参数，900 s工具/7200 s整例限制。配置、全部数值/选择/最终选点及25项精确图结构检查一致，冻结输入未变；仅native ABC输出时间注释导致字节hash不同。Slurm41 s、MaxRSS437680 KiB，使用64397内1 CPU/4 GiB步骤、共享已有GPU，未增加分配。此复现不计入905输入性能cohort |
-| 64398 | `20261111T221147Z-consistent-path-audit-batch1-4a351887` | RUNNING：为统一版本全量比较采集可复用的路径证据，启动时冻结64397的89个PASS输入，816未记录；全部benchmark源码为`160b218`。复用现有路径审计程序，observer与原测量使用同一个64389 ABC二进制，逐份要求新CEC、全部timing及mapped正文不变，沿用900 s工具时限。2 CPU/24 GiB/0 GPU、24 h，顺序审计；提交后总分配16 CPU/153 GiB/2 GPU。准备/分析源码`6a35de5`，一次性driver及配置另存hash；尚无整批完成结论，不是新增候选搜索 |
+| 64398 | `20261111T221147Z-consistent-path-audit-batch1-4a351887` | COMPLETED_WITH_INCOMPLETE_BENCHMARK_COVERAGE：固定89/89个设计PASS，1411份映射、1678个成功测量引用，逐份新CEC及全部timing/mapped正文不变核验通过；精确benchmark目录与冻结清单一致。清单仍为89 PASS/816未记录，不代表全905完成。benchmark源码`160b218`、同一64389 ABC、900 s工具时限；准备/分析源码`6a35de5`。Slurm正常退出0:0，1h41m27s、MaxRSS1406460 KiB，2 CPU/24 GiB/0 GPU；没有候选搜索 |
 | 64399 | `20261111T184752Z-consistent-full-shard0-1568c1b9` | RUNNING：统一版本偶数453输入分片，由64396在配额检查后提交。启动75/75真实核心PASS，已进入4 worker benchmark；源码`160b218`、64389工具，8 CPU/64 GiB/1 GPU、5天。与64397相同的8预算、warmup2、梯度20/校准30步、整例7200 s/工具900 s；两份预定索引互斥且并集905。不是整分片或全量完成声明 |
 | 64400 | `20261111T225011Z-consistent-path-audit-batch2-7d3c9774` | RUNNING：冻结两个统一版本分片的166个PASS输入、739未记录，核验并排除64398已分配的89个精确目录，新增77个路径审计；benchmark源码均为`160b218`。2 CPU/24 GiB/0 GPU、24 h，同一64389 ABC与900 s工具时限。提交后总分配20 CPU/176 GiB/2 GPU；准备/分析源码`5b22586`，一次性driver及前批清单另存hash。已开始产生逐例PASS，尚无整批完成结论 |
 | 64401 | `20261111T230414Z-consistent-path-audit-batch3-9f6ede4b` | RUNNING：冻结两个分片的204个PASS输入、701未记录，核验并排除前两批已分配的166个精确目录，新增38个路径审计；benchmark源码均为`160b218`。2 CPU/24 GiB/0 GPU、24 h，同一64389 ABC与900 s工具时限。提交后总分配22 CPU/200 GiB/2 GPU；准备/分析源码`b057dc8`，复用第二批driver的相同字节，配置显式列出两个前批。已经进入原有observer流程，尚无整批完成结论 |
@@ -112,6 +112,8 @@
 两份分片均已提交，64396已正常结束，**不要再次执行这两份`job.slurm`**。监测计划与脚本在其`input/plans.json`、`input/guard.py`，配额检查保存在`output/checks/`；目标运行各有独占创建的`input/launch_reservation.json`、`input/pre_submission_run.json`及成功回执`input/submission.json`。监测目录另存`output/submitted_64340.json`、`submitted_64341.json`。以这些回执和Slurm判断实际状态，不根据旧准备快照的状态重复启动；监测已经没有后续提交工作。
 
 ## 统一版本路径证据分批采集
+
+首批64398已经完整结束，89/89个精确benchmark目录均与原选择一致且审计PASS；1411份映射、1678个成功测量引用，逐例唯一AIG字节数之和为1173（不是跨设计全局去重数）。`output/slurm_completion.json`及其`.sha256`保存终态sacct、清单一致性、计数及主要报告hash，完成记录SHA256为`98d33c113cd21220a3e91cc06829adf01e29e19683dff4dabe662bc8d55a492b`。原冻结cohort和选择清单hash未改变。其余批次的进度及最终905覆盖仍须单独检查。
 
 64398的`output/cohort/cohort.json`和`output/path_audit_selection.json`固定首批89个精确benchmark目录及来源。64400同时读取两个统一版本分片，冻结166个PASS输入；逐项核验首批清单、前后cohort、精确benchmark目录、输入索引及源码commit后，排除已分配的89个目录，选择新增77个。两批选择互斥、并集166，不能将已分配审计当作已通过审计。第二批选择清单SHA256为`5fbc3a5a10ef9933e39df12874fb1e2e473add32b8f12a66db209770eb359114`，首次核验时已有5例PASS、73份映射，整批仍在运行。
 

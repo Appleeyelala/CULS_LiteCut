@@ -31,6 +31,7 @@
 | 搜索与公平比较 | `20261111T175518Z-acyclic-cohort-program-audit-333c8796/output/cohort/cohort.json`、`paired_report/paired_statistics.json`、`search_quality/` | 固定191输入、206次尝试；选定185 PASS、6 FAIL，其余714未记录；多开发版本分层保留，不能当作最终统一版本全量结果 |
 | 保存映射的最大arrival链 | `20261111T160518Z-frozen-cohort-path-audit-0994e1ac/output/arrival_paths/summary.json` | 固定清单中116个成功设计的1870份映射、2218个引用，通过新CEC和数值/网表正文不变核验 |
 | 路径变化与预测关联 | `20261111T182725Z-completed116-path-analysis-3a705938/output/path_changes/summary.json`、`retained_prefix_comparison.json` | 全部116设计只读复核，原39设计分析精确一致；不与191输入搜索快照拼成同一实验，不能证明唯一逻辑路径身份 |
+| 统一版本首批路径采集 | `20261111T221147Z-consistent-path-audit-batch1-4a351887/output/arrival_paths/summary.json`、`audit_summary.json`、`slurm_completion.json` | 固定89/89个设计PASS，1411份映射、1678个引用，精确benchmark目录与原清单一致；新CEC及数值/网表正文不变核验通过。benchmark源码`160b218`，与最终比较相同的64389 ABC；首批冻结cohort仍有816未记录，不是全905完成 |
 
 上述搜索比较未显示稳定优于对等预算随机搜索的结果。真实CEC通过、代理预测准确、优化收益和跨设计泛化是不同结论，分别见[搜索分析](INTERIM_SEARCH_ANALYSIS.md)、[路径分析](PATH_CHANGE_ANALYSIS.md)和[限制报告](LIMITATIONS.md)。
 
@@ -42,4 +43,4 @@
 
 最终比较须核对全部905个终态、同一来源与参数、各方法缺项、真实预算及失败请求。已有开发版本全量扫描和定向补验独立保存，不按结果优劣拼接为最终cohort。Slurm退出0也不等于全部case或历史程序PASS；应读取逐例和逐程序报告。当前不宣称全量验收完成。
 
-统一版本的路径证据已开始独立采集：64398、64400、64401、64402和64403分别选择89、77、38、37和49个成功设计，目录见[运行记录](RUN_LOG.md#统一版本路径证据分批采集)。每批核验并排除所有前批已分配的精确目录，五批互斥、并集290，benchmark源码均为`160b218`。启动时分别冻结89/166/204/241/290个成功输入，816/739/701/664/615未记录的快照独立保留，不能将缺项相加。五批仍在运行，不列入上面的已完成证据。选择清单见各自`output/path_audit_selection.json`，实际逐例报告见`output/arrival_paths/`；已分配不等于已完成。后续由现有多audit入口与最终cohort按精确benchmark目录关联，原开发版本的116设计报告不替代新结果。
+统一版本的路径证据已开始独立采集：64398、64400、64401、64402和64403分别选择89、77、38、37和49个成功设计，目录见[运行记录](RUN_LOG.md#统一版本路径证据分批采集)。每批核验并排除所有前批已分配的精确目录，五批互斥、并集290，benchmark源码均为`160b218`。启动时分别冻结89/166/204/241/290个成功输入，816/739/701/664/615未记录的快照独立保留，不能将缺项相加。首批64398已完成并列入上表，其余四批仍在运行。选择清单见各自`output/path_audit_selection.json`，实际逐例报告见`output/arrival_paths/`；已分配不等于已完成。后续由现有多audit入口与最终cohort按精确benchmark目录关联，原开发版本的116设计报告不替代新结果。

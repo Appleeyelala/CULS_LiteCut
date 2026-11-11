@@ -39,6 +39,14 @@ python -B RUN/src/scripts/run_framework_experiment.py \
 
 全数据集先用 `stage_benchmarks.py` 生成逐文件hash清单；再用 `run_benchmark_suite.py --manifest … --shard-count 2 --shard-index 0` 及另一个索引1覆盖数据。`--workers`受CPU配额限制，共享当前已分配GPU，不额外申请资源。单例超时会终止其工具后代进程并保留记录。
 
+本地持续集成入口为：
+
+```bash
+python -B RUN/src/scripts/ci.py --run RUN --tool-run BUILD_RUN
+```
+
+它串联完整核心回归、真实c1355双目标8预算smoke、原生writer、已有Gate1工具与ABC Gia测试、全程序矩阵，并生成`ci_summary.json`。完整入口需要一个GPU分配；`--unit-only`可用于CPU快速检查，明确保留GPU测试SKIP。没有配置外部CI服务或Git钩子，完整流水线须在实际运行通过后才能作为提交的验证证据。
+
 ## 检查产物
 
 - `config.json`、`partition/`、`candidates/`：输入与原始分区、GPU导出，保留原始ID。

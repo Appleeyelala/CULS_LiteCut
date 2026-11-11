@@ -69,6 +69,12 @@ def functional_evidence(root, runs):
             for relative in ['projects/culs/src/algorithms/rewrite.cu', 'projects/culs/src/algorithms/rewrite.h',
                              'tests/native/replay_constants.cpp']:
                 add(run, relative, report, 'native_writer_constants', record['status'], record['scope'])
+        report = run / 'output/cycle_regression.json'
+        if report.is_file():
+            record = json.loads(report.read_text())
+            for relative in ['projects/culs/src/algorithms/rewrite.cu', 'projects/culs/src/algorithms/rewrite.h',
+                             'global_timing/candidates.py', 'global_timing/pipeline.py']:
+                add(run, relative, report, 'retained_transitive_cycle_repair', record['status'], record['scope'])
         report = run / 'output/historical_analysis_tests/summary.json'
         if report.is_file():
             for record in json.loads(report.read_text())['records']:

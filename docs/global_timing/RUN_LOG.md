@@ -64,7 +64,7 @@
 | 64340.8 | `20261111T160210Z-cached-coordinate-real-regression-e46fd0d0` | COMPLETED_WITH_EXPLICIT_OMISSIONS：缓存版60项真实核心测试全部通过，c1355双目标8预算比较完成，两模式仍为360.111877 ps / 513.216003 area、CEC PASS；writer/Gate1工具/Gia及2507项程序矩阵完成，139 import PASS/17 FAIL/1 SKIP、57 CLI smoke PASS、102文件有命名功能证据。Slurm 9m09s，MaxRSS457464 KiB，共享分配计时 |
 | 64381 | `20261111T160518Z-frozen-cohort-path-audit-0994e1ac` | RUNNING：冻结128次尝试、125输入（116 PASS/9 FAIL/780未记录），按既定最后终态尝试策略审计116个成功设计的全部成功映射引用。仅重新CEC/测量并要求全部数值和网表正文相同，再提取最大arrival链；不重新搜索候选。该快照不随后续live结果改变 |
 | 64382 | `20261111T160933Z-division-cec-diagnosis-e5e74bdc` | DIAGNOSIS_COMPLETED：对index147 Division保存的原始/native rewrite AIG，核对同一旧ABC及输入hash；原`cec -n`在外部1800 s限制下于306.23 s取得等价性证明，`cec -n -p`在300.06 s超时。诊断不改变原300 s FAIL，没有rewrite/mapping，不代表完整benchmark通过 |
-| 64341.5 | `20261111T160711Z-cached-coordinate-failed-case-retry-963fafa6` | RUNNING：缓存版60项真实核心测试全部通过；78（OpenABC sqrt）和125（DF_pipeline）已在873.49/118.20 s完整PASS，22（ACE hyp）继续。每种搜索8次预算、3600 s单例限制。hyp在64341.4明确超时后才加入；旧记录/hash保留，不重复live case。使用原有GPU allocation，不取消其他任务 |
+| 64341.5 | `20261111T160711Z-cached-coordinate-failed-case-retry-963fafa6` | COMPLETED_WITH_FAILURES：缓存版60项真实核心测试全部通过；78（OpenABC sqrt）和125（DF_pipeline）在873.49/118.20 s完整PASS，22（ACE hyp）在3600.50 s超时，已进入joint但没有完整终态结果。每种搜索8次预算；Slurm 1h17m07s、MaxRSS2830788 KiB。旧记录/hash保留，不取消其他任务 |
 | 64383 | `20261111T161958Z-tool-timeout-regression-18c44f98` | COMPLETED_WITH_GPU_OMISSIONS：`f29a906`增加显式工具时限来源检查，61项CPU矩阵50 PASS/11 SKIP；旧104/125输入冻结清单均仍有效。缓存版c1355的25个成功观察引用对应22份映射、18种AIG字节，重新CEC/全部PO与area/global/网表正文及路径检查通过。缓存前后完整数值/选择/图结构相同；native ABC时间注释使文件字节不同 |
 | 64340.9 | `20261111T162117Z-declared-timeout-division-retry-50d6b379` | RUNNING：`f29a906`的61项真实核心测试全部通过；每工具900 s、单设计7200 s的显式参数已用于c1355完整比较，70.68 s PASS；随后重验Division index147，仍每搜索8次预算、默认`cec -n`。原300 s CEC失败及306.23 s诊断证书独立保留，不因诊断通过提前标记Division完成 |
 | 64384 | `20261111T162905Z-timeout-cohort-program-audit-d2c73954` | COMPLETED_WITH_EXPLICIT_OMISSIONS：冻结145次尝试、137输入，选择130 PASS/7 FAIL/768未记录；包括实际900 s配置的c1355及旧300 s运行，时限/工具/输入/预算/快照核验通过。2507项程序矩阵完成，139 import PASS/17 FAIL/1 SKIP、57 CLI smoke PASS、1395个编译TU、102文件有命名功能证据。代码与`f29a906`相同，复用字节匹配的61项真实核心及其他命名测试，不新增rewrite/mapping |
@@ -75,7 +75,8 @@
 | 64340.10 | `20261111T172127Z-selected-replay-crash-diagnosis-1e0694ff` | COMPLETED_DIAGNOSTIC / NATIVE_SIGNAL_REPRODUCED：index197的20项原选择、owner表、输入及旧二进制在GDB下重现SIGSEGV，回溯为反复调用CPUSolver::Fanin；没有新搜索或mapping |
 | 64340.11 | `20261111T172508Z-replay-alias-chain-inspection-1c801ee8` | FAILED_DIAGNOSTIC：成功到达旧二进制Fanin入口，但集群GDB不支持Python脚本，未取得内存快照；环境错误与日志独立保留 |
 | 64340.12 | `20261111T172704Z-replay-alias-memory-inspection-dd0019ee` | COMPLETED_DIAGNOSTIC / ALIAS_CYCLE_OBSERVED：GDB原生命令读取实际内存，确认3个不同region的原始root 6868→10577→8953→6868形成环，旧trace均ACCEPTED；100个活跃引用进入环。详见NATIVE_REPLAY_CYCLES.md；无CEC/mapping标签 |
-| 64389 | `20261111T173355Z-acyclic-replay-tool-build-64cf764e` | RUNNING：`d2065ab`加入安装前传递依赖检查和有界别名解析；69项CPU矩阵58 PASS/11 SKIP，正在构建工具并执行链接实际solver的原生CPU回归。尚未取得真实GPU replay/CEC修复验收 |
+| 64389 | `20261111T173355Z-acyclic-replay-tool-build-64cf764e` | BUILT_AND_CPU_VALIDATED：`d2065ab`加入安装前传递依赖检查和有界别名解析；69项CPU矩阵58 PASS/11 SKIP，工具构建及链接真实solver的环/长链/补相/常量输出CEC回归通过。2m55s、MaxRSS2594464 KiB；GPU验证单独记录于64341.6 |
+| 64341.6 | `20261111T173748Z-acyclic-replay-real-regression-e1510460` | RUNNING：69/69真实核心PASS，c1355/index197完整双目标比较分别56.80/165.97 s PASS。旧20项循环选择保持FAIL，明确CYCLE_REJECT root10577；另一次13项修复安装CEC/mapping PASS，未用no-op fallback。c1355完整数值/选择/图结构与保存参照一致。逐程序矩阵继续执行 |
 
 ## 首次真实闭环的有限结论
 

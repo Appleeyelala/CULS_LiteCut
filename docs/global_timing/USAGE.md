@@ -91,6 +91,8 @@ python -B RUN/src/scripts/analyze_path_changes.py --cohort FROZEN_COHORT_JSON \
 
 `analyze_search_quality.py --output NEW_OUTPUT --suites SAVED_SUITE_0 SAVED_SUITE_1 --expected-inputs 905 --cohort-label LABEL`在CPU Slurm任务中审计已有搜索，不执行rewrite/mapping或拟合。它冻结各suite当前完整JSONL记录，拒绝同一输入重复混入，输出预测误差、校准标签来源检查、梯度请求接受率、最终选点来源和图表。正在扫描的suite会明确显示尚未全覆盖；失败请求不填充时序数值。预测统计属于模型不断更新的自适应搜索，不解释为固定模型排序或跨设计泛化。
 
+`failure_evidence/case_*.json`另存FAIL/PARTIAL/SKIP的原日志hash和尾部、明确缺失的方法、失败工具命令及失败测量原因。完整案例超时与单条工具超时分别记录；部分完成案例仍可分析已经验证的搜索观察。已完成工具时间合计不含被中断的命令及CPU代理计算，不能作为完整wall-time分解；搜索中可恢复的失败请求也不自动被解释为整例失败根因。来源不匹配或损坏记录计为审计错误，不改变原benchmark状态。
+
 全量分片和补验包含重复输入时，先在新的CPU Slurm运行中建立显式选择清单：
 
 ```bash

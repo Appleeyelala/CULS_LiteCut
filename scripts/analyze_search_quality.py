@@ -14,6 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from global_timing.common import digest, save_json
 from global_timing.cohort import analysis_sources
 from global_timing.search_analysis import analyze_search, aggregate_search
+from global_timing.failure_analysis import describe_failure
 
 
 def write_csv(path, rows):
@@ -68,8 +69,18 @@ def main():
             identity = {'index': row['index'], 'input_name': row['relative_path'], 'input_sha256': row['sha256'],
                         'case_status': row['status'], 'source_commit': metadata['source_commit']}
             coverage.append(identity)
+            if row['status'] in {'FAIL', 'PARTIAL', 'SKIP'}:
+                try:
+                    detail = describe_failure(row, suite)
+                    detail_path = output / 'failure_evidence' / f'case_{row["index"]:04d}.json'
+                    save_json(detail_path, detail)
+                    failures.append(dict(identity, reason=row.get('reason'),
+                        timed_out=row.get('timed_out', False), categories=detail['categories'],
+                        failed_methods=detail['failed_methods'], evidence=str(detail_path),
+                        evidence_sha256=digest(detail_path)))
+                except Exception as exc:
+                    failures.append(dict(identity, audit_error=f'Failure evidence: {type(exc).__name__}: {exc}'))
             if row['status'] not in {'PASS', 'PARTIAL'} or not row.get('summary'):
-                failures.append(dict(identity, reason=row.get('reason'), timed_out=row.get('timed_out', False)))
                 continue
             path = Path(row['summary']).resolve()
             if not path.is_relative_to(suite):
@@ -116,6 +127,7 @@ def main():
               'analysis_source': str(Path(__file__).resolve().parents[1]),
               'script_sha256': digest(Path(__file__)),
               'module_sha256': digest(Path(__file__).resolve().parents[1] / 'global_timing/search_analysis.py'),
+              'failure_module_sha256': digest(Path(__file__).resolve().parents[1] / 'global_timing/failure_analysis.py'),
               'slurm_job_id': os.environ['SLURM_JOB_ID']}
     report['aggregate_by_source_commit'] = {
         commit: aggregate_search([row for row in analyzed if row['source_commit'] == commit])
@@ -168,6 +180,8 @@ def main():
     lines += ['', '预测来自逐次真实评估前，模型随反馈变化；这不是固定模型的候选排序测试或跨设计泛化证据。',
               '源码版本逐输入保留，并在summary.json中分别汇总；多版本总体统计不冒充单一最终版本的实验。',
               '使用冻结cohort时保留全部旧尝试；尚未产生终态记录的声明任务会使全量完成标记保持false。',
+              'failure_evidence保留失败/部分完成/跳过案例的日志尾部、原始hash、缺失方法和失败工具记录。',
+              '工具时间合计只包含已完成命令，不是完整wall-time分解；超时不是不等价证明，失败请求也不自动解释整例失败。',
               '基线锚点、失败请求均不用于计算预测误差；没有实际变化的样本单列，不计作方向预测正确。',
               '每个设计等权汇总；零delay参考不做归一化。单种子、自适应样本及相关benchmark变体不支持显著性推断。',
               '最终选择来源描述保存的请求来源，不证明因果贡献；显式修复可能继承梯度提案，其直接parent来源另列。',

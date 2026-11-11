@@ -21,8 +21,9 @@ def main():
     if not os.environ.get('SLURM_JOB_ID') or not str(run).startswith('/data/wushangge/'):
         raise SystemExit('Use a prepared Slurm /data run.')
     relative = 'projects/culs/src/algorithms/rewrite.cu'
-    if digest(run / 'src' / relative) != digest(args.tool_run / 'src' / relative):
-        raise SystemExit('Native source differs from built object.')
+    for name in [relative, 'projects/culs/src/algorithms/rewrite.h']:
+        if digest(run / 'src' / name) != digest(args.tool_run / 'src' / name):
+            raise SystemExit('Native source/header differs from built object.')
     output = run / 'output/native_writer'
     output.mkdir()
     binary = output / 'test_native_writer'
@@ -47,8 +48,9 @@ def main():
             raise AssertionError('Constant output literals changed.')
         metrics = Evaluator(abc, run / 'input/asap7', original).evaluate(candidate, output / f'check_{repetition}')
         report.append(metrics)
-    save_json(output / 'summary.json', {'status': 'PASS', 'scope': 'Actual CPUSolver Reset/Reorder/WriteAig, twice; no GPU rewrite.',
+    save_json(output / 'summary.json', {'status': 'PASS', 'scope': 'Actual CPUSolver transitive dependency, cyclic/long alias and complement checks; Reset/Reorder/WriteAig twice; no GPU rewrite.',
                                        'source_sha256': digest(run / 'src' / relative),
+                                       'header_sha256': digest(run / 'src/projects/culs/src/algorithms/rewrite.h'),
                                        'driver_sha256': digest(run / 'src/tests/native/replay_constants.cpp'),
                                        'object_sha256': digest(obj), 'binary_sha256': digest(binary), 'checks': report})
 

@@ -66,7 +66,8 @@ def functional_evidence(root, runs):
         report = run / 'output/native_writer/summary.json'
         if report.is_file():
             record = json.loads(report.read_text())
-            for relative in ['projects/culs/src/algorithms/rewrite.cu', 'tests/native/replay_constants.cpp']:
+            for relative in ['projects/culs/src/algorithms/rewrite.cu', 'projects/culs/src/algorithms/rewrite.h',
+                             'tests/native/replay_constants.cpp']:
                 add(run, relative, report, 'native_writer_constants', record['status'], record['scope'])
         report = run / 'output/historical_analysis_tests/summary.json'
         if report.is_file():

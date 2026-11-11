@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <stdexcept>
 #include "robin_hood.h"
 
 #define isC(x) ((x) & 1)
@@ -155,8 +156,39 @@ public:
         return node > numInputs && (fanin0[node] == fanin1[node] || fanin0[node] == 1);
     }
     int Fanin(int fanin) {
-        if(!isRedundant(id(fanin))) return fanin;
-        return isC(fanin) ^ Fanin(fanin1[id(fanin)]);
+        int polarity = 0;
+        // Valid alias chains contain at most n nodes. Avoid unbounded host
+        // recursion, and report corrupt/cyclic chains instead of SIGSEGV.
+        for (int steps = 0; steps <= n; ++steps) {
+            int node = id(fanin);
+            if (fanin < 0 || node > n)
+                throw std::runtime_error("rewrite alias references an invalid node");
+            if (!isRedundant(node)) return fanin ^ polarity;
+            polarity ^= isC(fanin);
+            fanin = fanin1[node];
+        }
+        throw std::runtime_error("rewrite contains a cyclic redundant-node chain");
+    }
+
+    bool ReplacementDependsOn(int replacement, int root,
+                              std::vector<int> & marks, int stamp) const {
+        // Reusing an existing node can close a multi-rewrite cycle even when
+        // the original removable cones and cut leaves do not conflict.
+        if (marks.size() != static_cast<size_t>(n + 1) || stamp <= 0)
+            throw std::runtime_error("invalid rewrite dependency traversal state");
+        std::vector<int> pending{replacement};
+        while (!pending.empty()) {
+            int node = pending.back();
+            pending.pop_back();
+            if (node < 0 || node > n)
+                throw std::runtime_error("rewrite replacement references an invalid node");
+            if (node == root) return true;
+            if (node <= numInputs || marks[node] == stamp) continue;
+            marks[node] = stamp;
+            pending.push_back(id(fanin0[node]));
+            pending.push_back(id(fanin1[node]));
+        }
+        return false;
     }
     
     bool IsSmall() { return n <= 100000; }

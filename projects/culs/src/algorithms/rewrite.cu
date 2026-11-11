@@ -1166,6 +1166,8 @@ void CPUSolver::Rewrite(bool fUseZeros, bool GPUReplace) {
                 auditRecords.push_back(std::move(record));
         };
 
+        std::vector<int> dependencyMarks(n + 1, 0);
+        int cycleRejectCount = 0;
         for (int executionOrder = 0; executionOrder < static_cast<int>(executionRoots.size()); ++executionOrder) {
             int i = executionRoots[executionOrder];
             auto& cut = bestCut[i];
@@ -1273,6 +1275,14 @@ void CPUSolver::Rewrite(bool fUseZeros, bool GPUReplace) {
                 continue;
             }
 
+            if (ReplacementDependsOn(newIdx, i, dependencyMarks, executionOrder + 1)) {
+                ++cycleRejectCount;
+                auditRecord.status = "CYCLE_REJECT";
+                auditRecord.statusReason = "replacement_transitively_depends_on_current_root";
+                appendAuditRecord(std::move(auditRecord));
+                continue;
+            }
+
             std::vector<unsigned char> deletedBeforeExecution;
             if (rewriteAuditOptions.enabled)
                 deletedBeforeExecution.assign(isDeleted, isDeleted + n + 1);
@@ -1329,6 +1339,7 @@ void CPUSolver::Rewrite(bool fUseZeros, bool GPUReplace) {
         if (rewriteAuditOptions.enabled)
             rewriteAuditWriteTrace(rewriteAuditOptions, auditRecords);
         free(replace);
+        printf("transitive dependency cycle rejects: %d\n", cycleRejectCount);
         CHOICE_TIME += clock() - choiceStartTime;
         printf("successfully replaced %d cones (pos %d, zero %d), reverted %d cones, compromised %d cones, pre-eval rejected %d cones, small cut reject %d cones, new idx reject %d cones\n", 
                replacedCount, replacedPosCount, replacedZeroCount, revertedCount, compromisedCount, preEvalRejectCount, smallCutRejectCount, newIdxRejectCount);
@@ -1584,6 +1595,8 @@ void CPUSolver::RewriteWave(bool fUseZeros) {
 
         int replacedCount = 0, compromisedCount = 0, revertedCount = 0, preEvalRejectCount = 0, smallCutRejectCount = 0, newIdxRejectCount = 0;
         int replacedPosCount = 0, replacedZeroCount = 0;
+        std::vector<int> dependencyMarks(n + 1, 0);
+        int cycleRejectCount = 0;
         for (int i = numInputs + 1; i <= nn; i++) {
             auto& cut = bestCut[i];
             int newIdx = id(replace[i]); // get the corresponding new choice node id
@@ -1601,6 +1614,10 @@ void CPUSolver::RewriteWave(bool fUseZeros) {
                 }
             }
             if (compromised) {compromisedCount++; continue;}
+            if (ReplacementDependsOn(newIdx, i, dependencyMarks, i + 1)) {
+                ++cycleRejectCount;
+                continue;
+            }
 
             int added = install(newIdx);
             ref[newIdx]++;
@@ -1628,6 +1645,7 @@ void CPUSolver::RewriteWave(bool fUseZeros) {
             }
         }
         free(replace);
+        printf("transitive dependency cycle rejects: %d\n", cycleRejectCount);
         CHOICE_TIME += clock() - choiceStartTime;
         printf("successfully replaced %d cones (pos %d, zero %d), reverted %d cones, compromised %d cones, pre-eval rejected %d cones, small cut reject %d cones, new idx reject %d cones\n", 
                replacedCount, replacedPosCount, replacedZeroCount, revertedCount, compromisedCount, preEvalRejectCount, smallCutRejectCount, newIdxRejectCount);

@@ -69,6 +69,8 @@ python -B RUN/src/scripts/analyze_timing_paths.py --run RUN \
 
 `profile_selection.py --run RUN --benchmarks SAVED_CASE_DIRECTORY`只读取已保存输入、候选与LiteCut分数，比较优化后的候选归一化、标量参考成本和历史独立region选择，不执行rewrite或mapping。`--catalogue-only`可诊断尚未完成推理的大设计。成本相等、选择相等与耗时分别报告；缺失历史选择时明确写`NO_SAVED_REFERENCE`。
 
+加`--student-rescore`会用准备目录的checkpoint重新提取19维特征并推理，要求全部score记录与保存的旧结果完全相同。新的`extract_all(..., student_only=True)`跳过模型未使用的5个谱特征及WL hash；默认25维接口保留。缓存键包含提取器和adapter源码hash，因此旧缓存不会被无声复用为新版本的核验证据。具体测试范围及缺失依赖见[测试证据](TEST_COVERAGE.md)。
+
 ## 失败与恢复
 
 任何CEC否定/未决、工具超时、缺失时序或部分安装都保留FAIL，不写入虚构指标。结构冲突在GPU前拒绝；运行时REVERTED必须创建一个新修复请求，不能把原失败请求改写为成功。保留旧结果，在新提交、新目录中修复并重跑相关回归。缺失依赖和历史硬编码入口分别报告，不自动重放旧训练或覆盖历史目录。

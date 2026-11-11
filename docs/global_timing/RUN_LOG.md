@@ -41,6 +41,9 @@
 | 64354 | `20261111T125125Z-path-provenance-regression-1876ee41` | COMPLETED：39项CPU矩阵（29 PASS、10 SKIP）；8设计168个成功观察引用对应124份映射，重新CEC、全部PO/global/area、网表正文与逐arc路径重构全部通过 |
 | 64355 | `20261111T130741Z-selection-cost-regression-3cba9919` | COMPLETED：41项CPU矩阵（31 PASS、10 SKIP）；c1355/des_perf/div的完整catalogue均与保存结果一致，24组坐标选项成本与标量参考逐位相同；c1355/des_perf完整选择一致。hyp归一化完成但无旧完整catalogue可比；div无旧完整选择可比，均明确标记 |
 | 64340.3 | `20261111T131145Z-selection-scale-e2e-f53fa37e` | RUNNING：性能修改后的41项真实核心回归全部通过；继续执行div/hyp/c1355的相同8预算完整对照，旧超时产物保留 |
+| 64356 | `20261111T131747Z-updated-program-matrix-4d80fce4` | COMPLETED_WITH_RECORDED_OMISSIONS：2494项矩阵；126 import PASS、17 FAIL、1 SKIP、51 CLI smoke PASS，45个文件有来源匹配的命名功能证据 |
+| 64357 | `20261111T132425Z-student-feature-regression-9184e32c` | COMPLETED：42项CPU矩阵（32 PASS、10 SKIP）；19维快捷提取重新计算c1355全部417条、div全部122,869条score，特征和预测及其记录与旧结果完全一致；div重算31.40 s |
+| 64341.2 | `20261111T132506Z-student-native-regression-7773e417` | COMPLETED_WITH_RECORDED_OMISSIONS：19维快捷提取的42项真实核心回归全部通过；2495项程序矩阵完成，127 import PASS、17 FAIL、1 SKIP、51 CLI smoke PASS |
 
 ## 首次真实闭环的有限结论
 

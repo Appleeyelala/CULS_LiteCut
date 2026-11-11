@@ -51,6 +51,30 @@ def verify_library_truth(decision, subgraph, library):
     return {'truth_verified': True, 'output_phase_complement': actual != truth}
 
 
+def verify_cut_truth(aig, decision):
+    """Validate the exported cut's boundary and truth against original AIG IDs."""
+    leaves = decision['cut_leaves']
+    if len(leaves) not in {3, 4} or len(set(leaves)) != len(leaves):
+        raise ValueError('Expected distinct 3/4-leaf rewrite cut.')
+    values = {node: pattern for node, pattern in zip(leaves, [0xaaaa, 0xcccc, 0xf0f0, 0xff00])}
+    values.setdefault(0, 0)
+    pending, interior = [decision['root']], set()
+    while pending:
+        node = pending.pop()
+        if node in values or node in interior:
+            continue
+        if node not in aig.fanin_literals:
+            raise ValueError('Cut does not bound the original cone: unlisted PI reached.')
+        interior.add(node)
+        pending.extend(literal >> 1 for literal in aig.fanin_literals[node])
+    for node in sorted(interior):
+        left, right = aig.fanin_literals[node]
+        values[node] = (values[left >> 1] ^ (0xffff if left & 1 else 0)) & (values[right >> 1] ^ (0xffff if right & 1 else 0))
+    if values[decision['root']] != (int(decision['truth']) & 0xffff):
+        raise ValueError('Exported cut truth differs from original AIG truth.')
+    return True
+
+
 def score_catalogue(aig_path, partition, catalogue, checkpoint, cache_dir, batch_size=128):
     if batch_size <= 0:
         raise ValueError('batch_size must be positive.')
@@ -74,10 +98,11 @@ def score_catalogue(aig_path, partition, catalogue, checkpoint, cache_dir, batch
         raise ValueError('Invalid Student output normalization.')
     rows, features = [], []
     for index, decision in enumerate(catalogue.decisions):
+        verify_cut_truth(partition.aig, decision)
         options = [None] + decision['candidate_subgraph_indices']
         for choice, subgraph in enumerate(options):
             row = {'decision_index': index, 'choice_index': choice, 'subgraph_index': subgraph,
-                   'region_id': decision['decision_owner_region']}
+                   'region_id': decision['decision_owner_region'], 'original_cut_truth_verified': True}
             if subgraph is None:
                 graph = original_cone(partition.aig, decision)
                 row['representation'] = 'original_structural_cone_to_cut_or_PI'

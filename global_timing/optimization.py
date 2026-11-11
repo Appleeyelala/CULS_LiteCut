@@ -33,7 +33,7 @@ def gradient_proposals(model, seen, seed, incumbent=None, steps=80, restarts=3,
                                          mode, area_limit_ratio, area_weight=area_weight)
             active = 1.0 - probabilities[:, 0]
             if model.catalogue.conflicts:
-                penalty = torch.stack([active[a] * active[b] for a, b in model.catalogue.conflicts]).mean()
+                penalty = (active[model.conflict_left] * active[model.conflict_right]).mean()
             else:
                 penalty = objective.new_zeros(())
             loss = objective + 0.1 * penalty

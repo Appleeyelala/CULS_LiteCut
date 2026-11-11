@@ -220,26 +220,31 @@ class Experiment:
     def independent_choices(self, baseline):
         model = TimingSurrogate(self.partition, self.catalogue, self.scores, baseline)
         combined = self.noop.copy()
+        neighbors = {i: set() for i in range(len(combined))}
+        for left, right in self.catalogue.conflicts:
+            neighbors[left].add(right)
+            neighbors[right].add(left)
         # Optimize each region with every other region frozen at no-rewrite.
         # Coordinate choices allow multiple compatible decisions per region.
         with torch.no_grad():
             for rid, indices in self.catalogue.region_decisions.items():
-                local = self.noop.copy()
+                if not indices:
+                    continue
+                local = {index: 0 for index in indices}
+                active = set()
                 for _ in range(2):
                     for index in indices:
                         ranked = []
                         for choice in range(model.counts[index]):
+                            if choice and neighbors[index] & (active - {index}):
+                                continue
                             trial = local.copy()
                             trial[index] = choice
-                            try:
-                                self.catalogue.validate(trial)
-                            except ValueError:
-                                continue
-                            probabilities = model.one_hot(trial)
-                            expected = (probabilities.unsqueeze(-1) * model.features).sum(dim=1).unsqueeze(0)
-                            _, arrivals = model._propagate(expected)
-                            ranked.append((float(arrivals[rid][0]), choice))
+                            ranked.append((float(model.independent_region_arrival(rid, trial)), choice))
                         local[index] = min(ranked)[1]
+                        active.discard(index)
+                        if local[index]:
+                            active.add(index)
                 for index in indices:
                     combined[index] = local[index]
         # Cross-region conflicts require a final global legal projection.

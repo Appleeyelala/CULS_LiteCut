@@ -45,6 +45,19 @@ class SurrogateTests(unittest.TestCase):
         x = torch.full((2, 3), 1 / 3, dtype=torch.float64, requires_grad=True)
         self.assertTrue(torch.autograd.gradcheck(lambda values: model(values), (x,), atol=1e-4, rtol=1e-3))
 
+    def test_independent_shortcut_matches_complete_propagation(self):
+        model = model_fixture()
+        with torch.no_grad():
+            model.interaction_weights.fill_(0.7)
+            for rid, indices in model.catalogue.region_decisions.items():
+                for choice in range(3):
+                    local = {index: choice for index in indices}
+                    full = [local.get(i, 0) for i in range(model.n_decisions)]
+                    values = model.one_hot(full)
+                    expected = (values.unsqueeze(-1) * model.features).sum(1).unsqueeze(0)
+                    _, arrivals = model._propagate(expected)
+                    torch.testing.assert_close(model.independent_region_arrival(rid, local), arrivals[rid, 0])
+
     def test_two_objective_modes_and_area_constraint(self):
         po = torch.tensor([80., 100.], dtype=torch.float64)
         area = torch.tensor(10., dtype=torch.float64)

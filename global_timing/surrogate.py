@@ -61,6 +61,8 @@ class TimingSurrogate(nn.Module):
             for i in indices:
                 decision_region[i] = rid
         self.register_buffer('decision_region', decision_region)
+        self.register_buffer('conflict_left', torch.tensor([a for a, _ in catalogue.conflicts], dtype=torch.long))
+        self.register_buffer('conflict_right', torch.tensor([b for _, b in catalogue.conflicts], dtype=torch.long))
         self.local_weights = nn.Parameter(torch.tensor([0.08, 0.15, 0.0, 0.0], dtype=torch.float64))
         self.interaction_weights = nn.Parameter(torch.zeros(4, dtype=torch.float64))
         self.area_weights = nn.Parameter(torch.tensor([0.0, 0.0, 1.0, 0.0], dtype=torch.float64))
@@ -123,8 +125,35 @@ class TimingSurrogate(nn.Module):
         self.depth_to_ps = self.delay_reference / max(max_depth, 1)
         with torch.no_grad():
             zero = torch.zeros((1, self.n_decisions, 4), dtype=torch.float64)
-            baseline_dp, _ = self._propagate(zero)
+            baseline_dp, baseline_regions = self._propagate(zero)
         self.register_buffer('baseline_dp', baseline_dp[0])
+        self.register_buffer('baseline_region_arrivals', baseline_regions[:, 0])
+
+    def independent_region_arrival(self, rid, choices):
+        """Exact region-root cost with all other regions fixed to no-op.
+
+        Predecessors cannot change in this independent baseline. Computing only
+        this region avoids a whole-DAG propagation for every coordinate option.
+        This shortcut is never used for the joint optimizer.
+        """
+        allowed = set(self.catalogue.region_decisions[rid])
+        if not set(choices) <= allowed:
+            raise ValueError('Independent selection includes another region.')
+        values = []
+        for port, depth in self.partition.transfers[rid].items():
+            local = self.features.new_zeros(4)
+            for index in self.port_decisions[rid, port]:
+                choice = choices.get(index, 0)
+                if not 0 <= choice < self.counts[index]:
+                    raise ValueError('Invalid local candidate choice.')
+                local = local + self.features[index, choice]
+            scale = (local * self.local_weights).sum()
+            cost = depth * self.depth_to_ps * torch.exp(2 * torch.tanh(scale / 2))
+            upstream = self.partition.owner.get(port)
+            if upstream is not None:
+                cost = cost + self.baseline_region_arrivals[upstream]
+            values.append(cost)
+        return self.temperature * torch.logsumexp(torch.stack(values) / self.temperature, dim=0)
 
     def one_hot(self, choices):
         self.catalogue.validate(choices)

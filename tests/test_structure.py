@@ -2,9 +2,10 @@
 import random
 from pathlib import Path
 import unittest
+import tempfile
 
 from global_timing.common import legacy
-from global_timing.structure import make_partition, references
+from global_timing.structure import make_partition, references, parse_aig
 
 
 def fixture(pi, fanins, outputs):
@@ -46,6 +47,15 @@ class StructureTests(unittest.TestCase):
 
     def test_empty_and_graph(self):
         self.check_graph(fixture(2, [], [2, 5, 0]))
+
+    def test_malformed_binary_inputs(self):
+        with tempfile.TemporaryDirectory() as directory:
+            for index, content in enumerate([b'', b'aig 3 1 0 1 2\n6\n',
+                                             b'aig 1 1 0 1 0\n99\n', b'aig 2 1 1 0 0\n0\n']):
+                path = Path(directory) / f'invalid_{index}.aig'
+                path.write_bytes(content)
+                with self.assertRaises(ValueError):
+                    parse_aig(path)
 
     def test_generated_dags_against_full_oracle(self):
         rng = random.Random(20261111)

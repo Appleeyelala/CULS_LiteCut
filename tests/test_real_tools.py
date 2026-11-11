@@ -5,7 +5,7 @@ from pathlib import Path
 import unittest
 import uuid
 
-from global_timing.common import legacy, read_jsonl, run_tool
+from global_timing.common import ToolError, legacy, read_jsonl, run_tool
 from global_timing.evaluation import Evaluator
 from global_timing.structure import make_partition, parse_aig
 
@@ -68,6 +68,29 @@ class RealToolTests(unittest.TestCase):
         self.assertEqual(sum(row['candidate_count'] > 0 for row in records), 91)
         self.assertEqual(sum(row['candidate_count'] for row in records), 326)
 
+    def test_real_cec_rejects_inverted_output(self):
+        header, first, rest = self.input.read_bytes().split(b'\n', 2)
+        altered = self.work / 'inequivalent.aig'
+        altered.write_bytes(header + b'\n' + str(int(first) ^ 1).encode() + b'\n' + rest)
+        work = self.work / 'negative_cec'
+        with self.assertRaises(ToolError):
+            self.evaluator.evaluate(altered, work)
+        record = json.loads((work / 'result.json').read_text())
+        self.assertEqual(record['status'], 'FAIL')
+        self.assertFalse((work / 'mapping.log').exists())
+
+    def test_real_abc_mapping_failure_is_not_measurement(self):
+        invalid_library = self.work / 'invalid.lib'
+        invalid_library.write_text('not a Liberty library\n')
+        work = self.work / 'negative_mapping'
+        evaluator = Evaluator(self.abc, invalid_library, self.input)
+        with self.assertRaises(ToolError):
+            evaluator.evaluate(self.input, work)
+        record = json.loads((work / 'result.json').read_text())
+        self.assertEqual(record['status'], 'FAIL')
+        self.assertEqual(record['cec'], 'PASS')
+        self.assertNotIn('delay_ps', record)
+
     def test_litecut_batch_cache_and_all_candidate_functions(self):
         from global_timing.common import ROOT
         from global_timing.candidates import catalogue_from_raw
@@ -85,6 +108,7 @@ class RealToolTests(unittest.TestCase):
         original = legacy('gate3e_run').LiteCutPredictor(ROOT / 'projects/litecut', self.input, checkpoint,
                                                         ROOT / 'projects/culs/src/algorithms/rewrite_library.inc')
         for row in rows:
+            self.assertTrue(row['original_cut_truth_verified'])
             if row['subgraph_index'] is None:
                 continue
             self.assertTrue(row['truth_verified'])

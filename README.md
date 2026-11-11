@@ -4,7 +4,7 @@
 
 源码工作区是 `/home/wushangge/CULS_LiteCut`，运行与数据根目录是 `/data/wushangge/CULS_LiteCut`。
 
-新增框架的构建与运行方法见 [使用说明](docs/global_timing/USAGE.md)，数学与真实执行边界见 [模型契约](docs/global_timing/MODEL_AND_EXECUTION.md)。当前仍在跨设计回归和全量验证中，已有负结果与新发现的接口问题；不宣称完整验收或稳定时序优势。
+新增框架的构建与运行方法见 [使用说明](docs/global_timing/USAGE.md)，数学与真实执行边界见 [模型契约](docs/global_timing/MODEL_AND_EXECUTION.md)，源码与已完成报告的对应关系见 [证据索引](docs/global_timing/EVIDENCE_INDEX.md)。当前仍在跨设计回归和全量验证中，已有负结果与新发现的接口问题；不宣称完整验收或稳定时序优势。
 
 完整 AIG 数据集现位于本仓库的 [open-sourceDataset](open-sourceDataset/)，包含 938 个文件（905 个 AIG/AAG），不进入 Git。后续统一从此目录选择输入；默认设计为 `OpenABC/c1355_orig.aig`，路径配置在 `config/workspace.json`。原 `/home/wushangge/cutLibOrigin/open-sourceDataset` 保留指向新目录的兼容链接，迁移记录见 [dataset_migration.json](provenance/dataset_migration.json)。实际运行前，准备工具会把选定设计复制到 `/data` 的运行目录并记录 SHA256。
 

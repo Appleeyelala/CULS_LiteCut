@@ -40,7 +40,10 @@ def abc_regression(binary, work, baseline, library, has_debug, has_local, candid
         matches = re.findall(r'PAIR_RESULT .*?reachable=1 .*?pair_delay=([0-9.eE+-]+)', log)
         if len(matches) != 1 or 'upper_bound=PASS single_source_consistent=PASS' not in log or 'PAIR_TRACE_ERROR' in log:
             raise ValueError('Rebuilt source-pair command did not pass its actual timing checks.')
-        cec = run_tool([binary, '-c', f'cec -n {tool_path(baseline)} {tool_path(mapped)}'], output, 'cec', 120)
+        # A mapped BLIF contains cell instances. A fresh ABC process must load
+        # their library before CEC can read the network.
+        cec = run_tool([binary, '-c', f'read_lib {tool_path(library)}; '
+                       f'cec -n {tool_path(baseline)} {tool_path(mapped)}'], output, 'cec', 120)
         if not cec_passed(cec):
             raise ValueError('Rebuilt mapped network did not pass CEC.')
         item = {'observed': observed, 'pair_delay_ps': float(matches[0]), 'cec': 'PASS',

@@ -68,6 +68,34 @@ def functional_evidence(root, runs):
         if report.is_file():
             for record in json.loads(report.read_text())['records']:
                 add(run, record['source_relative'], report, 'retained_R9_analysis', record['status'], record['scope'])
+        report = run / 'output/native_validation/summary.json'
+        if report.is_file():
+            for record in json.loads(report.read_text())['records']:
+                targets = ['scripts/test_native_variants.py']
+                if record['variant'] == 'gate1_aigrewrite':
+                    targets += ['legacy/gate1_aigrewrite/src/' + name for name in
+                                ['algorithms/rewrite.cu', 'aig_manager.cu', 'command_manager.cpp']]
+                    scope = 'Actual normalization and four retained dependent two-decision replays, exact provenance/graph comparison and original-input CEC.'
+                else:
+                    targets += ['scripts/build_native_variants.py']
+                    variants = json.loads((run / 'src/provenance/abc_variants.json').read_text())
+                    variant = next(v for v in variants if Path(v['overlay']).name == record['variant'])
+                    targets += [str(Path(variant['overlay']) / name) for name in
+                                variant['changed_files'] + variant['extra_source_files']]
+                    scope = 'Actual mapped CEC and reachable/unreachable pair checks; optional mapper/local-arrival diagnostics. Named command coverage only; build script helper exercised without rebuilding.'
+                for relative in targets:
+                    add(run, relative, report, 'rebuilt_native:' + record['variant'], record['status'], scope)
+        for directory, targets, label in [
+            ('search_quality', ['scripts/analyze_search_quality.py', 'global_timing/search_analysis.py'],
+             'Saved search-label provenance, error and selection-source audit; no new timing measurements.'),
+            ('gradient_profile', ['scripts/profile_gradient.py'],
+             'Exact saved calibration and gradient trace reconstruction with CPU profiling.')]:
+            report = run / 'output' / directory / 'summary.json'
+            if report.is_file():
+                record = json.loads(report.read_text())
+                status = ('PASS' if record['audit_failure_count'] == 0 else 'FAIL') if directory == 'search_quality' else record['status']
+                for relative in targets:
+                    add(run, relative, report, directory, status, label)
         for directory, targets, scope in [
             ('selection_profiles', ['scripts/profile_selection.py', 'global_timing/candidates.py',
                 'global_timing/surrogate.py', 'global_timing/pipeline.py'],
@@ -96,12 +124,54 @@ def functional_evidence(root, runs):
     return evidence
 
 
+def native_compile_evidence(root, runs):
+    """Record actual native objects only for unchanged source snapshots."""
+    evidence = {}
+    for run in runs:
+        report = run / 'output/imported_native/summary.json'
+        if not report.is_file():
+            raise FileNotFoundError('Native build has no final report: ' + str(report))
+        records = json.loads(report.read_text())['records']
+        variants = {Path(v['overlay']).name: v for v in
+                    json.loads((run / 'src/provenance/abc_variants.json').read_text())}
+        for record in records:
+            if record.get('build') != 'PASS':
+                continue
+            binary = Path(record['binary'])
+            if hashlib.sha256(binary.read_bytes()).hexdigest() != record['binary_sha256']:
+                raise ValueError('Recorded native binary hash changed: ' + str(binary))
+            sources = []
+            if record['variant'] == 'gate1_aigrewrite':
+                for obj in binary.parent.rglob('*.o'):
+                    text = obj.relative_to(binary.parent).as_posix()
+                    if text.startswith('CMakeFiles/abcg.dir/src/'):
+                        sources.append('legacy/gate1_aigrewrite/src/' + text.split('/src/', 1)[1][:-2])
+            else:
+                variant = variants[record['variant']]
+                for obj in binary.parent.rglob('*.o'):
+                    for suffix in ['.c', '.cpp', '.cc']:
+                        relative = obj.relative_to(binary.parent).with_suffix(suffix)
+                        overlay = Path(variant['overlay']) / relative
+                        selected = overlay if (run / 'src' / overlay).is_file() else Path(variant['base']) / relative
+                        if (run / 'src' / selected).is_file():
+                            sources.append(str(selected))
+            for relative in sources:
+                current, tested = root / relative, run / 'src' / relative
+                if current.is_file() and current.read_bytes() == tested.read_bytes():
+                    evidence.setdefault(relative, []).append({'report': str(report), 'variant': record['variant'],
+                        'binary_sha256': record['binary_sha256'],
+                        'source_sha256': hashlib.sha256(current.read_bytes()).hexdigest()})
+    return evidence
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--run', type=Path, required=True)
     parser.add_argument('--tool-run', type=Path, required=True)
     parser.add_argument('--evidence-run', type=Path, action='append', default=[],
                         help='Prior actual tests to attach only for byte-identical source files.')
+    parser.add_argument('--native-build-run', type=Path, action='append', default=[],
+                        help='Completed isolated historical native builds with object and source evidence.')
     args = parser.parse_args()
     run = args.run.resolve()
     if not os.environ.get('SLURM_JOB_ID') or not str(run).startswith('/data/wushangge/'):
@@ -128,6 +198,8 @@ def main():
                 if (args.tool_run / 'src' / relative).is_file() and
                 hashlib.sha256((root / relative).read_bytes()).digest() ==
                 hashlib.sha256((args.tool_run / 'src' / relative).read_bytes()).digest()}
+    native_compiled = native_compile_evidence(root, args.native_build_run)
+    compiled.update(native_compiled)
     functional = functional_evidence(root, [run, *args.evidence_run])
     for index, row in enumerate(rows):
         path = root / row['path']
@@ -158,14 +230,17 @@ def main():
             row.update(syntax='PASS', syntax_reason='Translation unit compiled in recorded framework build.',
                        build='PASS', build_evidence=str(build / 'build_report.json'),
                        runtime='SKIP', runtime_reason='Linked native translation unit; real binary integration tests exist, per-file runtime coverage unmeasured.')
+            if row['path'] in native_compiled:
+                row.update(syntax_reason='Translation unit compiled in an isolated historical native build; exact source bytes checked.',
+                           build_evidence=native_compiled[row['path']])
         elif row['kind'] in {'.sh', '.slurm'}:
             literals = sorted(set(re.findall(r'(?:/home|/data|/usr/local)/[^\s"\';]+', path.read_text())))
             row.update(runtime='SKIP', runtime_reason='Historical wrapper retains fixed run/output or compiler paths; executing it could overwrite preserved evidence. bash -n checked; inspect required paths.',
                        required_paths=literals)
         elif row['path'].startswith('history/abc_variants/'):
-            row.update(runtime='SKIP', runtime_reason='Variant overlay requires its own ABC baseline build and exact historical experiment; not the framework binary.')
+            row.update(runtime='SKIP', runtime_reason='Variant header or support file has no standalone runtime; named native command evidence is attached where supplied.')
         elif row['path'].startswith('legacy/'):
-            row.update(runtime='SKIP', runtime_reason='Historical Gate1 snapshot has a separate unbuilt executable and fixed historical replay inputs; not the current CULS build.')
+            row.update(runtime='SKIP', runtime_reason='Historical header or optional entry has no isolated runtime; separate Gate1 binary evidence is attached where supplied.')
         else:
             row.update(runtime='SKIP', runtime_reason='Header/build support/optional translation unit or notebook; no isolated executable. Compiler coverage only asserted where object evidence exists.')
         if row['path'] in functional:
@@ -183,6 +258,7 @@ def main():
                'runtime_smoke': dict(Counter(r['runtime'] for r in rows)),
                'functional': dict(Counter(r['functional'] for r in rows)),
                'compiled_translation_units': len(compiled), 'all_files_recorded': True,
+               'historical_native_translation_units': len(native_compiled),
                'scope': 'Every snapshot source recorded; runtime smoke is not full functionality. Failures and skipped historical workloads remain explicit.',
                'database': json.loads((output / 'summary.json').read_text())['database_hits']}
     with (output / 'matrix_summary.json').open('x') as stream:

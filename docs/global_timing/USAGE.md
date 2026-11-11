@@ -33,7 +33,7 @@ python -B RUN/src/scripts/run_framework_experiment.py \
   --gradient-steps 60 --calibration-steps 80 --mode both
 ```
 
-构建工具复制ABC基线后仅加入只读Liberty端点报告。`--build-only`可在无GPU任务中编译，明确记录`BUILT_NOT_RUNTIME_VALIDATED`；之后仍须运行GPU回归。测试工具核对二进制哈希与全部对应原生源码，拒绝用旧二进制测试已改动的C/CUDA源。
+构建工具复制ABC基线后加入只读Liberty端点报告及默认关闭的最大arrival路径observer。`--build-only`可在无GPU任务中编译，明确记录`BUILT_NOT_RUNTIME_VALIDATED`；之后仍须运行GPU回归。测试工具核对二进制哈希与全部对应原生源码，拒绝用旧二进制测试已改动的C/CUDA源。
 
 底层API为 `python -m global_timing --help`。指定输入、gpuls、ABC、library、checkpoint和全新output目录。支持`area_constraint`、`joint`或`both`；`--area-limit-ratio`默认1.05，`--area-weight`默认0.5，随机种子默认20261111。路径必须不含CULS/ABC命令解析器无法转义的字符。
 
@@ -57,6 +57,17 @@ python -B RUN/src/scripts/ci.py --run RUN --tool-run BUILD_RUN
 - `summary.json`、`report/`：六类方法、两种目标的真实比较、CSV与可导出PNG/PDF。
 
 使用 `summarize_benchmarks.py` 聚合已有结果；`--repeat A B`分别比较文件字节、精确序列化图结构、选择与全部PO/CEC/面积，忽略墙钟时间。图结构hash仅排除符号名称和注释（包括ABC时间戳），保留节点ID和端口顺序。跨版本还须确认算法源码、输入、库和二进制哈希；不能只因最终delay相同就声称完全复现。报告分开绘制最佳面积可行delay与实际联合目标，保存候选变化及真实梯度范数。
+
+保存选择的路径审计可在新的CPU Slurm任务中执行：
+
+```bash
+python -B RUN/src/scripts/analyze_timing_paths.py --run RUN \
+  --tool-run OBSERVER_BUILD_RUN --benchmarks SAVED_CASE_DIRECTORY
+```
+
+该命令在新目录重新CEC/mapping，启用`CULS_GLOBAL_TIMING_PATH_REPORT=1`，要求原测量数值和网表正文完全一致。`output/arrival_paths/`保存各映射的`paths.json`、完整日志及各方法源/端点集合变化；旧搜索目录不改写。observer源码和二进制应来自同一已记录构建，不用新标签覆盖历史Gate3F的MIO列。
+
+`profile_selection.py --run RUN --benchmarks SAVED_CASE_DIRECTORY`只读取已保存输入、候选与LiteCut分数，比较优化后的候选归一化、标量参考成本和历史独立region选择，不执行rewrite或mapping。`--catalogue-only`可诊断尚未完成推理的大设计。成本相等、选择相等与耗时分别报告；缺失历史选择时明确写`NO_SAVED_REFERENCE`。
 
 ## 失败与恢复
 

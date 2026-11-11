@@ -34,6 +34,12 @@
 | 64340.1 / 64341.1 | `20261111T121807Z-corrected-full-shard0-93ae61a2` / `20261111T121809Z-corrected-full-shard1-29165762` | RUNNING：修复后的全905输入双分片；独立step共享已有分配，旧batch未取消；各step先通过33项真实回归 |
 | 64349 | `20261111T122037Z-historical-analysis-regression-324c8936` | COMPLETED：四个R9分析入口用隔离历史输入执行通过，依赖文件hash未改变；2487项程序矩阵合入来源匹配的历史Gate3/R9功能证据，120 import PASS、17 FAIL、1 SKIP |
 | 64350 | `20261111T122536Z-paired-results-regression-b1f525fb` | COMPLETED：35项CPU测试（26 PASS、9个GPU入口SKIP）；8设计实际配对统计与修复版c1355重复比较通过，包含最终选点检查 |
+| 64351 | `20261111T124031Z-arrival-path-observer-build-1ab72688` | COMPLETED：构建可选Liberty最大arrival路径observer；实际ABC路径重构及插桩前后网表/全部PO/面积一致性测试通过；GPU测试由64340.2补齐 |
+| 64340.2 | `20261111T124507Z-arrival-path-full-ci-6caaeabb` | COMPLETED_WITH_EXPLICIT_OMISSIONS：38项真实核心回归全部通过，c1355双目标smoke、原生writer/Gate1/Gia及2492项程序矩阵完成；缺失历史训练环境明确保留 |
+| 64352 | `20261111T124509Z-saved-selection-path-analysis-2bda1d0e` | FAIL：分析wrapper误按搜索method定位复用的no-op文件；原搜索结果未改动 |
+| 64353 | `20261111T124930Z-saved-path-analysis-regression-c851ab7f` | FAIL：首次修复假设了错误的replay路径层数；随后改为按实际observation路径和输入hash定位，并增加回归 |
+| 64354 | `20261111T125125Z-path-provenance-regression-1876ee41` | COMPLETED：39项CPU矩阵（29 PASS、10 SKIP）；8设计168个成功观察引用对应124份映射，重新CEC、全部PO/global/area、网表正文与逐arc路径重构全部通过 |
+| 64355 | `20261111T130741Z-selection-cost-regression-3cba9919` | COMPLETED：41项CPU矩阵（31 PASS、10 SKIP）；c1355/des_perf/div的完整catalogue均与保存结果一致，24组坐标选项成本与标量参考逐位相同；c1355/des_perf完整选择一致。hyp归一化完成但无旧完整catalogue可比；div无旧完整选择可比，均明确标记 |
 
 ## 首次真实闭环的有限结论
 
@@ -62,3 +68,13 @@
 ## 测量边界
 
 新ABC只读插桩输出的PO11 **Liberty** arrival（例如GG=424.422180 ps）与历史Gate3F的PO11 **MIO** arrival（GG=194.1 ps）不同，不能替换历史列。新工具的GG global=425.052216 ps，与历史显示425.05 ps一致；GL/LG/LL也分别对应389.023682、369.597626、388.937592 ps。关键PO并列集合与原生trace各自记录，不把mapper数字ID跨运行等同为原AIG逻辑点。
+
+新增路径observer不依赖native `stime -p`的min-slack回溯作为指定端点的最大arrival路径。它在相同SC timing状态下读取load/slew、cell arc与rise/fall相位，选择能重构端点arrival的最大前驱，验证每级累计值。64354实际复核的124份映射来自8设计、107份不同AIG字节；同一AIG可能对应不同保存的mapped正文，因而不只按AIG去重。完整证据为该运行的`output/arrival_paths/summary.json`及逐映射`paths.json`。
+
+此处固定PI/PO索引从0开始，只比较源/端点集合及当前映射内的链。它不是原图候选到cell的逐项对齐，也没有证明某条布尔可敏化的唯一物理路径切换。
+
+## 大设计选择开销检查
+
+64355在CPU任务中只读取保留的实际输入，不执行rewrite/mapping。`div`有51,140个executable decisions，最大region含1,016个decision；8组坐标选项的旧标量累计耗时7.41 s，优化后0.327 s，成本逐位一致。完整独立region选择耗时39.61 s；旧全量运行在此阶段超过1800 s单例上限，没有完成的旧选择可比较。`des_perf`完整选择与已保存请求完全相同，当前22.45 s；历史90.54 s来自不同并发负载，只能作诊断。
+
+`hyp`有117,509个region、979,378个legal cuts。共享只读region集合后，完整catalogue耗时4.52 s；512条实际cut的归一化参考耗时1.027 s、优化后0.00304 s，内容相同。此处不把子集计时外推为整个优化框架的加速，也不把纯CPU诊断记作完整benchmark通过。后续须补齐超时设计的真实E2E。

@@ -32,6 +32,16 @@
 
 原始 baseline、ABC 原生 rewrite、LiteCut 贪心、独立 region、随机搜索和联合搜索都使用同一输入、库、二进制和映射命令。随机与联合搜索有相同真实评估上限；确定性单次方法报告其较小调用数，不能只比较忽略校准成本的优化时间。主结果同时报告相对原始输入和相对 replay no-op 的变化。
 
+## 最大arrival路径审计
+
+`CULS_GLOBAL_TIMING_PATH_REPORT=1`启用独立ABC构建中的可选只读observer；默认关闭。它为arrival达到全局值95%的每个PO输出一条最大arrival链，包括该端点的rise/fall相位、前驱相位、cell/pin、实际load/slew下的arc delay和累计arrival。直接PI/常量端点也有明确终点类型。
+
+原生`stime -p`按全局min-slack回溯，不能直接认作指定PO的最大arrival前驱。新observer按相同SC manager状态和原生Liberty lookup重新选择最大前驱，检查phase连通及逐arc累计误差；解析器拒绝缺失near-critical端点、非有限数值、循环或不能重构arrival的链。它不修改mapping状态。补充分析必须同时验证新CEC、全部PO/area/global数值及mapped网表正文与原记录相同。
+
+PI/PO索引是固定接口的0-based编号；映射节点ID仍仅在本次网表内有效。输出反映ABC静态load/slew合并模型下的最大链，不是布尔路径可敏化证明，也不是signoff物理路径。比较源/端点集合变化时，不宣称跨映射节点身份已经对齐。
+
+独立region基线仍以其他region均为no-op的root arrival作两轮坐标选择。为避免大region重复产生大量Python/Torch微操作，坐标候选的特征累加使用有序`numpy.add.accumulate`；保留标量exp/tanh/LSE计算和原候选平局规则。该辅助函数不参与梯度反传，联合优化的可微传播保持独立。
+
 ## 当前限制
 
-代理使用固定原图 Region DAG，真实结构变化由重放验证；跨 region 交互只有直接前驱项，远程 mapper 决策和引脚重排可能预测错误。候选仍受原 GPU 的正节点增益筛选约束。多路径代理指所有 Region DAG 入口及 PO 的传播，不声称每条原 AIG 路径都有精确的映射后路径身份。ABC 原生 min-slack traceback 仅作为当前映射的路径报告，不跨运行按数值 ID 对齐。
+代理使用固定原图 Region DAG，真实结构变化由重放验证；跨 region 交互只有直接前驱项，远程 mapper 决策和引脚重排可能预测错误。候选仍受原 GPU 的正节点增益筛选约束。多路径代理指所有 Region DAG 入口及 PO 的传播，不声称每条原 AIG 路径都有精确的映射后路径身份。native min-slack trace与可选最大arrival链分别保存，不跨运行按数值ID对齐。

@@ -4,6 +4,8 @@
 
 每个 `(root, cut_slot)` decision 有 no-op 和 GPU mask 保留的 replacement candidates。一个 region 的变量由该 region 的各 decision 选择共同组成，允许同 region 内多个兼容 rewrite。不同 cut 共享 root、removable cone 重叠、任一 decision 删除另一 decision 的 cut leaf 都被保守排除。该策略可能排除某些特定顺序可执行的组合，不宣称枚举全部合法状态。
 
+`MinimizeCutSupport` 会删去函数无关的cut变量。跨设计审查还发现cut叶子之间的逻辑关系可能使“边界变量相互独立”的完整真值检查过强。因此验证分两层：结构边界/小型BDD可直接证明的cut先通过；其余在保留原始PI和全部叶子逻辑的上下文中，以ABC CEC比较原root与导出LUT。不能把独立变量检查的差异当作实际反例，也不能跳过证明。未证明cut有独立清单，不进入优化；原始GPU导出始终保留。
+
 所有组合从同一原始 AIG 重放，按原 root 升序执行。必须核对请求与 preselection 完全相等，且每个请求均为 ACCEPTED；否则记录 FAIL，不把部分安装当作请求组合。no-op 显式关闭原生默认选择。原始 AIG 与零选择序列化后 AIG 分开测量，避免把序列化引起的 mapper 差异隐藏在优化收益中。
 
 ## 局部到全局的代理
@@ -25,6 +27,8 @@
 ## 真实评价
 
 统一流程为 `read_lib; read_aiger; map; topo; stime -p; write_verilog`。独立 ABC 构建仅加入只读报告，从同一个 `SC_Man` 导出 area、global delay、每个 PO 的 rise/fall arrival。解析器要求 PO 最大 arrival 与 global delay 一致。CEC 只接受明确的正证明并优先拒绝否定/未决结果。
+
+真实CEC使用`cec -n`，显式按AIGER的PI/PO位置匹配，先检查接口数量。原输入可能包含符号名，而CULS replay未保存名称；名称不同不等于逻辑不同。PI/PO顺序仍是严格接口契约，不能任意重新排序。
 
 原始 baseline、ABC 原生 rewrite、LiteCut 贪心、独立 region、随机搜索和联合搜索都使用同一输入、库、二进制和映射命令。随机与联合搜索有相同真实评估上限；确定性单次方法报告其较小调用数，不能只比较忽略校准成本的优化时间。主结果同时报告相对原始输入和相对 replay no-op 的变化。
 

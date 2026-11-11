@@ -30,7 +30,10 @@
 | 64347 | `20261111T115530Z-ci-cpu-and-existing-reports-bdf90782` | FAIL：CI父进程提前导入绘图库使子进程继承不兼容MKL线程层；调整导入顺序，保留失败日志 |
 | 64348 | `20261111T115853Z-ci-cpu-and-reports-regression-c08b3bd8` | COMPLETED：32项CPU矩阵（23 PASS、9个GPU入口SKIP）；6组已保存实验生成图表；重复运行数值/选择一致，Native ABC输出字节hash因时间注释不同，进一步按精确图结构区分 |
 | 64340.0 | `20261111T121113Z-corrected-tools-regression-538f79e0` | COMPLETED_WITH_EXPLICIT_OMISSIONS：独立step在原分配内运行，33项真实核心测试全部通过，c1355双目标8预算完成、都未改善基线；原生writer/Gate1/Gia及2486项矩阵完成；重复运行选择/数值/结构hash一致，ABC注释导致字节hash不同 |
-| 64341.0 | `20261111T121235Z-corrected-cross-design-pilot-13f96501` | RUNNING：独立step验证六个此前失败设计、c1355和中位设计；33项真实回归通过，各设计结果仍待完成 |
+| 64341.0 | `20261111T121235Z-corrected-cross-design-pilot-13f96501` | COMPLETED：33项真实回归及8/8设计完整比较通过；包括六个此前失败设计、c1355和中位设计；不是代表性随机抽样 |
+| 64340.1 / 64341.1 | `20261111T121807Z-corrected-full-shard0-93ae61a2` / `20261111T121809Z-corrected-full-shard1-29165762` | RUNNING：修复后的全905输入双分片；独立step共享已有分配，旧batch未取消；各step先通过33项真实回归 |
+| 64349 | `20261111T122037Z-historical-analysis-regression-324c8936` | COMPLETED：四个R9分析入口用隔离历史输入执行通过，依赖文件hash未改变；2487项程序矩阵合入来源匹配的历史Gate3/R9功能证据，120 import PASS、17 FAIL、1 SKIP |
+| 64350 | `20261111T122536Z-paired-results-regression-b1f525fb` | COMPLETED：35项CPU测试（26 PASS、9个GPU入口SKIP）；8设计实际配对统计与修复版c1355重复比较通过，包含最终选点检查 |
 
 ## 首次真实闭环的有限结论
 
@@ -41,6 +44,14 @@
 64331修复后的完整比较：LiteCut贪心359.873505 ps/533.511353 area，独立region399.386475 ps/523.013794 area；面积约束搜索最佳仍为360.111877 ps/513.216003 area，联合目标最佳360.111877 ps/510.416656 area。不能只引用64330的改善。
 
 64334小预算跨设计pilot中，c5315梯度面积约束搜索404.531586 ps，随机414.942444 ps；c7552梯度1020.499270 ps，随机927.469604 ps；jpeg_hm_decode独立region3040.164790 ps，梯度搜索维持no-op 9142.371090 ps。预算每搜索8次、单种子；没有建立稳定的算法优势。
+
+## 修复版的阶段结果
+
+64341.0的8设计检查中，面积约束梯度相对相同已消耗预算的随机搜索为2胜、5平、1负；联合目标为1胜、4平、3负。这里按各自实际目标判断数值胜负，joint胜不等于delay单项更低。样本包含定向选择的失败案例，不能据此推断全数据集效果或统计显著性。
+
+`DSP_comb`的原始delay为4208.673340 ps，零rewrite replay为5567.682620 ps，二者CEC通过；梯度面积约束结果3847.503660 ps，随机3635.908200 ps。此例说明序列化对mapper的影响可能很大；报告必须分别对照original与no-op，不能仅报相对较差no-op的收益。修复版c1355两模式仍为360.111877 ps / 513.216003 area，未改善。
+
+修复版c1355两次完整搜索的选择、最终选点、CEC、全部PO、面积及精确序列化图结构一致；Native ABC输出时间注释导致原始文件字节不同。完整比较见64350运行的`output/paired_report/repeat_comparison.json`。同一c1355运行的12个预先预测样本global-delta MAE约71.03 ps、Pearson约−0.63；这是自适应搜索内小样本诊断，不能宣称代理准确或跨设计泛化。
 
 ## 全量扫描暴露的接口问题
 

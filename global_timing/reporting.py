@@ -3,8 +3,8 @@ import csv
 import json
 from pathlib import Path
 
-import numpy as np
 import torch
+import numpy as np
 
 from .common import save_json
 from .surrogate import scalar_objective

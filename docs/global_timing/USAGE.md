@@ -17,7 +17,7 @@ python -B scripts/prepare_run.py --name my-check \
   --purpose '具体授权的测试目的' --design OpenABC/c1355_orig.aig
 ```
 
-准备工具只建目录和清单，不运行或提交任务。将下面命令写入该运行目录的 `job.slurm`，通过 `sbatch` 执行。设置工作目录、`TMPDIR`、`XDG_CACHE_HOME`、`MPLCONFIGDIR`、`PYTHONPATH` 至运行目录及其 `src`；设置 `OMP_NUM_THREADS=OPENBLAS_NUM_THREADS=MKL_NUM_THREADS=1`。已完成运行目录保留完整作业脚本，可按任务审查资源和参数。
+准备工具只建目录和清单，不运行或提交任务。将下面命令写入该运行目录的 `job.slurm`，通过 `sbatch` 执行。设置工作目录、`TMPDIR`、`XDG_CACHE_HOME`、`MPLCONFIGDIR`、`PYTHONPATH` 至运行目录及其 `src`；设置 `OMP_NUM_THREADS=OPENBLAS_NUM_THREADS=MKL_NUM_THREADS=1`。共享环境建议显式设置`MKL_THREADING_LAYER=GNU`，避免先导入NumPy的父进程把INTEL线程层传给Torch子进程。已完成运行目录保留完整作业脚本，可按任务审查资源和参数。
 
 每次提交前检查 `sinfo` 和 `squeue -u wushangge`。包含PENDING在内，累计不超过64CPU、256GiB、2GPU；现有分区为Compute，但仍须当次检查。
 

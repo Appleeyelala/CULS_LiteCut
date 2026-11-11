@@ -13,7 +13,6 @@ import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from global_timing.common import run_tool, save_json
-from global_timing.reporting import write_report
 
 
 def main():
@@ -47,6 +46,9 @@ def main():
             run_tool(command, run / 'logs/ci', name, timeout=3600)
             report['steps'].append({'name': name, 'status': 'PASS', 'command': command})
         if not args.unit_only:
+            # Import numerical plotting dependencies only after subprocesses;
+            # their loader may set MKL_THREADING_LAYER in the parent process.
+            from global_timing.reporting import write_report
             report['benchmark_comparison'] = write_report(run / 'output/benchmark', run / 'output/benchmark/report')
             report['repository_matrix'] = json.loads((run / 'output/repository_tests/matrix_summary.json').read_text())
         report['core_tests'] = json.loads((run / 'output/tests.json').read_text())

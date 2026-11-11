@@ -109,7 +109,8 @@ def main():
                 '--checkpoint', run / 'input/student_checkpoint', '--library', source / 'projects/culs/src/algorithms/rewrite_library.inc',
                 '--gate3c', c, '--gate3b', b / 'c1355_orig', '--gate3d', d / 'raw', '--region-map', owner,
                 '--gpuls', gpuls, '--abc', abc, '--out-dir', e])
-        execute('gate3f', [py, tools / 'gate3f_run.py', '--original-aig', aig, '--library', run / 'input/asap7',
+        # Historical ABC `read` dispatches by suffix; the manifest alias has none.
+        execute('gate3f', [py, tools / 'gate3f_run.py', '--original-aig', aig, '--library', (run / 'input/asap7').resolve(),
                 '--gpuls', gpuls, '--region-map', owner, '--gate3e', e, '--abc', abc, '--out-dir', f])
         # Independently verify all emitted AIGs. Negative text takes precedence.
         cec = []

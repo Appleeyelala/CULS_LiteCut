@@ -38,3 +38,13 @@
 64364（`20261111T144801Z-bounded-arrival-regression-0a0473d0`）完成49项CPU矩阵：39 PASS、10个真实工具入口SKIP。新增测试覆盖重复source、重汇合、跨层边、并列/大数值、有限差分和384层链，并检查实际保存的数值元素数。原模型的数值梯度测试也通过。
 
 同一保存div实例的全部校准loss/参数与完整40步梯度trace仍精确一致。含cProfile的初始化为2.63 s、30步校准21.13 s、40步梯度提案49.05 s；该任务MaxRSS约1.01 GiB。对照64363的99.05/105.82 s，仅描述两次保存输入剖析的测量差异，不将其写成全框架或独占资源的加速比。新的真实工具与完整c1355回归另存于`20261111T150227Z-bounded-arrival-real-regression-b71177d2`，其最终状态以对应报告为准。
+
+## voter的大单region选择成本
+
+64367（`20261111T153819Z-voter-coordinate-profile-bf87713a`，源码`ef68f47`）只读取正在补验的voter已经保存完成的输入、catalogue和分数。该设计的13,758个AND属于一个strict maximal MFFC，含7,007个executable decisions、1,001个边界入口，入口到decision的关联共431,860项。58,069条legal cut的catalogue与保存结果精确一致；模型初始化1.64 s。
+
+新`--options-only --option-checks 1`只检查decision 0的两个候选成本。固定局部配置用于数值参照，不声明它是完整可执行的rewrite组合。现有批量入口与标量参照的两个成本精确相同；批量入口含cProfile耗时0.191 s，标量参照未加profiler耗时4.862 s。这里不是相同计时条件的加速比，也不将一个coordinate的时间外推为完整搜索耗时。
+
+`output/selection_profiles/1364100a59bc/option_0.txt`显示一次批量调用发生454,930次函数调用：所有1,001个入口都重新建立选择列表，共433,862次字典get；两个候选又分别重新计算1,001项scalar port cost。列表构造累计0.081 s，两个完整入口cost/归约累计0.053 s。该结果定位了重复处理未变化入口的开销，尚未修改独立选择算法。
+
+此任务明确记录`full_independent_selection_executed=false`及`NOT_RUN_OPTIONS_ONLY`，没有完整选择、rewrite或mapping，不把其PASS替代正在执行的voter E2E。原生短任务的Slurm采样不足以据此推断Python峰值内存。

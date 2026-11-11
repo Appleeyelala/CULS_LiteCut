@@ -52,12 +52,14 @@
 | 64361 | `20261111T142532Z-saved-gradient-profile-5baf3f8e` | COMPLETED：保留div输入的首轮面积约束校准及完整梯度trace精确复现；诊断4183层DAG、51140个decision的实际CPU开销，不执行rewrite/mapping；初版误把mutable run.json列入input hashes，后续排除该项 |
 | 64362 | `20261111T142809Z-native-aware-program-matrix-571ab8dd` | COMPLETED_WITH_RECORDED_OMISSIONS：46项CPU矩阵36 PASS/10 SKIP；2501项程序清单、1395个编译TU、133 import PASS/17 FAIL/1 SKIP、55 CLI smoke PASS；97文件附来源匹配的命名功能证据 |
 | 64363 | `20261111T143301Z-gradient-overhead-regression-62411fb5` | COMPLETED：46项CPU矩阵36 PASS/10 SKIP；移除逐层重复扫描及逐decision张量转换后，保留div首轮校准的全部loss/参数及完整40步梯度trace精确一致；初始化2.60 s、校准99.05 s、提案105.82 s，均含profiler |
-| 64341.4 | `20261111T143814Z-profiled-scale-e2e-retry-8cee3d62` | RUNNING：性能修复后的46项真实核心测试全部通过；div/hyp/c1355重验中，仍每种搜索8次预算。基于已记录的深DAG成本把单例限制从1800 s调整为3600 s，旧超时保留；共享已有分配，不新增GPU allocation |
+| 64341.4 | `20261111T143814Z-profiled-scale-e2e-retry-8cee3d62` | RUNNING：性能修复后的46项真实核心测试全部通过；div已在2022.49 s完成完整比较并PASS，hyp/c1355仍在本次序列中，仍每种搜索8次预算。基于已记录的深DAG成本把单例限制从1800 s调整为3600 s，旧超时保留；共享已有分配，不新增GPU allocation |
 | 64364 | `20261111T144801Z-bounded-arrival-regression-0a0473d0` | COMPLETED：49项CPU矩阵39 PASS/10 SKIP；显式一阶arrival反传与原Torch参照及有限差分通过；保存div全部校准loss/参数、完整40步梯度trace精确一致。含profiler校准21.13 s、提案49.05 s；未执行rewrite/mapping |
 | 64340.5 | `20261111T145230Z-alu-replay-diagnosis-ecc3c927` | COMPLETED_DIAGNOSTIC / PASS_NOT_REPRODUCED：同一旧gpuls/ALU输入的GDB重放未复现SIGSEGV，零rewrite并CEC/mapping通过；原全量失败保留，根因尚未证明 |
 | 64365 | `20261111T145549Z-checked-cuda-tool-build-2623c263` | BUILT_NOT_RUNTIME_VALIDATED：50项CPU矩阵39 PASS/11 SKIP；CULS增加CUDA初始化返回值检查并初始化heap输出变量，独立ABC observer保持原源码；两工具重新构建完成，实际工具回归单独记录 |
 | 64340.6 | `20261111T150227Z-bounded-arrival-real-regression-b71177d2` | COMPLETED_WITH_EXPLICIT_OMISSIONS：`b288fe1`的50项真实核心测试全部通过，含无GPU初始化错误检查；c1355完整双目标8预算比较完成，两模式仍为360.111877 ps / 513.216003 area、未改善。实际writer/Gate1工具/Gia检查通过；2504项程序矩阵完成，136 import PASS/17 FAIL/1 SKIP、56 CLI smoke PASS、1395个编译TU，100文件附来源匹配的命名功能证据 |
-| 64340.7 | `20261111T151256Z-bounded-arrival-failed-case-retry-9d4f505b` | RUNNING：先通过50项真实核心测试；仅重验当时已终止的7项失败，按91/38/32/54/53/62/59顺序单worker执行，仍每种搜索8次预算、3600 s单例限制。旧失败记录及其来源hash已冻结；新manifest只调整行顺序，保留全部905输入身份。不重复64341.4中正在执行/等待的ACE div/hyp，不取消原任务 |
+| 64340.7 | `20261111T151256Z-bounded-arrival-failed-case-retry-9d4f505b` | RUNNING：先通过50项真实核心测试；ALU已在109.86 s完成完整比较并PASS，原SIGSEGV根因仍未证明。仅重验当时已终止的7项失败，按91/38/32/54/53/62/59顺序单worker执行，仍每种搜索8次预算、3600 s单例限制。旧失败记录及来源hash已冻结；新manifest只调整行顺序，保留全部905输入身份。不重复64341.4中的ACE div/hyp，不取消原任务 |
+| 64366 | `20261111T152720Z-benchmark-cohort-audit-38c31f2a` | COMPLETED_WITH_EXPLICIT_OMISSIONS：57项CPU矩阵46 PASS/11 SKIP；冻结106次尝试、104个输入，当前选择97 PASS/7 FAIL/801未记录，原9次失败全部保留。预测来源审计错误0，配对比较与版本分层完成；c1355跨性能修复版本的数值/选择/图结构一致。2507项程序矩阵、139 import PASS/17 FAIL/1 SKIP、57 CLI smoke PASS；未运行新rewrite/mapping |
+| 64367 | `20261111T153819Z-voter-coordinate-profile-bf87713a` | COMPLETED：voter完整catalogue与保存结果一致；一个region含7007个decision、1001个边界入口、431860项入口关联。单个coordinate两个候选的批量/标量成本精确相同，记录重复遍历全部入口的cProfile；未执行完整独立选择、rewrite或mapping，不替代live E2E |
 
 ## 首次真实闭环的有限结论
 

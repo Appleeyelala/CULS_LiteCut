@@ -7,10 +7,11 @@ import json
 import os
 from pathlib import Path
 import re
-import signal
 import subprocess
 import sys
 import time
+
+from .processes import terminate_tree
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -72,7 +73,7 @@ def run_tool(argv, work: Path, name: str, timeout: float = 300, env=None) -> str
         try:
             proc.wait(timeout=timeout)
         except subprocess.TimeoutExpired:
-            os.killpg(proc.pid, signal.SIGKILL)
+            record['terminated_process_ids'] = terminate_tree(proc.pid)
             proc.wait()
             record['timed_out'] = True
         record.update(returncode=proc.returncode, elapsed_s=time.monotonic() - start, log=str(log))

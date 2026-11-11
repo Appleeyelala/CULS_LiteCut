@@ -10,7 +10,6 @@ import hashlib
 import json
 import os
 from pathlib import Path
-import signal
 import subprocess
 import sys
 import time
@@ -55,6 +54,7 @@ def main():
     env = dict(os.environ, PYTHONPATH=str(run / 'src'))
     sys.path.insert(0, str(run / 'src'))
     from global_timing.reporting import write_report
+    from global_timing.processes import terminate_tree
     records = []
     try:
         with (suite / 'records.jsonl').open('x') as stream:
@@ -86,14 +86,19 @@ def main():
                             try:
                                 process.wait(timeout=args.case_timeout)
                             except subprocess.TimeoutExpired:
-                                os.killpg(process.pid, signal.SIGKILL)
+                                record['terminated_process_ids'] = terminate_tree(process.pid)
                                 process.wait()
                                 record['timed_out'] = True
                         record['returncode'] = process.returncode
                         if process.returncode or not (output / 'summary.json').is_file():
                             raise RuntimeError('Case failed or timed out; inspect preserved log and intermediate results.')
                         comparison = write_report(output, output / 'report')
-                        record.update(status='PASS', summary=str(output / 'summary.json'), comparison=comparison)
+                        result = json.loads((output / 'summary.json').read_text())
+                        failed_methods = [name for name in ['greedy_litecut', 'independent_regions']
+                                          if result[name].get('best') is None]
+                        record.update(status='PARTIAL' if failed_methods else 'PASS',
+                                      failed_methods=failed_methods,
+                                      summary=str(output / 'summary.json'), comparison=comparison)
                 except Exception as exc:
                     record.update(status='FAIL', reason=f'{type(exc).__name__}: {exc}')
                 record['elapsed_s'] = time.monotonic() - started
@@ -106,7 +111,7 @@ def main():
                    'scope': 'explicit index subset' if indices is not None else 'full assigned dataset shard',
                    'shard_index': args.shard_index, 'shard_count': args.shard_count}
         (suite / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n')
-        metadata.update(state='COMPLETED_WITH_FAILURES' if any(r['status'] == 'FAIL' for r in records) else 'COMPLETED',
+        metadata.update(state='COMPLETED_WITH_FAILURES' if any(r['status'] in {'FAIL', 'PARTIAL'} for r in records) else 'COMPLETED',
                         outputs=str(suite / 'summary.json'))
     except Exception as exc:
         metadata.update(state='FAILED', error=str(exc))

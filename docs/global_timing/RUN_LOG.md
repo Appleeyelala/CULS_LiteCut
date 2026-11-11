@@ -95,6 +95,7 @@
 | 64398 | `20261111T221147Z-consistent-path-audit-batch1-4a351887` | RUNNING：为统一版本全量比较采集可复用的路径证据，启动时冻结64397的89个PASS输入，816未记录；全部benchmark源码为`160b218`。复用现有路径审计程序，observer与原测量使用同一个64389 ABC二进制，逐份要求新CEC、全部timing及mapped正文不变，沿用900 s工具时限。2 CPU/24 GiB/0 GPU、24 h，顺序审计；提交后总分配16 CPU/153 GiB/2 GPU。准备/分析源码`6a35de5`，一次性driver及配置另存hash；尚无整批完成结论，不是新增候选搜索 |
 | 64399 | `20261111T184752Z-consistent-full-shard0-1568c1b9` | RUNNING：统一版本偶数453输入分片，由64396在配额检查后提交。启动75/75真实核心PASS，已进入4 worker benchmark；源码`160b218`、64389工具，8 CPU/64 GiB/1 GPU、5天。与64397相同的8预算、warmup2、梯度20/校准30步、整例7200 s/工具900 s；两份预定索引互斥且并集905。不是整分片或全量完成声明 |
 | 64400 | `20261111T225011Z-consistent-path-audit-batch2-7d3c9774` | RUNNING：冻结两个统一版本分片的166个PASS输入、739未记录，核验并排除64398已分配的89个精确目录，新增77个路径审计；benchmark源码均为`160b218`。2 CPU/24 GiB/0 GPU、24 h，同一64389 ABC与900 s工具时限。提交后总分配20 CPU/176 GiB/2 GPU；准备/分析源码`5b22586`，一次性driver及前批清单另存hash。已开始产生逐例PASS，尚无整批完成结论 |
+| 64401 | `20261111T230414Z-consistent-path-audit-batch3-9f6ede4b` | RUNNING：冻结两个分片的204个PASS输入、701未记录，核验并排除前两批已分配的166个精确目录，新增38个路径审计；benchmark源码均为`160b218`。2 CPU/24 GiB/0 GPU、24 h，同一64389 ABC与900 s工具时限。提交后总分配22 CPU/200 GiB/2 GPU；准备/分析源码`b057dc8`，复用第二批driver的相同字节，配置显式列出两个前批。已经进入原有observer流程，尚无整批完成结论 |
 
 ## 统一版本全量比较的准备与提交
 
@@ -111,6 +112,8 @@
 ## 统一版本路径证据分批采集
 
 64398的`output/cohort/cohort.json`和`output/path_audit_selection.json`固定首批89个精确benchmark目录及来源。64400同时读取两个统一版本分片，冻结166个PASS输入；逐项核验首批清单、前后cohort、精确benchmark目录、输入索引及源码commit后，排除已分配的89个目录，选择新增77个。两批选择互斥、并集166，不能将已分配审计当作已通过审计。第二批选择清单SHA256为`5fbc3a5a10ef9933e39df12874fb1e2e473add32b8f12a66db209770eb359114`，首次核验时已有5例PASS、73份映射，整批仍在运行。
+
+64401进一步冻结204个PASS输入，排除上述166项后选择38个；三个批次选择互斥、并集204。第三批`output/path_audit_selection.json`的SHA256为`98a29b8e6d5ad2ce9b6a95c508899546276d2676acbfd6cb0d1a468e95842058`。第三批driver与第二批逐字节相同，仅配置增加第二批的选择清单及其cohort哈希；冻结来源检查通过后已开始对index32执行CEC和路径测量。各批启动时的缺项是各自固定快照，不能直接相加或视为最终缺失数量。
 
 各批完成的逐例报告位于`output/arrival_paths/*/summary.json`；原搜索结果保持不变。未来批次应排除所有前批选择清单中已分配的目录，避免重复运行；若确需重试失败审计，必须保留失败报告及单独声明的新尝试。最终使用`analyze_path_changes.py --audit-runs`合并各批证据，匹配最终905输入cohort选定的精确benchmark目录，不以相同输入hash的旧开发运行代替。各批冻结范围及未记录状态不随后续扫描回写。
 

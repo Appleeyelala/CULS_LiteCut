@@ -5,8 +5,10 @@ from collections import Counter
 import csv
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
+import statistics
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -30,13 +32,16 @@ def canonical_outcomes(summary, include_byte_hash=True):
                 'source': (row.get('prediction_before_evaluation') or {}).get('source'),
                 'rejected_requests': row.get('execution_failure', {}).get('rejected_requests')}
 
+    def group(item):
+        return {'observations': [observation(row) for row in item['observations']],
+                'selected_best': observation(item['best']) if item.get('best') else None}
+
     return {'config': summary['config'], 'original': measurement(summary['original']),
             'native_abc': measurement(summary['native_abc']), 'noop': observation(summary['replay_noop']),
-            'greedy': [observation(r) for r in summary['greedy_litecut']['observations']],
-            'independent': [observation(r) for r in summary['independent_regions']['observations']],
+            'greedy': group(summary['greedy_litecut']),
+            'independent': group(summary['independent_regions']),
             'random': [observation(r) for r in summary['random_search']],
-            'gradient': {mode: [observation(r) for r in item['observations']]
-                         for mode, item in summary['gradient_search'].items()}}
+            'gradient': {mode: group(item) for mode, item in summary['gradient_search'].items()}}
 
 
 def saved_graphs(benchmark, summary):
@@ -51,6 +56,48 @@ def saved_graphs(benchmark, summary):
             if row['status'] == 'PASS':
                 paths[f'{group}/{row["index"]}'] = Path(row['aig'])
     return {key: aig_structure_digest(path) for key, path in paths.items()}
+
+
+def paired_statistics(records):
+    """Compare objectives only on matching designs, budgets and feasibility."""
+    if len({record['index'] for record in records}) != len(records):
+        return {'status': 'NOT_POOLED', 'reason': 'Repeated input indices: select one declared run cohort before computing aggregate performance.'}
+    comparisons = {}
+    for proposed, control, field, constrained in [
+        ('gradient_area_constraint', 'random_search_area_constraint', 'delay_ps', True),
+        ('gradient_joint', 'random_search_joint', 'actual_joint_objective', False)]:
+        pairs, omitted = [], []
+        for record in records:
+            rows = {row['method']: row for row in record.get('comparison', [])}
+            a, b = rows.get(proposed), rows.get(control)
+            reason = None
+            if a is None or b is None:
+                reason = 'Missing measured method result.'
+            elif a['evaluations_including_baseline'] != b['evaluations_including_baseline']:
+                reason = 'Different consumed evaluation counts; excluded from this strict paired aggregate.'
+            elif constrained and not (a['area_constraint_feasible'] and b['area_constraint_feasible']):
+                reason = 'Actual mapped area constraint not satisfied.'
+            elif a.get(field) is None or b.get(field) is None:
+                reason = 'Objective absent from this saved report version.'
+            if reason:
+                omitted.append({'index': record['index'], 'status': record['status'], 'reason': reason})
+                continue
+            av, bv = a[field], b[field]
+            tied = math.isclose(av, bv, rel_tol=1e-6, abs_tol=1e-8)
+            pairs.append({'index': record['index'], 'proposed': av, 'control': bv,
+                'outcome': 'tie' if tied else 'win' if av < bv else 'loss',
+                'improvement_pct': 100 * (bv - av) / bv if bv > 0 else None,
+                'delay_ratio': a['delay_ps'] / b['delay_ps'] if b['delay_ps'] > 0 and a['delay_ps'] > 0 else None,
+                'direct_gradient_evaluations': a.get('direct_gradient_evaluations')})
+        improvements = [row['improvement_pct'] for row in pairs if row['improvement_pct'] is not None]
+        ratios = [row['delay_ratio'] for row in pairs if row['delay_ratio'] is not None]
+        comparisons[proposed] = {'control': control, 'objective': field, 'paired_count': len(pairs),
+            'outcomes': dict(Counter(row['outcome'] for row in pairs)), 'omitted_count': len(omitted),
+            'median_objective_improvement_pct': statistics.median(improvements) if improvements else None,
+            'geometric_mean_delay_ratio': math.exp(statistics.mean(math.log(x) for x in ratios)) if ratios else None,
+            'pairs': pairs, 'omitted': omitted}
+    return {'status': 'COMPUTED', 'comparisons': comparisons,
+        'scope': 'Paired saved real measurements with equal consumed budgets; failures and omissions remain in coverage, never imputed. A win is numerical, not a statistical-significance claim. Joint-objective wins need not reduce delay.'}
 
 
 def main():
@@ -88,6 +135,8 @@ def main():
                 'scope': 'Counts reflect saved requests, including failed inputs; PASS is not proof of improved timing.'}
     save_json(args.output / 'coverage.json', coverage)
     save_json(args.output / 'case_records.json', records)
+    statistics_report = paired_statistics(records)
+    save_json(args.output / 'paired_statistics.json', statistics_report)
     if args.repeat:
         left, right = [json.loads((p / 'summary.json').read_text()) for p in args.repeat]
         a, b = canonical_outcomes(left), canonical_outcomes(right)
@@ -103,6 +152,13 @@ def main():
              '完整逐输入状态见 case_records.json；所有方法原始数值见 comparison_all.csv。',
              '固定PI/PO顺序和相同Liberty流程才可比较；历史MIO或mapper mode0指标不并入本表。',
              '同一输入的重跑保留独立来源，不用后一次结果覆盖先前失败；总表可能包含重复输入。']
+    if statistics_report['status'] == 'COMPUTED':
+        lines += ['', '配对比较仅使用相同输入、相同已消耗评估数且具备真实指标的结果；失败和缺失单独列出。', '',
+                  '| 方法 | 对照 | 配对数 | 数值胜/平/负 | 未纳入数 |', '|---|---|---:|---|---:|']
+        for method, item in statistics_report['comparisons'].items():
+            counts = item['outcomes']
+            lines.append(f"| {method} | {item['control']} | {item['paired_count']} | {counts.get('win', 0)}/{counts.get('tie', 0)}/{counts.get('loss', 0)} | {item['omitted_count']} |")
+        lines += ['', 'joint按实际联合目标判定胜负；它不等于delay单项胜负。数值差异不代表统计显著性。']
     (args.output / 'REPORT.md').write_text('\n'.join(lines) + '\n')
 
 

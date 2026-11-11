@@ -23,6 +23,7 @@ class TimingSurrogate(nn.Module):
         self.n_regions = len(partition.regions)
         self.delay_reference = max(float(baseline['delay_ps']), 1e-6)
         self.area_reference = max(float(baseline['area']), 1e-6)
+        self.area_baseline = float(baseline['area'])
         if temperature_ratio <= 0 or not math.isfinite(temperature_ratio):
             raise ValueError('Timing smoothing temperature must be positive.')
         self.temperature = max(self.delay_reference * temperature_ratio, 1e-8)
@@ -55,11 +56,11 @@ class TimingSurrogate(nn.Module):
         self.register_buffer('features', features)
         self.register_buffer('valid', valid)
         self.register_buffer('sizes', torch.tensor(sizes, dtype=torch.float64))
-        incidence = torch.zeros((self.n_regions, self.n_decisions), dtype=torch.float64)
+        decision_region = torch.zeros(self.n_decisions, dtype=torch.long)
         for rid, indices in catalogue.region_decisions.items():
             for i in indices:
-                incidence[rid, i] = 1.0
-        self.register_buffer('incidence', incidence)
+                decision_region[i] = rid
+        self.register_buffer('decision_region', decision_region)
         self.local_weights = nn.Parameter(torch.tensor([0.08, 0.15, 0.0, 0.0], dtype=torch.float64))
         self.interaction_weights = nn.Parameter(torch.zeros(4, dtype=torch.float64))
         self.area_weights = nn.Parameter(torch.tensor([0.0, 0.0, 1.0, 0.0], dtype=torch.float64))
@@ -79,6 +80,40 @@ class TimingSurrogate(nn.Module):
             for port in transfers:
                 self.port_decisions[rid, port] = [i for i in catalogue.region_decisions[rid]
                                                 if port in ports_at[catalogue.decisions[i]['root']]]
+        sources, targets, depths, sparse_rows, sparse_cols = [], [], [], [], []
+        levels = {}
+        for rid in partition.order:
+            predecessors = [partition.owner[p] for p in partition.transfers[rid] if p in partition.owner]
+            levels[rid] = 1 + max((levels[p] for p in predecessors), default=-1)
+        edge_by_target = {}
+        for rid, transfers in enumerate(partition.transfers):
+            for port, depth in transfers.items():
+                edge = len(sources)
+                sources.append(partition.owner.get(port, -1))
+                targets.append(rid)
+                depths.append(depth)
+                edge_by_target.setdefault(rid, []).append(edge)
+                for decision in self.port_decisions[rid, port]:
+                    sparse_rows.append(edge)
+                    sparse_cols.append(decision)
+        self.register_buffer('edge_sources', torch.tensor(sources, dtype=torch.long))
+        self.register_buffer('edge_targets', torch.tensor(targets, dtype=torch.long))
+        self.register_buffer('edge_depths', torch.tensor(depths, dtype=torch.float64))
+        self.register_buffer('port_incidence', torch.sparse_coo_tensor(
+            torch.tensor([sparse_rows, sparse_cols], dtype=torch.long),
+            torch.ones(len(sparse_rows), dtype=torch.float64),
+            (len(sources), self.n_decisions)).coalesce())
+        self.layers = []
+        for layer in sorted(set(levels.values())):
+            nodes = [rid for rid in partition.order if levels[rid] == layer]
+            edges, destinations = [], []
+            for position, rid in enumerate(nodes):
+                edges.extend(edge_by_target[rid])
+                destinations.extend([position] * len(edge_by_target[rid]))
+            self.layers.append((torch.tensor(nodes, dtype=torch.long), torch.tensor(edges, dtype=torch.long),
+                                torch.tensor(destinations, dtype=torch.long)))
+        self.register_buffer('output_regions', torch.tensor([partition.owner.get(lit >> 1, -1)
+                                                            for lit in partition.aig.po_literals], dtype=torch.long))
         structural_arrivals = {}
         for rid in partition.order:
             structural_arrivals[rid] = max((structural_arrivals[partition.owner[p]] if p in partition.owner else 0) + d
@@ -100,29 +135,32 @@ class TimingSurrogate(nn.Module):
 
     def _propagate(self, expected):
         batch = expected.shape[0]
-        zero = expected.new_zeros(batch)
-        region_features = torch.einsum('rd,bdf->brf', self.incidence, expected)
-        arrivals = {}
-        for rid in self.partition.order:
-            inputs = []
-            for port, depth in self.partition.transfers[rid].items():
-                indices = self.port_decisions[rid, port]
-                local = expected[:, indices, :].sum(dim=1) if indices else expected.new_zeros((batch, 4))
-                if port in self.partition.owner:
-                    pred = self.partition.owner[port]
-                    upstream = arrivals[pred]
-                    interaction = region_features[:, rid, :] * region_features[:, pred, :]
-                else:
-                    upstream = zero
-                    interaction = expected.new_zeros((batch, 4))
-                log_scale = (local * self.local_weights).sum(-1) + (interaction * self.interaction_weights).sum(-1)
-                cost = depth * self.depth_to_ps * torch.exp(2.0 * torch.tanh(log_scale / 2.0))
-                inputs.append(upstream + cost)
-            arrivals[rid] = self.temperature * torch.logsumexp(torch.stack(inputs, dim=-1) / self.temperature, dim=-1)
-        endpoints = [arrivals[self.partition.owner[lit >> 1]] if (lit >> 1) in self.partition.owner else zero
-                     for lit in self.partition.aig.po_literals]
-        po = torch.stack(endpoints, dim=-1) if endpoints else expected.new_zeros((batch, 0))
-        return po, arrivals
+        if self.n_regions == 0:
+            return expected.new_zeros((batch, len(self.output_regions))), expected.new_zeros((0, batch))
+        region_features = expected.new_zeros((batch, self.n_regions, 4)).index_add(1, self.decision_region, expected)
+        # Sparse edge/decision aggregation and level-batched LSE avoid an R*D
+        # dense matrix and thousands of tiny autograd operations per sample.
+        flattened = expected.permute(1, 0, 2).reshape(self.n_decisions, batch * 4)
+        local = torch.sparse.mm(self.port_incidence, flattened).reshape(-1, batch, 4).permute(1, 0, 2)
+        upstream_features = region_features[:, self.edge_sources.clamp_min(0), :]
+        upstream_features = upstream_features * (self.edge_sources >= 0)[None, :, None]
+        interaction = region_features[:, self.edge_targets, :] * upstream_features
+        log_scale = (local * self.local_weights).sum(-1) + (interaction * self.interaction_weights).sum(-1)
+        costs = self.edge_depths[None, :] * self.depth_to_ps * torch.exp(2.0 * torch.tanh(log_scale / 2.0))
+        arrivals = expected.new_zeros((batch, self.n_regions))
+        for nodes, edges, destination in self.layers:
+            sources = self.edge_sources[edges]
+            upstream = arrivals[:, sources.clamp_min(0)] * (sources >= 0)[None, :]
+            values = upstream + costs[:, edges]
+            index = destination[None, :].expand(batch, -1)
+            maximum = values.new_full((batch, len(nodes)), -torch.inf).scatter_reduce(1, index, values,
+                                                                                   reduce='amax').detach()
+            sums = values.new_zeros(maximum.shape).scatter_add(1, index, torch.exp(
+                (values - maximum.gather(1, index)) / self.temperature))
+            stage = maximum + self.temperature * sums.log()
+            arrivals = arrivals.index_copy(1, nodes, stage)
+        po = arrivals[:, self.output_regions.clamp_min(0)] * (self.output_regions >= 0)[None, :]
+        return po, arrivals.T
 
     def forward(self, probabilities):
         single = probabilities.ndim == 2
@@ -135,7 +173,7 @@ class TimingSurrogate(nn.Module):
         # Gate-count change is only a predictor of mapped area and is fitted
         # against real mapped areas, never reported as measured area.
         summary = (expected * self.sizes[None, :, None]).sum(dim=1) / max(self.partition.aig.and_count, 1)
-        area = self.area_reference * torch.exp(2.0 * torch.tanh((summary * self.area_weights).sum(-1) / 2.0))
+        area = self.area_baseline * torch.exp(2.0 * torch.tanh((summary * self.area_weights).sum(-1) / 2.0))
         if single:
             return po[0], area[0]
         return po, area

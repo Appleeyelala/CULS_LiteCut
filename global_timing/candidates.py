@@ -87,16 +87,21 @@ def catalogue_from_raw(rows, partition):
     by_region = {i: [] for i in range(len(partition.regions))}
     # Generate possible conflict pairs through node incidence, avoiding N^2
     # comparison on large candidate collections.
-    touched = {}
+    removers, leaf_users = {}, {}
     pairs = set()
     for i, decision in enumerate(decisions):
-        for node in set(decision['removable_nodes']) | set(decision['cut_leaves']):
-            if node == 0:
-                continue
-            for other in touched.get(node, []):
-                pairs.add((other, i))
-            touched.setdefault(node, []).append(i)
+        for node in decision['removable_nodes']:
+            removers.setdefault(node, []).append(i)
+        for node in decision['cut_leaves']:
+            leaf_users.setdefault(node, []).append(i)
         by_region[decision['decision_owner_region']].append(i)
+    # Shared leaves alone are not conflicts. Expanding all leaf-user pairs
+    # would be quadratic for high-fanout PIs on large benchmark designs.
+    for node, deleting in removers.items():
+        for left in deleting:
+            for right in deleting + leaf_users.get(node, []):
+                if left != right:
+                    pairs.add((min(left, right), max(left, right)))
     for left, right in sorted(pairs):
         if conflict_reason(decisions[left], decisions[right]):
             conflicts.append((left, right))

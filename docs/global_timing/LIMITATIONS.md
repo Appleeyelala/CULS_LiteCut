@@ -39,7 +39,7 @@ index197进一步暴露了原生顺序安装的三region引用环：旧trace把6
 - 全量扫描的`forgeEDA/Division.aig`（index147）在native ABC rewrite的CEC阶段超过300 s限制。保存输入为38,773 AND、64 PI、14,205 PO；旧运行未取得证书，不是已证明不等价。64382复用原输入、保存的native AIG和同一ABC，原命令在延长限制后于306.23 s证明等价；自动分区版本仍在300 s超时。单独证明不替代完整benchmark，也不改变旧FAIL或用缺失的timing补数值。
 - Division随后64340.9在7200.51 s整例超时。只读终态记录显示12条CEC累计6678.86 s，其中面积约束eval7在900.17 s超时；该次native CEC已经通过。不能把此失败归为native仍未证明或全部归为代理求导；完整命令计时边界见[性能检查](PERFORMANCE_AUDIT.md)。该案例仍为FAIL，不根据保存的部分成功测量补造完整比较。
 - index108 `Back_End_With_Decode`在64341.7使用性能修复及无环原生工具后，候选准备和no-op CEC/mapping通过，但native ABC rewrite的CEC仍在900.21 s超时。完整案例于1337.65 s记FAIL；没有取得该native结果的等价性证书，也没有执行其后的各搜索方法。该失败点与旧1800 s候选准备超时不同；不能把它写成不等价，或用已经通过的no-op代替缺失的native及搜索结果。
-- `94909a7`现将独立native对照失败保留为无指标的失败项，允许其他方法继续；suite仍为PARTIAL。75项真实核心、两个正常完整benchmark及受控native故障的实际其余测量/路径检查通过，但尚未据此声称自然超时的index108已经完成。详见[NATIVE_CONTROL_FAILURES.md](NATIVE_CONTROL_FAILURES.md)。
+- `94909a7`将独立native对照失败保留为无指标的失败项，允许其他方法继续；流程完整结束但方法缺失时记PARTIAL，整例超时仍FAIL。75项真实核心、两个正常完整benchmark及受控native故障的其余真实测量/路径检查通过。自然补验108随后在7200.59 s整例超时：greedy修复测量通过，independent仍失败，随机8条观察保存，面积约束未完成、joint未启动。该设计仍无完整比较，不能把失败隔离有效等同于整例通过。详见[NATIVE_CONTROL_FAILURES.md](NATIVE_CONTROL_FAILURES.md)。
 
 ## 测试与可复现性
 

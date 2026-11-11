@@ -73,6 +73,22 @@ python -B RUN/src/scripts/analyze_timing_paths.py --run RUN \
 
 `analyze_search_quality.py --output NEW_OUTPUT --suites SAVED_SUITE_0 SAVED_SUITE_1 --expected-inputs 905 --cohort-label LABEL`在CPU Slurm任务中审计已有搜索，不执行rewrite/mapping或拟合。它冻结各suite当前完整JSONL记录，拒绝同一输入重复混入，输出预测误差、校准标签来源检查、梯度请求接受率、最终选点来源和图表。正在扫描的suite会明确显示尚未全覆盖；失败请求不填充时序数值。预测统计属于模型不断更新的自适应搜索，不解释为固定模型排序或跨设计泛化。
 
+全量分片和补验包含重复输入时，先在新的CPU Slurm运行中建立显式选择清单：
+
+```bash
+python -B RUN/src/scripts/build_benchmark_cohort.py --manifest INVENTORY_JSON \
+  --suites ORIGINAL_SUITE_0 ORIGINAL_SUITE_1 RETRY_SUITE --output RUN/output/cohort
+python -B RUN/src/scripts/analyze_search_quality.py \
+  --cohort RUN/output/cohort/cohort.json --expected-inputs 905 \
+  --cohort-label LABEL --output RUN/output/search_quality
+python -B RUN/src/scripts/summarize_benchmarks.py \
+  --cohort RUN/output/cohort/cohort.json --output RUN/output/paired_report
+```
+
+顺序必须预先声明：最后列出且已有终态记录的尝试用于当前汇总，后一次失败也会替代前一次成功，绝不按delay/area选择最优重跑。清单冻结所有源JSONL完整前缀、run元数据和输入manifest，并保留全部尝试及原结果路径；尚无记录的声明任务不代表已确认正在运行，只表示本快照没有其终态。只有所有输入及所有声明任务均有终态记录，才标记覆盖完成；它仍不等于全部PASS。
+
+读取清单时重新检查来源快照hash、选择规则，以及成功案例的输入、配置、模型/工具/库身份和结果hash。两种分析使用同一选择，保留源码版本并分别输出版本分层统计；总体数字不冒充单一最终版本的结果。新的原始记录只进入后续新清单，不改写此前快照。该流程不重新执行任何rewrite、mapping或模型校准。
+
 `profile_gradient.py --run RUN --benchmark SAVED_CASE --mode area_constraint --iteration 2`在CPU Slurm内重构已保存的首轮校准与梯度提案。要求参数、loss及完整trace精确相同，输出逐阶段cProfile。后续轮次还依赖旧模型状态，当前入口无法重建时会明确FAIL。它不产生新的timing标签。
 
 历史原生工具使用`build_native_variants.py --run RUN --jobs 8`重建：每个ABC overlay各自覆盖一份基线，Gate1单独链接其ABC依赖。随后使用`test_native_variants.py --run NEW_RUN --build-run NATIVE_BUILD_RUN --scope abc`，或在GPU分配内用`--scope gate1 --abc CEC_BINARY`。新验证核对全部相关源码与二进制hash，输出到新目录。mapped BLIF的CEC必须先加载同一library。`test_repository.py`支持`--native-build-run`和多个`--evidence-run`，把实际对象文件及来源匹配的命名检查加入逐程序矩阵。

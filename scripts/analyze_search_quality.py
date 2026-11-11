@@ -12,6 +12,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from global_timing.common import digest, save_json
+from global_timing.cohort import analysis_sources
 from global_timing.search_analysis import analyze_search, aggregate_search
 
 
@@ -29,7 +30,9 @@ def write_csv(path, rows):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
-    parser.add_argument('--suites', type=Path, nargs='+', required=True)
+    inputs = parser.add_mutually_exclusive_group(required=True)
+    inputs.add_argument('--suites', type=Path, nargs='+', default=[])
+    inputs.add_argument('--cohort', type=Path, help='Validated frozen retry selection from build_benchmark_cohort.py.')
     parser.add_argument('--expected-inputs', type=int, required=True)
     parser.add_argument('--cohort-label', required=True)
     args = parser.parse_args()
@@ -43,23 +46,22 @@ def main():
     snapshots.mkdir()
     coverage, analyzed, methods, predictions, gradients, failures, sources = [], [], [], [], [], [], []
     seen = set()
-    for number, suite in enumerate(args.suites):
-        suite = suite.resolve()
-        raw = (suite / 'records.jsonl').read_bytes()
-        # A live writer can be part-way through its final line. Freeze only
-        # complete records and disclose any ignored tail; do not retry cases.
-        complete = raw[:raw.rfind(b'\n') + 1]
+    batches, cohort = analysis_sources(args.suites, args.cohort)
+    if cohort is not None and cohort['expected_inputs'] != args.expected_inputs:
+        raise ValueError('Expected input count differs from the frozen cohort inventory.')
+    for number, batch in enumerate(batches):
+        suite = Path(batch['suite'])
+        complete = batch['raw_complete']
         snapshot = snapshots / f'suite_{number:02d}.jsonl'
         with snapshot.open('xb') as stream:
             stream.write(complete)
-        metadata_path = suite.parent.parent / 'run.json'
-        metadata = json.loads(metadata_path.read_text())
+        metadata = batch['metadata']
         sources.append({'suite': str(suite), 'source_commit': metadata['source_commit'],
                         'records_snapshot': str(snapshot), 'snapshot_sha256': digest(snapshot),
-                        'ignored_incomplete_tail_bytes': len(raw) - len(complete),
-                        'metadata_path': str(metadata_path), 'binaries': metadata.get('binaries')})
-        for line in complete.splitlines():
-            row = json.loads(line)
+                        'snapshot_scope': 'Declared cohort selection' if cohort else 'Complete live JSONL prefix',
+                        'ignored_incomplete_tail_bytes': batch['ignored_incomplete_tail_bytes'],
+                        'metadata_path': batch['metadata_path'], 'binaries': metadata.get('binaries')})
+        for row in batch['records']:
             if row['index'] in seen:
                 raise ValueError('Duplicate input index: choose one declared cohort instead of pooling reruns.')
             seen.add(row['index'])
@@ -106,7 +108,8 @@ def main():
                 gradients = [r for r in gradients if r['index'] != row['index']]
     pooled = aggregate_search(analyzed)
     report = {'cohort_label': args.cohort_label, 'sources': sources, 'recorded_inputs': len(seen),
-              'expected_inputs': args.expected_inputs, 'coverage_complete': seen == set(range(args.expected_inputs)),
+              'expected_inputs': args.expected_inputs, 'coverage_complete': seen == set(range(args.expected_inputs)) and
+              (cohort is None or cohort['coverage_complete']),
               'case_status_counts': dict(Counter(r['case_status'] for r in coverage)),
               'analyzed_inputs': len(analyzed), 'audit_failure_count': sum('audit_error' in r for r in failures),
               'aggregate': pooled, 'failures_and_omissions': failures,
@@ -114,6 +117,14 @@ def main():
               'script_sha256': digest(Path(__file__)),
               'module_sha256': digest(Path(__file__).resolve().parents[1] / 'global_timing/search_analysis.py'),
               'slurm_job_id': os.environ['SLURM_JOB_ID']}
+    report['aggregate_by_source_commit'] = {
+        commit: aggregate_search([row for row in analyzed if row['source_commit'] == commit])
+        for commit in sorted({row['source_commit'] for row in analyzed})}
+    report['heterogeneous_source_versions'] = len({row['source_commit'] for row in coverage}) > 1
+    if cohort is not None:
+        report['frozen_cohort'] = {'path': str(args.cohort.resolve()), 'sha256': digest(args.cohort),
+            'policy': cohort['policy'], 'pending_declared_attempts': cohort['pending_declared_attempts'],
+            'attempt_status_counts': cohort['attempt_status_counts']}
     save_json(output / 'summary.json', report)
     save_json(output / 'coverage.json', coverage)
     write_csv(output / 'methods.csv', methods)
@@ -155,6 +166,8 @@ def main():
         lines.append(f'| {mode} | {result["design_count"]} | {value if value is not None else "N/A"} | '
                      f'{result["direct_gradient_successful"]}/{result["direct_gradient_requested"]} | {result["final_selected_sources"]} |')
     lines += ['', '预测来自逐次真实评估前，模型随反馈变化；这不是固定模型的候选排序测试或跨设计泛化证据。',
+              '源码版本逐输入保留，并在summary.json中分别汇总；多版本总体统计不冒充单一最终版本的实验。',
+              '使用冻结cohort时保留全部旧尝试；尚未产生终态记录的声明任务会使全量完成标记保持false。',
               '基线锚点、失败请求均不用于计算预测误差；没有实际变化的样本单列，不计作方向预测正确。',
               '每个设计等权汇总；零delay参考不做归一化。单种子、自适应样本及相关benchmark变体不支持显著性推断。',
               '最终选择来源描述保存的请求来源，不证明因果贡献；显式修复可能继承梯度提案，其直接parent来源另列。',

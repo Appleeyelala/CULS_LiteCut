@@ -26,6 +26,7 @@ def functional_evidence(root, runs):
             'report': str(report), 'source_sha256': hashlib.sha256(current.read_bytes()).hexdigest()})
 
     modules = {'test_structure': ['structure'], 'test_candidates': ['candidates'], 'test_arrival': ['arrival'],
+               'test_cohort': ['cohort'],
                'test_evaluation': ['evaluation'], 'test_pipeline': ['pipeline'],
                'test_processes': ['processes', 'common'], 'test_surrogate': ['surrogate', 'optimization'],
                'test_truth': ['truth', 'litecut'], 'test_paths': ['path_analysis'],

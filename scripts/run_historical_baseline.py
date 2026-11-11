@@ -103,9 +103,11 @@ def main():
             execute('gate3d_' + label, [gpuls, '-c', f'read {aig}; gate3d_rewrite_execution_audit -o {d / label} --region-map {owner}'])
         execute('gate3d_analysis', [py, tools / 'gate3d_analyze.py', '--raw', d / 'raw', '--raw-second', d / 'raw_second',
                 '--gate3c', c, '--gate3a', a, '--source', source / 'projects/culs/src/algorithms/rewrite.cu', '--output', d, '--input', aig])
+        if not (d / 'raw/decision_execution_trace.jsonl').is_file():
+            raise RuntimeError('Gate3D did not produce the raw trace required by Gate3E.')
         execute('gate3e', [py, tools / 'gate3e_run.py', '--cutlib', source / 'projects/litecut', '--original-aig', aig,
                 '--checkpoint', run / 'input/student_checkpoint', '--library', source / 'projects/culs/src/algorithms/rewrite_library.inc',
-                '--gate3c', c, '--gate3b', b / 'c1355_orig', '--gate3d', d, '--region-map', owner,
+                '--gate3c', c, '--gate3b', b / 'c1355_orig', '--gate3d', d / 'raw', '--region-map', owner,
                 '--gpuls', gpuls, '--abc', abc, '--out-dir', e])
         execute('gate3f', [py, tools / 'gate3f_run.py', '--original-aig', aig, '--library', run / 'input/asap7',
                 '--gpuls', gpuls, '--region-map', owner, '--gate3e', e, '--abc', abc, '--out-dir', f])

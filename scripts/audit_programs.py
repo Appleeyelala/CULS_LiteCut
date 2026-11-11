@@ -64,7 +64,10 @@ def audit(root: Path, output: Path) -> dict:
                 row['syntax_reason'] = str(exc)
         else:
             row['syntax_reason'] = 'Requires project compiler/interpreter and dependencies; build tests must supply evidence.'
-        hits = sorted(set(DATABASE.findall(text))) if kind in {'.py', '.sql'} else []
+        hits = sorted({name.split('.')[0] for name in row.get('imports', [])
+                       if DATABASE.fullmatch(name.split('.')[0])})
+        if kind == '.sql':
+            hits = ['SQL script']
         if hits:
             db_hits.append({'path': row['path'], 'kind': 'database_api_reference', 'matches': hits})
         rows.append(row)

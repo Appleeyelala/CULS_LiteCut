@@ -30,7 +30,7 @@ def functional_evidence(root, runs):
                'test_evaluation': ['evaluation'], 'test_pipeline': ['pipeline'],
                'test_processes': ['processes', 'common'], 'test_surrogate': ['surrogate', 'optimization'],
                'test_truth': ['truth', 'litecut'], 'test_paths': ['path_analysis'],
-               'test_search_analysis': ['search_analysis']}
+               'test_search_analysis': ['search_analysis'], 'test_path_changes': ['path_changes']}
     specific = {
         'test_liberty_paths_reconstruct_arrivals_without_changing_mapping':
             ['framework/abc/path_report.c.inc', 'framework/abc/endpoint_report.c.inc', 'global_timing/path_analysis.py'],
@@ -41,6 +41,9 @@ def functional_evidence(root, runs):
         'test_reused_baseline_resolves_record_provenance_at_variable_depth': ['scripts/analyze_timing_paths.py']}
     specific['test_student_features_equal_full_prefix_without_computing_unused_columns'] = [
         'projects/litecut/src/data_preprocess/feat_extraction_v3.py']
+    for name in ['test_raw_measurement_validation_rejects_tampered_cec_paths_and_netlist',
+                 'test_report_priority_preserves_failure_and_exact_source_path']:
+        specific[name] = ['scripts/analyze_path_changes.py']
     imported = {'gate1c_r_io_signature': 'legacy/gate1_aigrewrite/gate1c_r_io_signature.py',
                 'gate1c_select': 'legacy/gate1_aigrewrite/gate1c_select.py',
                 'upstream_gia_test': 'third_party/abc/test/gia/gia_test.cc'}
@@ -87,6 +90,8 @@ def functional_evidence(root, runs):
                 for relative in targets:
                     add(run, relative, report, 'rebuilt_native:' + record['variant'], record['status'], scope)
         for directory, targets, label in [
+            ('path_changes', ['scripts/analyze_path_changes.py', 'global_timing/path_changes.py'],
+             'Retained CEC/timing/netlist/trace integrity and cross-selection endpoint comparisons; no new mapping.'),
             ('search_quality', ['scripts/analyze_search_quality.py', 'global_timing/search_analysis.py'],
              'Saved search-label provenance, error and selection-source audit; no new timing measurements.'),
             ('gradient_profile', ['scripts/profile_gradient.py'],
@@ -94,7 +99,9 @@ def functional_evidence(root, runs):
             report = run / 'output' / directory / 'summary.json'
             if report.is_file():
                 record = json.loads(report.read_text())
-                status = ('PASS' if record['audit_failure_count'] == 0 else 'FAIL') if directory == 'search_quality' else record['status']
+                status = ('PASS' if record['audit_failure_count'] == 0 else 'FAIL') if directory in {'search_quality', 'path_changes'} else record['status']
+                if directory == 'path_changes' and (record['invalid_report_snapshots'] or not record['analyzed_inputs']):
+                    status = 'FAIL'
                 for relative in targets:
                     add(run, relative, report, directory, status, label)
         for directory, targets, scope in [

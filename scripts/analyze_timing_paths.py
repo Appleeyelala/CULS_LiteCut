@@ -11,6 +11,7 @@ import json
 import os
 from pathlib import Path
 import sys
+import traceback
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from global_timing.common import digest, save_json
@@ -32,6 +33,27 @@ def main():
     run = args.run.resolve()
     if not os.environ.get('SLURM_JOB_ID') or not str(run).startswith('/data/wushangge/'):
         raise SystemExit('Path analysis requires a prepared Slurm /data run.')
+    metadata_path = run / 'run.json'
+    metadata = json.loads(metadata_path.read_text())
+    metadata.update(state='RUNNING', slurm_job_id=os.environ['SLURM_JOB_ID'], experiment_executed=True,
+                    environment={'python': sys.version, 'executable': sys.executable,
+                                 'slurm': {k: v for k, v in os.environ.items() if k.startswith('SLURM_')}})
+    metadata_path.write_text(json.dumps(metadata, indent=2) + '\n')
+    try:
+        code = analyze(args)
+        metadata['state'] = 'COMPLETED' if code == 0 else 'COMPLETED_WITH_FAILURES'
+        return code
+    except Exception as exc:
+        metadata.update(state='FAILED', error=f'{type(exc).__name__}: {exc}')
+        save_json(run / 'output/path_analysis_failure.json', {'error': metadata['error'], 'traceback': traceback.format_exc()})
+        raise
+    finally:
+        metadata['outputs'] = str(run / 'output/arrival_paths')
+        metadata_path.write_text(json.dumps(metadata, indent=2) + '\n')
+
+
+def analyze(args):
+    run = args.run.resolve()
     binary = args.tool_run / 'build/framework_tools/abc/abc'
     build = json.loads((args.tool_run / 'build/framework_tools/build_report.json').read_text())
     if digest(binary) != build['binaries']['abc']['sha256']:
@@ -61,7 +83,13 @@ def main():
         for name, rows in groups.items():
             for row in rows:
                 if row['status'] == 'PASS':
-                    mapped = benchmark / row['method'] / f'eval_{row["index"]:04d}' / 'evaluation/mapped.v'
+                    # A reused no-op row can be relabeled with a search method
+                    # while retaining its original replay/evaluation artifacts.
+                    evaluated = Path(row['aig']).parents[2] / 'evaluation'
+                    stored = json.loads((evaluated / 'result.json').read_text())
+                    if stored['input_sha256'] != row['metrics']['input_sha256']:
+                        raise ValueError('Observation does not identify its actual evaluation directory.')
+                    mapped = evaluated / 'mapped.v'
                     requests.append((name, row['index'], Path(row['aig']), row['metrics'], mapped))
         cached, measurements, changes, previous = {}, [], [], {}
         for name, index, aig, reference, mapped in requests:
@@ -107,7 +135,9 @@ def main():
                   'scope': 'Maximizing Liberty arrival chains, one per near-critical PO. PI/PO indices are preserved interface identities. Mapped node IDs are not aligned across mappings; changed endpoint pairs do not assert unique logical path identity.'}
         save_json(work / 'summary.json', report)
         records.append({'benchmark': str(benchmark), 'status': report['status'], 'summary': str(work / 'summary.json'),
-                        'unique_aigs': len(measurements), 'failed': sum(row['status'] != 'PASS' for row in measurements)})
+                        'unique_traced_mappings': len(measurements), 'successful_observation_references': len(requests),
+                        'unique_aig_bytes': len({row['input_sha256'] for row in measurements}),
+                        'failed': sum(row['status'] != 'PASS' for row in measurements)})
         print(json.dumps(records[-1]), flush=True)
     save_json(output / 'summary.json', {'records': records, 'observer_abc_sha256': digest(binary),
                                       'source_commit': json.loads((run / 'run.json').read_text())['source_commit']})

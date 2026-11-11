@@ -50,7 +50,7 @@ def main():
             executable, command = values[:2]
             if isinstance(command, (list, tuple)):
                 resolved = shutil.which(str(executable))
-                if resolved and Path(resolved).resolve().parent == Path('/usr/bin'):
+                if resolved and Path(resolved).resolve().parent in {Path('/usr/bin'), Path(sys.executable).resolve().parent}:
                     name = Path(resolved).name
                     if ((name == 'lscpu' and list(command) == [str(executable)]) or
                         (name == 'fc-list' and all(str(a) == '--help' or str(a).startswith('--format=') for a in command[1:])) or

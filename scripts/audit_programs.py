@@ -17,7 +17,7 @@ import subprocess
 
 
 SUFFIXES = {'.py', '.sh', '.slurm', '.c', '.cc', '.cpp', '.cxx', '.cu',
-            '.h', '.hpp', '.cuh', '.tcl', '.pl', '.ipynb', '.sql'}
+            '.h', '.hpp', '.cuh', '.inc', '.tcl', '.pl', '.ipynb', '.sql'}
 DATABASE = re.compile(r'\b(sqlite3|sqlalchemy|psycopg\w*|pymongo|mysql|lmdb|h5py)\b')
 
 

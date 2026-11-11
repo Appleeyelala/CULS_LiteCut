@@ -5,6 +5,7 @@ import math
 import os
 from pathlib import Path
 import re
+import time
 
 from .common import ToolError, digest, run_tool, save_json, tool_path
 
@@ -57,6 +58,7 @@ class Evaluator:
                            for name, path in [('abc', self.abc), ('library', self.library), ('original', self.original)]}
 
     def evaluate(self, candidate: Path, work: Path) -> dict:
+        started = time.monotonic()
         work.mkdir(parents=True, exist_ok=False)
         result = {'status': 'RUNNING', 'input_sha256': digest(candidate), 'provenance': self.provenance}
         try:
@@ -76,5 +78,6 @@ class Evaluator:
             result.update(status='FAIL', error=f'{type(exc).__name__}: {exc}')
             raise
         finally:
+            result['runtime_s'] = time.monotonic() - started
             save_json(work / 'result.json', result)
         return result

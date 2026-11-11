@@ -45,6 +45,7 @@ class SearchConfig:
 
 class Experiment:
     def __init__(self, aig, gpuls, abc, library, checkpoint, output, config):
+        started = time.monotonic()
         config.validate()
         self.config = config
         self.aig, self.gpuls, self.output = Path(aig), Path(gpuls), Path(output)
@@ -62,6 +63,7 @@ class Experiment:
                                                  self.checkpoint, self.output.parent / 'litecut_cache')
         save_json(self.output / 'litecut.json', {'scores': self.scores, 'cache': self.cache})
         self.noop = [0] * len(self.catalogue.decisions)
+        self.preparation_runtime_s = time.monotonic() - started
 
     def evaluate_choice(self, choices, method, index, predicted=None):
         work = self.output / method / f'eval_{index:04d}'
@@ -96,6 +98,7 @@ class Experiment:
         return choices if choices != observation['choices'] else None
 
     def deterministic_baseline(self, choices, method, baseline):
+        started = time.monotonic()
         rows = []
         seen = set()
         while len(rows) < self.config.evaluation_budget and tuple(choices) not in seen:
@@ -112,7 +115,8 @@ class Experiment:
         summary = {'method': method, 'observations': rows, 'status': 'PASS' if successful else 'FAIL',
                    'best': successful[-1] if successful else None,
                    'fallback_noop': baseline if not successful else None,
-                   'evaluations': len(rows), 'repair_is_new_replay': True}
+                   'evaluations': len(rows), 'repair_is_new_replay': True,
+                   'exclusive_method_runtime_s': time.monotonic() - started}
         save_json(self.output / method / 'summary.json', summary)
         return summary
 
@@ -150,6 +154,7 @@ class Experiment:
                                       self.config.area_limit_ratio, area_weight=self.config.area_weight))
 
     def gradient_search(self, baseline, mode):
+        started = time.monotonic()
         method = 'gradient_' + mode
         model = TimingSurrogate(self.partition, self.catalogue, self.scores, baseline['metrics'])
         observations = [dict(baseline, method=method, baseline_reused=True)]
@@ -204,6 +209,8 @@ class Experiment:
             iteration += 1
         best = min(observations, key=lambda row: self.rank_actual(row, baseline['metrics'], mode))
         summary = {'method': method, 'observations': observations, 'best': best, 'stop_reason': stop_reason,
+                   'exclusive_method_runtime_s': time.monotonic() - started,
+                   'shared_baseline_runtime_s': baseline['runtime_s'],
                    'evaluation_budget': self.config.evaluation_budget, 'evaluations_including_baseline': len(observations),
                    'gradient_proposal_evaluations': sum(row.get('prediction_before_evaluation', {}).get('source') == 'joint_selection_gradient'
                        for row in observations if row.get('prediction_before_evaluation'))}
@@ -241,6 +248,7 @@ class Experiment:
         return self.catalogue.project(logits)
 
     def run(self):
+        started = time.monotonic()
         original = self.evaluator.evaluate(self.aig, self.output / 'original')
         baseline = self.evaluate_choice(self.noop, 'replay_noop', 0)
         if baseline['status'] != 'PASS':
@@ -248,15 +256,18 @@ class Experiment:
         native = self.output / 'native_abc'
         native.mkdir()
         native_aig = native / 'rewritten.aig'
+        native_started = time.monotonic()
         command = f'read_aiger {tool_path(self.aig)}; strash; rewrite; write_aiger {tool_path(native_aig)}'
         run_tool([self.evaluator.abc, '-c', command], native, 'rewrite', self.config.timeout_s)
         native_metrics = self.evaluator.evaluate(native_aig, native / 'evaluation')
+        native_runtime = time.monotonic() - native_started
         local_scores = [[] for _ in self.catalogue.decisions]
         for row in self.scores:
             local_scores[row['decision_index']].append(-row['predicted_local_abc_delay'])
         greedy = self.deterministic_baseline(self.catalogue.project(local_scores), 'greedy_litecut', baseline)
         independent = self.deterministic_baseline(self.independent_choices(baseline['metrics']), 'independent_regions', baseline)
         rng = random.Random(self.config.seed)
+        random_started = time.monotonic()
         random_rows, seen = [dict(baseline, baseline_reused=True)], {tuple(self.noop)}
         repair = None
         while len(random_rows) < self.config.evaluation_budget:
@@ -268,12 +279,16 @@ class Experiment:
             seen.add(tuple(choices))
             repair = self.repair_choice(random_rows[-1])
         save_json(self.output / 'random_search/observations.json', random_rows)
+        random_runtime = time.monotonic() - random_started
         searches = {mode: self.gradient_search(baseline, mode) for mode in self.config.modes}
         summary = {'status': 'COMPLETED', 'original': original, 'replay_noop': baseline,
                    'native_abc': native_metrics, 'greedy_litecut': greedy, 'independent_regions': independent,
                    'random_search': random_rows, 'gradient_search': searches,
                    'candidate_count': sum(d['candidate_count'] for d in self.catalogue.decisions),
                    'region_count': len(self.partition.regions), 'config': asdict(self.config),
+                   'preparation_runtime_s': self.preparation_runtime_s,
+                   'exclusive_native_runtime_s': native_runtime, 'exclusive_random_runtime_s': random_runtime,
+                   'total_runtime_including_preparation_s': time.monotonic() - started + self.preparation_runtime_s,
                    'serialization_control': 'Original and zero-choice replay are measured separately; graph serialization may alter mapping.',
                    'scope': 'Measured benchmark outcomes; this run does not establish generalization to other designs.'}
         save_json(self.output / 'summary.json', summary)

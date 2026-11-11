@@ -21,7 +21,7 @@
 | 64337 | `20261111T112204Z-concurrent-suite-pilot-64109582` | COMPLETED_WITH_FAILURES：c1355通过；中位电路因把功能支持cut当结构边界而误拒绝 |
 | 64338 | `20261111T112224Z-repository-import-regression-a19a25d0` | COMPLETED：修正/dev/null与工具搜索路径；83个import PASS，18 FAIL、27受探针约束SKIP；后续允许只读lscpu/fc-list查询 |
 | 64339 | `20261111T112634Z-support-cut-regression-4ac56f58` | COMPLETED：29项回归；c1355与中位电路并发比较完成，发现8条score涉及功能支持最小化 |
-| 64340/64341 | `20261111T112917Z-full-benchmark-shard0-864a4c8b` / `20261111T112919Z-full-benchmark-shard1-5bb41012` | 旧版本全量扫描进行中；出现命名接口、cut上下文/BDD规模及常量输出问题；不作为最终全量验收 |
+| 64340/64341 | `20261111T112917Z-full-benchmark-shard0-864a4c8b` / `20261111T112919Z-full-benchmark-shard1-5bb41012` | `6d956e0`旧版本扫描：64340仍RUNNING；64341自然结束，452个奇数输入全部有终态，300 PASS/150 FAIL/2 PARTIAL，Slurm9h51m36s、MaxRSS7642836 KiB。已知命名接口、cut上下文/BDD规模及常量输出问题保留；不作为最终统一版本验收 |
 | 64342 | `20261111T113159Z-cross-design-integrity-audit-0f3668f1` | COMPLETED：独立读取已导出cut，定位边界自由变量真值差异 |
 | 64343 | `20261111T113648Z-context-proof-regression-525333c5` | COMPLETED：31项CPU测试（8个GPU入口SKIP）、4项真实ABC回归；六个保留案例10,281个cut全部证明；两个旧no-op仍因常量翻转不等价 |
 | 64344 | `20261111T113959Z-constant-safe-tool-build-5e7be150` | BUILT_NOT_RUNTIME_VALIDATED：修复常量导出/未初始化状态后重新编译；尚待GPU回归 |
@@ -31,7 +31,7 @@
 | 64348 | `20261111T115853Z-ci-cpu-and-reports-regression-c08b3bd8` | COMPLETED：32项CPU矩阵（23 PASS、9个GPU入口SKIP）；6组已保存实验生成图表；重复运行数值/选择一致，Native ABC输出字节hash因时间注释不同，进一步按精确图结构区分 |
 | 64340.0 | `20261111T121113Z-corrected-tools-regression-538f79e0` | COMPLETED_WITH_EXPLICIT_OMISSIONS：独立step在原分配内运行，33项真实核心测试全部通过，c1355双目标8预算完成、都未改善基线；原生writer/Gate1/Gia及2486项矩阵完成；重复运行选择/数值/结构hash一致，ABC注释导致字节hash不同 |
 | 64341.0 | `20261111T121235Z-corrected-cross-design-pilot-13f96501` | COMPLETED：33项真实回归及8/8设计完整比较通过；包括六个此前失败设计、c1355和中位设计；不是代表性随机抽样 |
-| 64340.1 / 64341.1 | `20261111T121807Z-corrected-full-shard0-93ae61a2` / `20261111T121809Z-corrected-full-shard1-29165762` | RUNNING：修复后的全905输入双分片；独立step共享已有分配，旧batch未取消；各step先通过33项真实回归 |
+| 64340.1 / 64341.1 | `20261111T121807Z-corrected-full-shard0-93ae61a2` / `20261111T121809Z-corrected-full-shard1-29165762` | `acd74fc`修正版：各step先通过33项真实回归。64340.1仍RUNNING；64341.1随父allocation自然结束而被Slurm取消，状态CANCELLED、0:15、8h55m46s，MaxRSS4530300 KiB。保留186条终态（177 PASS/8 FAIL/1 PARTIAL），266个声明输入无终态，包含已建立目录的371/375；没有suite summary。原run.json的RUNNING是中断后遗留值，不据此认定仍活跃，不补造失败行 |
 | 64349 | `20261111T122037Z-historical-analysis-regression-324c8936` | COMPLETED：四个R9分析入口用隔离历史输入执行通过，依赖文件hash未改变；2487项程序矩阵合入来源匹配的历史Gate3/R9功能证据，120 import PASS、17 FAIL、1 SKIP |
 | 64350 | `20261111T122536Z-paired-results-regression-b1f525fb` | COMPLETED：35项CPU测试（26 PASS、9个GPU入口SKIP）；8设计实际配对统计与修复版c1355重复比较通过，包含最终选点检查 |
 | 64351 | `20261111T124031Z-arrival-path-observer-build-1ab72688` | COMPLETED：构建可选Liberty最大arrival路径observer；实际ABC路径重构及插桩前后网表/全部PO/面积一致性测试通过；GPU测试由64340.2补齐 |
@@ -87,15 +87,16 @@
 | 64340.14 | `20261111T184033Z-isolated-native-backend-retry-813f3b26` | COMPLETED_WITH_FAILURES：75项真实核心PASS；108在7200.59 s整例超时，returncode −9，案例FAIL。native CEC在900.30 s超时后流程继续：greedy经修复取得CEC/mapping PASS，independent仍FAIL，随机8条观察保存3 PASS/5 FAIL（含no-op），面积约束进度7条但未完成、joint未启动。没有完整case summary，不记PARTIAL或补造比较。已结束的10条CEC命令累计5554.95 s、含3次超时；6条mapping累计857.43 s，不是完整独占剖析。Slurm2h01m24s、MaxRSS3622052 KiB；源码`0355cae`，每搜索8次预算、7200/900 s限制，旧失败保留 |
 | 64394 | `20261111T190337Z-saved-failure-evidence-audit-9b981c5c` | COMPLETED_WITH_EXPLICIT_OMISSIONS：`53d4541`增加只读失败证据汇总；81项CPU矩阵69 PASS/12 SKIP，191输入冻结清单的全部预测/梯度/方法CSV及数值聚合与旧结果完全相同，审计错误0。实际7200 s Division、900 s native失败及旧受控native fixture分别复核，不混入性能统计。2512项程序矩阵完成：144 import PASS/17 FAIL/1 SKIP、58 CLI smoke PASS、1395编译TU、110文件有来源匹配命名证据。5m33s、MaxRSS400244 KiB；没有新rewrite、CEC、mapping或拟合 |
 | 64395 | `20261111T191749Z-full905-partition-certificates-f9e48d3a` | COMPLETED_WITH_EXPLICIT_OMISSIONS：`16ac3cd`对完整905输入独立验证CPU strict MFFC/owner、精确DAG及每端口反向AND距离，905/905 PASS；4 worker结构阶段147.13 s。86项CPU矩阵74 PASS/12 SKIP；2515项程序矩阵完成，147 import PASS/17 FAIL/1 SKIP、59 CLI smoke PASS、1395编译TU、113文件有命名证据。5m02s、MaxRSS6091568 KiB；未运行GPU、CEC、mapping或搜索，不能替代全量benchmark比较 |
-| 64396 | `20261111T194041Z-consistent-cohort-submit-guard-e5f1d667` | RUNNING：仅申请1 CPU/1 GiB（站点实际2 CPU）、无GPU的提交监测任务。严格匹配父作业64340→新分片0、64341→新分片1，自然终止后重新检查sinfo、全部用户请求及CPU/内存/GPU预算，核对冻结脚本/输入/准备元数据hash后各提交一次。资源解析、GPU类型去重及预算边界检查PASS；首次实际检查为10 CPU/129 GiB/2 GPU，两份均保持等待。禁止取消旧作业；提交结果不明时停止，不自动重试 |
+| 64396 | `20261111T194041Z-consistent-cohort-submit-guard-e5f1d667` | RUNNING：提交监测申请1 CPU/1 GiB（实际2 CPU）、无GPU。父64341自然结束后，重新检查集群及用户请求、冻结输入/脚本hash，于2026-11-11 21:22:13 UTC提交新分片1为64397；仍等待父64340结束后提交分片0。提交后合计14 CPU/129 GiB/2 GPU。成功回执和衔接记录保留，禁止重复提交；结果不明时停止且不自动重试 |
+| 64397 | `20261111T184753Z-consistent-full-shard1-175169c2` | RUNNING：统一版本奇数452输入分片，源码`160b218`、64389工具。启动75/75真实核心PASS，已进入4 worker benchmark；8 CPU/64 GiB/1 GPU、5天，每搜索8预算、warmup2、梯度20/校准30步、整例7200 s/工具900 s，原定参数未变。由64396提交，准备及提交清单保持独立；不是整分片或全905完成声明 |
 
-## 统一版本全量比较的预先准备
+## 统一版本全量比较的准备与提交
 
-`20261111T184752Z-consistent-full-shard0-1568c1b9`和`20261111T184753Z-consistent-full-shard1-175169c2`已准备，**尚未提交**。两份`input/cohort_plan.json`固定同一源码`160b218`（程序与已通过75项真实核心及全仓库矩阵的`94909a7`相同）、64389工具构建、同一输入清单及互斥的偶数453/奇数452项；并集恰为905。准备清单hash、命令与shell语法已核对，输出目录为空，不计为实验完成。
+`20261111T184752Z-consistent-full-shard0-1568c1b9`仍等待提交；`20261111T184753Z-consistent-full-shard1-175169c2`已作为64397启动。两份`input/cohort_plan.json`是冻结的准备快照，保留其中的PREPARED_NOT_SUBMITTED原值；实际提交以`input/submission.json`和Slurm为准。它们固定同一源码`160b218`（程序与已通过75项真实核心及全仓库矩阵的`94909a7`相同）、64389工具构建、同一输入清单及互斥的偶数453/奇数452项，并集恰为905。准备时已核对清单hash、命令、shell语法及空输出目录；准备本身不计为实验完成。
 
 两份均固定每搜索8次请求、warmup 2、梯度20步、校准30步、整例7200 s及单工具900 s；每个分片计划8 CPU、64 GiB、1 GPU、4个独立case进程、5天。保留默认固定随机种子及两目标模式。此前不同开发版本及定向补验不并入这一次统一源码的初始全量比较，不根据结果好坏挑选重跑。
 
-当前64340/64341各占一张GPU，因累计上限2 GPU，准备没有触发提交，也没有取消现有分配。实际提交前须重新检查集群及所有RUNNING/PENDING请求；某一分配自然释放后才能提交相应新分片。附在旧分配内的step如随父作业结束而中断，须依据Slurm和保存记录明确标注，不能补造终态或把未运行的case算作已覆盖。后续提交与结果在新记录中更新。
+准备时64340/64341各占一张GPU，达到累计上限，因此没有立即提交或取消旧分配。64341自然结束后，64396按新检查释放出的配额提交64397，64340仍在运行。其附属64341.1的取消由sacct和slurmstepd日志确认；小型衔接证据在监测目录`output/transition_64341_to_64397.json`及其`.sha256`，保留旧记录hash、186条终态和未完成目录、新分片回执、资源及75项启动测试。旧run.json未改写，未记录输入不算已覆盖，也不混入最终统一版本cohort。
 
 两份分片现交由64396监测提交。**该监测任务仍存活时，不要另行执行这两份`job.slurm`。** 具体计划与脚本在其`input/plans.json`、`input/guard.py`，每次实际配额检查保存于`output/checks/`。提交前还会再次检查，并在目标运行内独占创建`input/launch_reservation.json`和`input/pre_submission_run.json`；成功后写`input/submission.json`，监测目录另存`output/submitted_64340.json`或`submitted_64341.json`。以这些回执及Slurm状态判断是否已提交，不根据旧准备状态重复启动。监测失败或退出时先检查全部回执和Slurm，不自动重试结果不明的sbatch。若明确需要停止后续自动提交，可在监测运行根目录创建`STOP`；它不会取消已经提交的作业。
 

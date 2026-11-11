@@ -71,3 +71,20 @@
 64387（`20261111T170329Z-backend-catalogue-diagnosis-dcbb55ab`）检查index108 `forgeEDA/Back_End_With_Decode.aig`。原`acd74fc`完整流程在1800.94 s被单例时限终止，已保存完整GPU导出但没有`catalogue.json`。当前实现只读其1,638,237条cut，构建catalogue耗时7.43 s，得到22,477个executable decisions和43,734个region。512条旧/新normalizer结果精确相同，分别耗时0.3761/0.0031 s。
 
 旧完整catalogue缺失，因此完整对照明确为`NO_SAVED_REFERENCE`。不能把原流程时限除以上述局部耗时作为加速比；该诊断没有rewrite、mapping或完整搜索，不把index108旧FAIL改为PASS。Slurm 34 s，MaxRSS约3.16 GiB。此前共享region集合的修复已存在，本次没有新增优化器改动。
+
+## hyp保存梯度轮次的剖析
+
+64391（`20261111T180508Z-hyp-saved-gradient-profile-8d6186eb`，源码`6807e15`）读取已终止的缓存版index22：`20261111T160711Z-cached-coordinate-failed-case-retry-963fafa6/output/suite/case_0022`。旧案例在3600.50 s超时，已经保存两目标搜索的部分结果；该状态不因局部剖析成功而变成PASS。
+
+本次重构面积约束模式首轮`calibration_0002`及`gradients_0002`，仅使用其已测量的3个训练观察。全部30步校准loss、参数和两次restart共40步梯度trace与原记录精确相同。该设计有117,509个region、2,760个decision、299,371条传递边和16,269个拓扑层；padding宽度5，port incidence有5,581个非零项。
+
+| 剖析阶段 | 含cProfile耗时 s |
+|---|---:|
+| partition | 4.250 |
+| 模型初始化 | 5.498 |
+| 30步保存校准重构 | 90.581 |
+| 2×20步保存梯度提案重构 | 113.565 |
+
+校准的arrival前向/反向累计44.60/39.89 s；提案中的相应累计57.86/51.80 s。它定位到深层传播的重复张量操作，不表明数学模型有误；本次未改模型、候选或优化器。全部原始剖析、输入hash和精确一致性结论在`output/gradient_profile/`。Slurm 3m40s、MaxRSS902432 KiB，CPU任务没有请求GPU。
+
+旧案例保存的已完成工具命令另有25次CEC、25次mapping和24次rewrite，累计约620.67、884.34和318.48 s；这些来自旧`*.command.json`，不是本次剖析重新计时。它们不含未完成命令、候选准备和代理计算，不能拼成完整的旧wall-time分解，也不能把整个3600 s限制归因于arrival。当前完整补验独立运行，本次没有新rewrite、mapping、Student训练或时序标签。

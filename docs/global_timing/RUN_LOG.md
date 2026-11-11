@@ -79,6 +79,7 @@
 | 64341.6 | `20261111T173748Z-acyclic-replay-real-regression-e1510460` | COMPLETED_WITH_EXPLICIT_OMISSIONS：69/69真实核心PASS，c1355/index197完整双目标比较分别56.80/165.97 s PASS。旧20项循环选择保持FAIL，明确CYCLE_REJECT root10577；另一次13项修复安装CEC/mapping PASS，未用no-op fallback。c1355完整数值/选择/图结构与保存参照一致。2510项程序矩阵完成：142 import PASS/17 FAIL/1 SKIP、58 CLI smoke PASS、1395编译TU、106文件有命名功能证据。9m27s、MaxRSS810424 KiB |
 | 64341.7 | `20261111T174715Z-acyclic-terminal-case-retries-7cce9a09` | RUNNING：在64341.6完整回归与矩阵完成后，使用新无环工具重验已终止的108/122/185/22，按该顺序单worker执行；每种搜索8次预算，显式7200 s单例/900 s工具限制。原失败与输入身份已冻结，不重启仍在运行的59/147，不取消旧allocation。源码`ee91a33`与已验证的原生`d2065ab`完全相同 |
 | 64390 | `20261111T175518Z-acyclic-cohort-program-audit-333c8796` | COMPLETED_WITH_EXPLICIT_OMISSIONS：冻结206次尝试、191输入，选择185 PASS/6 FAIL/714未记录；原17 FAIL及1 PARTIAL保留。预测来源审计错误0；对等预算随机比较为36/91/58与48/77/60胜/平/负，未显示稳定优势。2510项程序矩阵完成：142 import PASS/17 FAIL/1 SKIP、58 CLI smoke PASS、1395编译TU、106文件有来源匹配命名证据，实际附上新循环回归。6m50s、MaxRSS539592 KiB；无新增rewrite/mapping |
+| 64391 | `20261111T180508Z-hyp-saved-gradient-profile-8d6186eb` | COMPLETED：只读旧3600 s超时的ACE hyp保存数据，重构首轮3样本校准及2×20步提案；全部loss/参数/梯度trace精确相同。117509 regions、16269层；含profiler的校准90.58 s、提案113.57 s。3m40s、MaxRSS902432 KiB；无新增rewrite/mapping/时序标签，不替代完整补验 |
 
 ## 首次真实闭环的有限结论
 

@@ -80,13 +80,14 @@
 | 64341.7 | `20261111T174715Z-acyclic-terminal-case-retries-7cce9a09` | RUNNING：新无环工具按108/122/185/22顺序补验。108在1337.65 s FAIL：准备与no-op通过，native CEC在900.21 s超时，后续搜索未执行；不是不等价证明。122（Core）和185（Ibtida_top）在873.16/1098.06 s完整PASS，22仍在运行。仍每搜索8次预算、7200 s单例/900 s工具限制；原失败与输入身份冻结，不重复当时live59/147、不取消旧allocation。源码`ee91a33`与已验证原生`d2065ab`相同 |
 | 64390 | `20261111T175518Z-acyclic-cohort-program-audit-333c8796` | COMPLETED_WITH_EXPLICIT_OMISSIONS：冻结206次尝试、191输入，选择185 PASS/6 FAIL/714未记录；原17 FAIL及1 PARTIAL保留。预测来源审计错误0；对等预算随机比较为36/91/58与48/77/60胜/平/负，未显示稳定优势。2510项程序矩阵完成：142 import PASS/17 FAIL/1 SKIP、58 CLI smoke PASS、1395编译TU、106文件有来源匹配命名证据，实际附上新循环回归。6m50s、MaxRSS539592 KiB；无新增rewrite/mapping |
 | 64391 | `20261111T180508Z-hyp-saved-gradient-profile-8d6186eb` | COMPLETED：只读旧3600 s超时的ACE hyp保存数据，重构首轮3样本校准及2×20步提案；全部loss/参数/梯度trace精确相同。117509 regions、16269层；含profiler的校准90.58 s、提案113.57 s。3m40s、MaxRSS902432 KiB；无新增rewrite/mapping/时序标签，不替代完整补验 |
-| 64340.13 | `20261111T181423Z-openabc-hyp-terminal-retry-ace13171` | RUNNING：59的3600 s尝试已终止后，在新目录用已验证无环工具和缓存实现补验；仍每搜索8次预算，显式7200 s单例/900 s工具时限。保存旧完整records/run元数据及hash；不重复启动live147或122，不新增GPU allocation。源码`f984581`，原生/优化器与已验证版本相同；共享资源计时不能用于独占性能比较 |
+| 64340.13 | `20261111T181423Z-openabc-hyp-terminal-retry-ace13171` | COMPLETED：69项真实核心PASS，index59在4980.26 s完整PASS，各搜索8次预算、0失败请求；两个梯度模式均有5次直接梯度评价，最终1854999.12 ps/176674.141 area，CEC PASS。相对no-op改善0.03748%，但比原输入慢4.54659%；原生ABC为1772861.75 ps。7200 s单例/900 s工具时限，旧3600 s失败及hash保留。Slurm1h23m53s、MaxRSS2758896 KiB；共享分配计时不作独占性能比较，源码`f984581` |
 | 64392 | `20261111T182248Z-native-control-failure-regression-7ef427ca` | COMPLETED_WITH_GPU_OMISSIONS：`94909a7`隔离独立native对照失败，75项CPU矩阵63 PASS/12 SKIP；检查必要基线失败中止、内部错误重新抛出、缺失对照禁止数值/路径替代及重复结果状态。11 s；真实工具另行验证 |
 | 64341.8 | `20261111T182419Z-native-control-real-regression-2c5d4d0b` | COMPLETED_WITH_EXPLICIT_OMISSIONS：75/75真实核心PASS；c1355/index197完整比较69.22/225.77 s PASS，c1355数值/选择/图结构不变，循环修复仍为13项CEC PASS。独立native故障保留FAIL，其余真实测量的9份映射/12个路径引用/3个预测关联通过。2510项矩阵完成：142 import PASS/17 FAIL/1 SKIP、58 CLI smoke PASS、1395编译TU、108文件有命名证据。13m17s、MaxRSS839268 KiB；故障注入不计入benchmark性能 |
 | 64393 | `20261111T182725Z-completed116-path-analysis-3a705938` | COMPLETED_WITH_EXPLICIT_OMISSIONS：只读复核64381全部116设计/1870份映射/2218引用，错误0，原39设计全部分析精确一致。50/116个original→no-op代表PI/PO对变化；9个失败及780未记录保留。5m25s、MaxRSS998472 KiB；没有新增rewrite/CEC/mapping，统计与解释见PATH_CHANGE_ANALYSIS.md |
 | 64340.14 | `20261111T184033Z-isolated-native-backend-retry-813f3b26` | RUNNING：75项真实核心再次PASS后，使用已验证失败隔离流程重验已终止的108；本次真实native CEC仍在900.30 s超时，FAIL保留，随后已进入greedy。整例尚未完成，不提前记为PARTIAL/PASS。每搜索8次预算、7200 s单例/900 s工具限制，没有故障注入；旧失败及源记录前缀冻结。源码`0355cae`，代码与已验证`94909a7`相同；共享既有allocation，不重复其他live输入 |
 | 64394 | `20261111T190337Z-saved-failure-evidence-audit-9b981c5c` | COMPLETED_WITH_EXPLICIT_OMISSIONS：`53d4541`增加只读失败证据汇总；81项CPU矩阵69 PASS/12 SKIP，191输入冻结清单的全部预测/梯度/方法CSV及数值聚合与旧结果完全相同，审计错误0。实际7200 s Division、900 s native失败及旧受控native fixture分别复核，不混入性能统计。2512项程序矩阵完成：144 import PASS/17 FAIL/1 SKIP、58 CLI smoke PASS、1395编译TU、110文件有来源匹配命名证据。5m33s、MaxRSS400244 KiB；没有新rewrite、CEC、mapping或拟合 |
 | 64395 | `20261111T191749Z-full905-partition-certificates-f9e48d3a` | COMPLETED_WITH_EXPLICIT_OMISSIONS：`16ac3cd`对完整905输入独立验证CPU strict MFFC/owner、精确DAG及每端口反向AND距离，905/905 PASS；4 worker结构阶段147.13 s。86项CPU矩阵74 PASS/12 SKIP；2515项程序矩阵完成，147 import PASS/17 FAIL/1 SKIP、59 CLI smoke PASS、1395编译TU、113文件有命名证据。5m02s、MaxRSS6091568 KiB；未运行GPU、CEC、mapping或搜索，不能替代全量benchmark比较 |
+| 64396 | `20261111T194041Z-consistent-cohort-submit-guard-e5f1d667` | RUNNING：仅申请1 CPU/1 GiB（站点实际2 CPU）、无GPU的提交监测任务。严格匹配父作业64340→新分片0、64341→新分片1，自然终止后重新检查sinfo、全部用户请求及CPU/内存/GPU预算，核对冻结脚本/输入/准备元数据hash后各提交一次。资源解析、GPU类型去重及预算边界检查PASS；首次实际检查为10 CPU/129 GiB/2 GPU，两份均保持等待。禁止取消旧作业；提交结果不明时停止，不自动重试 |
 
 ## 统一版本全量比较的预先准备
 
@@ -95,6 +96,8 @@
 两份均固定每搜索8次请求、warmup 2、梯度20步、校准30步、整例7200 s及单工具900 s；每个分片计划8 CPU、64 GiB、1 GPU、4个独立case进程、5天。保留默认固定随机种子及两目标模式。此前不同开发版本及定向补验不并入这一次统一源码的初始全量比较，不根据结果好坏挑选重跑。
 
 当前64340/64341各占一张GPU，因累计上限2 GPU，准备没有触发提交，也没有取消现有分配。实际提交前须重新检查集群及所有RUNNING/PENDING请求；某一分配自然释放后才能提交相应新分片。附在旧分配内的step如随父作业结束而中断，须依据Slurm和保存记录明确标注，不能补造终态或把未运行的case算作已覆盖。后续提交与结果在新记录中更新。
+
+两份分片现交由64396监测提交。**该监测任务仍存活时，不要另行执行这两份`job.slurm`。** 具体计划与脚本在其`input/plans.json`、`input/guard.py`，每次实际配额检查保存于`output/checks/`。提交前还会再次检查，并在目标运行内独占创建`input/launch_reservation.json`和`input/pre_submission_run.json`；成功后写`input/submission.json`，监测目录另存`output/submitted_64340.json`或`submitted_64341.json`。以这些回执及Slurm状态判断是否已提交，不根据旧准备状态重复启动。监测失败或退出时先检查全部回执和Slurm，不自动重试结果不明的sbatch。若明确需要停止后续自动提交，可在监测运行根目录创建`STOP`；它不会取消已经提交的作业。
 
 ## 首次真实闭环的有限结论
 

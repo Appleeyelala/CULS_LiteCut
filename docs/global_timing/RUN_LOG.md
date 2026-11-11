@@ -69,6 +69,8 @@
 | 64340.9 | `20261111T162117Z-declared-timeout-division-retry-50d6b379` | RUNNING：`f29a906`的61项真实核心测试全部通过；每工具900 s、单设计7200 s的显式参数已用于c1355完整比较，70.68 s PASS；随后重验Division index147，仍每搜索8次预算、默认`cec -n`。原300 s CEC失败及306.23 s诊断证书独立保留，不因诊断通过提前标记Division完成 |
 | 64384 | `20261111T162905Z-timeout-cohort-program-audit-d2c73954` | COMPLETED_WITH_EXPLICIT_OMISSIONS：冻结145次尝试、137输入，选择130 PASS/7 FAIL/768未记录；包括实际900 s配置的c1355及旧300 s运行，时限/工具/输入/预算/快照核验通过。2507项程序矩阵完成，139 import PASS/17 FAIL/1 SKIP、57 CLI smoke PASS、1395个编译TU、102文件有命名功能证据。代码与`f29a906`相同，复用字节匹配的61项真实核心及其他命名测试，不新增rewrite/mapping |
 | 64385 | `20261111T163916Z-frozen137-search-analysis-29b53754` | COMPLETED_WITH_EXPLICIT_OMISSIONS：分析64384同一冻结清单中的130个成功设计，预测来源审计错误0；面积约束/联合模式的对等预算随机比较为28/59/43与33/48/49胜/平/负。保留7项遗漏及5种源码分层；无稳定优势结论。生成CSV/图/来源记录，不重新拟合、rewrite或mapping |
+| 64386 | `20261111T165927Z-saved-path-change-audit-c21e0dbe` | COMPLETED_WITH_EXPLICIT_OMISSIONS：`01889c4`的67项CPU矩阵56 PASS/11 SKIP；只读复核39设计611份保存映射、728个成功观察引用，错误0。冻结125输入清单，77个成功设计的路径报告尚未包含在该快照，9个非PASS、780未记录。27/39个original→no-op的代表PI/PO对已变化。2510项程序矩阵完成：142 import PASS/17 FAIL/1 SKIP、58 CLI smoke PASS、1395个编译TU、105个文件有来源匹配命名功能证据。6m07s、MaxRSS513212 KiB；没有新增rewrite/mapping |
+| 64387 | `20261111T170329Z-backend-catalogue-diagnosis-dcbb55ab` | COMPLETED_DIAGNOSTIC：只读处理index108 Back_End_With_Decode旧1800 s超时后保存的1,638,237条cut；当前catalogue构建7.43 s、22,477 executable decisions、43,734 regions。512条旧/新normalizer结果精确相同；旧完整catalogue不存在，明确NO_SAVED_REFERENCE。Slurm 34 s、MaxRSS3312724 KiB；未执行rewrite/mapping，不替代完整E2E |
 
 ## 首次真实闭环的有限结论
 

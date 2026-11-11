@@ -65,3 +65,10 @@
 该任务总计167.46 s，Slurm MaxRSS为995,656 KiB。只复用保存输入，没有rewrite、mapping或新时序标签。原`5b580a4`版本的voter完整比较已在64340.7通过，耗时2151.71 s，其中独立方法1980.76 s包含真实评估；它与上表的保存输入选择计时范围和并发条件不同，不据此计算整套算法加速比。
 
 缓存版实际工具回归在`20261111T160210Z-cached-coordinate-real-regression-e46fd0d0`（64340.8）记录60/60核心PASS，并完成c1355双目标比较。两模式仍选择no-op，delay为360.111877 ps、area为513.216003，CEC PASS。这个结果验证执行回归，不表示预测准确性或优化收益提高。
+
+## 后续超时输入的候选目录检查
+
+64387（`20261111T170329Z-backend-catalogue-diagnosis-dcbb55ab`）检查index108 `forgeEDA/Back_End_With_Decode.aig`。原`acd74fc`完整流程在1800.94 s被单例时限终止，已保存完整GPU导出但没有`catalogue.json`。当前实现只读其1,638,237条cut，构建catalogue耗时7.43 s，得到22,477个executable decisions和43,734个region。512条旧/新normalizer结果精确相同，分别耗时0.3761/0.0031 s。
+
+旧完整catalogue缺失，因此完整对照明确为`NO_SAVED_REFERENCE`。不能把原流程时限除以上述局部耗时作为加速比；该诊断没有rewrite、mapping或完整搜索，不把index108旧FAIL改为PASS。Slurm 34 s，MaxRSS约3.16 GiB。此前共享region集合的修复已存在，本次没有新增优化器改动。
+

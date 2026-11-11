@@ -18,6 +18,8 @@
 
 64383还实际复核缓存版c1355的22份映射（25个观察引用、18种AIG字节），全部重新CEC、确认全部PO/area/global与网表正文相同，并通过最大arrival链检查。此前与缓存版c1355的完整数值、选择及精确图结构一致；native ABC时间注释仍导致字节不同。它不把CPU矩阵中的11项SKIP当作真实GPU测试PASS。
 
+`01889c4`新增6项跨配置路径分析测试。64386的67项CPU矩阵为56 PASS/11 SKIP，检查PO/PI/相位与并列集合、零delay、失败间隔、保存最终选点、缺失/重复/虚构引用、报告优先级、精确benchmark身份，以及原始CEC/路径/netlist被改动的拒绝。39设计611份真实保存映射的只读复核错误0；未再次执行映射。新增分析未改变优化器或原生工具，原61项真实核心证据仅按源码字节匹配复用，不把11项CPU SKIP改为本次GPU通过。
+
 `20261111T132425Z-student-feature-regression-9184e32c`的CPU矩阵为32 PASS、10个真实工具入口SKIP；不能把这些SKIP算作CPU任务完成了GPU验证。其保留输入复核另行重算c1355的417条、div的122,869条原实现/候选特征及预测，与旧25维提取流程保存的全部score记录完全相同。没有训练模型或更换权重。
 
 `20261111T130741Z-selection-cost-regression-3cba9919`检查候选归一化、24组标量/批量坐标成本及可获得的旧独立选择。缺失完整旧选择的div和缺失旧完整catalogue的hyp明确为`NO_SAVED_REFERENCE`，不冒称做过这些完整对照。
@@ -26,7 +28,9 @@
 
 ## 全程序矩阵
 
-最新已完成矩阵`20261111T162905Z-timeout-cohort-program-audit-d2c73954`（源码`b6c5838`，可执行代码与`f29a906`相同）覆盖2,507项源码/入口：1,610项语法PASS、1,395个编译translation units、139项import PASS、17 FAIL、1 SKIP、57项CLI smoke PASS。102个文件有来源字节匹配的命名功能证据；这不是行覆盖率，其余项目明确不宣称逐文件功能覆盖。报告仅复用源码字节匹配的61项真实核心、native、R9、路径、Student、候选选择及搜索审计证据。同时冻结137输入/145次尝试，并核验实际900 s案例及旧300 s案例的时限声明与配置一致，读取来源清单通过；未新增rewrite、mapping或优化。
+最新已完成矩阵`20261111T165927Z-saved-path-change-audit-c21e0dbe`（源码`01889c4`，64386）覆盖2,510项源码/入口：1,613项语法PASS、1,395个编译translation units、142项import PASS、17 FAIL、1 SKIP、58项CLI smoke PASS。105个文件有来源字节匹配的命名功能证据；这不是行覆盖率，其余项目明确不宣称逐文件功能覆盖。新增的3个程序文件有路径单元检查与39设计保存证据复核，其余真实工具证据仅对相同源码字节复用。6m07s、MaxRSS513212 KiB；未新增rewrite、mapping或优化。
+
+此前`20261111T162905Z-timeout-cohort-program-audit-d2c73954`（源码`b6c5838`，可执行代码与`f29a906`相同）的2,507项矩阵、102个有命名功能证据的文件和实际61项核心来源记录完整保留。同时冻结137输入/145次尝试，核验实际900 s案例及旧300 s案例的时限声明与配置一致；未新增rewrite或mapping。
 
 此前`20261111T160210Z-cached-coordinate-real-regression-e46fd0d0`（源码`0e1cbd9`）的同规模矩阵、60项真实核心测试、c1355双目标比较、writer/Gate1工具/Gia检查完整保留，step 64340.8退出0。历史依赖缺项不因Slurm成功而改为PASS。
 

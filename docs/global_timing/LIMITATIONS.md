@@ -37,6 +37,7 @@ index197进一步暴露了原生顺序安装的三region引用环：旧trace把6
 - `forgeEDA/ALU.aig`在修复版全量扫描的零rewrite阶段出现过原生SIGSEGV（返回码−11），当时没有输出trace/AIG。64340.5使用同一旧二进制和相同输入hash在GDB下未复现：6449条trace全部未选择、零rewrite，随后CEC与mapping通过。因此记录为`PASS_NOT_REPRODUCED`，不将原失败改成PASS。发现的构造函数CUDA调用未检查和未初始化输出变量已单独修正，但没有证据证明它就是该次崩溃的根因。
 - 64340.7中的ALU和voter已使用新版工具完成完整比较；64341.4中的div在提高至3600 s限制后通过。原始失败仍保留，不作为旧版运行已通过或原崩溃根因已证明的证据。voter的未变化入口重复计算已由`0e1cbd9`缓存处理；64379核对4个保存设计的成本与完整请求完全相同，64340.8完成缓存版c1355真实回归。缓存版voter目前只有保存输入核对，不能冒称它又完成了一次完整E2E。
 - 全量扫描的`forgeEDA/Division.aig`（index147）在native ABC rewrite的CEC阶段超过300 s限制。保存输入为38,773 AND、64 PI、14,205 PO；旧运行未取得证书，不是已证明不等价。64382复用原输入、保存的native AIG和同一ABC，原命令在延长限制后于306.23 s证明等价；自动分区版本仍在300 s超时。单独证明不替代完整benchmark，也不改变旧FAIL或用缺失的timing补数值。
+- Division随后64340.9在7200.51 s整例超时。只读终态记录显示12条CEC累计6678.86 s，其中面积约束eval7在900.17 s超时；该次native CEC已经通过。不能把此失败归为native仍未证明或全部归为代理求导；完整命令计时边界见[性能检查](PERFORMANCE_AUDIT.md)。该案例仍为FAIL，不根据保存的部分成功测量补造完整比较。
 - index108 `Back_End_With_Decode`在64341.7使用性能修复及无环原生工具后，候选准备和no-op CEC/mapping通过，但native ABC rewrite的CEC仍在900.21 s超时。完整案例于1337.65 s记FAIL；没有取得该native结果的等价性证书，也没有执行其后的各搜索方法。该失败点与旧1800 s候选准备超时不同；不能把它写成不等价，或用已经通过的no-op代替缺失的native及搜索结果。
 - `94909a7`现将独立native对照失败保留为无指标的失败项，允许其他方法继续；suite仍为PARTIAL。75项真实核心、两个正常完整benchmark及受控native故障的实际其余测量/路径检查通过，但尚未据此声称自然超时的index108已经完成。详见[NATIVE_CONTROL_FAILURES.md](NATIVE_CONTROL_FAILURES.md)。
 

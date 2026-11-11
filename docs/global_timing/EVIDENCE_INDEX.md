@@ -21,7 +21,8 @@
 
 | 核验对象 | 运行目录与报告 | 能支持的结论 |
 |---|---|---|
-| 最新真实核心回归与全程序矩阵 | `20261111T182419Z-native-control-real-regression-2c5d4d0b/output/tests.json`、`repository_tests/test_matrix.json`、`audit_summary.json` | 程序版本`94909a7`：75/75核心PASS；2510项逐程序记录，17项import FAIL及1项SKIP明确保留；108个文件有来源匹配的命名功能证据，不是行覆盖率 |
+| 最新真实核心回归 | `20261111T182419Z-native-control-real-regression-2c5d4d0b/output/tests.json`、`repository_tests/test_matrix.json`、`audit_summary.json` | 程序版本`94909a7`：75/75核心PASS；当次2510项矩阵完整保留 |
+| 当前全程序矩阵及失败分析 | `20261111T190337Z-saved-failure-evidence-audit-9b981c5c/output/repository_tests/test_matrix.json`、`tests.json`、`failure_regression.json` | `53d4541`：2512项记录，17项import FAIL及1项SKIP；110文件有命名证据。81项CPU矩阵69 PASS/12 SKIP，6项新增失败分析测试通过；未重跑原优化器或GPU回归 |
 | 原生循环及独立对照失败 | 同一目录的`cycle_regression.json`、`native_control_regression.json` | 旧循环请求被拒绝，另一次13项安装CEC/mapping通过；受控native故障不妨碍其余真实测量，缺失对照不填数值；故障fixture不参与性能统计 |
 | 可追溯的原生构建 | `20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/build_report.json` | gpuls/ABC的实际构建、hash与对应源码；Python后续版本须另行验证 |
 | 搜索与公平比较 | `20261111T175518Z-acyclic-cohort-program-audit-333c8796/output/cohort/cohort.json`、`paired_report/paired_statistics.json`、`search_quality/` | 固定191输入、206次尝试；选定185 PASS、6 FAIL，其余714未记录；多开发版本分层保留，不能当作最终统一版本全量结果 |

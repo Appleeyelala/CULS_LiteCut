@@ -11,3 +11,5 @@ index108 `Back_End_With_Decode`在`20261111T174715Z-acyclic-terminal-case-retrie
 同一回归的c1355和index197完整8预算双目标比较PASS；c1355全部数值、选择和精确序列化图结构与保存参照一致，index197仍拒绝原循环请求并在另一次13项安装后通过CEC/mapping。全程序矩阵与最终任务状态另见`RUN_LOG.md`。
 
 真实工具回归目录：`/data/wushangge/CULS_LiteCut/runs/20261111T182419Z-native-control-real-regression-2c5d4d0b/`。关键产物为`output/tests.json`、`output/native_control_regression.json`及`output/cycle_regression.json`。它尚未证明index108已在新流程完成完整搜索。
+
+后续自然补验64340.14（`20261111T184033Z-isolated-native-backend-retry-813f3b26`）使用真实ABC，native CEC在900.30 s超时、returncode −9。`native_abc/attempt.json`保持FAIL，流程随后进入`greedy_litecut`；没有故障注入或更换对照数值。此时整例仍在运行，仅证明自然超时已被隔离，不提前宣称其他搜索完成、整例PARTIAL或PASS。

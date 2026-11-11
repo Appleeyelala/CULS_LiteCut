@@ -34,7 +34,11 @@
 
 ## 全程序矩阵
 
-最新已完成矩阵`20261111T182419Z-native-control-real-regression-2c5d4d0b`（源码`94909a7`，64341.8）覆盖2,510项源码/入口：1,613项语法PASS、1,395个编译translation units、142项import PASS、17 FAIL、1 SKIP、58项CLI smoke PASS。108个文件有来源字节匹配的命名功能证据；这不是行覆盖率，其余项目明确不宣称逐文件功能覆盖。同一任务完成75项真实核心、两个完整benchmark、受控native失败后的真实测量/路径验证和已有导入工具检查。13m17s、MaxRSS839268 KiB；原生源码未变，复用64389实际构建。
+最新已完成矩阵`20261111T190337Z-saved-failure-evidence-audit-9b981c5c`（源码`53d4541`，64394）覆盖2,512项源码/入口：1,615项语法PASS、1,395个编译translation units、144项import PASS、17 FAIL、1 SKIP、58项CLI smoke PASS。110个文件有来源字节匹配的命名功能证据，不是行覆盖率。新增只读失败分析的6项测试通过；本次完整81项CPU矩阵为69 PASS/12个真实工具入口SKIP，不能称为本次执行了81项GPU回归。原优化器、工具、真实核心测试源码未变，相关实际证据按字节匹配复用64341.8等运行。
+
+同一64394还实际复核冻结191输入清单：预测、方法、梯度CSV及数值聚合完全不变，失败证据审计错误0；旧7200 s Division、900 s native失败及标明用途的旧native故障fixture另行只读核验。5m33s、MaxRSS400244 KiB；没有新rewrite、CEC、mapping、预测标签或模型拟合。
+
+此前真实矩阵`20261111T182419Z-native-control-real-regression-2c5d4d0b`（源码`94909a7`，64341.8）覆盖2,510项源码/入口：1,613项语法PASS、1,395个编译translation units、142项import PASS、17 FAIL、1 SKIP、58项CLI smoke PASS。108个文件有来源字节匹配的命名功能证据；这不是行覆盖率，其余项目明确不宣称逐文件功能覆盖。同一任务完成75项真实核心、两个完整benchmark、受控native失败后的真实测量/路径验证和已有导入工具检查。13m17s、MaxRSS839268 KiB；原生源码未变，复用64389实际构建。
 
 此前`20261111T175518Z-acyclic-cohort-program-audit-333c8796`（源码`cefb56a`，64390）的同规模矩阵及106个有命名功能证据的文件完整保留。它为rewrite头文件/实现、candidate与pipeline附上来源匹配的64341.6循环拒绝/修复记录，复用69项真实核心及原生CPU证据，没有再次执行GPU测试或mapping；6m50s、MaxRSS539592 KiB。
 

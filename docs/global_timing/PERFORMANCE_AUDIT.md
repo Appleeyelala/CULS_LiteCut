@@ -88,3 +88,18 @@
 校准的arrival前向/反向累计44.60/39.89 s；提案中的相应累计57.86/51.80 s。它定位到深层传播的重复张量操作，不表明数学模型有误；本次未改模型、候选或优化器。全部原始剖析、输入hash和精确一致性结论在`output/gradient_profile/`。Slurm 3m40s、MaxRSS902432 KiB，CPU任务没有请求GPU。
 
 旧案例保存的已完成工具命令另有25次CEC、25次mapping和24次rewrite，累计约620.67、884.34和318.48 s；这些来自旧`*.command.json`，不是本次剖析重新计时。它们不含未完成命令、候选准备和代理计算，不能拼成完整的旧wall-time分解，也不能把整个3600 s限制归因于arrival。当前完整补验独立运行，本次没有新rewrite、mapping、Student训练或时序标签。
+
+## Division整例超时的已保存工具记录
+
+只读审计`20261111T190337Z-saved-failure-evidence-audit-9b981c5c/output/failure_diagnostics/case_0147.json`检查已终止的64340.9：`20261111T162117Z-declared-timeout-division-retry-50d6b379/output/suite/case_0147`。整例在7200.51 s超时；这一点与早期native CEC的300 s超时分开保留。
+
+| 有终态记录的命令 | 数量 | 已保存elapsed合计 s |
+|---|---:|---:|
+| CEC | 12 | 6678.86 |
+| mapping | 10 | 123.68 |
+| rewrite（含native） | 27 | 41.21 |
+| enumeration | 1 | 1.73 |
+
+“终态记录”包括超时后被终止的命令，不表示全部证明成功。面积约束`eval_0007`的CEC在900.17 s超时；另有11条CEC命令正常退出，其具体证明状态仍由对应测量结果解释。该次native CEC耗时728.36 s；greedy、independent及若干成功搜索请求的CEC约666.68–774.24 s。它们来自共享分配，不能与先前独立306.23 s诊断相除作为算法加速或退化的证据。
+
+这些记录说明该次失败中等价性验证已占据大量可观测时间，不能把7200 s全部归因于深DAG求导。合计不含尚未写出终态记录的命令和CPU准备/代理计算，不是完整wall-time分解，也不把终止前已通过的局部步骤补写为整例PASS。本次审计没有新增CEC、mapping或时序标签。

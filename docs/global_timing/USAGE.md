@@ -57,6 +57,7 @@ python -B RUN/src/scripts/ci.py --run RUN --tool-run BUILD_RUN
 - 每个 `eval_*/`：选择、真实顺序trace、AIG、CEC、mapping、Liberty timing、mapped netlist、命令和耗时。
 - `gradient_*/`：预先预测、拟合记录、真实梯度、投影选择、实际评价进展；失败/修复/warmup均计入预算。
 - `summary.json`、`report/`：六类方法、两种目标的真实比较、CSV与可导出PNG/PDF。
+- `native_abc/attempt.json`、`report/method_failures.json`：独立native对照的明确状态与未成功方法。native失败时summary中的指标为null，其他方法可继续，但suite仍为PARTIAL；必需的original/no-op失败仍中止。不得把缺失对照填成no-op数值。
 
 使用 `summarize_benchmarks.py` 聚合已有结果；`--repeat A B`分别比较文件字节、精确序列化图结构、选择与全部PO/CEC/面积，忽略墙钟时间。图结构hash仅排除符号名称和注释（包括ABC时间戳），保留节点ID和端口顺序。跨版本还须确认算法源码、输入、库和二进制哈希；不能只因最终delay相同就声称完全复现。报告分开绘制最佳面积可行delay与实际联合目标，保存候选变化及真实梯度范数。
 

@@ -39,6 +39,8 @@ python -B RUN/src/scripts/run_framework_experiment.py \
 
 全数据集先用 `stage_benchmarks.py` 生成逐文件hash清单；再用 `run_benchmark_suite.py --manifest … --shard-count 2 --shard-index 0` 及另一个索引1覆盖数据。`--workers`受CPU配额限制，共享当前已分配GPU，不额外申请资源。单例超时会终止其工具后代进程并保留记录。
 
+批量入口的`--case-timeout`限制整个设计，`--tool-timeout`限制单条rewrite/CEC/mapping命令，默认分别为3600/300秒；后者转交底层CLI的`--timeout`。延长限制需保留旧失败并在新运行记录原因，不改变实际评估次数预算。汇总清单检查声明的工具时限与每个成功案例的配置一致；旧版未声明该参数的suite按其固定300秒默认值核验。
+
 本地持续集成入口为：
 
 ```bash
@@ -65,7 +67,7 @@ python -B RUN/src/scripts/analyze_timing_paths.py --run RUN \
   --tool-run OBSERVER_BUILD_RUN --benchmarks SAVED_CASE_DIRECTORY
 ```
 
-该命令在新目录重新CEC/mapping，启用`CULS_GLOBAL_TIMING_PATH_REPORT=1`，要求原测量数值和网表正文完全一致。`output/arrival_paths/`保存各映射的`paths.json`、完整日志及各方法源/端点集合变化；旧搜索目录不改写。observer源码和二进制应来自同一已记录构建，不用新标签覆盖历史Gate3F的MIO列。
+该命令在新目录重新CEC/mapping，启用`CULS_GLOBAL_TIMING_PATH_REPORT=1`，沿用保存配置中的工具时限，要求原测量数值和网表正文完全一致。`output/arrival_paths/`保存各映射的`paths.json`、完整日志及各方法源/端点集合变化；旧搜索目录不改写。observer源码和二进制应来自同一已记录构建，不用新标签覆盖历史Gate3F的MIO列。
 
 `profile_selection.py --run RUN --benchmarks SAVED_CASE_DIRECTORY`只读取已保存输入、候选与LiteCut分数，比较优化后的候选归一化、标量参考成本和历史独立region选择，不执行rewrite或mapping。`--catalogue-only`可诊断尚未完成推理的大设计。成本相等、选择相等与耗时分别报告；缺失历史选择时明确写`NO_SAVED_REFERENCE`。
 

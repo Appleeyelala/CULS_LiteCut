@@ -95,7 +95,10 @@ def analyze(args):
         tag = hashlib.sha256(str(benchmark.resolve()).encode()).hexdigest()[:12]
         work = output / tag
         work.mkdir()
-        evaluator = Evaluator(binary, library, original)
+        timeout = summary['config']['timeout_s']
+        if type(timeout) is not int or timeout <= 0:
+            raise ValueError('Saved tool timeout must be a positive integer.')
+        evaluator = Evaluator(binary, library, original, timeout=timeout)
         groups = {'replay_noop': [summary['replay_noop']], 'random_search': summary['random_search']}
         groups.update({name: summary[name]['observations'] for name in ['greedy_litecut', 'independent_regions']})
         groups.update({'gradient_' + name: item['observations'] for name, item in summary['gradient_search'].items()})
@@ -123,7 +126,8 @@ def analyze(args):
                 destination = work / f'graph_{len(cached):04d}'
                 record = {'input_sha256': input_hash, 'mapped_reference_body_sha256': mapped_hash,
                           'aig': str(aig), 'source_benchmark': str(benchmark),
-                          'reference_abc': reference['provenance']['abc'], 'observer_abc_sha256': digest(binary)}
+                          'reference_abc': reference['provenance']['abc'], 'observer_abc_sha256': digest(binary),
+                          'tool_timeout_s': timeout}
                 try:
                     actual = evaluator.evaluate(aig, destination)
                     for field in ['area', 'delay_ps', 'mapped_gates', 'po_arrivals_ps']:
@@ -152,6 +156,7 @@ def analyze(args):
                     'path_evidence': record['paths']})
                 previous[name] = pairs
         report = {'source_benchmark': str(benchmark), 'measurements': measurements, 'selection_path_changes': changes,
+                  'tool_timeout_s': timeout,
                   'status': 'PASS' if all(row['status'] == 'PASS' for row in measurements) else 'FAIL',
                   'scope': 'Maximizing Liberty arrival chains, one per near-critical PO. PI/PO indices are preserved interface identities. Mapped node IDs are not aligned across mappings; changed endpoint pairs do not assert unique logical path identity.'}
         save_json(work / 'summary.json', report)

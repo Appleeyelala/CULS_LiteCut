@@ -30,13 +30,16 @@ def main():
     parser.add_argument('--gradient-steps', type=int, default=20)
     parser.add_argument('--calibration-steps', type=int, default=30)
     parser.add_argument('--case-timeout', type=int, default=3600)
+    parser.add_argument('--tool-timeout', type=int, default=300,
+                        help='Per rewrite/CEC/mapping command limit; recorded separately from the whole-case limit.')
     parser.add_argument('--workers', type=int, default=1,
                         help='Independent case processes sharing the allocated GPU; CPU threads per process stay one.')
     args = parser.parse_args()
     run = args.run.resolve()
     if not os.environ.get('SLURM_JOB_ID') or not str(run).startswith('/data/wushangge/'):
         raise SystemExit('Benchmark suite requires Slurm and a prepared /data run.')
-    if args.shard_count < 1 or not 0 <= args.shard_index < args.shard_count or args.case_timeout <= 0:
+    if (args.shard_count < 1 or not 0 <= args.shard_index < args.shard_count or
+            args.case_timeout <= 0 or args.tool_timeout <= 0):
         parser.error('Invalid shard or time limit.')
     if not 1 <= args.workers <= int(os.environ.get('SLURM_CPUS_PER_TASK', '1')):
         parser.error('Case workers must fit the CPU allocation.')
@@ -80,7 +83,7 @@ def main():
                     '--library', str(run / 'input/asap7'), '--checkpoint', str(run / 'input/student_checkpoint'),
                     '--output', str(output), '--evaluations', str(args.evaluations), '--warmup', str(args.warmup),
                     '--gradient-steps', str(args.gradient_steps), '--calibration-steps', str(args.calibration_steps),
-                    '--mode', 'both']
+                    '--timeout', str(args.tool_timeout), '--mode', 'both']
                 record['command'] = command
                 log_path = run / 'logs' / f'case_{row["index"]:04d}.log'
                 record['log'] = str(log_path)

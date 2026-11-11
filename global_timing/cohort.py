@@ -140,6 +140,11 @@ def _check_case(attempt, source):
              'gradient_steps': 'gradient_steps', 'calibration_steps': 'calibration_steps'}
     if any(metadata['benchmark_arguments'][key] != config[value] for key, value in names.items()):
         raise ValueError('Case search budget differs from the declared suite arguments.')
+    # Earlier suite runners always used the CLI's fixed 300-second default.
+    declared_timeout = metadata['benchmark_arguments'].get('tool_timeout', 300)
+    if (type(declared_timeout) is not int or declared_timeout <= 0 or
+            config['timeout_s'] != declared_timeout):
+        raise ValueError('Case tool timeout differs from the declared suite arguments.')
     return {'summary': _artifact(summary_path), 'config': _artifact(config_path)}
 
 

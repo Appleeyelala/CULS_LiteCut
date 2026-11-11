@@ -43,7 +43,8 @@ def disk_fixture(root):
     meta['benchmark_arguments']['manifest'] = str(manifest)
     meta['benchmark_manifest_sha256'] = hashlib.sha256(manifest.read_bytes()).hexdigest()
     (run / 'run.json').write_text(json.dumps(meta))
-    parameters = {'evaluation_budget': 8, 'warmup_evaluations': 2, 'gradient_steps': 20, 'calibration_steps': 30}
+    parameters = {'evaluation_budget': 8, 'warmup_evaluations': 2, 'gradient_steps': 20,
+                  'calibration_steps': 30, 'timeout_s': 300}
     config = dict(parameters, input_sha256='1' * 64, gpuls_sha256='3' * 64, checkpoint_sha256='6' * 64,
                   toolchain={'abc': {'sha256': '4' * 64}, 'library': {'sha256': '5' * 64}})
     (case / 'config.json').write_text(json.dumps(config))
@@ -147,6 +148,29 @@ class CohortTests(unittest.TestCase):
                 (case / 'config.json').write_text(json.dumps(config))
                 with self.assertRaises(ValueError):
                     build_cohort(manifest, [suite], root / 'cohort')
+
+    def test_tool_timeout_requires_an_explicit_matching_declaration(self):
+        for declared, actual, accepted in [(None, 300, True), (None, 900, False),
+                                          (900, 900, True), (900, 300, False),
+                                          (0, 0, False), (True, 1, False)]:
+            with self.subTest(declared=declared, actual=actual), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                manifest, run, suite, case = disk_fixture(root)
+                meta = json.loads((run / 'run.json').read_text())
+                if declared is not None:
+                    meta['benchmark_arguments']['tool_timeout'] = declared
+                (run / 'run.json').write_text(json.dumps(meta))
+                for name in ['config.json', 'summary.json']:
+                    path = case / name
+                    value = json.loads(path.read_text())
+                    (value if name == 'config.json' else value['config'])['timeout_s'] = actual
+                    path.write_text(json.dumps(value))
+                if accepted:
+                    build_cohort(manifest, [suite], root / 'cohort')
+                    read_cohort(root / 'cohort/cohort.json')
+                else:
+                    with self.assertRaisesRegex(ValueError, 'tool timeout'):
+                        build_cohort(manifest, [suite], root / 'cohort')
 
 
 if __name__ == '__main__':

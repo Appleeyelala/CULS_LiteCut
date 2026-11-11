@@ -68,6 +68,7 @@
 | 64383 | `20261111T161958Z-tool-timeout-regression-18c44f98` | COMPLETED_WITH_GPU_OMISSIONS：`f29a906`增加显式工具时限来源检查，61项CPU矩阵50 PASS/11 SKIP；旧104/125输入冻结清单均仍有效。缓存版c1355的25个成功观察引用对应22份映射、18种AIG字节，重新CEC/全部PO与area/global/网表正文及路径检查通过。缓存前后完整数值/选择/图结构相同；native ABC时间注释使文件字节不同 |
 | 64340.9 | `20261111T162117Z-declared-timeout-division-retry-50d6b379` | RUNNING：`f29a906`的61项真实核心测试全部通过；每工具900 s、单设计7200 s的显式参数已用于c1355完整比较，70.68 s PASS；随后重验Division index147，仍每搜索8次预算、默认`cec -n`。原300 s CEC失败及306.23 s诊断证书独立保留，不因诊断通过提前标记Division完成 |
 | 64384 | `20261111T162905Z-timeout-cohort-program-audit-d2c73954` | COMPLETED_WITH_EXPLICIT_OMISSIONS：冻结145次尝试、137输入，选择130 PASS/7 FAIL/768未记录；包括实际900 s配置的c1355及旧300 s运行，时限/工具/输入/预算/快照核验通过。2507项程序矩阵完成，139 import PASS/17 FAIL/1 SKIP、57 CLI smoke PASS、1395个编译TU、102文件有命名功能证据。代码与`f29a906`相同，复用字节匹配的61项真实核心及其他命名测试，不新增rewrite/mapping |
+| 64385 | `20261111T163916Z-frozen137-search-analysis-29b53754` | COMPLETED_WITH_EXPLICIT_OMISSIONS：分析64384同一冻结清单中的130个成功设计，预测来源审计错误0；面积约束/联合模式的对等预算随机比较为28/59/43与33/48/49胜/平/负。保留7项遗漏及5种源码分层；无稳定优势结论。生成CSV/图/来源记录，不重新拟合、rewrite或mapping |
 
 ## 首次真实闭环的有限结论
 

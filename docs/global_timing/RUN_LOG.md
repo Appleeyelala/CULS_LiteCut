@@ -77,7 +77,7 @@
 | 64340.12 | `20261111T172704Z-replay-alias-memory-inspection-dd0019ee` | COMPLETED_DIAGNOSTIC / ALIAS_CYCLE_OBSERVED：GDB原生命令读取实际内存，确认3个不同region的原始root 6868→10577→8953→6868形成环，旧trace均ACCEPTED；100个活跃引用进入环。详见NATIVE_REPLAY_CYCLES.md；无CEC/mapping标签 |
 | 64389 | `20261111T173355Z-acyclic-replay-tool-build-64cf764e` | BUILT_AND_CPU_VALIDATED：`d2065ab`加入安装前传递依赖检查和有界别名解析；69项CPU矩阵58 PASS/11 SKIP，工具构建及链接真实solver的环/长链/补相/常量输出CEC回归通过。2m55s、MaxRSS2594464 KiB；GPU验证单独记录于64341.6 |
 | 64341.6 | `20261111T173748Z-acyclic-replay-real-regression-e1510460` | COMPLETED_WITH_EXPLICIT_OMISSIONS：69/69真实核心PASS，c1355/index197完整双目标比较分别56.80/165.97 s PASS。旧20项循环选择保持FAIL，明确CYCLE_REJECT root10577；另一次13项修复安装CEC/mapping PASS，未用no-op fallback。c1355完整数值/选择/图结构与保存参照一致。2510项程序矩阵完成：142 import PASS/17 FAIL/1 SKIP、58 CLI smoke PASS、1395编译TU、106文件有命名功能证据。9m27s、MaxRSS810424 KiB |
-| 64341.7 | `20261111T174715Z-acyclic-terminal-case-retries-7cce9a09` | RUNNING：新无环工具按108/122/185/22顺序补验。108在1337.65 s FAIL：准备与no-op通过，native CEC在900.21 s超时，后续搜索未执行；不是不等价证明。122（Core）在873.16 s完整PASS。仍每搜索8次预算、7200 s单例/900 s工具限制；原失败与输入身份冻结，不重复当时live59/147、不取消旧allocation。源码`ee91a33`与已验证原生`d2065ab`相同 |
+| 64341.7 | `20261111T174715Z-acyclic-terminal-case-retries-7cce9a09` | RUNNING：新无环工具按108/122/185/22顺序补验。108在1337.65 s FAIL：准备与no-op通过，native CEC在900.21 s超时，后续搜索未执行；不是不等价证明。122（Core）和185（Ibtida_top）在873.16/1098.06 s完整PASS，22仍在运行。仍每搜索8次预算、7200 s单例/900 s工具限制；原失败与输入身份冻结，不重复当时live59/147、不取消旧allocation。源码`ee91a33`与已验证原生`d2065ab`相同 |
 | 64390 | `20261111T175518Z-acyclic-cohort-program-audit-333c8796` | COMPLETED_WITH_EXPLICIT_OMISSIONS：冻结206次尝试、191输入，选择185 PASS/6 FAIL/714未记录；原17 FAIL及1 PARTIAL保留。预测来源审计错误0；对等预算随机比较为36/91/58与48/77/60胜/平/负，未显示稳定优势。2510项程序矩阵完成：142 import PASS/17 FAIL/1 SKIP、58 CLI smoke PASS、1395编译TU、106文件有来源匹配命名证据，实际附上新循环回归。6m50s、MaxRSS539592 KiB；无新增rewrite/mapping |
 | 64391 | `20261111T180508Z-hyp-saved-gradient-profile-8d6186eb` | COMPLETED：只读旧3600 s超时的ACE hyp保存数据，重构首轮3样本校准及2×20步提案；全部loss/参数/梯度trace精确相同。117509 regions、16269层；含profiler的校准90.58 s、提案113.57 s。3m40s、MaxRSS902432 KiB；无新增rewrite/mapping/时序标签，不替代完整补验 |
 | 64340.13 | `20261111T181423Z-openabc-hyp-terminal-retry-ace13171` | RUNNING：59的3600 s尝试已终止后，在新目录用已验证无环工具和缓存实现补验；仍每搜索8次预算，显式7200 s单例/900 s工具时限。保存旧完整records/run元数据及hash；不重复启动live147或122，不新增GPU allocation。源码`f984581`，原生/优化器与已验证版本相同；共享资源计时不能用于独占性能比较 |
@@ -85,6 +85,14 @@
 | 64341.8 | `20261111T182419Z-native-control-real-regression-2c5d4d0b` | COMPLETED_WITH_EXPLICIT_OMISSIONS：75/75真实核心PASS；c1355/index197完整比较69.22/225.77 s PASS，c1355数值/选择/图结构不变，循环修复仍为13项CEC PASS。独立native故障保留FAIL，其余真实测量的9份映射/12个路径引用/3个预测关联通过。2510项矩阵完成：142 import PASS/17 FAIL/1 SKIP、58 CLI smoke PASS、1395编译TU、108文件有命名证据。13m17s、MaxRSS839268 KiB；故障注入不计入benchmark性能 |
 | 64393 | `20261111T182725Z-completed116-path-analysis-3a705938` | COMPLETED_WITH_EXPLICIT_OMISSIONS：只读复核64381全部116设计/1870份映射/2218引用，错误0，原39设计全部分析精确一致。50/116个original→no-op代表PI/PO对变化；9个失败及780未记录保留。5m25s、MaxRSS998472 KiB；没有新增rewrite/CEC/mapping，统计与解释见PATH_CHANGE_ANALYSIS.md |
 | 64340.14 | `20261111T184033Z-isolated-native-backend-retry-813f3b26` | RUNNING：75项真实核心再次PASS后，使用已验证失败隔离流程重验已终止的108；每搜索8次预算、7200 s单例/900 s工具限制，实际ABC没有故障注入。旧900 s native失败及源记录前缀已冻结；本次native证明仍按真实结果决定状态，不以旧失败强制本次失败。源码`0355cae`，代码与已验证`94909a7`相同；共享既有allocation，不重复其他live输入 |
+
+## 统一版本全量比较的预先准备
+
+`20261111T184752Z-consistent-full-shard0-1568c1b9`和`20261111T184753Z-consistent-full-shard1-175169c2`已准备，**尚未提交**。两份`input/cohort_plan.json`固定同一源码`160b218`（程序与已通过75项真实核心及全仓库矩阵的`94909a7`相同）、64389工具构建、同一输入清单及互斥的偶数453/奇数452项；并集恰为905。准备清单hash、命令与shell语法已核对，输出目录为空，不计为实验完成。
+
+两份均固定每搜索8次请求、warmup 2、梯度20步、校准30步、整例7200 s及单工具900 s；每个分片计划8 CPU、64 GiB、1 GPU、4个独立case进程、5天。保留默认固定随机种子及两目标模式。此前不同开发版本及定向补验不并入这一次统一源码的初始全量比较，不根据结果好坏挑选重跑。
+
+当前64340/64341各占一张GPU，因累计上限2 GPU，准备没有触发提交，也没有取消现有分配。实际提交前须重新检查集群及所有RUNNING/PENDING请求；某一分配自然释放后才能提交相应新分片。附在旧分配内的step如随父作业结束而中断，须依据Slurm和保存记录明确标注，不能补造终态或把未运行的case算作已覆盖。后续提交与结果在新记录中更新。
 
 ## 首次真实闭环的有限结论
 

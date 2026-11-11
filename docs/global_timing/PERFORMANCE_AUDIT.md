@@ -25,4 +25,6 @@
 
 64363（`20261111T143301Z-gradient-overhead-regression-62411fb5`）已完成：46项CPU矩阵为36 PASS、10个真实工具入口SKIP；div的loss、参数与完整40步梯度trace精确一致。初始化2.60 s、校准99.05 s、提案105.82 s，均含profiler。这里只报告相同保存输入上的两次测量，不宣称跨设计或完整E2E的加速；深DAG求导仍是主要成本，真实E2E须单独完成。
 
+64341.4随后通过46项真实核心回归，并开始div/hyp/c1355完整比较。仍使用每搜索8次实际评价预算；根据已有耗时证据给予3600 s单例限制，保留此前1800 s失败。此处增加时间上限并不构成算法性能改善证据，完整结果仍须检查对应case记录。
+
 64361初版把可变`run.json`的开始状态hash放入`input_sha256`，该项不能验证终态manifest。其他输入hash及数值一致性检查仍有效。`27e3741`在后续剖析中排除可变manifest，旧报告保留。准备后未提交的`20261111T143226Z-gradient-overhead-regression-f0d5fdd7`明确标为`SUPERSEDED_NOT_SUBMITTED`，不是失败或完成的实验。

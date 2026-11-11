@@ -6,6 +6,8 @@
 
 `20261111T134714Z-final-feature-e2e-retry-aa36f9d5/output/tests.json`记录46项核心测试全部通过，包含MFFC参照、冲突与空候选、有限差分梯度、两种目标、失败CEC、上下文cut证明、真实GPU候选/replay、常量导出、Student推理缓存、Liberty端点/路径及预测来源审计。其c1355完整比较通过，div超时；核心测试通过不替代每个benchmark的完成状态。随后梯度重复计算修复的回归单独记录，不把旧测试冒充新源码验证。
 
+重复计算修复后，`20261111T143814Z-profiled-scale-e2e-retry-8cee3d62/output/tests.json`再次记录46/46真实核心PASS（64341.4）；其大设计完整比较仍在进行。CPU保存输入一致性验证见64363及[性能检查](PERFORMANCE_AUDIT.md)。
+
 `20261111T132425Z-student-feature-regression-9184e32c`的CPU矩阵为32 PASS、10个真实工具入口SKIP；不能把这些SKIP算作CPU任务完成了GPU验证。其保留输入复核另行重算c1355的417条、div的122,869条原实现/候选特征及预测，与旧25维提取流程保存的全部score记录完全相同。没有训练模型或更换权重。
 
 `20261111T130741Z-selection-cost-regression-3cba9919`检查候选归一化、24组标量/批量坐标成本及可获得的旧独立选择。缺失完整旧选择的div和缺失旧完整catalogue的hyp明确为`NO_SAVED_REFERENCE`，不冒称做过这些完整对照。

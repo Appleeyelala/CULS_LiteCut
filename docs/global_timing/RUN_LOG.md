@@ -52,6 +52,7 @@
 | 64361 | `20261111T142532Z-saved-gradient-profile-5baf3f8e` | COMPLETED：保留div输入的首轮面积约束校准及完整梯度trace精确复现；诊断4183层DAG、51140个decision的实际CPU开销，不执行rewrite/mapping；初版误把mutable run.json列入input hashes，后续排除该项 |
 | 64362 | `20261111T142809Z-native-aware-program-matrix-571ab8dd` | COMPLETED_WITH_RECORDED_OMISSIONS：46项CPU矩阵36 PASS/10 SKIP；2501项程序清单、1395个编译TU、133 import PASS/17 FAIL/1 SKIP、55 CLI smoke PASS；97文件附来源匹配的命名功能证据 |
 | 64363 | `20261111T143301Z-gradient-overhead-regression-62411fb5` | COMPLETED：46项CPU矩阵36 PASS/10 SKIP；移除逐层重复扫描及逐decision张量转换后，保留div首轮校准的全部loss/参数及完整40步梯度trace精确一致；初始化2.60 s、校准99.05 s、提案105.82 s，均含profiler |
+| 64341.4 | `20261111T143814Z-profiled-scale-e2e-retry-8cee3d62` | RUNNING：性能修复后的46项真实核心测试全部通过；div/hyp/c1355重验中，仍每种搜索8次预算。基于已记录的深DAG成本把单例限制从1800 s调整为3600 s，旧超时保留；共享已有分配，不新增GPU allocation |
 
 ## 首次真实闭环的有限结论
 

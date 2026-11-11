@@ -89,6 +89,7 @@
 | 64395 | `20261111T191749Z-full905-partition-certificates-f9e48d3a` | COMPLETED_WITH_EXPLICIT_OMISSIONS：`16ac3cd`对完整905输入独立验证CPU strict MFFC/owner、精确DAG及每端口反向AND距离，905/905 PASS；4 worker结构阶段147.13 s。86项CPU矩阵74 PASS/12 SKIP；2515项程序矩阵完成，147 import PASS/17 FAIL/1 SKIP、59 CLI smoke PASS、1395编译TU、113文件有命名证据。5m02s、MaxRSS6091568 KiB；未运行GPU、CEC、mapping或搜索，不能替代全量benchmark比较 |
 | 64396 | `20261111T194041Z-consistent-cohort-submit-guard-e5f1d667` | RUNNING：提交监测申请1 CPU/1 GiB（实际2 CPU）、无GPU。父64341自然结束后，重新检查集群及用户请求、冻结输入/脚本hash，于2026-11-11 21:22:13 UTC提交新分片1为64397；仍等待父64340结束后提交分片0。提交后合计14 CPU/129 GiB/2 GPU。成功回执和衔接记录保留，禁止重复提交；结果不明时停止且不自动重试 |
 | 64397 | `20261111T184753Z-consistent-full-shard1-175169c2` | RUNNING：统一版本奇数452输入分片，源码`160b218`、64389工具。启动75/75真实核心PASS，已进入4 worker benchmark；8 CPU/64 GiB/1 GPU、5天，每搜索8预算、warmup2、梯度20/校准30步、整例7200 s/工具900 s，原定参数未变。由64396提交，准备及提交清单保持独立；不是整分片或全905完成声明 |
+| 64397.0 | `20261111T214331Z-consistent-c1355-exact-repeat-0e387139` | COMPLETED / reproduction PASS：独立执行c1355，使用全量奇数分片的同一`160b218`源码快照、工具/资产、固定种子及全部搜索参数，900 s工具/7200 s整例限制。配置、全部数值/选择/最终选点及25项精确图结构检查一致，冻结输入未变；仅native ABC输出时间注释导致字节hash不同。Slurm41 s、MaxRSS437680 KiB，使用64397内1 CPU/4 GiB步骤、共享已有GPU，未增加分配。此复现不计入905输入性能cohort |
 
 ## 统一版本全量比较的准备与提交
 
@@ -99,6 +100,12 @@
 准备时64340/64341各占一张GPU，达到累计上限，因此没有立即提交或取消旧分配。64341自然结束后，64396按新检查释放出的配额提交64397，64340仍在运行。其附属64341.1的取消由sacct和slurmstepd日志确认；小型衔接证据在监测目录`output/transition_64341_to_64397.json`及其`.sha256`，保留旧记录hash、186条终态和未完成目录、新分片回执、资源及75项启动测试。旧run.json未改写，未记录输入不算已覆盖，也不混入最终统一版本cohort。
 
 两份分片现交由64396监测提交。**该监测任务仍存活时，不要另行执行这两份`job.slurm`。** 具体计划与脚本在其`input/plans.json`、`input/guard.py`，每次实际配额检查保存于`output/checks/`。提交前还会再次检查，并在目标运行内独占创建`input/launch_reservation.json`和`input/pre_submission_run.json`；成功后写`input/submission.json`，监测目录另存`output/submitted_64340.json`或`submitted_64341.json`。以这些回执及Slurm状态判断是否已提交，不根据旧准备状态重复启动。监测失败或退出时先检查全部回执和Slurm，不自动重试结果不明的sbatch。若明确需要停止后续自动提交，可在监测运行根目录创建`STOP`；它不会取消已经提交的作业。
+
+## 统一版本c1355复现
+
+统一版本c1355的独立复现见64397.0的`output/verification.json`、`output/comparison/repeat_comparison.json`及`output/accounting.json`。参照是64397的`output/suite/case_0047`；两种梯度模式都保持360.111877 ps / 513.216003 area，CEC PASS，与original/no-op相同，未改善。每种搜索8条观察；比较包括中间成功/失败状态、全部PO、area/ADP和选择，墙钟时间不作为一致性条件。移除唯一ABC写入时间注释后，native输出字节相同；原文件与hash均保留。新运行的准备/分析源码为`58b3e6f`，实际优化器运行源码明确复用`160b218`，两种职责及hash分开记录。这是单设计复现，不代表全905结果可重复或优化有效。
+
+`20261111T213951Z-consistent-c1355-repeat-check-93a290ca`只准备、未提交或执行。最初拟用的旧回归工具时限为300 s，与最终cohort的900 s不同，故标记为`SUPERSEDED_NOT_SUBMITTED`，改用上述同参数真实复现；旧准备记录保留。
 
 ## 首次真实闭环的有限结论
 

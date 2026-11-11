@@ -62,7 +62,16 @@ class Evaluator:
         work.mkdir(parents=True, exist_ok=False)
         result = {'status': 'RUNNING', 'input_sha256': digest(candidate), 'provenance': self.provenance}
         try:
-            text = run_tool([self.abc, '-c', f'cec {tool_path(self.original)} {tool_path(candidate)}'], work, 'cec', self.timeout)
+            def interface(path):
+                with path.open('rb') as stream:
+                    fields = stream.readline().split()
+                if len(fields) != 6 or fields[0] != b'aig' or int(fields[3]) != 0:
+                    raise ToolError('Expected a combinational binary AIG interface.')
+                return int(fields[2]), int(fields[4])
+            if interface(candidate) != interface(self.original):
+                raise ToolError('Replay changed PI/PO interface counts.')
+            result['cec_interface'] = 'AIGER_PI_PO_POSITIONAL_ORDER; symbol names may be absent after replay'
+            text = run_tool([self.abc, '-c', f'cec -n {tool_path(self.original)} {tool_path(candidate)}'], work, 'cec', self.timeout)
             if not cec_passed(text):
                 raise ToolError('CEC did not explicitly prove equivalence.')
             result['cec'] = 'PASS'

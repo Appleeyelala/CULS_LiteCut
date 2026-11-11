@@ -5,6 +5,10 @@ Resource limits fail explicitly rather than asserting an unproved equivalence.
 """
 
 
+class ContextProofRequired(ValueError):
+    """Independent boundary variables cannot certify this cut; use real CEC."""
+
+
 class BDD:
     def __init__(self, limit=200000):
         self.nodes = [None, None]  # constant false / true
@@ -19,7 +23,7 @@ class BDD:
         key = variable, low, high
         if key not in self.unique:
             if len(self.nodes) >= self.limit:
-                raise ValueError('Cut Boolean validation exceeded its explicit BDD node limit.')
+                raise ContextProofRequired('Cut Boolean validation exceeded its explicit BDD node limit.')
             self.unique[key] = len(self.nodes)
             self.nodes.append(key)
         return self.unique[key]
@@ -43,7 +47,7 @@ class BDD:
         key = left, right
         if key not in self.and_cache:
             if len(self.and_cache) >= self.limit * 4:
-                raise ValueError('Cut Boolean validation exceeded its explicit BDD apply limit.')
+                raise ContextProofRequired('Cut Boolean validation exceeded its explicit BDD apply limit.')
             a, b = self.nodes[left], self.nodes[right]
             variable = min(a[0], b[0])
             low = self.conjunction(a[1] if a[0] == variable else left,
@@ -57,6 +61,8 @@ class BDD:
 def support_cut_truth(aig, decision, interior, external_pis):
     """Prove independence from omitted PIs and exact exported cut truth."""
     leaves = decision['cut_leaves']
+    if len(external_pis) > 8 or len(interior) > 128:
+        raise ContextProofRequired('Support-minimized cut requires original-context CEC, beyond small exact BDD scope.')
     order = leaves + sorted(external_pis)
     bdd = BDD()
     values = {node: bdd.node(index, 0, 1) for index, node in enumerate(order)}
@@ -77,6 +83,6 @@ def support_cut_truth(aig, decision, interior, external_pis):
                         expected(index + 1, assignment | (1 << index)))
 
     if values[decision['root']] != expected(0, 0):
-        raise ValueError('Support-minimized cut truth differs from original AIG function.')
+        raise ContextProofRequired('Independent support check differs; prove with original cut-leaf relationships.')
     return {'cut_semantics': 'FUNCTIONAL_SUPPORT_MINIMIZED', 'boolean_validator': 'EXACT_ROBDD',
             'eliminated_external_pi_count': len(external_pis), 'bdd_nodes': len(bdd.nodes)}

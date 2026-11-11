@@ -9,7 +9,7 @@ import numpy as np
 import torch
 
 from .common import ROOT, digest, legacy, save_json
-from .truth import support_cut_truth
+from .truth import ContextProofRequired, support_cut_truth
 
 
 def original_cone(aig, decision):
@@ -77,7 +77,7 @@ def verify_cut_truth(aig, decision):
         left, right = aig.fanin_literals[node]
         values[node] = (values[left >> 1] ^ (0xffff if left & 1 else 0)) & (values[right >> 1] ^ (0xffff if right & 1 else 0))
     if values[decision['root']] != (int(decision['truth']) & 0xffff):
-        raise ValueError('Exported cut truth differs from original AIG truth.')
+        raise ContextProofRequired('Independent cut truth differs; original cut-leaf relationships require CEC.')
     return {'cut_semantics': 'STRUCTURAL_BOUNDARY', 'boolean_validator': 'EXHAUSTIVE_16_BIT_TRUTH'}
 
 
@@ -105,7 +105,7 @@ def score_catalogue(aig_path, partition, catalogue, checkpoint, cache_dir, batch
         raise ValueError('Invalid Student output normalization.')
     rows, features = [], []
     for index, decision in enumerate(catalogue.decisions):
-        cut_validation = verify_cut_truth(partition.aig, decision)
+        cut_validation = decision.get('cut_validation') or verify_cut_truth(partition.aig, decision)
         options = [None] + decision['candidate_subgraph_indices']
         for choice, subgraph in enumerate(options):
             row = {'decision_index': index, 'choice_index': choice, 'subgraph_index': subgraph,

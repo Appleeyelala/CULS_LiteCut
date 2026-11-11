@@ -41,10 +41,13 @@ class RecordedResult(unittest.TextTestResult):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--test', action='append', help='Exact unittest name; may repeat. Omit for full discovery.')
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     sys.path.insert(0, str(root))
-    suite = unittest.defaultTestLoader.discover(str(root / 'tests'))
+    sys.path.insert(0, str(root / 'tests'))
+    suite = (unittest.defaultTestLoader.loadTestsFromNames(args.test) if args.test else
+             unittest.defaultTestLoader.discover(str(root / 'tests')))
     result = unittest.TextTestRunner(verbosity=2, resultclass=RecordedResult).run(suite)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open('x') as stream:

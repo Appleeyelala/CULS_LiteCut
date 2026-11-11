@@ -12,6 +12,7 @@ import torch
 from .candidates import enumerate_candidates, replay
 from .common import digest, run_tool, save_json, tool_path
 from .evaluation import Evaluator
+from .cut_validation import validate_catalogue
 from .litecut import score_catalogue
 from .optimization import gradient_proposals
 from .structure import make_partition, parse_aig
@@ -59,6 +60,8 @@ class Experiment:
         self.partition.write(self.output / 'partition')
         self.catalogue = enumerate_candidates(self.gpuls, self.aig, self.partition,
                                                self.output / 'candidates', config.timeout_s)
+        self.catalogue, self.cut_audit = validate_catalogue(self.evaluator.abc, self.partition, self.catalogue,
+                                                           self.output / 'cut_validation', config.timeout_s)
         self.scores, self.cache = score_catalogue(self.aig, self.partition, self.catalogue,
                                                  self.checkpoint, self.output.parent / 'litecut_cache')
         save_json(self.output / 'litecut.json', {'scores': self.scores, 'cache': self.cache})
@@ -290,6 +293,8 @@ class Experiment:
                    'native_abc': native_metrics, 'greedy_litecut': greedy, 'independent_regions': independent,
                    'random_search': random_rows, 'gradient_search': searches,
                    'candidate_count': sum(d['candidate_count'] for d in self.catalogue.decisions),
+                   'cut_validation_counts': {k: self.cut_audit[k] for k in
+                       ['raw_executable_decisions', 'verified_decisions', 'excluded_decisions']},
                    'region_count': len(self.partition.regions), 'config': asdict(self.config),
                    'preparation_runtime_s': self.preparation_runtime_s,
                    'exclusive_native_runtime_s': native_runtime, 'exclusive_random_runtime_s': random_runtime,

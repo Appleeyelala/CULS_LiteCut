@@ -91,6 +91,33 @@ class RealToolTests(unittest.TestCase):
         self.assertEqual(record['cec'], 'PASS')
         self.assertNotIn('delay_ps', record)
 
+    def test_named_io_is_checked_in_preserved_aiger_order(self):
+        binary = b'aig 5 3 0 1 2\n10\n' + bytes([4, 2, 2, 2])
+        named, unnamed = self.work / 'named.aig', self.work / 'unnamed.aig'
+        named.write_bytes(binary + b'i0 alpha\ni1 beta\ni2 gamma\no0 result\nc\nunit fixture\n')
+        unnamed.write_bytes(binary)
+        evaluator = Evaluator(self.abc, self.run_root / 'input/asap7', named)
+        result = evaluator.evaluate(unnamed, self.work / 'named_interface')
+        self.assertEqual(result['cec'], 'PASS')
+        self.assertIn('POSITIONAL_ORDER', result['cec_interface'])
+
+    def test_context_cut_cec_accepts_relations_and_rejects_wrong_function(self):
+        from global_timing.candidates import Catalogue
+        from global_timing.cut_validation import validate_catalogue
+        from test_structure import fixture
+        # u=a&b, v=c&d. a&u&v equals u&v only when original leaf relations hold.
+        aig = fixture(4, [(2, 4), (6, 8), (10, 12), (2, 14)], [16])
+        partition = make_partition(aig)
+        decisions = [dict(root=8, cut_slot=i, cut_leaves=[1, 2, 5, 6], truth=truth,
+                          candidate_count=1, candidate_subgraph_indices=[0])
+                     for i, truth in enumerate([0xf000, 0xffff])]
+        catalogue = Catalogue(decisions, [(0, 1)], {0: [0, 1]})
+        verified, audit = validate_catalogue(self.abc, partition, catalogue, self.work / 'context_cut_audit')
+        self.assertEqual(len(verified.decisions), 1)
+        self.assertEqual(verified.decisions[0]['cut_slot'], 0)
+        self.assertEqual(audit['entries'][0]['status'], 'PASS')
+        self.assertEqual(audit['entries'][1]['status'], 'FAIL')
+
     def test_litecut_batch_cache_and_all_candidate_functions(self):
         from global_timing.common import ROOT
         from global_timing.candidates import catalogue_from_raw

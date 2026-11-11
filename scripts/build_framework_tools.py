@@ -8,6 +8,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import time
+import sys
 
 
 def main():
@@ -21,6 +22,11 @@ def main():
     if not 1 <= args.jobs <= int(os.environ.get('SLURM_CPUS_PER_TASK', '1')):
         raise SystemExit('--jobs exceeds the CPU allocation.')
     src = run / 'src'
+    metadata = json.loads((run / 'run.json').read_text())
+    metadata.update(state='RUNNING', slurm_job_id=os.environ['SLURM_JOB_ID'], experiment_executed=True,
+                    environment={'python': sys.version, 'path': os.environ.get('PATH'),
+                                 'slurm': {k: v for k, v in os.environ.items() if k.startswith('SLURM_')}})
+    (run / 'run.json').write_text(json.dumps(metadata, indent=2) + '\n')
     root = run / 'build/framework_tools'
     root.mkdir(exist_ok=False)
     abc_src = root / 'abc'
@@ -35,6 +41,7 @@ def main():
     content = content.replace(invocation, invocation + '\n    CulsGlobalTimingReport( p );')
     timing.write_text(content)
     commands = [
+        [sys.executable, '-B', str(src / 'scripts/run_tests.py'), '--output', str(run / 'output/unit_tests.json')],
         ['cmake', '-S', str(src / 'projects/culs'), '-B', str(root / 'culs'),
          '-DCMAKE_C_COMPILER=/usr/local/bin/gcc', '-DCMAKE_CXX_COMPILER=/usr/local/bin/g++',
          '-DCMAKE_CUDA_HOST_COMPILER=/usr/local/bin/g++', '-DCMAKE_CUDA_COMPILER=/usr/local/cuda-11.8/bin/nvcc',
@@ -57,12 +64,23 @@ def main():
         report['binaries'] = {}
         for name, path in {'gpuls': root / 'culs/gpuls', 'abc': abc_src / 'abc'}.items():
             report['binaries'][name] = {'path': str(path), 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
+        env = dict(os.environ, CULS_TEST_RUN=str(run), CULS_TEST_GPULS=str(root / 'culs/gpuls'),
+                   CULS_TEST_ABC=str(abc_src / 'abc'), PYTHONPATH=str(src))
+        with (run / 'logs/framework_tests.log').open('x') as log:
+            test = subprocess.run([sys.executable, '-B', str(src / 'scripts/run_tests.py'),
+                                  '--output', str(run / 'output/tests.json')], cwd=run,
+                                  env=env, stdout=log, stderr=subprocess.STDOUT)
+        report['test_exit_code'] = test.returncode
+        if test.returncode:
+            raise RuntimeError('Framework regression failed; see logs/framework_tests.log')
         report['state'] = 'COMPLETED'
     except Exception as exc:
         report.update(state='FAILED', error=str(exc))
         raise
     finally:
         (root / 'build_report.json').write_text(json.dumps(report, indent=2) + '\n')
+        metadata.update(state=report['state'], outputs=str(root / 'build_report.json'))
+        (run / 'run.json').write_text(json.dumps(metadata, indent=2) + '\n')
 
 
 if __name__ == '__main__':

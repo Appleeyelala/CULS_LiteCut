@@ -83,14 +83,15 @@ struct RewriteReplayChoice {
 
 struct RewriteAuditOptions {
     bool enabled = false;
-    // An explicit replay may intentionally select zero candidates (no-rewrite).
-    bool replayMode = false;
     std::string tracePath;
     std::vector<int> internalToOriginal;
     std::vector<int> originalToRegion;
     std::vector<int> executionOrder;
     std::vector<int> *preselectedInternalRoots = nullptr;
     std::vector<RewriteReplayChoice> replayChoices;
+    // Keep the legacy aggregate initializer field order unchanged.
+    // An explicit replay may intentionally select zero candidates (no-rewrite).
+    bool replayMode = false;
 };
 
 class CPUSolver {

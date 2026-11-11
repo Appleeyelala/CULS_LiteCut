@@ -65,8 +65,12 @@
 | 64381 | `20261111T160518Z-frozen-cohort-path-audit-0994e1ac` | RUNNING：冻结128次尝试、125输入（116 PASS/9 FAIL/780未记录），按既定最后终态尝试策略审计116个成功设计的全部成功映射引用。仅重新CEC/测量并要求全部数值和网表正文相同，再提取最大arrival链；不重新搜索候选。该快照不随后续live结果改变 |
 | 64382 | `20261111T160933Z-division-cec-diagnosis-e5e74bdc` | DIAGNOSIS_COMPLETED：对index147 Division保存的原始/native rewrite AIG，核对同一旧ABC及输入hash；原`cec -n`在外部1800 s限制下于306.23 s取得等价性证明，`cec -n -p`在300.06 s超时。诊断不改变原300 s FAIL，没有rewrite/mapping，不代表完整benchmark通过 |
 | 64341.5 | `20261111T160711Z-cached-coordinate-failed-case-retry-963fafa6` | RUNNING：缓存版60项真实核心测试全部通过；依次重验已终止的78（OpenABC sqrt）、125（DF_pipeline）、22（ACE hyp），每种搜索8次预算、3600 s单例限制。最后一项是在64341.4明确超时后才加入；旧记录/hash保留，不重复live case。使用原有GPU allocation，不取消其他任务 |
+| 64383 | `20261111T161958Z-tool-timeout-regression-18c44f98` | COMPLETED_WITH_GPU_OMISSIONS：`f29a906`增加显式工具时限来源检查，61项CPU矩阵50 PASS/11 SKIP；旧104/125输入冻结清单均仍有效。缓存版c1355的25个成功观察引用对应22份映射、18种AIG字节，重新CEC/全部PO与area/global/网表正文及路径检查通过。缓存前后完整数值/选择/图结构相同；native ABC时间注释使文件字节不同 |
+| 64340.9 | `20261111T162117Z-declared-timeout-division-retry-50d6b379` | RUNNING：`f29a906`的61项真实核心测试全部通过；每工具900 s、单设计7200 s的显式参数已用于c1355完整比较，70.68 s PASS；随后重验Division index147，仍每搜索8次预算、默认`cec -n`。原300 s CEC失败及306.23 s诊断证书独立保留，不因诊断通过提前标记Division完成 |
 
 ## 首次真实闭环的有限结论
+
+`20261111T162048Z-declared-timeout-division-retry-7fb70837`仅准备了源码和Division输入，未提交任何任务。准备后检查发现suite核心测试固定要求c1355，已标为`SUPERSEDED_NOT_SUBMITTED`；新目录64340.9用默认c1355作核心fixture，实际47/147从完整manifest选取。未覆盖输入或把准备失败计为实验FAIL。
 
 64330的原始与no-op replay基线均为360.111877 ps、513.216003 area；ABC rewrite为359.501831 ps、529.778870 area。面积约束搜索最好记录349.582336 ps、513.449280 area；联合目标最好记录345.476715 ps、486.388794 area。两种搜索各有17次直接梯度提案实际评估，其余为基线/warmup；失败请求计入24次预算。
 

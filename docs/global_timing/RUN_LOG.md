@@ -90,6 +90,7 @@
 | 64396 | `20261111T194041Z-consistent-cohort-submit-guard-e5f1d667` | RUNNING：提交监测申请1 CPU/1 GiB（实际2 CPU）、无GPU。父64341自然结束后，重新检查集群及用户请求、冻结输入/脚本hash，于2026-11-11 21:22:13 UTC提交新分片1为64397；仍等待父64340结束后提交分片0。提交后合计14 CPU/129 GiB/2 GPU。成功回执和衔接记录保留，禁止重复提交；结果不明时停止且不自动重试 |
 | 64397 | `20261111T184753Z-consistent-full-shard1-175169c2` | RUNNING：统一版本奇数452输入分片，源码`160b218`、64389工具。启动75/75真实核心PASS，已进入4 worker benchmark；8 CPU/64 GiB/1 GPU、5天，每搜索8预算、warmup2、梯度20/校准30步、整例7200 s/工具900 s，原定参数未变。由64396提交，准备及提交清单保持独立；不是整分片或全905完成声明 |
 | 64397.0 | `20261111T214331Z-consistent-c1355-exact-repeat-0e387139` | COMPLETED / reproduction PASS：独立执行c1355，使用全量奇数分片的同一`160b218`源码快照、工具/资产、固定种子及全部搜索参数，900 s工具/7200 s整例限制。配置、全部数值/选择/最终选点及25项精确图结构检查一致，冻结输入未变；仅native ABC输出时间注释导致字节hash不同。Slurm41 s、MaxRSS437680 KiB，使用64397内1 CPU/4 GiB步骤、共享已有GPU，未增加分配。此复现不计入905输入性能cohort |
+| 64398 | `20261111T221147Z-consistent-path-audit-batch1-4a351887` | RUNNING：为统一版本全量比较采集可复用的路径证据，启动时冻结64397的89个PASS输入，816未记录；全部benchmark源码为`160b218`。复用现有路径审计程序，observer与原测量使用同一个64389 ABC二进制，逐份要求新CEC、全部timing及mapped正文不变，沿用900 s工具时限。2 CPU/24 GiB/0 GPU、24 h，顺序审计；提交后总分配16 CPU/153 GiB/2 GPU。准备/分析源码`6a35de5`，一次性driver及配置另存hash；尚无整批完成结论，不是新增候选搜索 |
 
 ## 统一版本全量比较的准备与提交
 
@@ -100,6 +101,10 @@
 准备时64340/64341各占一张GPU，达到累计上限，因此没有立即提交或取消旧分配。64341自然结束后，64396按新检查释放出的配额提交64397，64340仍在运行。其附属64341.1的取消由sacct和slurmstepd日志确认；小型衔接证据在监测目录`output/transition_64341_to_64397.json`及其`.sha256`，保留旧记录hash、186条终态和未完成目录、新分片回执、资源及75项启动测试。旧run.json未改写，未记录输入不算已覆盖，也不混入最终统一版本cohort。
 
 两份分片现交由64396监测提交。**该监测任务仍存活时，不要另行执行这两份`job.slurm`。** 具体计划与脚本在其`input/plans.json`、`input/guard.py`，每次实际配额检查保存于`output/checks/`。提交前还会再次检查，并在目标运行内独占创建`input/launch_reservation.json`和`input/pre_submission_run.json`；成功后写`input/submission.json`，监测目录另存`output/submitted_64340.json`或`submitted_64341.json`。以这些回执及Slurm状态判断是否已提交，不根据旧准备状态重复启动。监测失败或退出时先检查全部回执和Slurm，不自动重试结果不明的sbatch。若明确需要停止后续自动提交，可在监测运行根目录创建`STOP`；它不会取消已经提交的作业。
+
+## 统一版本路径证据分批采集
+
+64398的`output/cohort/cohort.json`和`output/path_audit_selection.json`固定首批89个精确benchmark目录及来源。完成的逐例报告位于`output/arrival_paths/*/summary.json`；原搜索结果保持不变。未来批次应排除这份选择清单中已分配的目录，避免重复运行；若确需重试失败审计，必须保留失败报告及单独声明的新尝试。最终使用`analyze_path_changes.py --audit-runs`合并各批证据，匹配最终905输入cohort选定的精确benchmark目录，不以相同输入hash的旧开发运行代替。首批冻结范围及其未记录状态不随后续扫描回写。
 
 ## 统一版本c1355复现
 

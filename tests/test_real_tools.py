@@ -103,6 +103,27 @@ class RealToolTests(unittest.TestCase):
         from global_timing.structure import aig_structure_digest
         self.assertEqual(aig_structure_digest(named), aig_structure_digest(unnamed))
 
+    def test_liberty_paths_reconstruct_arrivals_without_changing_mapping(self):
+        from global_timing.common import tool_path
+        from global_timing.evaluation import parse_timing
+        from global_timing.path_analysis import parse_paths
+        plain = self.work / 'path_disabled'
+        before = self.evaluator.evaluate(self.input, plain)
+        observed = self.work / 'path_enabled'
+        command = (f'read_lib {tool_path(self.run_root / "input/asap7")}; read_aiger {tool_path(self.input)}; '
+                   f'map; topo; stime -p; write_verilog {tool_path(observed / "mapped.v")}')
+        text = run_tool([self.abc, '-c', command], observed, 'mapping', 120,
+                        dict(os.environ, CULS_GLOBAL_TIMING_REPORT='1', CULS_GLOBAL_TIMING_PATH_REPORT='1'))
+        after = parse_timing(text)
+        for key in ['area', 'delay_ps', 'po_arrivals_ps', 'mapped_gates']:
+            self.assertEqual(before[key], after[key])
+        paths = parse_paths(text, after, self.partition.aig.pi_count)
+        self.assertTrue(paths['paths'])
+        self.assertTrue(any(row['critical'] for row in paths['paths']))
+        def body(path):
+            return '\n'.join(line for line in path.read_text().splitlines() if not line.lstrip().startswith('//'))
+        self.assertEqual(body(plain / 'mapped.v'), body(observed / 'mapped.v'))
+
     def test_replay_preserves_constant_literals_and_inputs(self):
         # Actual binary AIG: constant outputs, constant AND fanins and live logic.
         fanins = [(0, 2), (1, 4), (2, 4), (8, 10), (12, 6)]

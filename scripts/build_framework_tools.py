@@ -39,8 +39,10 @@ def main():
     invocation = '    Abc_SclTimeNtkPrint( p, fShowAll, fPrintPath );'
     if content.count(declaration) != 1 or content.count(invocation) != 1:
         raise RuntimeError('ABC timing instrumentation anchor changed.')
-    content = content.replace(declaration, (src / 'framework/abc/endpoint_report.c.inc').read_text() + '\n' + declaration)
-    content = content.replace(invocation, invocation + '\n    CulsGlobalTimingReport( p );')
+    observer = '\n'.join((src / 'framework/abc' / name).read_text()
+                         for name in ['endpoint_report.c.inc', 'path_report.c.inc'])
+    content = content.replace(declaration, observer + '\n' + declaration)
+    content = content.replace(invocation, invocation + '\n    CulsGlobalTimingReport( p );\n    CulsGlobalPathReport( p );')
     timing.write_text(content)
     commands = [
         [sys.executable, '-B', str(src / 'scripts/run_tests.py'), '--output', str(run / 'output/unit_tests.json')],

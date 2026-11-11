@@ -38,12 +38,15 @@ def main():
     def writable(value):
         if isinstance(value, int):
             return
+        if value is not None and os.fsdecode(value) == '/dev/null':
+            return  # Torch discards dynamic-loader query output here.
         if value is not None and not Path(os.fsdecode(value)).resolve().is_relative_to(scratch):
             raise GuardViolation('Write outside isolated probe directory: ' + os.fsdecode(value))
 
     def guard(event, values):
         if event in {'subprocess.Popen', 'os.system', 'os.fork', 'os.forkpty', 'os.posix_spawn'} or event.startswith('socket.'):
-            raise GuardViolation('Import/help attempted external execution or networking: ' + event)
+            raise GuardViolation('Import/help attempted external execution or networking: ' + event +
+                                 (' ' + repr(values[:2]) if event == 'subprocess.Popen' else ''))
         if event == 'open':
             path, mode, flags = values
             if (mode and any(c in mode for c in 'wax+')) or flags & (os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_TRUNC):
@@ -56,7 +59,7 @@ def main():
     sys.addaudithook(guard)
     relative = target.relative_to(root)
     sys.path[:0] = [str(target.parent), str(root), str(root / 'projects/litecut'),
-                    str(root / 'projects/litecut/src'), str(root / 'tests')]
+                    str(root / 'projects/litecut/src'), str(root / 'projects/culs/tools'), str(root / 'tests')]
     if relative.parts[:2] == ('projects', 'litecut'):
         module = '.'.join(relative.with_suffix('').parts[2:])
     elif relative.parts[0] in {'global_timing', 'tests', 'scripts'}:

@@ -4,8 +4,10 @@ import json
 from pathlib import Path
 
 import numpy as np
+import torch
 
 from .common import save_json
+from .surrogate import scalar_objective
 
 
 def _write_csv(path, rows, fields):
@@ -27,6 +29,7 @@ def write_report(benchmark: Path, output: Path):
         comparison.append({'method': method, 'delay_ps': metrics['delay_ps'], 'area': metrics['area'], 'adp': metrics['adp'],
             'delay_improvement_pct': 100 * (original['delay_ps'] - metrics['delay_ps']) / max(original['delay_ps'], 1e-9),
             'area_change_pct': 100 * (metrics['area'] - original['area']) / max(original['area'], 1e-9),
+            'area_constraint_feasible': metrics['area'] <= baseline['area'] * summary['config']['area_limit_ratio'] + 1e-8,
             'evaluations_including_baseline': len(rows) or 1, 'failed_requests': sum(r['status'] != 'PASS' for r in rows),
             'measured_evaluation_runtime_s': sum(r.get('runtime_s', 0) for r in rows) if rows else None,
             'exclusive_method_runtime_s': runtime,
@@ -51,6 +54,15 @@ def write_report(benchmark: Path, output: Path):
     if feasible:
         best = min(feasible, key=lambda row: row['metrics']['delay_ps'])
         add('random_search_area_constraint', best['metrics'], random_rows, best.get('applied_rewrites'), summary.get('exclusive_random_runtime_s'))
+    successful = [row for row in random_rows if row['status'] == 'PASS']
+    if successful:
+        def joint_value(row):
+            metrics = row['metrics']
+            return float(scalar_objective(torch.tensor(metrics['po_arrivals_ps'], dtype=torch.float64),
+                torch.tensor(metrics['area'], dtype=torch.float64), baseline['delay_ps'], baseline['area'],
+                'joint', area_weight=summary['config']['area_weight']))
+        best = min(successful, key=joint_value)
+        add('random_search_joint', best['metrics'], random_rows, best.get('applied_rewrites'), summary.get('exclusive_random_runtime_s'))
     for mode, item in summary['gradient_search'].items():
         best, rows = item['best'], item['observations']
         add('gradient_' + mode, best['metrics'], rows, best.get('applied_rewrites'), item.get('exclusive_method_runtime_s'))
@@ -92,6 +104,12 @@ def write_report(benchmark: Path, output: Path):
                    'scope': 'Predictions saved before each new label; adaptive within-design search, not held-out-design generalization.',
                    'runtime_scope': 'Evaluation runtimes exclude calibration/search overhead; complete elapsed time is in run/Slurm records.',
                    'trace_scope': 'Critical PO sets and ABC native trace endpoints; no cross-map logical ID alignment.'}
+    diagnostics['critical_po_set_changed_observations'] = sum(row['status'] == 'PASS' and
+        row['metrics']['critical_po_indices'] != baseline['critical_po_indices'] for row in observations)
+    diagnostics['unsuccessful_deterministic_methods'] = [name for name in ['greedy_litecut', 'independent_regions']
+        if summary[name].get('status') == 'FAIL']
+    diagnostics['total_runtime_including_preparation_s'] = summary.get('total_runtime_including_preparation_s')
+    diagnostics['preparation_runtime_s'] = summary.get('preparation_runtime_s')
     if predictions:
         x = np.array([r['predicted_global_delta_ps'] for r in predictions])
         y = np.array([r['actual_global_delta_ps'] for r in predictions])

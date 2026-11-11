@@ -53,6 +53,10 @@
 | 64362 | `20261111T142809Z-native-aware-program-matrix-571ab8dd` | COMPLETED_WITH_RECORDED_OMISSIONS：46项CPU矩阵36 PASS/10 SKIP；2501项程序清单、1395个编译TU、133 import PASS/17 FAIL/1 SKIP、55 CLI smoke PASS；97文件附来源匹配的命名功能证据 |
 | 64363 | `20261111T143301Z-gradient-overhead-regression-62411fb5` | COMPLETED：46项CPU矩阵36 PASS/10 SKIP；移除逐层重复扫描及逐decision张量转换后，保留div首轮校准的全部loss/参数及完整40步梯度trace精确一致；初始化2.60 s、校准99.05 s、提案105.82 s，均含profiler |
 | 64341.4 | `20261111T143814Z-profiled-scale-e2e-retry-8cee3d62` | RUNNING：性能修复后的46项真实核心测试全部通过；div/hyp/c1355重验中，仍每种搜索8次预算。基于已记录的深DAG成本把单例限制从1800 s调整为3600 s，旧超时保留；共享已有分配，不新增GPU allocation |
+| 64364 | `20261111T144801Z-bounded-arrival-regression-0a0473d0` | COMPLETED：49项CPU矩阵39 PASS/10 SKIP；显式一阶arrival反传与原Torch参照及有限差分通过；保存div全部校准loss/参数、完整40步梯度trace精确一致。含profiler校准21.13 s、提案49.05 s；未执行rewrite/mapping |
+| 64340.5 | `20261111T145230Z-alu-replay-diagnosis-ecc3c927` | COMPLETED_DIAGNOSTIC / PASS_NOT_REPRODUCED：同一旧gpuls/ALU输入的GDB重放未复现SIGSEGV，零rewrite并CEC/mapping通过；原全量失败保留，根因尚未证明 |
+| 64365 | `20261111T145549Z-checked-cuda-tool-build-2623c263` | BUILT_NOT_RUNTIME_VALIDATED：50项CPU矩阵39 PASS/11 SKIP；CULS增加CUDA初始化返回值检查并初始化heap输出变量，独立ABC observer保持原源码；两工具重新构建完成，实际工具回归单独记录 |
+| 64340.6 | `20261111T150227Z-bounded-arrival-real-regression-b71177d2` | COMPLETED_WITH_EXPLICIT_OMISSIONS：`b288fe1`的50项真实核心测试全部通过，含无GPU初始化错误检查；c1355完整双目标8预算比较完成，两模式仍为360.111877 ps / 513.216003 area、未改善。实际writer/Gate1工具/Gia检查通过；2504项程序矩阵完成，136 import PASS/17 FAIL/1 SKIP、56 CLI smoke PASS、1395个编译TU，100文件附来源匹配的命名功能证据 |
 
 ## 首次真实闭环的有限结论
 

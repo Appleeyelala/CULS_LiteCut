@@ -8,6 +8,8 @@
 
 重复计算修复后，`20261111T143814Z-profiled-scale-e2e-retry-8cee3d62/output/tests.json`再次记录46/46真实核心PASS（64341.4）；其大设计完整比较仍在进行。CPU保存输入一致性验证见64363及[性能检查](PERFORMANCE_AUDIT.md)。
 
+最新`b288fe1`快照在`20261111T150227Z-bounded-arrival-real-regression-b71177d2/output/tests.json`通过50/50真实核心测试（64340.6）。新增内容为有界arrival反传的3项测试，以及真实gpuls在`CUDA_VISIBLE_DEVICES=-1`时明确返回正错误码并报告CUDA初始化失败的负向测试。测试使用64365重新构建且全部原生源码匹配的二进制；CPU构建阶段的39 PASS/11 SKIP由此得到独立真实工具补验。此项不证明此前ALU原生崩溃的根因已找到。
+
 `20261111T132425Z-student-feature-regression-9184e32c`的CPU矩阵为32 PASS、10个真实工具入口SKIP；不能把这些SKIP算作CPU任务完成了GPU验证。其保留输入复核另行重算c1355的417条、div的122,869条原实现/候选特征及预测，与旧25维提取流程保存的全部score记录完全相同。没有训练模型或更换权重。
 
 `20261111T130741Z-selection-cost-regression-3cba9919`检查候选归一化、24组标量/批量坐标成本及可获得的旧独立选择。缺失完整旧选择的div和缺失旧完整catalogue的hyp明确为`NO_SAVED_REFERENCE`，不冒称做过这些完整对照。
@@ -16,7 +18,9 @@
 
 ## 全程序矩阵
 
-最新已完成矩阵`20261111T142809Z-native-aware-program-matrix-571ab8dd`（源码`157987c`）覆盖2,501项源码/入口：1,604项语法PASS、1,395个编译translation units、133项import PASS、17 FAIL、1 SKIP、55项CLI smoke PASS。97个文件有来源字节匹配的命名功能证据；这不是行覆盖率，其余项目明确不宣称逐文件功能覆盖。该任务的CPU核心矩阵为36 PASS、10 SKIP，并按字节匹配附上此前46项真实工具测试。随后修改过的源码必须使用对应新回归，不回写此矩阵。
+最新已完成矩阵`20261111T150227Z-bounded-arrival-real-regression-b71177d2`（源码`b288fe1`）覆盖2,504项源码/入口：1,607项语法PASS、1,395个编译translation units、136项import PASS、17 FAIL、1 SKIP、56项CLI smoke PASS。100个文件有来源字节匹配的命名功能证据；这不是行覆盖率，其余项目明确不宣称逐文件功能覆盖。同一运行已通过50项真实核心测试、c1355双目标完整比较及writer/Gate1工具/Gia检查。报告仅复用源码字节匹配的历史native、R9、路径、Student、保存梯度及搜索审计证据。
+
+此前`20261111T142809Z-native-aware-program-matrix-571ab8dd`（源码`157987c`）的2,501项矩阵、97个有命名功能证据的文件及CPU核心36 PASS/10 SKIP仍完整保留。源码有后续修改的模块使用新回归，不回写旧报告。两份矩阵中的编译TU都是按文件去重后的计数，不能把历史变体的1,379个TU再次加到总计1,395上。
 
 历史原生程序已独立重建：`64359`保存5个ABC overlay及Gate1的完整编译记录；首次mapped-BLIF CEC入口缺少加载library而失败，不能记为不等价。`64360`复用hash核对的二进制，在新目录重新检查后5/5通过，包括reachable/unreachable pair、开启/关闭mapper观察的网表正文与pair一致，以及local arrival的109.239990/106.219986 ps对照。该reachable smoke查询名字`pi04`→`po11`，不是历史R9机制分析的`pi03`→`po11`，两者不混用。
 

@@ -22,6 +22,8 @@
 
 候选 logits 经 softmax 松弛；前向用经过冲突投影的合法 one-hot 选择，反向使用 straight-through 近似。每次联合更新全部 decision 的 logits，并保存逐 decision 梯度、投影变化、预测端点和目标轨迹。有限差分测试针对可微代理；STE 不被声称为离散真实目标的精确梯度。
 
+Region DAG传播默认由`arrival.py`显式执行一阶逆拓扑求导，保存每条边的指数项与每个region的归一化分母，避免为每层建立完整arrival向量的autograd复制链。原Torch实现保留为`TimingSurrogate(propagation_backend='reference')`数值参照；默认`bounded_tape`只支持一阶导数。该实现改变计算与存储方式，不改变代理模型或STE的研究假设。有限差分、深链及实际保存div校准/完整梯度轨迹的对照见[性能检查](PERFORMANCE_AUDIT.md)。
+
 支持两个目标：平滑最大 PO arrival 加面积超限惩罚，以及归一化 delay/area 的 Smooth Tchebycheff。所有 PO 都有正权重；传播中的主导 region 分支和实际 critical PO 可随选择变化。最终面积约束在真实 mapped area 上重新检查，参考明确记录的零选择 replay baseline。
 
 每批真实评估后用已观测的 Liberty PO arrival 和 area 拟合共享校正系数。每个新组合先保存预测，再读取它自己的实际评价；历史拟合误差与新组合误差分别记录。校准 warmup、失败请求、探索回退都计入评估预算，梯度提案来源单独统计，不能把随机回退称作梯度收益。

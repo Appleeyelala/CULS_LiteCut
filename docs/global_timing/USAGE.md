@@ -80,3 +80,5 @@ python -B RUN/src/scripts/analyze_timing_paths.py --run RUN \
 ## 失败与恢复
 
 任何CEC否定/未决、工具超时、缺失时序或部分安装都保留FAIL，不写入虚构指标。结构冲突在GPU前拒绝；运行时REVERTED必须创建一个新修复请求，不能把原失败请求改写为成功。保留旧结果，在新提交、新目录中修复并重跑相关回归。缺失依赖和历史硬编码入口分别报告，不自动重放旧训练或覆盖历史目录。
+
+`diagnose_replay.py --run RUN --tool-run BUILD_RUN --saved-case SAVED_CASE`用于在GPU Slurm分配内诊断保存的零rewrite原生失败。准备时必须用`--design`选择与原失败输入hash相同的设计；入口核对旧二进制hash、复制owner表并在GDB下重放，保存信号与backtrace。如果未复现，仍检查零选择和CEC/mapping，只记录`PASS_NOT_REPRODUCED`，不修订原case状态。诊断作业退出0仅表示生成诊断记录，应检查`output/replay_diagnosis/summary.json`中的实际分类。

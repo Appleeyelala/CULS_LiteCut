@@ -130,9 +130,9 @@ def score_catalogue(aig_path, partition, catalogue, checkpoint, cache_dir, batch
                                                      synthetic_base=partition.aig.maximum_variable + 1)
                 row['replacement_dag_info'] = info
                 row['representation'] = 'canonical_library_materialization'
-            full, names = predictor.extractor.extract_all(graph)
-            values = np.asarray(full[:19], dtype=np.float32)
-            if names != predictor.feature_names or values.shape != (19,) or not np.isfinite(values).all():
+            continuous, names = predictor.extractor.extract_all(graph, student_only=True)
+            values = np.asarray(continuous, dtype=np.float32)
+            if names != predictor.feature_names[:19] or values.shape != (19,) or not np.isfinite(values).all():
                 raise ValueError('Canonical feature extraction contract violated.')
             row['continuous_features_19'] = values.tolist()
             row['feature_hash'] = hashlib.sha256(values.tobytes()).hexdigest()

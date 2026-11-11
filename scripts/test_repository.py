@@ -37,6 +37,8 @@ def functional_evidence(root, runs):
             'projects/litecut/gate2a_candidate_inference.py', 'projects/litecut/src/extract_cutlib_student/modeling.py',
             'projects/litecut/src/data_preprocess/feat_extraction_v3.py'],
         'test_reused_baseline_resolves_record_provenance_at_variable_depth': ['scripts/analyze_timing_paths.py']}
+    specific['test_student_features_equal_full_prefix_without_computing_unused_columns'] = [
+        'projects/litecut/src/data_preprocess/feat_extraction_v3.py']
     imported = {'gate1c_r_io_signature': 'legacy/gate1_aigrewrite/gate1c_r_io_signature.py',
                 'gate1c_select': 'legacy/gate1_aigrewrite/gate1c_select.py',
                 'upstream_gia_test': 'third_party/abc/test/gia/gia_test.cc'}

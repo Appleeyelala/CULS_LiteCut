@@ -171,7 +171,8 @@ class RealToolTests(unittest.TestCase):
     def test_litecut_batch_cache_and_all_candidate_functions(self):
         from global_timing.common import ROOT
         from global_timing.candidates import catalogue_from_raw
-        from global_timing.litecut import score_catalogue
+        from global_timing.litecut import score_catalogue, original_cone
+        import numpy as np
         raw = self.work / 'litecut_raw'
         run_tool([self.gpuls, '-c', f'read {self.input}; gate3c_rewrite_decisions_dump -o {raw}'], self.work, 'litecut_enumerate', 120)
         catalogue = catalogue_from_raw(read_jsonl(raw / 'gpu_rewrite_cuts.jsonl'), self.partition)
@@ -187,11 +188,15 @@ class RealToolTests(unittest.TestCase):
         for row in rows:
             self.assertTrue(row['original_cut_truth_verified'])
             if row['subgraph_index'] is None:
+                graph = original_cone(self.partition.aig, catalogue.decisions[row['decision_index']])
+                full, names = original.extractor.extract_all(graph)
+                self.assertEqual(names, original.feature_names)
+                self.assertEqual(row['continuous_features_19'], np.asarray(full[:19], dtype=np.float32).tolist())
                 continue
             self.assertTrue(row['truth_verified'])
             reference = original.score(catalogue.decisions[row['decision_index']], row['subgraph_index'])
-            for a, b in zip(row['continuous_features_19'], reference['continuous_features_19']):
-                self.assertAlmostEqual(a, b, delta=1e-5 * max(1, abs(b)))
+            self.assertEqual(row['continuous_features_19'],
+                             np.asarray(reference['continuous_features_19'], dtype=np.float32).tolist())
             self.assertAlmostEqual(row['predicted_local_abc_delay'], reference['predicted_local_abc_delay'],
                                    delta=3e-5 * max(1, abs(reference['predicted_local_abc_delay'])))
 

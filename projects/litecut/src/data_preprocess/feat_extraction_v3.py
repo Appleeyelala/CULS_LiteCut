@@ -395,12 +395,15 @@ class CompleteCutFeatureExtractor:
     # -------------------------
     # Main API
     # -------------------------
-    def extract_all(self, subg):
+    def extract_all(self, subg, student_only=False):
         """
         subg: cut 子图，格式 {node: [(fanout, is_not_edge), ...]}
 
         返回：
           full_vector, names
+
+        student_only=True returns the unchanged first 19 continuous features
+        without computing the unused Laplacian spectrum and WL hash.
         """
         self.raw_data = subg
         self.G = self._build_weighted_graph()
@@ -417,10 +420,7 @@ class CompleteCutFeatureExtractor:
         f_stru = self.get_structural_stats(f_time[1])  # [2]
         f_inv  = self.get_inverter_stats()             # [2]
         f_cont = self.get_continuous_topology()        # [3]
-        f_lap  = self.get_laplacian_eigenvalues(k=5)   # [5]
-        wl_hash = self.get_wl_signature()              # [1]
-
-        full_vector = f_ctx + f_time + f_base + f_stru + f_inv + f_cont + f_lap + [wl_hash]
+        continuous = f_ctx + f_time + f_base + f_stru + f_inv + f_cont
 
         names = [
             "R_root", "SlackProxy_root", "Root_Global_Fanout", "Max_L_leaf",
@@ -435,4 +435,8 @@ class CompleteCutFeatureExtractor:
             "WL_Hash"
         ]
 
-        return full_vector, names
+        if student_only:
+            return continuous, names[:19]
+        f_lap = self.get_laplacian_eigenvalues(k=5)
+        wl_hash = self.get_wl_signature()
+        return continuous + f_lap + [wl_hash], names

@@ -16,7 +16,7 @@ import traceback
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 
-def profile(benchmark, output, catalogue_only):
+def profile(benchmark, output, catalogue_only, student_checkpoint=None):
     import torch
     from global_timing.candidates import Catalogue, catalogue_from_raw
     from global_timing.common import digest, legacy, read_jsonl, save_json
@@ -78,6 +78,18 @@ def profile(benchmark, output, catalogue_only):
             catalogue = Catalogue(saved['decisions'], [tuple(pair) for pair in saved['conflicts']],
                                   {int(k): v for k, v in saved['region_decisions'].items()})
             scores = read('litecut.json')['scores']
+            if student_checkpoint is not None:
+                from global_timing.litecut import score_catalogue
+                if digest(student_checkpoint) != config['checkpoint_sha256']:
+                    raise ValueError('Student checkpoint differs from saved input.')
+                record['source_hashes'][str(student_checkpoint)] = config['checkpoint_sha256']
+                started = time.monotonic()
+                rescored, cache = score_catalogue(aig, partition, catalogue, student_checkpoint, output / 'student_cache')
+                record.update(student_rescore_s=time.monotonic() - started, student_rescore_count=len(rescored),
+                              student_rescore_cache=cache, student_scores_exact_match=rescored == scores)
+                if rescored != scores:
+                    raise AssertionError('Student-only features/predictions differ from saved full-extractor scores.')
+                del rescored
             baseline = read('replay_noop/eval_0000/observation.json')['metrics']
             started = time.monotonic()
             model = TimingSurrogate(partition, catalogue, scores, baseline)
@@ -134,6 +146,8 @@ def main():
     parser.add_argument('--run', type=Path, required=True)
     parser.add_argument('--benchmarks', type=Path, nargs='*', default=[])
     parser.add_argument('--catalogue-only', type=Path, nargs='*', default=[])
+    parser.add_argument('--student-rescore', action='store_true',
+                        help='Recompute all saved scores with the prepared checkpoint and require exact equality.')
     args = parser.parse_args()
     run = args.run.resolve()
     if not os.environ.get('SLURM_JOB_ID') or not run.is_relative_to('/data/wushangge'):
@@ -148,7 +162,8 @@ def main():
     for benchmark, catalogue_only in [(p, False) for p in args.benchmarks] + [(p, True) for p in args.catalogue_only]:
         benchmark = benchmark.resolve()
         key = hashlib.sha256(str(benchmark).encode()).hexdigest()[:12]
-        record = profile(benchmark, run / 'output/selection_profiles' / key, catalogue_only)
+        record = profile(benchmark, run / 'output/selection_profiles' / key, catalogue_only,
+                         run / 'input/student_checkpoint' if args.student_rescore else None)
         records.append(record)
         print(json.dumps({k: record.get(k) for k in ['benchmark', 'status', 'error', 'full_independent_selection_s']}), flush=True)
     save_json(run / 'output/selection_profiles/summary.json', {'source_commit': metadata['source_commit'],

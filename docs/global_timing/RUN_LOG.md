@@ -76,11 +76,14 @@
 | 64340.11 | `20261111T172508Z-replay-alias-chain-inspection-1c801ee8` | FAILED_DIAGNOSTIC：成功到达旧二进制Fanin入口，但集群GDB不支持Python脚本，未取得内存快照；环境错误与日志独立保留 |
 | 64340.12 | `20261111T172704Z-replay-alias-memory-inspection-dd0019ee` | COMPLETED_DIAGNOSTIC / ALIAS_CYCLE_OBSERVED：GDB原生命令读取实际内存，确认3个不同region的原始root 6868→10577→8953→6868形成环，旧trace均ACCEPTED；100个活跃引用进入环。详见NATIVE_REPLAY_CYCLES.md；无CEC/mapping标签 |
 | 64389 | `20261111T173355Z-acyclic-replay-tool-build-64cf764e` | BUILT_AND_CPU_VALIDATED：`d2065ab`加入安装前传递依赖检查和有界别名解析；69项CPU矩阵58 PASS/11 SKIP，工具构建及链接真实solver的环/长链/补相/常量输出CEC回归通过。2m55s、MaxRSS2594464 KiB；GPU验证单独记录于64341.6 |
-| 64341.6 | `20261111T173748Z-acyclic-replay-real-regression-e1510460` | RUNNING：69/69真实核心PASS，c1355/index197完整双目标比较分别56.80/165.97 s PASS。旧20项循环选择保持FAIL，明确CYCLE_REJECT root10577；另一次13项修复安装CEC/mapping PASS，未用no-op fallback。c1355完整数值/选择/图结构与保存参照一致。逐程序矩阵继续执行 |
+| 64341.6 | `20261111T173748Z-acyclic-replay-real-regression-e1510460` | COMPLETED_WITH_EXPLICIT_OMISSIONS：69/69真实核心PASS，c1355/index197完整双目标比较分别56.80/165.97 s PASS。旧20项循环选择保持FAIL，明确CYCLE_REJECT root10577；另一次13项修复安装CEC/mapping PASS，未用no-op fallback。c1355完整数值/选择/图结构与保存参照一致。2510项程序矩阵完成：142 import PASS/17 FAIL/1 SKIP、58 CLI smoke PASS、1395编译TU、106文件有命名功能证据。9m27s、MaxRSS810424 KiB |
+| 64341.7 | `20261111T174715Z-acyclic-terminal-case-retries-7cce9a09` | RUNNING：在64341.6完整回归与矩阵完成后，使用新无环工具重验已终止的108/122/185/22，按该顺序单worker执行；每种搜索8次预算，显式7200 s单例/900 s工具限制。原失败与输入身份已冻结，不重启仍在运行的59/147，不取消旧allocation。源码`ee91a33`与已验证的原生`d2065ab`完全相同 |
 
 ## 首次真实闭环的有限结论
 
 `20261111T162048Z-declared-timeout-division-retry-7fb70837`仅准备了源码和Division输入，未提交任何任务。准备后检查发现suite核心测试固定要求c1355，已标为`SUPERSEDED_NOT_SUBMITTED`；新目录64340.9用默认c1355作核心fixture，实际47/147从完整manifest选取。未覆盖输入或把准备失败计为实验FAIL。
+
+`20261111T170757Z-backend-e2e-retry-812b3360`也仅准备、未执行。随后发现并修复了真实原生引用环，因此标记为`SUPERSEDED_NOT_SUBMITTED`，index108的实际补验使用64341.7的新目录和已验证工具；没有覆盖旧准备文件。
 
 64330的原始与no-op replay基线均为360.111877 ps、513.216003 area；ABC rewrite为359.501831 ps、529.778870 area。面积约束搜索最好记录349.582336 ps、513.449280 area；联合目标最好记录345.476715 ps、486.388794 area。两种搜索各有17次直接梯度提案实际评估，其余为基线/warmup；失败请求计入24次预算。
 

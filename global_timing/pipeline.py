@@ -238,20 +238,21 @@ class Experiment:
             for rid, indices in self.catalogue.region_decisions.items():
                 if not indices:
                     continue
-                local = {index: 0 for index in indices}
+                state = model.independent_region_state(rid)
                 active = set()
                 for _ in range(2):
                     for index in indices:
                         if neighbors[index] & (active - {index}):
-                            local[index] = 0  # the only feasible option
+                            choice = 0  # the only feasible option
                         else:
-                            costs = model.independent_region_options(rid, local, index)
-                            local[index] = min((float(cost), choice) for choice, cost in enumerate(costs))[1]
+                            costs = state.options(index)
+                            choice = min((float(cost), candidate) for candidate, cost in enumerate(costs))[1]
+                        state.set_choice(index, choice)
                         active.discard(index)
-                        if local[index]:
+                        if choice:
                             active.add(index)
-                for index in indices:
-                    combined[index] = local[index]
+                for index, choice in state.choices.items():
+                    combined[index] = choice
         # Cross-region conflicts require a final global legal projection.
         logits = [[1.0 if c == choice else 0.0 for c in range(d['candidate_count'] + 1)]
                   for d, choice in zip(self.catalogue.decisions, combined)]

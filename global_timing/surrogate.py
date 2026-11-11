@@ -15,6 +15,88 @@ from torch import nn
 from .arrival import prepare_arrival_layers, reference_arrivals, smooth_arrivals
 
 
+class _IndependentRegionState:
+    """Non-differentiable coordinate costs for one fixed baseline model.
+
+    Only choices may change. Unaffected port costs retain their exact values;
+    affected ports are recomputed from the original ordered feature sum, never
+    updated by subtracting/adding candidate contributions. Features and topology
+    remain immutable, as in the enclosing independent-baseline invocation.
+    """
+    def __init__(self, model, rid, choices=None):
+        choices = {} if choices is None else choices
+        model._validate_independent_choices(rid, choices)
+        self.model, self.rid = model, rid
+        self._choices = {index: choices.get(index, 0) for index in model.catalogue.region_decisions[rid]}
+        self._ports = list(model.partition.transfers[rid])
+        self._affected = {index: [] for index in self._choices}
+        for position, port in enumerate(self._ports):
+            for index in model.port_decisions[rid, port]:
+                self._affected[index].append(position)
+        self._weights = model.local_weights.detach().clone()
+        self._temperature, self._depth_to_ps = model.temperature, model.depth_to_ps
+        self._pending_index, self._pending_values = None, None
+        with torch.no_grad():
+            local = model._independent_port_options(rid, self._choices, None, self._ports, [0])[0]
+            values = torch.from_numpy(local)
+            self._values = torch.stack([model._independent_port_cost(rid, port, values[position])
+                                        for position, port in enumerate(self._ports)])
+
+    @property
+    def choices(self):
+        return dict(self._choices)
+
+    def _check_context(self, index=None):
+        if index is not None and index not in self._choices:
+            raise ValueError('Independent selection includes another region.')
+        if (self.model.temperature != self._temperature or self.model.depth_to_ps != self._depth_to_ps or
+                not torch.equal(self.model.local_weights.detach(), self._weights)):
+            raise ValueError('Independent coordinate cache requires a fixed baseline model.')
+
+    def _candidate_values(self, index, options):
+        positions = self._affected[index]
+        ports = [self._ports[position] for position in positions]
+        local = self.model._independent_port_options(self.rid, self._choices, index, ports, options)
+        features = torch.from_numpy(local)
+        values = self._values.expand(len(options), -1).clone()
+        for candidate in range(len(options)):
+            for offset, position in enumerate(positions):
+                values[candidate, position] = self.model._independent_port_cost(
+                    self.rid, self._ports[position], features[candidate, offset])
+        return values
+
+    def _arrival(self, values):
+        return self._temperature * torch.logsumexp(values / self._temperature, dim=0)
+
+    def current_arrival(self):
+        self._check_context()
+        with torch.no_grad():
+            return self._arrival(self._values)
+
+    def options(self, index):
+        self._check_context(index)
+        with torch.no_grad():
+            values = self._candidate_values(index, list(range(self.model.counts[index])))
+            self._pending_index, self._pending_values = index, values
+            # Use the same one-dimensional reduction kernel and port order as
+            # the scalar reference, including the unchanged port entries.
+            return torch.stack([self._arrival(row) for row in values])
+
+    def set_choice(self, index, choice):
+        self._check_context(index)
+        if type(choice) is not int or not 0 <= choice < self.model.counts[index]:
+            raise ValueError('Invalid local candidate choice.')
+        with torch.no_grad():
+            if self._choices[index] != choice:
+                if self._pending_index == index:
+                    self._values = self._pending_values[choice].clone()
+                else:
+                    self._values = self._candidate_values(index, [choice])[0].clone()
+                self._choices[index] = choice
+            # A forced change on another coordinate invalidates old proposals.
+            self._pending_index, self._pending_values = None, None
+
+
 class TimingSurrogate(nn.Module):
     def __init__(self, partition, catalogue, scores, baseline, temperature_ratio=0.005,
                  propagation_backend='bounded_tape'):
@@ -162,15 +244,32 @@ class TimingSurrogate(nn.Module):
         return self._independent_arrival_from_ports(rid, local_features)
 
     def _independent_arrival_from_ports(self, rid, local_features):
-        values = []
-        for (port, depth), local in zip(self.partition.transfers[rid].items(), local_features):
-            scale = (local * self.local_weights).sum()
-            cost = depth * self.depth_to_ps * torch.exp(2 * torch.tanh(scale / 2))
-            upstream = self.partition.owner.get(port)
-            if upstream is not None:
-                cost = cost + self.baseline_region_arrivals[upstream]
-            values.append(cost)
+        values = [self._independent_port_cost(rid, port, local)
+                  for port, local in zip(self.partition.transfers[rid], local_features)]
         return self.temperature * torch.logsumexp(torch.stack(values) / self.temperature, dim=0)
+
+    def _independent_port_cost(self, rid, port, local):
+        scale = (local * self.local_weights).sum()
+        cost = self.partition.transfers[rid][port] * self.depth_to_ps * torch.exp(2 * torch.tanh(scale / 2))
+        upstream = self.partition.owner.get(port)
+        if upstream is not None:
+            cost = cost + self.baseline_region_arrivals[upstream]
+        return cost
+
+    def _validate_independent_choices(self, rid, choices, index=None):
+        if rid not in self.catalogue.region_decisions:
+            raise ValueError('Unknown independent region.')
+        allowed = set(self.catalogue.region_decisions[rid])
+        if (index is not None and index not in allowed) or not set(choices) <= allowed:
+            raise ValueError('Independent selection includes another region.')
+        if any(type(c) is not int or not 0 <= c < self.counts[i] for i, c in choices.items()):
+            raise ValueError('Invalid local candidate choice.')
+        if self.features.device.type != 'cpu' or self.features.dtype != torch.float64:
+            raise ValueError('Independent baseline batching requires float64 CPU features.')
+
+    def independent_region_state(self, rid, choices=None):
+        """Cache exact unaffected port costs for a fixed independent model."""
+        return _IndependentRegionState(self, rid, choices)
 
     def independent_region_options(self, rid, choices, index):
         """Batch the independent baseline's coordinate options on the CPU.
@@ -180,16 +279,19 @@ class TimingSurrogate(nn.Module):
         candidate) triple. No incremental cache or regrouped sum is used. This
         is a non-differentiable baseline helper, not the joint surrogate path.
         """
-        allowed = set(self.catalogue.region_decisions[rid])
-        if index not in allowed or not set(choices) <= allowed:
-            raise ValueError('Independent selection includes another region.')
-        if any(type(c) is not int or not 0 <= c < self.counts[i] for i, c in choices.items()):
-            raise ValueError('Invalid local candidate choice.')
-        if self.features.device.type != 'cpu' or self.features.dtype != torch.float64:
-            raise ValueError('Independent baseline batching requires float64 CPU features.')
+        self._validate_independent_choices(rid, choices, index)
         count = self.counts[index]
-        features = self.features.detach().numpy()
         ports = list(self.partition.transfers[rid])
+        local = self._independent_port_options(rid, choices, index, ports, list(range(count)))
+        with torch.no_grad():
+            # Retained uncached reference uses the same scalar kernels.
+            values = torch.from_numpy(local)
+            return torch.stack([self._independent_arrival_from_ports(rid, values[c]) for c in range(count)])
+
+    def _independent_port_options(self, rid, choices, index, ports, options):
+        """Ordered sums for selected ports and options; callers validate state."""
+        count = len(options)
+        features = self.features.detach().numpy()
         local = np.zeros((count, len(ports), 4), dtype=np.float64)
         for position, port in enumerate(ports):
             indices = self.port_decisions[rid, port]
@@ -200,18 +302,14 @@ class TimingSurrogate(nn.Module):
                 # Leading zero mirrors the scalar reference's initial value.
                 terms = np.zeros((count, len(indices) + 1, 4), dtype=np.float64)
                 terms[:, 1:, :] = selected
-                terms[:, indices.index(index) + 1, :] = features[index, :count]
+                terms[:, indices.index(index) + 1, :] = features[index, options]
                 np.add.accumulate(terms, axis=1, out=terms)
                 local[:, position, :] = terms[:, -1, :]
             else:
                 terms = np.concatenate((np.zeros((1, 4), dtype=np.float64), selected))
                 np.add.accumulate(terms, axis=0, out=terms)
                 local[:, position, :] = terms[-1]
-        with torch.no_grad():
-            # Keep the scalar transcendental/reduction kernels too: vectorized
-            # exp/tanh can round differently and perturb deterministic ties.
-            values = torch.from_numpy(local)
-            return torch.stack([self._independent_arrival_from_ports(rid, values[c]) for c in range(count)])
+        return local
 
     def one_hot(self, choices):
         self.catalogue.validate(choices)

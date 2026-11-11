@@ -31,7 +31,89 @@ def model_fixture():
     return TimingSurrogate(partition, catalogue, scores, {'delay_ps': 100., 'area': 10., 'po_arrivals_ps': [60., 100.]})
 
 
+def wide_model_fixture():
+    # Disjoint leaf supports followed by reconvergence give each coordinate
+    # different affected and unaffected ports within a single maximal region.
+    nodes = [(2, 4), (6, 8), (10, 12), (14, 16), (18, 20), (22, 24), (26, 28)]
+    partition = make_partition(fixture(8, nodes, [30]))
+    catalogue = Catalogue([{'root': root, 'candidate_count': 3} for root in range(9, 16)],
+                          [], {0: list(range(7))})
+    rng, scores = random.Random(123), []
+    for index in range(7):
+        for choice in range(4):
+            features = [0.] * 19
+            features[8], features[11] = 1 + rng.random(), 2 + rng.random()
+            scores.append({'decision_index': index, 'choice_index': choice,
+                           'predicted_local_abc_delay': 1 + rng.random(), 'continuous_features_19': features})
+    model = TimingSurrogate(partition, catalogue, scores,
+                            {'delay_ps': 100., 'area': 20., 'po_arrivals_ps': [100.]})
+    with torch.no_grad():
+        model.features[:, 3] = model.features[:, 2]
+        model.local_weights.copy_(torch.tensor([0.17, -0.21, 0.08, 0.03], dtype=torch.float64))
+    return model
+
+
 class SurrogateTests(unittest.TestCase):
+    def test_cached_coordinates_preserve_scalar_costs_after_commits_and_forced_changes(self):
+        model, rng = wide_model_fixture(), random.Random(97)
+        choices = {index: rng.randrange(4) for index in range(7)}
+        state = model.independent_region_state(0, choices)
+        with torch.no_grad():
+            for step in range(60):
+                index = rng.randrange(7)
+                actual = state.options(index)
+                expected = torch.stack([model.independent_region_arrival(0, choices | {index: choice})
+                                        for choice in range(4)])
+                torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+                self.assertEqual(int(actual.argmin()), int(expected.argmin()))
+                if step % 3 == 0:
+                    # Mimic a conflict-forced change after computing proposals
+                    # on another coordinate; old proposals must be invalidated.
+                    other = (index + 1) % 7
+                    forced = 0 if step % 2 else 2
+                    state.set_choice(other, forced)
+                    choices[other] = forced
+                choice = int(actual.argmin()) if step % 2 else rng.randrange(4)
+                state.set_choice(index, choice)
+                choices[index] = choice
+                torch.testing.assert_close(state.current_arrival(), model.independent_region_arrival(0, choices),
+                                           rtol=0, atol=0)
+                self.assertEqual(state.choices, choices)
+                external = state.choices
+                external[index] = (choice + 1) % 4
+                self.assertEqual(state.choices, choices)
+
+    def test_cached_independent_costs_keep_other_regions_at_noop(self):
+        model = model_fixture()
+        with torch.no_grad():
+            for rid, indices in model.catalogue.region_decisions.items():
+                choices = {index: 2 for index in indices}
+                state = model.independent_region_state(rid, choices)
+                torch.testing.assert_close(state.current_arrival(), model.independent_region_arrival(rid, choices),
+                                           rtol=0, atol=0)
+                for index in indices:
+                    torch.testing.assert_close(state.options(index), model.independent_region_options(rid, choices, index),
+                                               rtol=0, atol=0)
+                    state.set_choice(index, 0)
+                    choices[index] = 0
+                    torch.testing.assert_close(state.current_arrival(), model.independent_region_arrival(rid, choices),
+                                               rtol=0, atol=0)
+
+    def test_coordinate_state_rejects_invalid_choices_and_changed_model_weights(self):
+        model = wide_model_fixture()
+        for choices in [{999: 1}, {0: -1}, {0: 4}, {0: True}]:
+            with self.subTest(choices=choices), self.assertRaises(ValueError):
+                model.independent_region_state(0, choices)
+        state = model.independent_region_state(0)
+        with self.assertRaises(ValueError):
+            state.options(999)
+        with self.assertRaises(ValueError):
+            state.set_choice(0, 4)
+        with torch.no_grad():
+            model.local_weights.add_(0.1)
+        with self.assertRaises(ValueError):
+            state.options(0)
+
     def test_batched_independent_options_preserve_ordered_costs_and_ties(self):
         # A single region with many nested decision roots and differing port
         # dependencies stresses the repeated-sum case; these are unit features.

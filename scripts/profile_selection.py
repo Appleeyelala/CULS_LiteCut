@@ -101,6 +101,10 @@ def profile(benchmark, output, catalogue_only, student_checkpoint=None, options_
                 'boundary_ports': len(partition.transfers[rid]),
                 'port_decision_incidences': sum(len(model.port_decisions[rid, port]) for port in partition.transfers[rid])}
             local = {i: random.Random(i + 17).randrange(model.counts[i]) for i in indices}
+            started = time.monotonic()
+            state = model.independent_region_state(rid, local)
+            record['coordinate_cache_init_s'] = time.monotonic() - started
+            record['coordinate_backend'] = 'unchanged_port_cache'
             option_records = []
             with torch.no_grad():
                 for index in indices[:option_checks]:
@@ -108,7 +112,7 @@ def profile(benchmark, output, catalogue_only, student_checkpoint=None, options_
                     started = time.monotonic()
                     if profiler is not None:
                         profiler.enable()
-                    actual = model.independent_region_options(rid, local, index)
+                    actual = state.options(index)
                     if profiler is not None:
                         profiler.disable()
                     fast_s = time.monotonic() - started
@@ -131,7 +135,7 @@ def profile(benchmark, output, catalogue_only, student_checkpoint=None, options_
                                   'actual': actual.tolist(), 'reference': expected.tolist()})
                         raise AssertionError('Batched independent costs differ from ordered scalar reference.')
             record['option_checks'] = option_records
-            del model
+            del state, model
             record['full_independent_selection_executed'] = not options_only
             if options_only:
                 record['selection_comparison'] = 'NOT_RUN_OPTIONS_ONLY'

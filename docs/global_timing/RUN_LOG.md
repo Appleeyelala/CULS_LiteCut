@@ -86,6 +86,7 @@
 | 64393 | `20261111T182725Z-completed116-path-analysis-3a705938` | COMPLETED_WITH_EXPLICIT_OMISSIONS：只读复核64381全部116设计/1870份映射/2218引用，错误0，原39设计全部分析精确一致。50/116个original→no-op代表PI/PO对变化；9个失败及780未记录保留。5m25s、MaxRSS998472 KiB；没有新增rewrite/CEC/mapping，统计与解释见PATH_CHANGE_ANALYSIS.md |
 | 64340.14 | `20261111T184033Z-isolated-native-backend-retry-813f3b26` | RUNNING：75项真实核心再次PASS后，使用已验证失败隔离流程重验已终止的108；本次真实native CEC仍在900.30 s超时，FAIL保留，随后已进入greedy。整例尚未完成，不提前记为PARTIAL/PASS。每搜索8次预算、7200 s单例/900 s工具限制，没有故障注入；旧失败及源记录前缀冻结。源码`0355cae`，代码与已验证`94909a7`相同；共享既有allocation，不重复其他live输入 |
 | 64394 | `20261111T190337Z-saved-failure-evidence-audit-9b981c5c` | COMPLETED_WITH_EXPLICIT_OMISSIONS：`53d4541`增加只读失败证据汇总；81项CPU矩阵69 PASS/12 SKIP，191输入冻结清单的全部预测/梯度/方法CSV及数值聚合与旧结果完全相同，审计错误0。实际7200 s Division、900 s native失败及旧受控native fixture分别复核，不混入性能统计。2512项程序矩阵完成：144 import PASS/17 FAIL/1 SKIP、58 CLI smoke PASS、1395编译TU、110文件有来源匹配命名证据。5m33s、MaxRSS400244 KiB；没有新rewrite、CEC、mapping或拟合 |
+| 64395 | `20261111T191749Z-full905-partition-certificates-f9e48d3a` | COMPLETED_WITH_EXPLICIT_OMISSIONS：`16ac3cd`对完整905输入独立验证CPU strict MFFC/owner、精确DAG及每端口反向AND距离，905/905 PASS；4 worker结构阶段147.13 s。86项CPU矩阵74 PASS/12 SKIP；2515项程序矩阵完成，147 import PASS/17 FAIL/1 SKIP、59 CLI smoke PASS、1395编译TU、113文件有命名证据。5m02s、MaxRSS6091568 KiB；未运行GPU、CEC、mapping或搜索，不能替代全量benchmark比较 |
 
 ## 统一版本全量比较的预先准备
 

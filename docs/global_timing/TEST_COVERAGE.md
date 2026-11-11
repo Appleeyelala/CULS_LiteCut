@@ -34,7 +34,9 @@
 
 ## 全程序矩阵
 
-最新已完成矩阵`20261111T190337Z-saved-failure-evidence-audit-9b981c5c`（源码`53d4541`，64394）覆盖2,512项源码/入口：1,615项语法PASS、1,395个编译translation units、144项import PASS、17 FAIL、1 SKIP、58项CLI smoke PASS。110个文件有来源字节匹配的命名功能证据，不是行覆盖率。新增只读失败分析的6项测试通过；本次完整81项CPU矩阵为69 PASS/12个真实工具入口SKIP，不能称为本次执行了81项GPU回归。原优化器、工具、真实核心测试源码未变，相关实际证据按字节匹配复用64341.8等运行。
+最新已完成矩阵`20261111T191749Z-full905-partition-certificates-f9e48d3a`（源码`16ac3cd`，64395）覆盖2,515项源码/入口：1,618项语法PASS、1,395个编译translation units、147项import PASS、17 FAIL、1 SKIP、59项CLI smoke PASS。113个文件有来源匹配的命名功能证据，不是行覆盖率。同一任务的86项CPU矩阵为74 PASS/12项真实工具入口SKIP；新增结构证书的5项测试包含80个小图的历史全root oracle对照及分区/端口距离错误反例。随后实际验证全部905输入，结构证书905 PASS，完整owner、DAG和各端口距离保留。5m02s、MaxRSS6091568 KiB；没有新GPU、CEC、mapping或搜索，原核心真实证据仍按未改源码匹配复用。详见[分区证书](PARTITION_CERTIFICATES.md)。
+
+此前矩阵`20261111T190337Z-saved-failure-evidence-audit-9b981c5c`（源码`53d4541`，64394）覆盖2,512项源码/入口：1,615项语法PASS、1,395个编译translation units、144项import PASS、17 FAIL、1 SKIP、58项CLI smoke PASS。110个文件有来源字节匹配的命名功能证据，不是行覆盖率。新增只读失败分析的6项测试通过；本次完整81项CPU矩阵为69 PASS/12个真实工具入口SKIP，不能称为本次执行了81项GPU回归。原优化器、工具、真实核心测试源码未变，相关实际证据按字节匹配复用64341.8等运行。
 
 同一64394还实际复核冻结191输入清单：预测、方法、梯度CSV及数值聚合完全不变，失败证据审计错误0；旧7200 s Division、900 s native失败及标明用途的旧native故障fixture另行只读核验。5m33s、MaxRSS400244 KiB；没有新rewrite、CEC、mapping、预测标签或模型拟合。
 

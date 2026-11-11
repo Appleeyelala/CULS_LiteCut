@@ -13,7 +13,7 @@ from global_timing.cohort import read_cohort
 from global_timing.common import digest, save_json
 from global_timing.evaluation import cec_passed, parse_timing
 from global_timing.path_analysis import parse_paths
-from global_timing.path_changes import aggregate_cases, analyze_case, endpoint_state, references
+from global_timing.path_changes import aggregate_cases, analyze_case, endpoint_state, prediction_changes, references
 from scripts.analyze_search_quality import write_csv
 from scripts.analyze_timing_paths import evaluation_directory, netlist_body
 
@@ -162,7 +162,7 @@ def main():
     output.mkdir(parents=True, exist_ok=False)
     selected, audit_sources, invalid = snapshot_reports(args.audit_runs, output)
     attempts = {row['record']['index']: row for row in cohort['selected_attempts']}
-    cases, coverage, observations, transitions, artifacts = [], [], [], [], {}
+    cases, coverage, observations, transitions, predictions, artifacts = [], [], [], [], [], {}
     used = set()
     for identity in cohort['cases']:
         index = identity['index']
@@ -193,6 +193,7 @@ def main():
             summary = json.loads(summary_path.read_text())
             states, hashes = validate_measurements(summary, saved['report'], saved['path'])
             analysis = analyze_case(summary, saved['report'], states)
+            analysis['prediction_samples'] = prediction_changes(summary, analysis)
             observers = sorted({item['observer_abc_sha256'] for item in saved['report']['measurements']})
             if len(observers) != 1:
                 raise ValueError('Case path evidence mixes observer binary versions.')
@@ -206,6 +207,7 @@ def main():
             identity_fields['benchmark_index'] = identity_fields.pop('index')
             observations.extend(dict(identity_fields, **value) for value in analysis['observations'])
             transitions.extend(dict(identity_fields, **value) for value in analysis['transitions'])
+            predictions.extend(dict(identity_fields, **value) for value in analysis['prediction_samples'])
             artifacts.update(hashes)
         except Exception as exc:
             row.update(analysis_status='ANALYSIS_ERROR', error=f'{type(exc).__name__}: {exc}')
@@ -220,7 +222,8 @@ def main():
         'path_report_selection_policy': 'last_declared_terminal_report_for_exact_selected_benchmark_path',
         'slurm_job_id': os.environ['SLURM_JOB_ID'],
         'analysis_code': {name: digest(Path(__file__).resolve().parents[1] / name) for name in
-            ['scripts/analyze_path_changes.py', 'global_timing/path_changes.py', 'global_timing/path_analysis.py']}}
+            ['scripts/analyze_path_changes.py', 'global_timing/path_changes.py', 'global_timing/path_analysis.py',
+             'global_timing/search_analysis.py']}}
     report['aggregate_by_version'] = [dict(benchmark_source_commit=source, observer_abc_sha256=observer,
         aggregate=aggregate_cases([case for case in cases if case['benchmark_source_commit'] == source and
                                    case['observer_abc_sha256'] == observer]))
@@ -230,6 +233,8 @@ def main():
     save_json(output / 'evidence_hashes.json', artifacts)
     write_csv(output / 'observations.csv', observations)
     write_csv(output / 'transitions.csv', transitions)
+    write_csv(output / 'prediction_path_changes.csv', predictions)
+    write_csv(output / 'prediction_error_by_endpoint_change.csv', report['aggregate']['prediction_error_by_endpoint_change'])
     write_csv(output / 'coverage.csv', coverage)
     import matplotlib
     matplotlib.use('Agg')
@@ -274,6 +279,14 @@ def main():
         '已保存的最终选点仅标记gradient与确定性基线；random有两种目标排序，不擅自选择一个作为统一final。',
         '完成的单例报告可来自仍在运行的审计；当前快照缺失不记作benchmark失败。其他重跑即使输入hash相同也不代替选定benchmark的路径证据。',
         '观察次数彼此相关，只作描述统计，不支持统计显著性或跨设计泛化推断。']
+    lines += ['', '## 评估前预测误差与端点变化', '',
+        '| 目标 | 端点变化类别 | 设计数 | 预测样本 | 按设计平均归一化MAE |', '|---|---|---:|---:|---:|']
+    for row in report['aggregate']['prediction_error_by_endpoint_change']:
+        lines.append(f'| {row["mode"]} | {row["endpoint_change"]} | {row["design_count"]} | '
+                     f'{row["sample_count"]} | {row["mean_per_design_normalized_mae"]} |')
+    lines += ['', '预测先核验训练标签仅来自更早成功观察，再按本次搜索的method/index/input hash连接路径；失败与基线锚点不计入误差。',
+        '各类别内先按设计平均，再跨设计等权汇总；零delay不归一化。类别可能包含不同设计与相同设计的相关观察，差异不证明因果关系。',
+        'SAME_OBSERVED_ENDPOINT_PAIR_SET只表示代表PI/PO对相同，不表示内部路径或映射未变。']
     (output / 'REPORT.md').write_text('\n'.join(lines) + '\n')
     print(json.dumps({key: report[key] for key in ['analyzed_inputs', 'coverage_counts', 'audit_failure_count']}))
     return int(report['audit_failure_count'] > 0 or bool(invalid))

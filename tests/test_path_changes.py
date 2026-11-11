@@ -1,4 +1,5 @@
 """Path comparisons preserve ties, serialization controls and failed-request gaps."""
+import copy
 import hashlib
 import json
 from pathlib import Path
@@ -8,7 +9,8 @@ import unittest
 from global_timing.common import digest
 from global_timing.evaluation import parse_timing
 from global_timing.path_analysis import parse_paths
-from global_timing.path_changes import aggregate_cases, analyze_case, compare_states, endpoint_state, references
+from global_timing.path_changes import (aggregate_cases, aggregate_prediction_changes, analyze_case,
+                                       compare_states, endpoint_state, prediction_changes, references)
 from scripts.analyze_path_changes import snapshot_reports, validate_measurements
 
 
@@ -39,6 +41,59 @@ def fixture():
 
 
 class PathChangeTests(unittest.TestCase):
+    def test_predictions_join_only_same_successful_path_observations(self):
+        from test_search_analysis import summary_fixture
+        summary = summary_fixture()
+        rows = summary['gradient_search']['area_constraint']['observations']
+        rows[3]['metrics']['po_arrivals_ps'] = [95., 80.]
+        paths = {'observations': []}
+        for row in rows:
+            if row['status'] == 'PASS' and not row.get('baseline_reused'):
+                row['metrics']['input_sha256'] = 'fixture-' + str(row['index'])
+                paths['observations'].append({'method': 'gradient_area_constraint', 'index': row['index'],
+                    'input_sha256': row['metrics']['input_sha256'], 'baseline_anchor': False,
+                    'vs_noop_delay_delta_ps': row['metrics']['delay_ps'] - 100.,
+                    'vs_noop_critical_po_changed': row['index'] == 3,
+                    'vs_noop_observed_critical_pairs_changed': row['index'] == 3,
+                    'vs_noop_observed_critical_transitions_changed': row['index'] == 3})
+        samples = prediction_changes(summary, paths)
+        self.assertEqual([sample['index'] for sample in samples], [2, 3])
+        self.assertEqual([sample['endpoint_change'] for sample in samples],
+                         ['SAME_OBSERVED_ENDPOINT_PAIR_SET', 'CRITICAL_PO_SET_CHANGED'])
+        self.assertEqual([sample['normalized_absolute_error'] for sample in samples], [.1, .1])
+        for corruption in ['missing', 'duplicate', 'input', 'delta', 'baseline', 'future_label']:
+            changed, altered = copy.deepcopy(paths), copy.deepcopy(summary)
+            if corruption == 'missing':
+                changed['observations'].pop()
+            elif corruption == 'duplicate':
+                changed['observations'].append(changed['observations'][0])
+            elif corruption == 'input':
+                changed['observations'][0]['input_sha256'] = 'another run'
+            elif corruption == 'delta':
+                changed['observations'][0]['vs_noop_delay_delta_ps'] = 100.
+            elif corruption == 'baseline':
+                changed['observations'][0]['baseline_anchor'] = True
+            else:
+                altered['gradient_search']['area_constraint']['observations'][2][
+                    'prediction_before_evaluation']['training_observation_indices'] = [2]
+            with self.subTest(corruption=corruption), self.assertRaises(ValueError):
+                prediction_changes(altered, changed)
+
+    def test_prediction_groups_weight_designs_and_exclude_zero_references(self):
+        sample = {'mode': 'joint', 'endpoint_change': 'SAME_OBSERVED_ENDPOINT_PAIR_SET',
+                  'normalized_absolute_error': .1, 'actual_change_exceeds_tolerance': True,
+                  'direction_correct': True}
+        cases = [{'analysis': {'prediction_samples': [sample] * 10}},
+                 {'analysis': {'prediction_samples': [dict(sample, normalized_absolute_error=.9,
+                                                          direction_correct=False)]}},
+                 {'analysis': {'prediction_samples': [dict(sample, normalized_absolute_error=None,
+                                                          actual_change_exceeds_tolerance=False)]}}]
+        group, = aggregate_prediction_changes(cases)
+        self.assertEqual((group['design_count'], group['sample_count'], group['normalizable_designs']), (3, 12, 2))
+        self.assertAlmostEqual(group['mean_per_design_normalized_mae'], .5)
+        self.assertEqual(group['designs_with_actual_delay_change'], 2)
+        self.assertEqual(group['mean_per_design_direction_accuracy'], .5)
+
     def test_distinguishes_endpoint_source_phase_ties_and_zero_delay(self):
         base = state()
         source = compare_states(base, state(pi=1))

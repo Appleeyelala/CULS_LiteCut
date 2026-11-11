@@ -5,6 +5,9 @@ representative maximizing chain, not an enumeration of tied logical paths.
 """
 from collections import Counter
 import math
+import statistics
+
+from .search_analysis import analyze_search
 
 
 def references(summary):
@@ -147,7 +150,57 @@ def aggregate_cases(cases):
             'saved_final_selections': len(selected),
             'saved_final_observed_pair_changes_vs_noop': sum(row['vs_noop_observed_critical_pairs_changed'] for row in selected)}
     return {'design_count': len(cases), 'methods': result,
+            'prediction_error_by_endpoint_change': aggregate_prediction_changes(cases),
             'serialization_controls_with_observed_pair_change': sum(case['analysis']['serialization_control']['observed_critical_pairs_changed'] for case in cases),
             'scope': 'Descriptive counts of audited successful observations, not independent replicates or '
                      'proof of unique logical critical-path identity. Final selection markers cover saved '
                      'gradient and deterministic results; random search has two separate objective rankings.'}
+
+
+def prediction_changes(summary, path_analysis):
+    """Join prospective predictions to this exact observation's audited paths."""
+    paths = {(row['method'], row['index']): row for row in path_analysis['observations']}
+    if len(paths) != len(path_analysis['observations']):
+        raise ValueError('Duplicate observations in path/prediction join.')
+    result = []
+    for sample in analyze_search(summary)['prediction_samples']:
+        key = 'gradient_' + sample['mode'], sample['index']
+        if key not in paths:
+            raise ValueError('Prediction sample lacks its exact path observation.')
+        path = paths[key]
+        observation = next(row for row in summary['gradient_search'][sample['mode']]['observations']
+                           if row['index'] == sample['index'])
+        if (path['baseline_anchor'] or path['input_sha256'] != observation['metrics']['input_sha256'] or
+                path['vs_noop_delay_delta_ps'] != sample['actual_delta_ps']):
+            raise ValueError('Prediction/path join identifies another observation or baseline.')
+        category = ('CRITICAL_PO_SET_CHANGED' if path['vs_noop_critical_po_changed'] else
+                    'PI_CHANGED_WITH_SAME_PO_SET' if path['vs_noop_observed_critical_pairs_changed'] else
+                    'SAME_OBSERVED_ENDPOINT_PAIR_SET')
+        result.append(dict(sample, endpoint_change=category,
+            observed_transition_changed=path['vs_noop_observed_critical_transitions_changed']))
+    return result
+
+
+def aggregate_prediction_changes(cases):
+    """Equal design weight within each category; no causal/path identity claim."""
+    keys = sorted({(row['mode'], row['endpoint_change']) for case in cases
+                   for row in case['analysis'].get('prediction_samples', [])})
+    result = []
+    for mode, category in keys:
+        per_design = [[row for row in case['analysis'].get('prediction_samples', [])
+                       if row['mode'] == mode and row['endpoint_change'] == category] for case in cases]
+        nonempty = [rows for rows in per_design if rows]
+        errors, directions = [], []
+        for rows in nonempty:
+            values = [row['normalized_absolute_error'] for row in rows if row['normalized_absolute_error'] is not None]
+            if values:
+                errors.append(statistics.mean(values))
+            values = [int(row['direction_correct']) for row in rows if row['actual_change_exceeds_tolerance']]
+            if values:
+                directions.append(statistics.mean(values))
+        result.append({'mode': mode, 'endpoint_change': category, 'design_count': len(nonempty),
+            'sample_count': sum(map(len, nonempty)), 'normalizable_designs': len(errors),
+            'mean_per_design_normalized_mae': statistics.mean(errors) if errors else None,
+            'designs_with_actual_delay_change': len(directions),
+            'mean_per_design_direction_accuracy': statistics.mean(directions) if directions else None})
+    return result

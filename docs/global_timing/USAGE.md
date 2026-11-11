@@ -80,6 +80,8 @@ python -B RUN/src/scripts/analyze_path_changes.py --cohort FROZEN_COHORT_JSON \
 
 输出区分critical PO集合、同一PO集合下代表PI变化、rise/fall相位、95%近关键PO集合、original→no-op序列化对照及成功观察之间的转移。失败请求保留为间隔，不获得虚构路径标签。gradient与确定性基线的保存最终选点另标；random有两种目标排名，不混为一个final。仅比较接口位置和代表链，不能据此证明唯一逻辑critical path switching。
 
+分析也将保存的评估前预测按本轮method/index/input hash连接到这些路径分类，复用校准标签来源检查。`prediction_path_changes.csv`保留逐样本，`prediction_error_by_endpoint_change.csv`在每类内先按设计求平均，再跨设计等权汇总。零delay不归一化，失败与基线锚点不计作预测准确样本；类别间差异是描述性关联，不证明路径变化导致误差。
+
 `profile_selection.py --run RUN --benchmarks SAVED_CASE_DIRECTORY`只读取已保存输入、候选与LiteCut分数，比较优化后的候选归一化、标量参考成本和历史独立region选择，不执行rewrite或mapping。`--catalogue-only`可诊断尚未完成推理的大设计。成本相等、选择相等与耗时分别报告；缺失历史选择时明确写`NO_SAVED_REFERENCE`。
 
 若完整独立选择本身耗时过长，可加`--options-only --option-checks 1`。它只检查最大region的一个coordinate及其全部候选成本，保存cProfile、标量对照和实际边界端口/decision关联规模；完整选择明确标为`NOT_RUN_OPTIONS_ONLY`。该剖析不重启正在运行的benchmark，也不把一个coordinate通过当作完整选择或E2E通过。

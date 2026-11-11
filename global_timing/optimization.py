@@ -25,7 +25,10 @@ def gradient_proposals(model, seen, seed, incumbent=None, steps=80, restarts=3,
         for step in range(steps):
             temperature = max(0.3, 1.0 - 0.7 * step / max(steps - 1, 1))
             probabilities = torch.softmax(logits.masked_fill(~model.valid, -torch.inf) / temperature, dim=-1)
-            choice = model.catalogue.project([logits[i, :count].detach().tolist() for i, count in enumerate(model.counts)])
+            # Convert once instead of slicing/detaching every decision tensor.
+            # Truncate padding in Python; values and tie-breaking are unchanged.
+            rows = logits.detach().tolist()
+            choice = model.catalogue.project([row[:count] for row, count in zip(rows, model.counts)])
             hard = model.one_hot(choice)
             straight_through = hard - probabilities.detach() + probabilities
             po, area = model(straight_through)

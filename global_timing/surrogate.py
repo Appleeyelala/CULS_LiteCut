@@ -107,8 +107,11 @@ class TimingSurrogate(nn.Module):
             torch.ones(len(sparse_rows), dtype=torch.float64),
             (len(sources), self.n_decisions)).coalesce())
         self.layers = []
-        for layer in sorted(set(levels.values())):
-            nodes = [rid for rid in partition.order if levels[rid] == layer]
+        nodes_by_level = {}
+        for rid in partition.order:
+            nodes_by_level.setdefault(levels[rid], []).append(rid)
+        for layer in sorted(nodes_by_level):
+            nodes = nodes_by_level[layer]
             edges, destinations = [], []
             for position, rid in enumerate(nodes):
                 edges.extend(edge_by_target[rid])
@@ -206,8 +209,8 @@ class TimingSurrogate(nn.Module):
     def one_hot(self, choices):
         self.catalogue.validate(choices)
         result = torch.zeros((self.n_decisions, self.width), dtype=self.features.dtype, device=self.features.device)
-        for i, choice in enumerate(choices):
-            result[i, choice] = 1
+        indices = torch.tensor(choices, dtype=torch.long, device=result.device).unsqueeze(1)
+        result.scatter_(1, indices, 1.0)
         return result
 
     def _propagate(self, expected):

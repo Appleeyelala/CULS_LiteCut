@@ -24,7 +24,7 @@ def write_report(benchmark: Path, output: Path):
     baseline = summary['replay_noop']['metrics']
     comparison, observations = [], []
 
-    def add(method, metrics, rows=None, applied=None, runtime=None):
+    def add(method, metrics, rows=None, applied=None, runtime=None, direct_gradients=None):
         rows = rows or []
         comparison.append({'method': method, 'delay_ps': metrics['delay_ps'], 'area': metrics['area'], 'adp': metrics['adp'],
             'delay_improvement_pct': 100 * (original['delay_ps'] - metrics['delay_ps']) / max(original['delay_ps'], 1e-9),
@@ -33,6 +33,7 @@ def write_report(benchmark: Path, output: Path):
             'evaluations_including_baseline': len(rows) or 1, 'failed_requests': sum(r['status'] != 'PASS' for r in rows),
             'measured_evaluation_runtime_s': sum(r.get('runtime_s', 0) for r in rows) if rows else None,
             'exclusive_method_runtime_s': runtime,
+            'direct_gradient_evaluations': direct_gradients,
             'applied_rewrites': applied, 'cec': metrics['cec'],
             'critical_po_indices': json.dumps(metrics['critical_po_indices'])})
 
@@ -65,7 +66,8 @@ def write_report(benchmark: Path, output: Path):
         add('random_search_joint', best['metrics'], random_rows, best.get('applied_rewrites'), summary.get('exclusive_random_runtime_s'))
     for mode, item in summary['gradient_search'].items():
         best, rows = item['best'], item['observations']
-        add('gradient_' + mode, best['metrics'], rows, best.get('applied_rewrites'), item.get('exclusive_method_runtime_s'))
+        add('gradient_' + mode, best['metrics'], rows, best.get('applied_rewrites'), item.get('exclusive_method_runtime_s'),
+            item.get('gradient_proposal_evaluations'))
         observations.extend(dict(row, report_method='gradient_' + mode) for row in rows)
     _write_csv(output / 'comparison.csv', comparison, list(comparison[0]))
     records, predictions = [], []
@@ -74,6 +76,9 @@ def write_report(benchmark: Path, output: Path):
         record = {'method': row['report_method'], 'index': row.get('index'), 'status': row['status'],
                   'delay_ps': metrics.get('delay_ps'), 'area': metrics.get('area'), 'adp': metrics.get('adp'),
                   'applied_rewrites': row.get('applied_rewrites'), 'runtime_s': row.get('runtime_s'),
+                  'active_decisions': sum(choice != 0 for choice in row.get('choices', [])),
+                  'near_critical_po_indices_within_5pct': json.dumps([i for i, value in enumerate(metrics.get('po_arrivals_ps', []))
+                      if value >= .95 * metrics.get('delay_ps', float('inf'))]),
                   'critical_po_indices': json.dumps(metrics.get('critical_po_indices')),
                   'native_trace_endpoints': json.dumps(metrics.get('abc_native_trace_endpoints')),
                   'error': row.get('error')}
@@ -88,6 +93,9 @@ def write_report(benchmark: Path, output: Path):
                 'endpoint_mae_ps': float(np.abs(actual - predicted).mean()),
                 'predicted_area': prediction['area'], 'actual_area': metrics['area'],
                 'training_observations': prediction.get('training_observations')})
+            indices = prediction.get('training_observation_indices')
+            if indices is not None and any(index >= row['index'] for index in indices):
+                raise ValueError('Prediction provenance includes its own or a future evaluation label.')
     if records:
         _write_csv(output / 'observations.csv', records, list(records[0]))
     if predictions:

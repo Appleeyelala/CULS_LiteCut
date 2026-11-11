@@ -91,6 +91,7 @@ def score_catalogue(aig_path, partition, catalogue, checkpoint, cache_dir, batch
     identity = {'input': digest(aig_path), 'checkpoint': digest(checkpoint), 'library': digest(library_path),
                 'canonical_code': [digest(p) for p in canonical_paths], 'adapter': digest(Path(__file__)),
                 'truth_validator': digest(ROOT / 'global_timing/truth.py'),
+                'context_validator': digest(ROOT / 'global_timing/cut_validation.py'),
                 'decisions': [[d['root'], d['cut_slot'], d['truth'], d['candidate_subgraph_indices']] for d in catalogue.decisions]}
     key = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
     cache_dir.mkdir(parents=True, exist_ok=True)

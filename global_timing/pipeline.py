@@ -100,7 +100,7 @@ class Experiment:
         self.catalogue.validate(choices)
         return choices if choices != observation['choices'] else None
 
-    def deterministic_baseline(self, choices, method, baseline):
+    def deterministic_baseline(self, choices, method, baseline, selection_runtime_s=0.0):
         started = time.monotonic()
         rows = []
         seen = set()
@@ -119,7 +119,8 @@ class Experiment:
                    'best': successful[-1] if successful else None,
                    'fallback_noop': baseline if not successful else None,
                    'evaluations': len(rows), 'repair_is_new_replay': True,
-                   'exclusive_method_runtime_s': time.monotonic() - started}
+                   'selection_runtime_s': selection_runtime_s,
+                   'exclusive_method_runtime_s': time.monotonic() - started + selection_runtime_s}
         save_json(self.output / method / 'summary.json', summary)
         return summary
 
@@ -165,6 +166,7 @@ class Experiment:
         rng = random.Random(self.config.seed)
         iteration, stop_reason = 0, 'evaluation_budget_reached'
         repair_pending = []
+        fitted_indices = []
         while len(observations) < self.config.evaluation_budget:
             remaining = self.config.evaluation_budget - len(observations)
             candidates = []
@@ -177,6 +179,8 @@ class Experiment:
                     candidates = [{'choices': choices, 'source': 'calibration_warmup'}]
             else:
                 calibration = model.fit_observations(observations, steps=self.config.calibration_steps)
+                fitted_indices = [row['index'] for row in observations if row['status'] == 'PASS']
+                calibration['training_observation_indices'] = fitted_indices.copy()
                 save_json(self.output / method / f'calibration_{iteration:04d}.json', calibration)
                 best = min(observations, key=lambda row: self.rank_actual(row, baseline['metrics'], mode))
                 proposals, trace = gradient_proposals(model, seen, self.config.seed + iteration,
@@ -197,7 +201,8 @@ class Experiment:
                 with torch.no_grad():
                     po, area = model(model.one_hot(choices))
                 prediction = dict(candidate, po_arrivals_ps=po.tolist(), area=float(area),
-                                  delay_ps=float(po.max()), training_observations=len(observations))
+                                  delay_ps=float(po.max()), training_observations=len(fitted_indices),
+                                  training_observation_indices=fitted_indices.copy())
                 observation = self.evaluate_choice(choices, method, len(observations), prediction)
                 observations.append(observation)
                 seen.add(tuple(choices))
@@ -269,11 +274,17 @@ class Experiment:
         run_tool([self.evaluator.abc, '-c', command], native, 'rewrite', self.config.timeout_s)
         native_metrics = self.evaluator.evaluate(native_aig, native / 'evaluation')
         native_runtime = time.monotonic() - native_started
+        selecting_started = time.monotonic()
         local_scores = [[] for _ in self.catalogue.decisions]
         for row in self.scores:
             local_scores[row['decision_index']].append(-row['predicted_local_abc_delay'])
-        greedy = self.deterministic_baseline(self.catalogue.project(local_scores), 'greedy_litecut', baseline)
-        independent = self.deterministic_baseline(self.independent_choices(baseline['metrics']), 'independent_regions', baseline)
+        choices = self.catalogue.project(local_scores)
+        greedy = self.deterministic_baseline(choices, 'greedy_litecut', baseline,
+                                             time.monotonic() - selecting_started)
+        selecting_started = time.monotonic()
+        choices = self.independent_choices(baseline['metrics'])
+        independent = self.deterministic_baseline(choices, 'independent_regions', baseline,
+                                                  time.monotonic() - selecting_started)
         rng = random.Random(self.config.seed)
         random_started = time.monotonic()
         random_rows, seen = [dict(baseline, baseline_reused=True)], {tuple(self.noop)}

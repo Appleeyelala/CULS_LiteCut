@@ -51,6 +51,19 @@ def functional_evidence(root, runs):
             record = json.loads(report.read_text())
             for relative in ['projects/culs/src/algorithms/rewrite.cu', 'tests/native/replay_constants.cpp']:
                 add(run, relative, report, 'native_writer_constants', record['status'], record['scope'])
+        report = run / 'output/historical_analysis_tests/summary.json'
+        if report.is_file():
+            for record in json.loads(report.read_text())['records']:
+                add(run, record['source_relative'], report, 'retained_R9_analysis', record['status'], record['scope'])
+        report = run / 'output/historical_baseline/commands.json'
+        if report.is_file():
+            for record in json.loads(report.read_text()):
+                for argument in record['argv']:
+                    path = Path(argument)
+                    if path.suffix == '.py' and path.is_relative_to(run / 'src'):
+                        add(run, str(path.relative_to(run / 'src')), report, record['name'],
+                            'PASS' if record.get('returncode') == 0 and 'error' not in record else 'FAIL',
+                            'Actual historical Gate3 invocation; inspect stage outputs and independent CEC report.')
     return evidence
 
 

@@ -8,9 +8,11 @@
 
 重复计算修复后，`20261111T143814Z-profiled-scale-e2e-retry-8cee3d62/output/tests.json`再次记录46/46真实核心PASS（64341.4）；其大设计完整比较仍在进行。CPU保存输入一致性验证见64363及[性能检查](PERFORMANCE_AUDIT.md)。
 
-最新`b288fe1`快照在`20261111T150227Z-bounded-arrival-real-regression-b71177d2/output/tests.json`通过50/50真实核心测试（64340.6）。新增内容为有界arrival反传的3项测试，以及真实gpuls在`CUDA_VISIBLE_DEVICES=-1`时明确返回正错误码并报告CUDA初始化失败的负向测试。测试使用64365重新构建且全部原生源码匹配的二进制；CPU构建阶段的39 PASS/11 SKIP由此得到独立真实工具补验。此项不证明此前ALU原生崩溃的根因已找到。
+`b288fe1`快照在`20261111T150227Z-bounded-arrival-real-regression-b71177d2/output/tests.json`通过50/50真实核心测试（64340.6）。新增内容为有界arrival反传的3项测试，以及真实gpuls在`CUDA_VISIBLE_DEVICES=-1`时明确返回正错误码并报告CUDA初始化失败的负向测试。测试使用64365重新构建且全部原生源码匹配的二进制；CPU构建阶段的39 PASS/11 SKIP由此得到独立真实工具补验。此项不证明此前ALU原生崩溃的根因已找到。
 
 64366的新增汇总回归为57项CPU矩阵：46 PASS、11个真实工具入口SKIP。7项新测试验证不按数值选重跑、待补验不伪装全覆盖、重复/错误身份拒绝、JSONL不完整尾部、冻结快照不随live append变化、快照/结果/选择/版本篡改检测，以及输入/工具/预算不匹配拒绝。随后实际读取104输入、106次尝试，预测来源审计错误0；这些是保存结果检查，不增加新的时序测量。
+
+`0e1cbd9`的未变化入口缓存增加3项测试。64379的60项CPU矩阵为49 PASS/11 SKIP；c1355、des_perf、div、voter共32个实际coordinate的全部候选成本及4份完整选择与保存参照精确相同。64340.8（`20261111T160210Z-cached-coordinate-real-regression-e46fd0d0`）随后通过60/60真实核心测试，c1355两模式完整比较通过。缓存只改变独立region基线的计算复用，未更改目标、候选或预算，完整证据见[性能检查](PERFORMANCE_AUDIT.md)。
 
 `20261111T132425Z-student-feature-regression-9184e32c`的CPU矩阵为32 PASS、10个真实工具入口SKIP；不能把这些SKIP算作CPU任务完成了GPU验证。其保留输入复核另行重算c1355的417条、div的122,869条原实现/候选特征及预测，与旧25维提取流程保存的全部score记录完全相同。没有训练模型或更换权重。
 
@@ -20,7 +22,9 @@
 
 ## 全程序矩阵
 
-最新已完成矩阵`20261111T152720Z-benchmark-cohort-audit-38c31f2a`（源码`d260a9e`）覆盖2,507项源码/入口：1,610项语法PASS、1,395个编译translation units、139项import PASS、17 FAIL、1 SKIP、57项CLI smoke PASS。102个文件有来源字节匹配的命名功能证据；这不是行覆盖率，其余项目明确不宣称逐文件功能覆盖。报告仅复用源码字节匹配的实际核心、native、R9、路径、Student及搜索审计证据。
+最新已完成矩阵`20261111T160210Z-cached-coordinate-real-regression-e46fd0d0`（源码`0e1cbd9`）覆盖2,507项源码/入口：1,610项语法PASS、1,395个编译translation units、139项import PASS、17 FAIL、1 SKIP、57项CLI smoke PASS。102个文件有来源字节匹配的命名功能证据；这不是行覆盖率，其余项目明确不宣称逐文件功能覆盖。报告仅复用源码字节匹配的实际核心、native、R9、路径、Student、候选选择及搜索审计证据。其60项真实核心测试、c1355双目标比较、writer/Gate1工具/Gia检查和程序矩阵整体完成，Slurm step 64340.8退出0；历史依赖缺项不因step成功而改为PASS。
+
+此前`20261111T152720Z-benchmark-cohort-audit-38c31f2a`的2,507项矩阵及57项CPU回归独立保留；该版本的汇总与审计证据只在相应源码字节匹配时复用。
 
 此前`20261111T150227Z-bounded-arrival-real-regression-b71177d2`（源码`b288fe1`）的2,504项矩阵、100个有命名功能证据的文件与50项真实核心测试保留；同一运行已完成c1355双目标比较及writer/Gate1工具/Gia检查。后续独立选择剖析入口的参数变化另行保存实际验证，不把旧矩阵当作后续所有文件的功能证明。
 

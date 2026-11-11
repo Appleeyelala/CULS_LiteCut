@@ -44,7 +44,7 @@ Region DAG传播默认由`arrival.py`显式执行一阶逆拓扑求导，保存�
 
 PI/PO索引是固定接口的0-based编号；映射节点ID仍仅在本次网表内有效。输出反映ABC静态load/slew合并模型下的最大链，不是布尔路径可敏化证明，也不是signoff物理路径。比较源/端点集合变化时，不宣称跨映射节点身份已经对齐。
 
-独立region基线仍以其他region均为no-op的root arrival作两轮坐标选择。为避免大region重复产生大量Python/Torch微操作，坐标候选的特征累加使用有序`numpy.add.accumulate`；保留标量exp/tanh/LSE计算和原候选平局规则。该辅助函数不参与梯度反传，联合优化的可微传播保持独立。
+独立region基线仍以其他region均为no-op的root arrival作两轮坐标选择。坐标候选的特征累加使用有序`numpy.add.accumulate`；未受本次decision影响的入口保留已有cost，受影响入口从原有序列表重新累加。缓存限定于固定模型的一次独立选择，显式处理强制清零及其他coordinate提交后的失效。标量exp/tanh、完整入口顺序的一维LSE与候选平局规则保持不变，实际保存的4个设计已检查完整请求相同。该辅助函数不参与梯度反传，联合优化的可微传播保持独立。
 
 ## 当前限制
 

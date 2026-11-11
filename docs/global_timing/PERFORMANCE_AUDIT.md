@@ -48,3 +48,20 @@
 `output/selection_profiles/1364100a59bc/option_0.txt`显示一次批量调用发生454,930次函数调用：所有1,001个入口都重新建立选择列表，共433,862次字典get；两个候选又分别重新计算1,001项scalar port cost。列表构造累计0.081 s，两个完整入口cost/归约累计0.053 s。该结果定位了重复处理未变化入口的开销，尚未修改独立选择算法。
 
 此任务明确记录`full_independent_selection_executed=false`及`NOT_RUN_OPTIONS_ONLY`，没有完整选择、rewrite或mapping，不把其PASS替代正在执行的voter E2E。原生短任务的Slurm采样不足以据此推断Python峰值内存。
+
+## 未变化入口缓存的精确回归
+
+`0e1cbd9`在独立region基线内缓存当前各入口的scalar cost。改变一个decision时，只重新计算可达入口；这些入口仍从原顺序的特征列表累加，不使用减旧值/加新值的增量求和。完整入口向量的顺序、逐候选的一维LSE、平局规则、两轮坐标选择及最终冲突投影保持不变。强制清零或改动其他decision会使待提交候选缓存失效；模型权重、温度或尺度改变会被拒绝。此缓存不参与联合梯度传播。
+
+64379（`20261111T155547Z-cached-coordinate-regression-0fa1eca4`）完成60项CPU矩阵：49 PASS、11个真实工具入口SKIP。新增3项测试覆盖连续提交、其他coordinate的强制变更、平局、空decision region、外部region隔离和非法选择/模型变更。实际保存的4个设计各检查8个coordinate，其全部候选成本与标量参照精确相同，最大绝对误差0；随后完整独立选择均与旧请求逐项相同。
+
+| 保存输入 | 缓存初始化 s（最大region） | 完整独立选择 s | 原请求对照 |
+|---|---:|---:|---|
+| c1355_orig | 0.00055 | 0.142 | EXACT_MATCH |
+| ACE/des_perf | 0.00142 | 16.192 | EXACT_MATCH |
+| ACE/div | 0.02511 | 30.030 | EXACT_MATCH |
+| ACE/voter | 0.11144 | 44.233 | EXACT_MATCH |
+
+该任务总计167.46 s，Slurm MaxRSS为995,656 KiB。只复用保存输入，没有rewrite、mapping或新时序标签。原`5b580a4`版本的voter完整比较已在64340.7通过，耗时2151.71 s，其中独立方法1980.76 s包含真实评估；它与上表的保存输入选择计时范围和并发条件不同，不据此计算整套算法加速比。
+
+缓存版实际工具回归在`20261111T160210Z-cached-coordinate-real-regression-e46fd0d0`（64340.8）记录60/60核心PASS，并完成c1355双目标比较。两模式仍选择no-op，delay为360.111877 ps、area为513.216003，CEC PASS。这个结果验证执行回归，不表示预测准确性或优化收益提高。

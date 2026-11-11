@@ -29,8 +29,8 @@ class ReportingTests(unittest.TestCase):
         row = {'status': 'PASS', 'choices': [0], 'metrics': {'delay_ps': 10}}
         group = {'observations': [row, dict(row, choices=[1])], 'best': row}
         summary = {'config': {}, 'original': {}, 'native_abc': {}, 'replay_noop': row,
-                   'greedy_litecut': group, 'independent_regions': group, 'random_search': [row],
-                   'gradient_search': {'joint': group}}
+                   'greedy_litecut': copy.deepcopy(group), 'independent_regions': copy.deepcopy(group),
+                   'random_search': [row], 'gradient_search': {'joint': group}}
         altered = copy.deepcopy(summary)
         altered['gradient_search']['joint']['best'] = altered['gradient_search']['joint']['observations'][1]
         self.assertNotEqual(canonical_outcomes(summary), canonical_outcomes(altered))

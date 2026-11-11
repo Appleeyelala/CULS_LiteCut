@@ -28,7 +28,8 @@ def functional_evidence(root, runs):
     modules = {'test_structure': ['structure'], 'test_candidates': ['candidates'],
                'test_evaluation': ['evaluation'], 'test_pipeline': ['pipeline'],
                'test_processes': ['processes', 'common'], 'test_surrogate': ['surrogate', 'optimization'],
-               'test_truth': ['truth', 'litecut'], 'test_paths': ['path_analysis']}
+               'test_truth': ['truth', 'litecut'], 'test_paths': ['path_analysis'],
+               'test_search_analysis': ['search_analysis']}
     specific = {
         'test_liberty_paths_reconstruct_arrivals_without_changing_mapping':
             ['framework/abc/path_report.c.inc', 'framework/abc/endpoint_report.c.inc', 'global_timing/path_analysis.py'],

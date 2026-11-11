@@ -2,8 +2,10 @@
 """Run the current committed test snapshot against hashed /data tool builds."""
 import argparse
 import hashlib
+import importlib.metadata
 import json
 import os
+import platform
 from pathlib import Path
 import subprocess
 import sys
@@ -26,15 +28,31 @@ def main():
         path = Path(item['path']).resolve()
         if not str(path).startswith('/data/wushangge/') or digest(path) != item['sha256']:
             raise SystemExit('Invalid or changed executable build artifact.')
-    # These API-defining sources must match; Python tests may evolve separately.
-    for relative in ['projects/culs/src/algorithms/rewrite.h', 'projects/culs/src/algorithms/rewrite.cu',
-                     'framework/abc/endpoint_report.c.inc']:
-        if digest(run / 'src' / relative) != digest(build_run / 'src' / relative):
-            raise SystemExit('Rebuild changed tool source before testing: ' + relative)
+    # Verify the complete native source trees; Python can evolve independently.
+    for prefix in ['projects/culs', 'third_party/abc', 'framework/abc']:
+        for source in (run / 'src' / prefix).rglob('*'):
+            if not source.is_file() or source.suffix not in {'.c', '.cpp', '.cc', '.cu', '.h', '.hpp', '.cuh', '.inc'}:
+                continue
+            relative = source.relative_to(run / 'src')
+            prior = build_run / 'src' / relative
+            if not prior.is_file() or digest(source) != digest(prior):
+                raise SystemExit('Rebuild changed native tool source before testing: ' + str(relative))
     metadata = json.loads((run / 'run.json').read_text())
+    packages = {}
+    for package in ['torch', 'numpy', 'scipy', 'pandas', 'networkx', 'matplotlib', 'scikit-learn']:
+        try:
+            packages[package] = importlib.metadata.version(package)
+        except importlib.metadata.PackageNotFoundError:
+            packages[package] = None
+    gpu = subprocess.run(['nvidia-smi', '--query-gpu=name,driver_version,memory.total', '--format=csv,noheader'],
+                         capture_output=True, text=True)
     metadata.update(state='RUNNING', experiment_executed=True, slurm_job_id=os.environ['SLURM_JOB_ID'],
                     tool_build_run=str(build_run), binaries=report['binaries'],
-                    environment={'python': sys.version, 'executable': sys.executable,
+                    environment={'python': sys.version, 'executable': sys.executable, 'platform': platform.platform(),
+                                 'packages': packages, 'node_gpu_inventory': gpu.stdout.strip(),
+                                 'cuda_visible_devices': os.environ.get('CUDA_VISIBLE_DEVICES'),
+                                 'thread_limits': {key: os.environ.get(key) for key in
+                                                   ['OMP_NUM_THREADS', 'OPENBLAS_NUM_THREADS', 'MKL_NUM_THREADS']},
                                  'slurm': {k: v for k, v in os.environ.items() if k.startswith('SLURM_')}})
     (run / 'run.json').write_text(json.dumps(metadata, indent=2) + '\n')
     env = dict(os.environ, CULS_TEST_RUN=str(run), CULS_TEST_GPULS=report['binaries']['gpuls']['path'],

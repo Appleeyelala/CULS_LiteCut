@@ -6,11 +6,13 @@ security sandbox. Subprocesses/network are denied; writes stay in the probe dir.
 """
 import argparse
 import importlib.util
+import importlib
 import json
 import os
 from pathlib import Path
 import resource
 import runpy
+import shutil
 import sys
 import traceback
 
@@ -44,6 +46,16 @@ def main():
             raise GuardViolation('Write outside isolated probe directory: ' + os.fsdecode(value))
 
     def guard(event, values):
+        if event == 'subprocess.Popen':
+            executable, command = values[:2]
+            if isinstance(command, (list, tuple)):
+                resolved = shutil.which(str(executable))
+                if resolved and Path(resolved).resolve().parent == Path('/usr/bin'):
+                    name = Path(resolved).name
+                    if ((name == 'lscpu' and list(command) == [str(executable)]) or
+                        (name == 'fc-list' and all(str(a) == '--help' or str(a).startswith('--format=') for a in command[1:])) or
+                        (name == 'uname' and list(command[1:]) == ['-p'])):
+                        return  # Read-only dependency discovery, never an experiment.
         if event in {'subprocess.Popen', 'os.system', 'os.fork', 'os.forkpty', 'os.posix_spawn'} or event.startswith('socket.'):
             raise GuardViolation('Import/help attempted external execution or networking: ' + event +
                                  (' ' + repr(values[:2]) if event == 'subprocess.Popen' else ''))
@@ -77,11 +89,16 @@ def main():
             else:
                 runpy.run_path(str(target), run_name='__main__')
         else:
-            spec = importlib.util.spec_from_file_location(module, target,
-                submodule_search_locations=[str(target.parent)] if target.name == '__init__.py' else None)
-            loaded = importlib.util.module_from_spec(spec)
-            sys.modules[module] = loaded
-            spec.loader.exec_module(loaded)
+            if module.startswith(('src.', 'global_timing.')) or module == 'global_timing':
+                loaded = importlib.import_module(module)
+                if Path(loaded.__file__).resolve() != target:
+                    raise ValueError('Probe imported a different source path: ' + str(loaded.__file__))
+            else:
+                spec = importlib.util.spec_from_file_location(module, target,
+                    submodule_search_locations=[str(target.parent)] if target.name == '__init__.py' else None)
+                loaded = importlib.util.module_from_spec(spec)
+                sys.modules[module] = loaded
+                spec.loader.exec_module(loaded)
         result['status'] = 'PASS'
     except SystemExit as exc:
         result.update(status='PASS' if args.mode == 'help' and exc.code in {0, None} else 'FAIL',

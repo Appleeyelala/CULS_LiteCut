@@ -26,7 +26,9 @@
 
 ## 全程序矩阵
 
-最新已完成矩阵`20261111T160210Z-cached-coordinate-real-regression-e46fd0d0`（源码`0e1cbd9`）覆盖2,507项源码/入口：1,610项语法PASS、1,395个编译translation units、139项import PASS、17 FAIL、1 SKIP、57项CLI smoke PASS。102个文件有来源字节匹配的命名功能证据；这不是行覆盖率，其余项目明确不宣称逐文件功能覆盖。报告仅复用源码字节匹配的实际核心、native、R9、路径、Student、候选选择及搜索审计证据。其60项真实核心测试、c1355双目标比较、writer/Gate1工具/Gia检查和程序矩阵整体完成，Slurm step 64340.8退出0；历史依赖缺项不因step成功而改为PASS。
+最新已完成矩阵`20261111T162905Z-timeout-cohort-program-audit-d2c73954`（源码`b6c5838`，可执行代码与`f29a906`相同）覆盖2,507项源码/入口：1,610项语法PASS、1,395个编译translation units、139项import PASS、17 FAIL、1 SKIP、57项CLI smoke PASS。102个文件有来源字节匹配的命名功能证据；这不是行覆盖率，其余项目明确不宣称逐文件功能覆盖。报告仅复用源码字节匹配的61项真实核心、native、R9、路径、Student、候选选择及搜索审计证据。同时冻结137输入/145次尝试，并核验实际900 s案例及旧300 s案例的时限声明与配置一致，读取来源清单通过；未新增rewrite、mapping或优化。
+
+此前`20261111T160210Z-cached-coordinate-real-regression-e46fd0d0`（源码`0e1cbd9`）的同规模矩阵、60项真实核心测试、c1355双目标比较、writer/Gate1工具/Gia检查完整保留，step 64340.8退出0。历史依赖缺项不因Slurm成功而改为PASS。
 
 此前`20261111T152720Z-benchmark-cohort-audit-38c31f2a`的2,507项矩阵及57项CPU回归独立保留；该版本的汇总与审计证据只在相应源码字节匹配时复用。
 

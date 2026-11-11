@@ -29,6 +29,8 @@
 | 64346 | `20261111T115338Z-imported-native-and-cli-tests-0dd6d0c7` | COMPLETED：Gate1 io_signature、候选选择器和ABC四项Gia原生单元测试全部通过；未下载依赖 |
 | 64347 | `20261111T115530Z-ci-cpu-and-existing-reports-bdf90782` | FAIL：CI父进程提前导入绘图库使子进程继承不兼容MKL线程层；调整导入顺序，保留失败日志 |
 | 64348 | `20261111T115853Z-ci-cpu-and-reports-regression-c08b3bd8` | COMPLETED：32项CPU矩阵（23 PASS、9个GPU入口SKIP）；6组已保存实验生成图表；重复运行数值/选择一致，Native ABC输出字节hash因时间注释不同，进一步按精确图结构区分 |
+| 64340.0 | `20261111T121113Z-corrected-tools-regression-538f79e0` | COMPLETED_WITH_EXPLICIT_OMISSIONS：独立step在原分配内运行，33项真实核心测试全部通过，c1355双目标8预算完成、都未改善基线；原生writer/Gate1/Gia及2486项矩阵完成；重复运行选择/数值/结构hash一致，ABC注释导致字节hash不同 |
+| 64341.0 | `20261111T121235Z-corrected-cross-design-pilot-13f96501` | RUNNING：独立step验证六个此前失败设计、c1355和中位设计；33项真实回归通过，各设计结果仍待完成 |
 
 ## 首次真实闭环的有限结论
 

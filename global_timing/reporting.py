@@ -31,9 +31,13 @@ def write_report(benchmark: Path, output: Path):
 
     def add(method, metrics, rows=None, applied=None, runtime=None, direct_gradients=None):
         rows = rows or []
+        def percent(value, reference, sign=1):
+            return sign * 100 * (value - reference) / reference if reference > 0 else None
         comparison.append({'method': method, 'delay_ps': metrics['delay_ps'], 'area': metrics['area'], 'adp': metrics['adp'],
-            'delay_improvement_pct': 100 * (original['delay_ps'] - metrics['delay_ps']) / max(original['delay_ps'], 1e-9),
-            'area_change_pct': 100 * (metrics['area'] - original['area']) / max(original['area'], 1e-9),
+            'delay_improvement_pct': percent(metrics['delay_ps'], original['delay_ps'], -1),
+            'delay_improvement_vs_noop_pct': percent(metrics['delay_ps'], baseline['delay_ps'], -1),
+            'area_change_pct': percent(metrics['area'], original['area']),
+            'area_change_vs_noop_pct': percent(metrics['area'], baseline['area']),
             'area_constraint_feasible': metrics['area'] <= baseline['area'] * summary['config']['area_limit_ratio'] + 1e-8,
             'evaluations_including_baseline': len(rows) or 1, 'failed_requests': sum(r['status'] != 'PASS' for r in rows),
             'measured_evaluation_runtime_s': sum(r.get('runtime_s', 0) for r in rows) if rows else None,
@@ -178,7 +182,9 @@ def write_report(benchmark: Path, output: Path):
     plt.close(fig)
     lines = ['# 真实优化运行报告', '', '数值仅来自对应运行的ABC结果；未通过的组合不进入性能排名。', '',
              '| 方法 | Delay ps | Area | ADP | Delay改善% | 评估数 | 失败数 |', '|---|---:|---:|---:|---:|---:|---:|']
-    lines += [f"| {r['method']} | {r['delay_ps']:.6f} | {r['area']:.6f} | {r['adp']:.3f} | {r['delay_improvement_pct']:.3f} | {r['evaluations_including_baseline']} | {r['failed_requests']} |" for r in comparison]
+    for row in comparison:
+        improvement = 'N/A' if row['delay_improvement_pct'] is None else f"{row['delay_improvement_pct']:.3f}"
+        lines.append(f"| {row['method']} | {row['delay_ps']:.6f} | {row['area']:.6f} | {row['adp']:.3f} | {improvement} | {row['evaluations_including_baseline']} | {row['failed_requests']} |")
     lines += ['', '预测评估为自适应搜索中的预先预测，不代表跨设计泛化。基线锚定不计作预测准确性的证明。',
               '面积约束参考no-op replay面积；所有失败、warmup和显式修复都计入实际搜索预算。',
               '原始输入与no-op replay分别保留；Native ABC未导出rewrite数量，不用AIG节点减少量冒充rewrite次数。',

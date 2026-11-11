@@ -28,7 +28,15 @@ def functional_evidence(root, runs):
     modules = {'test_structure': ['structure'], 'test_candidates': ['candidates'],
                'test_evaluation': ['evaluation'], 'test_pipeline': ['pipeline'],
                'test_processes': ['processes', 'common'], 'test_surrogate': ['surrogate', 'optimization'],
-               'test_truth': ['truth', 'litecut']}
+               'test_truth': ['truth', 'litecut'], 'test_paths': ['path_analysis']}
+    specific = {
+        'test_liberty_paths_reconstruct_arrivals_without_changing_mapping':
+            ['framework/abc/path_report.c.inc', 'framework/abc/endpoint_report.c.inc', 'global_timing/path_analysis.py'],
+        'test_context_cut_cec_accepts_relations_and_rejects_wrong_function': ['global_timing/cut_validation.py'],
+        'test_litecut_batch_cache_and_all_candidate_functions': ['global_timing/litecut.py',
+            'projects/litecut/gate2a_candidate_inference.py', 'projects/litecut/src/extract_cutlib_student/modeling.py',
+            'projects/litecut/src/data_preprocess/feat_extraction_v3.py'],
+        'test_reused_baseline_resolves_record_provenance_at_variable_depth': ['scripts/analyze_timing_paths.py']}
     imported = {'gate1c_r_io_signature': 'legacy/gate1_aigrewrite/gate1c_r_io_signature.py',
                 'gate1c_select': 'legacy/gate1_aigrewrite/gate1c_select.py',
                 'upstream_gia_test': 'third_party/abc/test/gia/gia_test.cc'}
@@ -41,6 +49,8 @@ def functional_evidence(root, runs):
                 for target in modules.get(module, []):
                     add(run, f'global_timing/{target}.py', report, record['test'], record['status'],
                         'Related named unit test; only its assertions are covered, not the entire module.')
+                for target in specific.get(record['test'].split('.')[-1], []):
+                    add(run, target, report, record['test'], record['status'], 'Named assertion evidence; no whole-file or line-coverage claim.')
         report = run / 'output/imported_tests/summary.json'
         if report.is_file():
             for record in json.loads(report.read_text()):

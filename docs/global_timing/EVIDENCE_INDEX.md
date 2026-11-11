@@ -21,7 +21,8 @@
 
 | 核验对象 | 运行目录与报告 | 能支持的结论 |
 |---|---|---|
-| 最新真实核心回归 | `20261111T182419Z-native-control-real-regression-2c5d4d0b/output/tests.json`、`repository_tests/test_matrix.json`、`audit_summary.json` | 程序版本`94909a7`：75/75核心PASS；当次2510项矩阵完整保留 |
+| 真实核心及完整对照回归 | `20261111T182419Z-native-control-real-regression-2c5d4d0b/output/tests.json`、`repository_tests/test_matrix.json`、`audit_summary.json` | 程序版本`94909a7`：75/75核心PASS；当次2510项矩阵完整保留 |
+| 自然native失败后的完整案例尝试 | `20261111T184033Z-isolated-native-backend-retry-813f3b26/output/tests.json`、`suite/records.jsonl`及逐方法产物 | 75/75真实核心再次PASS；index108的native超时后继续执行，但整例7200.59 s FAIL。部分测量保留，面积约束未完成、joint未启动；不能作为完整比较 |
 | 失败分析 | `20261111T190337Z-saved-failure-evidence-audit-9b981c5c/output/repository_tests/test_matrix.json`、`tests.json`、`failure_regression.json` | `53d4541`：2512项记录，17项import FAIL及1项SKIP；110文件有命名证据。81项CPU矩阵69 PASS/12 SKIP，6项新增失败分析测试通过；未重跑原优化器或GPU回归 |
 | 原生循环及独立对照失败 | 同一目录的`cycle_regression.json`、`native_control_regression.json` | 旧循环请求被拒绝，另一次13项安装CEC/mapping通过；受控native故障不妨碍其余真实测量，缺失对照不填数值；故障fixture不参与性能统计 |
 | 可追溯的原生构建 | `20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/build_report.json` | gpuls/ABC的实际构建、hash与对应源码；Python后续版本须另行验证 |

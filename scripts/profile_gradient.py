@@ -52,7 +52,9 @@ def main():
         print(json.dumps(stages[-1]), flush=True)
         return result
 
-    metadata = read(run / 'run.json')
+    # The run manifest changes as this job progresses; it is not an immutable
+    # input artifact and must not appear in the saved source checksum table.
+    metadata = json.loads((run / 'run.json').read_text())
     metadata.update(state='RUNNING', experiment_executed=True, slurm_job_id=os.environ['SLURM_JOB_ID'],
                     command=sys.argv, environment={'python': sys.version,
                         'slurm': {k: v for k, v in os.environ.items() if k.startswith('SLURM_')}})

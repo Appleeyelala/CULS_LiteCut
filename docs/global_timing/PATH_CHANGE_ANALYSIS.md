@@ -31,3 +31,20 @@
 - 每份成功路径报告必须覆盖该次搜索全部成功观察。其他重跑即使输入hash相同，也不能代替冻结清单选定的benchmark目录。
 
 全部文件位于`/data/wushangge/CULS_LiteCut/runs/20261111T165927Z-saved-path-change-audit-c21e0dbe/output/path_changes/`：`summary.json`含版本分层，`coverage.json`保留905项状态，`observations.csv`和`transitions.csv`保留逐观察及相邻成功转移，`evidence_hashes.json`记录原始证据hash，`input_snapshots/`冻结逐设计报告，PNG/PDF保存对照图。
+
+## 同一批39设计的预测误差分层
+
+64388（`20261111T171234Z-prediction-path-regression-6ea0c287`，源码`ab863e8`）已完成。它通过只读指针索引严格复用上述39份报告，逐项核验原始证据，并确认此前全部观察、转移、序列化对照及计数完全相同；没有引入后来完成的设计。69项CPU矩阵为58 PASS/11 SKIP，关联审计错误0，2510项程序矩阵完成。Slurm 6m04s、MaxRSS457688 KiB。
+
+每个预测先检查拟合标签仅来自更早成功观察，再以同轮method/index/input hash连接路径。MAE的分母是no-op global delay；在每个类别内先对单设计求平均，再让设计等权汇总。
+
+| 目标 | 相对no-op的代表端点变化 | 设计数 | 预测样本数 | 按设计平均归一化Δdelay MAE |
+|---|---|---:|---:|---:|
+| 面积约束 | critical PO集合变化 | 33 | 101 | 0.15502 |
+| 面积约束 | PO集合不变、代表PI变化 | 4 | 11 | 0.12685 |
+| 面积约束 | 代表PI/PO对集合相同 | 13 | 31 | 0.02706 |
+| 联合目标 | critical PO集合变化 | 32 | 83 | 0.18606 |
+| 联合目标 | PO集合不变、代表PI变化 | 5 | 7 | 0.13634 |
+| 联合目标 | 代表PI/PO对集合相同 | 16 | 53 | 0.03123 |
+
+这批数据中端点变化组误差较大，但类别包含不同设计与相关观察，不能推断因果关系。同一设计可贡献多个类别，设计数不能相加。样本包含38个ACE输入和1个OpenABC输入，不能外推全数据集。代表端点不变仍不等于内部映射或逻辑链不变；较小MAE也不代表方向预测准确。方向统计只计实际delay变化的样本，详见该运行的`output/path_changes/prediction_error_by_endpoint_change.csv`及逐样本CSV。

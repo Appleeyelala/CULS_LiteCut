@@ -71,6 +71,11 @@
 | 64385 | `20261111T163916Z-frozen137-search-analysis-29b53754` | COMPLETED_WITH_EXPLICIT_OMISSIONS：分析64384同一冻结清单中的130个成功设计，预测来源审计错误0；面积约束/联合模式的对等预算随机比较为28/59/43与33/48/49胜/平/负。保留7项遗漏及5种源码分层；无稳定优势结论。生成CSV/图/来源记录，不重新拟合、rewrite或mapping |
 | 64386 | `20261111T165927Z-saved-path-change-audit-c21e0dbe` | COMPLETED_WITH_EXPLICIT_OMISSIONS：`01889c4`的67项CPU矩阵56 PASS/11 SKIP；只读复核39设计611份保存映射、728个成功观察引用，错误0。冻结125输入清单，77个成功设计的路径报告尚未包含在该快照，9个非PASS、780未记录。27/39个original→no-op的代表PI/PO对已变化。2510项程序矩阵完成：142 import PASS/17 FAIL/1 SKIP、58 CLI smoke PASS、1395个编译TU、105个文件有来源匹配命名功能证据。6m07s、MaxRSS513212 KiB；没有新增rewrite/mapping |
 | 64387 | `20261111T170329Z-backend-catalogue-diagnosis-dcbb55ab` | COMPLETED_DIAGNOSTIC：只读处理index108 Back_End_With_Decode旧1800 s超时后保存的1,638,237条cut；当前catalogue构建7.43 s、22,477 executable decisions、43,734 regions。512条旧/新normalizer结果精确相同；旧完整catalogue不存在，明确NO_SAVED_REFERENCE。Slurm 34 s、MaxRSS3312724 KiB；未执行rewrite/mapping，不替代完整E2E |
+| 64388 | `20261111T171234Z-prediction-path-regression-6ea0c287` | COMPLETED_WITH_EXPLICIT_OMISSIONS：`ab863e8`的69项CPU矩阵58 PASS/11 SKIP；严格复用64386的39设计，原始路径统计完全相同，评估前预测与精确观察的关联审计错误0。critical PO变化组归一化MAE为0.155/0.186，代表PI/PO不变组为0.027/0.031；仅为描述性关联。2510项程序矩阵完成，142 import PASS/17 FAIL/1 SKIP、58 CLI smoke PASS、105个文件有命名功能证据。6m04s、MaxRSS457688 KiB |
+| 64340.10 | `20261111T172127Z-selected-replay-crash-diagnosis-1e0694ff` | COMPLETED_DIAGNOSTIC / NATIVE_SIGNAL_REPRODUCED：index197的20项原选择、owner表、输入及旧二进制在GDB下重现SIGSEGV，回溯为反复调用CPUSolver::Fanin；没有新搜索或mapping |
+| 64340.11 | `20261111T172508Z-replay-alias-chain-inspection-1c801ee8` | FAILED_DIAGNOSTIC：成功到达旧二进制Fanin入口，但集群GDB不支持Python脚本，未取得内存快照；环境错误与日志独立保留 |
+| 64340.12 | `20261111T172704Z-replay-alias-memory-inspection-dd0019ee` | COMPLETED_DIAGNOSTIC / ALIAS_CYCLE_OBSERVED：GDB原生命令读取实际内存，确认3个不同region的原始root 6868→10577→8953→6868形成环，旧trace均ACCEPTED；100个活跃引用进入环。详见NATIVE_REPLAY_CYCLES.md；无CEC/mapping标签 |
+| 64389 | `20261111T173355Z-acyclic-replay-tool-build-64cf764e` | RUNNING：`d2065ab`加入安装前传递依赖检查和有界别名解析；69项CPU矩阵58 PASS/11 SKIP，正在构建工具并执行链接实际solver的原生CPU回归。尚未取得真实GPU replay/CEC修复验收 |
 
 ## 首次真实闭环的有限结论
 

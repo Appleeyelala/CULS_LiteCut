@@ -83,6 +83,8 @@ struct RewriteReplayChoice {
 
 struct RewriteAuditOptions {
     bool enabled = false;
+    // An explicit replay may intentionally select zero candidates (no-rewrite).
+    bool replayMode = false;
     std::string tracePath;
     std::vector<int> internalToOriginal;
     std::vector<int> originalToRegion;

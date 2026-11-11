@@ -1067,7 +1067,7 @@ void CPUSolver::Rewrite(bool fUseZeros, bool GPUReplace) {
     if (GPUReplace) {
         gpuSolver->GetResults(n, bestOut, bestCut);
         gpuSolver->GetSelectedCutSlots(n, bestCutSlot);
-        if (!rewriteAuditOptions.replayChoices.empty()) {
+        if (rewriteAuditOptions.replayMode || !rewriteAuditOptions.replayChoices.empty()) {
             std::vector<Cut> allCuts(static_cast<size_t>(n + 1) * CUT_SET_SIZE);
             std::vector<unsigned char> candidateMasks(
                 static_cast<size_t>(n + 1) * CUT_SET_SIZE * MAX_REWRITE_SUBGR
@@ -2405,6 +2405,7 @@ int gate3eExecutionReplay(const char * outputDir, const char * inputPath,
 
             rw::RewriteAuditOptions options;
             options.enabled = true;
+            options.replayMode = true;
             options.internalToOriginal = graph.newToOld;
             options.originalToRegion = originalToRegion;
             std::vector<bool> selectedInternal(static_cast<size_t>(n + 1), false);

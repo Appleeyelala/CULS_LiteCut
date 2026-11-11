@@ -101,6 +101,8 @@
 
 两份均固定每搜索8次请求、warmup 2、梯度20步、校准30步、整例7200 s及单工具900 s；每个分片计划8 CPU、64 GiB、1 GPU、4个独立case进程、5天。保留默认固定随机种子及两目标模式。此前不同开发版本及定向补验不并入这一次统一源码的初始全量比较，不根据结果好坏挑选重跑。
 
+两份`run.json/environment`已记录实际软件包、平台、GPU清单、可见设备和线程设置。偶数64399在eda2使用NVIDIA A40、驱动550.127.05、glibc2.30；奇数64397在eda使用RTX4090、驱动550.100、glibc2.31。两边Torch1.13.1、NumPy1.26.3等记录的软件包版本相同，OMP/OpenBLAS/MKL线程均为1。统一版本与预算不表示硬件相同；同一输入的各方法在其所属作业环境中比较，跨分片墙钟时间不当作同硬件或独占资源的速度证据。
+
 准备时64340/64341各占一张GPU，达到累计上限，因此没有立即提交或取消旧分配。两个父作业先后自然结束，64396按重新检查的配额依次提交64397/64399。附属64340.1和64341.1的取消均由sacct和slurmstepd日志确认；小型衔接证据在监测目录`output/transition_64340_to_64399.json`、`transition_64341_to_64397.json`及各自`.sha256`，保留旧记录hash、207/186条终态、未完成目录、新分片回执、资源及各75项启动测试。旧run.json未改写，未记录输入不算已覆盖，也不混入最终统一版本cohort。
 
 两份分片均已提交，64396已正常结束，**不要再次执行这两份`job.slurm`**。监测计划与脚本在其`input/plans.json`、`input/guard.py`，配额检查保存在`output/checks/`；目标运行各有独占创建的`input/launch_reservation.json`、`input/pre_submission_run.json`及成功回执`input/submission.json`。监测目录另存`output/submitted_64340.json`、`submitted_64341.json`。以这些回执和Slurm判断实际状态，不根据旧准备快照的状态重复启动；监测已经没有后续提交工作。

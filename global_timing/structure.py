@@ -10,6 +10,8 @@ from collections import Counter
 import csv
 from dataclasses import dataclass
 import heapq
+import hashlib
+import struct
 from pathlib import Path
 
 from .common import legacy, save_json
@@ -44,6 +46,22 @@ def parse_aig(path: Path):
     if any(lit < 0 or lit > 2 * aig.maximum_variable + 1 for lit in aig.po_literals):
         raise ValueError('PO literal is outside the input AIG.')
     return aig
+
+
+def aig_structure_digest(path: Path):
+    """Hash exact node IDs, PI/PO order and literals, excluding symbols/comments.
+
+    This is not a hash of Boolean equivalence or graph isomorphism. Raw file
+    SHA256 remains separately recorded, including ABC's timestamp comments.
+    """
+    aig = parse_aig(path)
+    checksum = hashlib.sha256(struct.pack('<QQQQ', aig.maximum_variable, aig.pi_count,
+                                          aig.po_count, aig.and_count))
+    for literal in aig.po_literals:
+        checksum.update(struct.pack('<Q', literal))
+    for node, (left, right) in sorted(aig.fanin_literals.items()):
+        checksum.update(struct.pack('<QQQ', node, left, right))
+    return checksum.hexdigest()
 
 
 def references(aig):

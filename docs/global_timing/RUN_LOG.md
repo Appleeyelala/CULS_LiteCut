@@ -25,6 +25,10 @@
 | 64342 | `20261111T113159Z-cross-design-integrity-audit-0f3668f1` | COMPLETED：独立读取已导出cut，定位边界自由变量真值差异 |
 | 64343 | `20261111T113648Z-context-proof-regression-525333c5` | COMPLETED：31项CPU测试（8个GPU入口SKIP）、4项真实ABC回归；六个保留案例10,281个cut全部证明；两个旧no-op仍因常量翻转不等价 |
 | 64344 | `20261111T113959Z-constant-safe-tool-build-5e7be150` | BUILT_NOT_RUNTIME_VALIDATED：修复常量导出/未初始化状态后重新编译；尚待GPU回归 |
+| 64345 | `20261111T114605Z-native-writer-and-import-tests-71839ae5` | COMPLETED：链接实际solver对象，连续两次Reset/Reorder/WriteAig的常量CEC与mapping通过；逐程序矩阵完成，导入缺失依赖仍显式记录 |
+| 64346 | `20261111T115338Z-imported-native-and-cli-tests-0dd6d0c7` | COMPLETED：Gate1 io_signature、候选选择器和ABC四项Gia原生单元测试全部通过；未下载依赖 |
+| 64347 | `20261111T115530Z-ci-cpu-and-existing-reports-bdf90782` | FAIL：CI父进程提前导入绘图库使子进程继承不兼容MKL线程层；调整导入顺序，保留失败日志 |
+| 64348 | `20261111T115853Z-ci-cpu-and-reports-regression-c08b3bd8` | COMPLETED：32项CPU矩阵（23 PASS、9个GPU入口SKIP）；6组已保存实验生成图表；重复运行数值/选择一致，Native ABC输出字节hash因时间注释不同，进一步按精确图结构区分 |
 
 ## 首次真实闭环的有限结论
 

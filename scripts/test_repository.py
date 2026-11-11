@@ -14,10 +14,52 @@ import sys
 from audit_programs import audit
 
 
+def functional_evidence(root, runs):
+    """Attach named executed tests only when the tested source bytes match."""
+    evidence = {}
+
+    def add(run, relative, report, name, status, scope):
+        current, tested = root / relative, run / 'src' / relative
+        if not current.is_file() or not tested.is_file() or current.read_bytes() != tested.read_bytes():
+            return
+        evidence.setdefault(relative, []).append({'test': name, 'status': status, 'scope': scope,
+            'report': str(report), 'source_sha256': hashlib.sha256(current.read_bytes()).hexdigest()})
+
+    modules = {'test_structure': ['structure'], 'test_candidates': ['candidates'],
+               'test_evaluation': ['evaluation'], 'test_pipeline': ['pipeline'],
+               'test_processes': ['processes', 'common'], 'test_surrogate': ['surrogate', 'optimization'],
+               'test_truth': ['truth', 'litecut']}
+    imported = {'gate1c_r_io_signature': 'legacy/gate1_aigrewrite/gate1c_r_io_signature.py',
+                'gate1c_select': 'legacy/gate1_aigrewrite/gate1c_select.py',
+                'upstream_gia_test': 'third_party/abc/test/gia/gia_test.cc'}
+    for run in dict.fromkeys(runs):
+        report = run / 'output/tests.json'
+        if report.is_file():
+            for record in json.loads(report.read_text())['records']:
+                module = record['test'].split('.')[0]
+                add(run, f'tests/{module}.py', report, record['test'], record['status'], 'Executed named test, not line coverage.')
+                for target in modules.get(module, []):
+                    add(run, f'global_timing/{target}.py', report, record['test'], record['status'],
+                        'Related named unit test; only its assertions are covered, not the entire module.')
+        report = run / 'output/imported_tests/summary.json'
+        if report.is_file():
+            for record in json.loads(report.read_text()):
+                add(run, imported[record['program']], report, record['program'], record['status'],
+                    'Real retained-input CLI assertions or four unchanged upstream Gia unit tests.')
+        report = run / 'output/native_writer/summary.json'
+        if report.is_file():
+            record = json.loads(report.read_text())
+            for relative in ['projects/culs/src/algorithms/rewrite.cu', 'tests/native/replay_constants.cpp']:
+                add(run, relative, report, 'native_writer_constants', record['status'], record['scope'])
+    return evidence
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--run', type=Path, required=True)
     parser.add_argument('--tool-run', type=Path, required=True)
+    parser.add_argument('--evidence-run', type=Path, action='append', default=[],
+                        help='Prior actual tests to attach only for byte-identical source files.')
     args = parser.parse_args()
     run = args.run.resolve()
     if not os.environ.get('SLURM_JOB_ID') or not str(run).startswith('/data/wushangge/'):
@@ -44,6 +86,7 @@ def main():
                 if (args.tool_run / 'src' / relative).is_file() and
                 hashlib.sha256((root / relative).read_bytes()).digest() ==
                 hashlib.sha256((args.tool_run / 'src' / relative).read_bytes()).digest()}
+    functional = functional_evidence(root, [run, *args.evidence_run])
     for index, row in enumerate(rows):
         path = root / row['path']
         row['functional'] = 'NOT_MEASURED_PER_FILE'
@@ -83,12 +126,20 @@ def main():
             row.update(runtime='SKIP', runtime_reason='Historical Gate1 snapshot has a separate unbuilt executable and fixed historical replay inputs; not the current CULS build.')
         else:
             row.update(runtime='SKIP', runtime_reason='Header/build support/optional translation unit or notebook; no isolated executable. Compiler coverage only asserted where object evidence exists.')
+        if row['path'] in functional:
+            evidence = functional[row['path']]
+            row['functional_evidence'] = evidence
+            statuses = {item['status'] for item in evidence}
+            row['functional'] = ('FAIL' if statuses & {'FAIL', 'ERROR'} else
+                                 'NAMED_TESTS_PASS' if 'PASS' in statuses else 'SKIP')
+            row['functional_reason'] = 'Named, source-matched evidence only; compilation, import and CLI smoke remain separate.'
         print(json.dumps({'path': row['path'], 'syntax': row['syntax'], 'import': row['import'], 'runtime': row['runtime']}), flush=True)
     with (output / 'test_matrix.json').open('x') as stream:
         json.dump(rows, stream, indent=2)
     summary = {'count': len(rows), 'entrypoints': sum(r['entrypoint'] for r in rows),
                'syntax': dict(Counter(r['syntax'] for r in rows)), 'import': dict(Counter(r['import'] for r in rows)),
                'runtime_smoke': dict(Counter(r['runtime'] for r in rows)),
+               'functional': dict(Counter(r['functional'] for r in rows)),
                'compiled_translation_units': len(compiled), 'all_files_recorded': True,
                'scope': 'Every snapshot source recorded; runtime smoke is not full functionality. Failures and skipped historical workloads remain explicit.',
                'database': json.loads((output / 'summary.json').read_text())['database_hits']}

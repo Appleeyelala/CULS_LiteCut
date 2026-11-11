@@ -12,11 +12,14 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from global_timing.common import save_json
 from global_timing.reporting import write_report
+from global_timing.structure import aig_structure_digest
 
 
-def canonical_outcomes(summary):
+def canonical_outcomes(summary, include_byte_hash=True):
     """Keep scientific outcomes and chosen IDs; omit paths, timing and logs."""
-    fields = ['cec', 'delay_ps', 'area', 'adp', 'po_arrivals_ps', 'critical_po_indices', 'input_sha256']
+    fields = ['cec', 'delay_ps', 'area', 'adp', 'po_arrivals_ps', 'critical_po_indices']
+    if include_byte_hash:
+        fields.append('input_sha256')
 
     def measurement(value):
         return {key: value.get(key) for key in fields}
@@ -24,7 +27,8 @@ def canonical_outcomes(summary):
     def observation(row):
         return {'status': row['status'], 'choices': row['choices'], 'applied_rewrites': row.get('applied_rewrites'),
                 'metrics': measurement(row.get('metrics', {})),
-                'source': (row.get('prediction_before_evaluation') or {}).get('source')}
+                'source': (row.get('prediction_before_evaluation') or {}).get('source'),
+                'rejected_requests': row.get('execution_failure', {}).get('rejected_requests')}
 
     return {'config': summary['config'], 'original': measurement(summary['original']),
             'native_abc': measurement(summary['native_abc']), 'noop': observation(summary['replay_noop']),
@@ -33,6 +37,20 @@ def canonical_outcomes(summary):
             'random': [observation(r) for r in summary['random_search']],
             'gradient': {mode: [observation(r) for r in item['observations']]
                          for mode, item in summary['gradient_search'].items()}}
+
+
+def saved_graphs(benchmark, summary):
+    paths = {'native_abc': benchmark / 'native_abc/rewritten.aig'}
+    paths['original'] = Path(summary['original']['provenance']['original']['path'])
+    groups = {'noop': [summary['replay_noop']], 'random': summary['random_search'],
+              'greedy': summary['greedy_litecut']['observations'],
+              'independent': summary['independent_regions']['observations']}
+    groups.update({name: item['observations'] for name, item in summary['gradient_search'].items()})
+    for group, rows in groups.items():
+        for row in rows:
+            if row['status'] == 'PASS':
+                paths[f'{group}/{row["index"]}'] = Path(row['aig'])
+    return {key: aig_structure_digest(path) for key, path in paths.items()}
 
 
 def main():
@@ -74,9 +92,12 @@ def main():
         left, right = [json.loads((p / 'summary.json').read_text()) for p in args.repeat]
         a, b = canonical_outcomes(left), canonical_outcomes(right)
         checks = {key: a[key] == b[key] for key in a}
+        graph_a, graph_b = saved_graphs(args.repeat[0], left), saved_graphs(args.repeat[1], right)
         save_json(args.output / 'repeat_comparison.json', {'paths': list(map(str, args.repeat)),
                   'exact_outcome_match': all(checks.values()), 'checks': checks,
-                  'scope': 'Exact choices, actual AIG hashes, CEC, all PO timings, area and ADP; wall-clock runtime excluded.'})
+                  'numeric_and_choice_match': canonical_outcomes(left, False) == canonical_outcomes(right, False),
+                  'exact_serialized_graph_match': graph_a == graph_b, 'graph_hashes': [graph_a, graph_b],
+                  'scope': 'Byte hashes remain checked separately. Graph hashes preserve node IDs and PI/PO order but exclude names/comments, such as ABC write timestamps. Numeric checks include every choice, CEC, PO timing, area and ADP; wall-clock runtime excluded.'})
     lines = ['# 已保存实验汇总', '', f'实际有记录的输入：{len(unique)}；状态：{coverage["status_counts"]}。',
              f'全量覆盖是否完成：{coverage["coverage_complete"]}。', '',
              '完整逐输入状态见 case_records.json；所有方法原始数值见 comparison_all.csv。',

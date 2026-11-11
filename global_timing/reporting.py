@@ -24,6 +24,11 @@ def write_report(benchmark: Path, output: Path):
     baseline = summary['replay_noop']['metrics']
     comparison, observations = [], []
 
+    def joint_value(metrics):
+        return float(scalar_objective(torch.tensor(metrics['po_arrivals_ps'], dtype=torch.float64),
+            torch.tensor(metrics['area'], dtype=torch.float64), baseline['delay_ps'], baseline['area'],
+            'joint', area_weight=summary['config']['area_weight']))
+
     def add(method, metrics, rows=None, applied=None, runtime=None, direct_gradients=None):
         rows = rows or []
         comparison.append({'method': method, 'delay_ps': metrics['delay_ps'], 'area': metrics['area'], 'adp': metrics['adp'],
@@ -34,6 +39,7 @@ def write_report(benchmark: Path, output: Path):
             'measured_evaluation_runtime_s': sum(r.get('runtime_s', 0) for r in rows) if rows else None,
             'exclusive_method_runtime_s': runtime,
             'direct_gradient_evaluations': direct_gradients,
+            'actual_joint_objective': joint_value(metrics),
             'applied_rewrites': applied, 'cec': metrics['cec'],
             'critical_po_indices': json.dumps(metrics['critical_po_indices'])})
 
@@ -57,12 +63,7 @@ def write_report(benchmark: Path, output: Path):
         add('random_search_area_constraint', best['metrics'], random_rows, best.get('applied_rewrites'), summary.get('exclusive_random_runtime_s'))
     successful = [row for row in random_rows if row['status'] == 'PASS']
     if successful:
-        def joint_value(row):
-            metrics = row['metrics']
-            return float(scalar_objective(torch.tensor(metrics['po_arrivals_ps'], dtype=torch.float64),
-                torch.tensor(metrics['area'], dtype=torch.float64), baseline['delay_ps'], baseline['area'],
-                'joint', area_weight=summary['config']['area_weight']))
-        best = min(successful, key=joint_value)
+        best = min(successful, key=lambda row: joint_value(row['metrics']))
         add('random_search_joint', best['metrics'], random_rows, best.get('applied_rewrites'), summary.get('exclusive_random_runtime_s'))
     for mode, item in summary['gradient_search'].items():
         best, rows = item['best'], item['observations']
@@ -70,19 +71,25 @@ def write_report(benchmark: Path, output: Path):
             item.get('gradient_proposal_evaluations'))
         observations.extend(dict(row, report_method='gradient_' + mode) for row in rows)
     _write_csv(output / 'comparison.csv', comparison, list(comparison[0]))
-    records, predictions = [], []
+    records, predictions, previous_choices = [], [], {}
     for row in observations:
         metrics = row.get('metrics', {})
+        choices = row.get('choices', [])
+        previous = previous_choices.get(row['report_method'], [0] * len(choices))
         record = {'method': row['report_method'], 'index': row.get('index'), 'status': row['status'],
                   'delay_ps': metrics.get('delay_ps'), 'area': metrics.get('area'), 'adp': metrics.get('adp'),
+                  'actual_joint_objective': joint_value(metrics) if row['status'] == 'PASS' else None,
                   'applied_rewrites': row.get('applied_rewrites'), 'runtime_s': row.get('runtime_s'),
-                  'active_decisions': sum(choice != 0 for choice in row.get('choices', [])),
+                  'active_decisions': sum(choice != 0 for choice in choices),
+                  'requested_decisions_changed_from_previous': sum(a != b for a, b in zip(choices, previous)),
+                  'proposal_source': (row.get('prediction_before_evaluation') or {}).get('source'),
                   'near_critical_po_indices_within_5pct': json.dumps([i for i, value in enumerate(metrics.get('po_arrivals_ps', []))
                       if value >= .95 * metrics.get('delay_ps', float('inf'))]),
                   'critical_po_indices': json.dumps(metrics.get('critical_po_indices')),
                   'native_trace_endpoints': json.dumps(metrics.get('abc_native_trace_endpoints')),
                   'error': row.get('error')}
         records.append(record)
+        previous_choices[row['report_method']] = choices
         prediction = row.get('prediction_before_evaluation') or {}
         if row['status'] == 'PASS' and 'po_arrivals_ps' in prediction:
             actual = np.asarray(metrics['po_arrivals_ps'])
@@ -146,12 +153,36 @@ def write_report(benchmark: Path, output: Path):
     fig.savefig(output / 'convergence_and_prediction.png', dpi=160)
     fig.savefig(output / 'convergence_and_prediction.pdf')
     plt.close(fig)
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+    for method in ['random_search', 'gradient_joint']:
+        rows = [r for r in records if r['method'] == method]
+        if not rows:
+            continue
+        best, curve = joint_value(baseline), []
+        for row in rows:
+            if row['status'] == 'PASS':
+                best = min(best, row['actual_joint_objective'])
+            curve.append(best)
+        axes[0].plot(range(1, len(curve) + 1), curve, label=method)
+    axes[0].set(xlabel='Actual request budget (failures included)', ylabel='Best actual joint objective')
+    axes[0].legend(fontsize=7)
+    for method in sorted({r['method'] for r in gradients}):
+        values = [r['gradient_norm'] for r in gradients if r['method'] == method and r['gradient_norm'] is not None]
+        axes[1].plot(range(len(values)), values, label=method)
+    axes[1].set(xlabel='Recorded gradient step (rounds and restarts concatenated)', ylabel='Selection gradient norm')
+    if gradients:
+        axes[1].legend(fontsize=7)
+    fig.tight_layout()
+    fig.savefig(output / 'joint_objective_and_gradients.png', dpi=160)
+    fig.savefig(output / 'joint_objective_and_gradients.pdf')
+    plt.close(fig)
     lines = ['# 真实优化运行报告', '', '数值仅来自对应运行的ABC结果；未通过的组合不进入性能排名。', '',
              '| 方法 | Delay ps | Area | ADP | Delay改善% | 评估数 | 失败数 |', '|---|---:|---:|---:|---:|---:|---:|']
     lines += [f"| {r['method']} | {r['delay_ps']:.6f} | {r['area']:.6f} | {r['adp']:.3f} | {r['delay_improvement_pct']:.3f} | {r['evaluations_including_baseline']} | {r['failed_requests']} |" for r in comparison]
     lines += ['', '预测评估为自适应搜索中的预先预测，不代表跨设计泛化。基线锚定不计作预测准确性的证明。',
               '面积约束参考no-op replay面积；所有失败、warmup和显式修复都计入实际搜索预算。',
               '原始输入与no-op replay分别保留；Native ABC未导出rewrite数量，不用AIG节点减少量冒充rewrite次数。',
+              '收敛图左侧是每种搜索采样集内的最佳面积可行delay；joint最终选点按联合目标，可能不同于其采样集内最小delay点。',
               'CSV中evaluation runtime仅为真实评估耗时；完整运行时间应结合run.json与Slurm accounting，包含拟合和搜索。']
     (output / 'REPORT.md').write_text('\n'.join(lines) + '\n')
     return comparison

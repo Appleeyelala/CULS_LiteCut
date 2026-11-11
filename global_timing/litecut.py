@@ -5,6 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 
+import networkx as nx
 import numpy as np
 import torch
 
@@ -87,12 +88,17 @@ def score_catalogue(aig_path, partition, catalogue, checkpoint, cache_dir, batch
     library_path = ROOT / 'projects/culs/src/algorithms/rewrite_library.inc'
     canonical_paths = [ROOT / 'projects/litecut' / p for p in [
         'gate2a_candidate_inference.py', 'src/data_preprocess/feat_extraction_v3.py',
-        'src/extract_cutlib_student/modeling.py', 'src/validate/eval_prediction_accuracy.py']]
+        'src/extract_cutlib_student/modeling.py', 'src/extract_cutlib_teacher/feature_branch.py',
+        'src/validate/eval_prediction_accuracy.py']]
     identity = {'input': digest(aig_path), 'checkpoint': digest(checkpoint), 'library': digest(library_path),
                 'canonical_code': [digest(p) for p in canonical_paths], 'adapter': digest(Path(__file__)),
+                'bridge': digest(ROOT / 'projects/culs/tools/gate3e_run.py'),
+                'environment': {'torch': str(torch.__version__), 'numpy': np.__version__, 'networkx': nx.__version__},
+                'batch_size': batch_size,
                 'truth_validator': digest(ROOT / 'global_timing/truth.py'),
                 'context_validator': digest(ROOT / 'global_timing/cut_validation.py'),
-                'decisions': [[d['root'], d['cut_slot'], d['truth'], d['candidate_subgraph_indices']] for d in catalogue.decisions]}
+                'decisions': [[d['root'], d['cut_slot'], d['truth'], d['cut_leaves'], d['decision_owner_region'],
+                               d['truth_class'], d['candidate_subgraph_indices']] for d in catalogue.decisions]}
     key = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
     cache_dir.mkdir(parents=True, exist_ok=True)
     path = cache_dir / (key + '.json')

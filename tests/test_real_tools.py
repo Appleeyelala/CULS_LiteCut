@@ -100,6 +100,8 @@ class RealToolTests(unittest.TestCase):
         result = evaluator.evaluate(unnamed, self.work / 'named_interface')
         self.assertEqual(result['cec'], 'PASS')
         self.assertIn('POSITIONAL_ORDER', result['cec_interface'])
+        from global_timing.structure import aig_structure_digest
+        self.assertEqual(aig_structure_digest(named), aig_structure_digest(unnamed))
 
     def test_replay_preserves_constant_literals_and_inputs(self):
         # Actual binary AIG: constant outputs, constant AND fanins and live logic.

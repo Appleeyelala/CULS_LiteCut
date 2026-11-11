@@ -8,6 +8,7 @@ import re
 import time
 
 from .common import ToolError, digest, run_tool, save_json, tool_path
+from .structure import aig_structure_digest
 
 
 def cec_passed(text: str) -> bool:
@@ -70,6 +71,7 @@ class Evaluator:
                 return int(fields[2]), int(fields[4])
             if interface(candidate) != interface(self.original):
                 raise ToolError('Replay changed PI/PO interface counts.')
+            result['input_structure_sha256'] = aig_structure_digest(candidate)
             result['cec_interface'] = 'AIGER_PI_PO_POSITIONAL_ORDER; symbol names may be absent after replay'
             text = run_tool([self.abc, '-c', f'cec -n {tool_path(self.original)} {tool_path(candidate)}'], work, 'cec', self.timeout)
             if not cec_passed(text):

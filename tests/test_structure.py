@@ -5,7 +5,7 @@ import unittest
 import tempfile
 
 from global_timing.common import legacy
-from global_timing.structure import make_partition, references, parse_aig
+from global_timing.structure import aig_structure_digest, make_partition, references, parse_aig
 
 
 def fixture(pi, fanins, outputs):
@@ -47,6 +47,19 @@ class StructureTests(unittest.TestCase):
 
     def test_empty_and_graph(self):
         self.check_graph(fixture(2, [], [2, 5, 0]))
+
+    def test_graph_hash_preserves_logic_and_output_order_not_comments(self):
+        with tempfile.TemporaryDirectory() as directory:
+            paths = [Path(directory) / f'{i}.aig' for i in range(4)]
+            contents = [b'aig 2 2 0 2 0\n2\n5\n',
+                        b'aig 2 2 0 2 0\n2\n5\ni0 first\nc\nwritten at another time\n',
+                        b'aig 2 2 0 2 0\n5\n2\n', b'aig 2 2 0 2 0\n2\n4\n']
+            for path, content in zip(paths, contents):
+                path.write_bytes(content)
+            hashes = [aig_structure_digest(path) for path in paths]
+            self.assertEqual(hashes[0], hashes[1])
+            self.assertNotEqual(hashes[0], hashes[2])
+            self.assertNotEqual(hashes[0], hashes[3])
 
     def test_malformed_binary_inputs(self):
         with tempfile.TemporaryDirectory() as directory:

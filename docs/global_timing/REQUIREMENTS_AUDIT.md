@@ -44,9 +44,9 @@
 | 2 多目标梯度逻辑与复现 | optimization.py、surrogate.py、保存梯度、c1355独立重复及全905结果 | 有证据；无稳定优势 |
 | 3 自动化测试系统 | tests/、scripts/ci.py、run_tests.py、test_repository.py | 有执行证据 |
 | 4 测试报告及遗漏 | TEST_COVERAGE、64395矩阵、两主分片核心报告 | 有证据；FAIL/SKIP明确 |
-| 5 基线比较 | FULL905_SEARCH_RESULTS、64854 comparison/；64905 performance_overview/ | 主比较完成；各baseline额外总览待64905 |
+| 5 基线比较 | FULL905_SEARCH_RESULTS、64854 comparison/；64905 performance_overview/ | 主比较和各baseline额外总览已生成；最终验收待原始路径复核 |
 | 6 预测/梯度/收敛/路径变化分析 | 64854 search_quality/、逐例report/；64905 path_changes/ | 搜索分析完成；全量路径待64905 |
 | 7 使用说明 | USAGE、MODEL_AND_EXECUTION、OPERATIONS与各run/job.slurm | 已有具体命令、依赖与参数 |
 | 8 限制与失败报告 | LIMITATIONS、NATIVE_CONTROL_FAILURES、NATIVE_REPLAY_CYCLES、PERFORMANCE_AUDIT及原始failure_evidence | 已有证据；最终路径限制仍待核验 |
 
-任务完成前还须确认：64852的167项全部终态、与前十二批互斥合计905；64905成功结束、全905原始路径/CEC/timing/netlist证据复核无遗漏或审计错误；最终报告及源码/测试来源保持一致。未满足时保留目标active。
+64852已COMPLETED/0:0，167/167项通过，与前十二批互斥合计905设计、13981份映射和16696个引用。任务完成前仍须确认64905成功结束、全905原始路径/CEC/timing/netlist证据复核无遗漏或审计错误，并核对最终报告及源码/测试来源一致；未满足时保留目标active。

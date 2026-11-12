@@ -4,7 +4,7 @@
 
 最新主结果见[统一版本905输入搜索结果](FULL905_SEARCH_RESULTS.md)和[逐要求验收](REQUIREMENTS_AUDIT.md)。64854已完成全905固定cohort、搜索来源审计及原始replay执行核验：901 PASS/4个native对照缺失的PARTIAL，保存搜索与执行审计错误0；并未建立稳定优于随机搜索的优势。目录为`20261112T103045Z-final905-search-analysis-v2-32c72d46/`，其中`output/comparison/`、`search_quality/`、`execution_audit/`分别保留原始对比、误差/来源及trace证据。
 
-前十二批路径已核验738个设计、11324份映射、13538个引用。第十三批64852精确选择剩余167项；64905依赖其结束后复核十三批全905的原始路径证据及各baseline总览。下面的运行中前缀描述保留其当时范围，不替代最新完成记录。
+十三批路径采集已正常结束，精确互斥覆盖905设计、13981份映射、16696个成功引用；四项native缺失保留。64905已完成全部批次终态/覆盖检查及baseline总览，继续复核原始CEC/Liberty日志/netlist/arrival链。目录为`20261112T122920Z-final905-path-analysis-61f92cbb/`；最终`path_changes/`和`final_validation.json`仍待结果。下面的运行中前缀描述保留其当时范围，不替代最新完成记录。
 
 ## 代码与执行
 

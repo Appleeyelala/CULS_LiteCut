@@ -65,3 +65,5 @@
 第六、第九批完成后，已确认完成的首六批加第九批共416个互斥设计、6402份映射、7650个成功引用。第十一批64481冻结712 PASS/2 PARTIAL/191未记录，排除前十批638项后新增76项，首个index408；十一批目录互斥、并集714。准备/分析源码`e1880f0`，选择清单为`20261112T012322Z-consistent-path-audit-batch11-69a57845/output/path_audit_selection.json`，SHA256为`3d6c9caa4f770e33bafe8308768b5db3f0f21b77e7ce92464fba23bfc8da89bb`。来源核验通过，实际审计仍在运行；晚于冻结的loco_top结果保留到后续批次。
 
 第十批完成后，已确认完成的首六批加第九、十批共451个互斥设计、6920份映射、8273个成功引用。审计PASS仅覆盖实际取得的有效测量，不把codec的benchmark PARTIAL改为PASS。
+
+第十二批64482已启动，准备/分析源码`6291113`，排除前十一批已分配的714个目录；新增范围仍待冻结清单，实际提交回执为`20261112T021114Z-consistent-path-audit-batch12-c02e35d3/input/submission.json`。尚未计入完成覆盖率。

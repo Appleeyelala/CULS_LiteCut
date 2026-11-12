@@ -104,6 +104,7 @@
 | 64407 | `20261112T005832Z-consistent-path-audit-batch9-316b38d0` | COMPLETED_WITH_INCOMPLETE_BENCHMARK_COVERAGE：固定52/52个设计审计PASS，791份映射、947个成功测量引用；精确清单及冻结hash一致。原cohort保留602 PASS/1 PARTIAL/302未记录，benchmark源码`160b218`，同一64389 ABC及900 s时限，准备/分析源码`46cabc2`。Slurm正常退出0:0，55m40s、MaxRSS3705960 KiB，2 CPU/24 GiB/0 GPU；不代表全905完成 |
 | 64408 | `20261112T010854Z-consistent-path-audit-batch10-1b537bfa` | COMPLETED_WITH_INCOMPLETE_BENCHMARK_COVERAGE：固定35/35个设计的有效测量审计PASS，518份映射、623个成功引用，包含codec；缺失native指标及引用保持缺失。精确清单及冻结hash一致，原cohort保留636 PASS/2 PARTIAL/267未记录。benchmark源码`160b218`，同一64389 ABC及900 s时限，准备/分析源码`b6bc67a`。Slurm正常退出0:0，47m03s、MaxRSS565756 KiB，2 CPU/24 GiB/0 GPU；不代表全905完成 |
 | 64481 | `20261112T012322Z-consistent-path-audit-batch11-69a57845` | RUNNING：冻结712 PASS/2 PARTIAL/191未记录，排除前十批638项，新增76个路径审计，首个index408；十一批目录互斥、并集714。benchmark源码`160b218`，同一64389 ABC及900 s时限，准备/分析源码`e1880f0`，driver字节不变。2 CPU/24 GiB/0 GPU、24 h，提交后总分配24 CPU/224 GiB/2 GPU；来源核验通过，尚无整批完成结论 |
+| 64482 | `20261112T021114Z-consistent-path-audit-batch12-c02e35d3` | RUNNING：准备/分析源码`6291113`，复用相同driver字节，排除前十一批714个精确目录，按实际终态纳入晚完成的PASS/PARTIAL输入。重新核验集群、全部请求及hash后提交；2 CPU/24 GiB/0 GPU、24 h，同一64389 ABC及900 s时限。提交后总分配24 CPU/224 GiB/2 GPU；仍在冻结来源阶段，新增范围待清单确认 |
 
 ## 统一版本全量比较的准备与提交
 
@@ -150,6 +151,8 @@
 第六批64404和第九批64407均已正常结束，分别74/74与52/52个设计审计PASS、1113/791份映射、1335/947个成功引用，逐例唯一AIG字节数之和862/589。两份`output/slurm_completion.json`的SHA256分别为`1ac43b1e477a50360492ba11643f97ab1ca194d05f86bb72ecef88488e0f2055`和`f03a0be4d23c1fc20d052d81e215360d6581e2e028434d9c48f78300becd929d`；原选择/cohort哈希不变。完成的首六批加第九批共416个互斥设计、6402份映射、7650个成功引用，其余已分配范围仍须分别核验。
 
 第十批64408已完成35/35个设计的有效测量审计，518份映射、623个成功引用，逐例唯一AIG字节数之和392；codec仍为benchmark PARTIAL，其已测量结果的路径审计PASS，native指标与路径引用保持缺失。`output/slurm_completion.json`的SHA256为`8dad49975f4a584ac433cd7cd610aec2c27ee72d09d3b10568af07ea76dc342d`；精确清单、冻结hash和Slurm正常终态已核验。完成的首六批加第九、十批共451个互斥设计、6920份映射、8273个成功引用。
+
+第十二批64482的目录为`20261112T021114Z-consistent-path-audit-batch12-c02e35d3`，准备/分析源码`6291113`，排除前十一批714个精确目录。提交前重新核验集群、全部用户请求及冻结hash，总分配由22 CPU/200 GiB/2 GPU变为24 CPU/224 GiB/2 GPU；新增范围待启动时冻结清单，包括尚未分配的loco_top有效测量，不回写前批快照。提交本身不增加通过覆盖数。
 
 各批完成的逐例报告位于`output/arrival_paths/*/summary.json`；原搜索结果保持不变。未来批次应排除所有前批选择清单中已分配的目录，避免重复运行；若确需重试失败审计，必须保留失败报告及单独声明的新尝试。最终使用`analyze_path_changes.py --audit-runs`合并各批证据，匹配最终905输入cohort选定的精确benchmark目录，不以相同输入hash的旧开发运行代替。各批冻结范围及未记录状态不随后续扫描回写。
 

@@ -24,6 +24,7 @@
 | 真实核心及完整对照回归 | `20261111T182419Z-native-control-real-regression-2c5d4d0b/output/tests.json`、`repository_tests/test_matrix.json`、`audit_summary.json` | 程序版本`94909a7`：75/75核心PASS；当次2510项矩阵完整保留 |
 | 统一版本c1355同配置复现 | `20261111T214331Z-consistent-c1355-exact-repeat-0e387139/output/verification.json`、`comparison/repeat_comparison.json`、`accounting.json` | 64397.0独立执行同一`160b218`优化器源码及完整参数；配置、全部数值/选择/最终选点、25项精确图结构一致，冻结输入未变。native ABC时间注释使字节不同；两模式无改善，复现不进入905输入性能cohort |
 | 自然native失败后的完整案例尝试 | `20261111T184033Z-isolated-native-backend-retry-813f3b26/output/tests.json`、`suite/records.jsonl`及逐方法产物 | 75/75真实核心再次PASS；index108的native超时后继续执行，但整例7200.59 s FAIL。部分测量保留，面积约束未完成、joint未启动；不能作为完整比较 |
+| 统一版本Back_End_With_Decode完整比较 | `20261111T184752Z-consistent-full-shard0-1568c1b9/output/suite/case_0108/report/comparison.csv`、`observations.csv`及原始CEC日志 | 4790.78 s完整PASS，无缺失方法；native及两最终点CEC通过。两梯度最终均来自修复，较原图慢15.122%，各四次直接梯度请求均FAIL；旧整例超时保留，路径审计尚在运行 |
 | 统一版本mrc4自然native失败 | `20261111T184753Z-consistent-full-shard1-175169c2/output/suite/case_0611/native_abc/rewrite.log`及`report/method_failures.json`、`comparison.csv`、`observations.csv` | ABC reverse-level更新断言退出−6，无native指标；其余方法完成，整例PARTIAL。两梯度最终点来自修复，各四次直接梯度请求均失败；不丢弃输入、不补造缺失基线 |
 | 失败分析 | `20261111T190337Z-saved-failure-evidence-audit-9b981c5c/output/repository_tests/test_matrix.json`、`tests.json`、`failure_regression.json` | `53d4541`：2512项记录，17项import FAIL及1项SKIP；110文件有命名证据。81项CPU矩阵69 PASS/12 SKIP，6项新增失败分析测试通过；未重跑原优化器或GPU回归 |
 | 原生循环及独立对照失败 | 同一目录的`cycle_regression.json`、`native_control_regression.json` | 旧循环请求被拒绝，另一次13项安装CEC/mapping通过；受控native故障不妨碍其余真实测量，缺失对照不填数值；故障fixture不参与性能统计 |
@@ -49,4 +50,4 @@
 
 统一版本路径审计64398、64400、64401、64402、64403、64404、64405分别选择89、77、38、37、49、74、151个有测量结果的设计，目录见[运行记录](RUN_LOG.md#统一版本路径证据分批采集)。七批精确目录互斥、并集515，benchmark源码均为`160b218`；第七批冻结514 PASS、1 PARTIAL、390未记录，包含mrc4有效测量。各批启动快照独立保留，不将未记录计数相加。首批、第二批、第三批及第五批已完成，共253设计、3836份映射、4595个引用；第四、六、七批仍在运行。选择清单见各自`output/path_audit_selection.json`，逐例报告见`output/arrival_paths/`；已分配不等于已完成。最终按精确benchmark目录关联，旧116设计报告不替代新结果。
 
-第八批64406已启动，准备/分析源码`e9016eb`，排除前七批已分配的515个目录；目前仍在冻结来源，未确认新增范围。实际提交回执见`20261112T004638Z-consistent-path-audit-batch8-b7761547/input/submission.json`，不能据此增加已通过覆盖数。
+第八批64406冻结550 PASS、1 PARTIAL、354未记录，排除前七批515项后新增36项，首个为index108；八批精确目录互斥、并集551。准备/分析源码`e9016eb`，选择清单见`20261112T004638Z-consistent-path-audit-batch8-b7761547/output/path_audit_selection.json`，SHA256为`fb2104a3bcbc417311185ed0aa6ea890422824dd34bdfdc9ad2de63fc38a7cbf`。来源核验通过、审计仍在运行，分配范围不增加已通过覆盖数。

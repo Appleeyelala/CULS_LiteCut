@@ -15,3 +15,5 @@ index108 `Back_End_With_Decode`在`20261111T174715Z-acyclic-terminal-case-retrie
 后续自然补验64340.14（`20261111T184033Z-isolated-native-backend-retry-813f3b26`）使用真实ABC，native CEC在900.30 s超时、returncode −9。`native_abc/attempt.json`保持FAIL，流程继续执行其他方法，没有故障注入或更换对照数值。最终案例在7200.59 s整例时限处记FAIL，Slurm step以0退出仅表示运行器完成记录；没有完整case summary，不能记作PARTIAL或PASS。
 
 保存结果显示greedy两次请求中第一次安装被拒绝、修复请求CEC/mapping PASS；independent两次请求均FAIL，第二次CEC在900.19 s超时。随机搜索保存8条观察（含no-op），3 PASS/5 FAIL，其中一次CEC在900.24 s超时。面积约束进度记录到7条（含no-op），4条直接梯度请求均FAIL，随后整例超时；联合目标未启动。这证明自然native超时后的继续执行有效，但没有完成该设计的完整方法比较。已结束命令的计时边界见[性能检查](PERFORMANCE_AUDIT.md)，原始失败与中间产物保持不变。
+
+统一版本64399的预定index108后来完整PASS：原生ABC的CEC在544.64 s证明等价，所有比较方法完成，整例4790.78 s。两梯度最终均为显式修复点，较原图慢15.122%，各四次直接梯度请求全部失败。此独立运行不回写上述失败，也不证明跨负载速度优势；完整数值和hash见[运行记录](RUN_LOG.md#统一版本back_end_with_decode完整结果)。

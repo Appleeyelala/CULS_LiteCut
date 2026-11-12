@@ -100,7 +100,7 @@
 | 64403 | `20261111T233214Z-consistent-path-audit-batch5-33fcbf06` | COMPLETED_WITH_INCOMPLETE_BENCHMARK_COVERAGE：固定49/49个精确设计PASS，751份映射、898个成功测量引用均通过核验；原冻结cohort仍为290 PASS/615未记录。benchmark源码`160b218`，同一64389 ABC及900 s时限；准备/分析源码`c92852f`。Slurm正常退出0:0，1h04m46s、MaxRSS892840 KiB，2 CPU/24 GiB/0 GPU；选择与cohort哈希不变，不是全905完成 |
 | 64404 | `20261111T235819Z-consistent-path-audit-batch6-0fe6209c` | RUNNING：首批64398完成后重新检查配额，冻结两个分片的364个PASS输入、541未记录，排除前五批已分配的290个精确目录，新增74个路径审计；benchmark源码均为`160b218`。2 CPU/24 GiB/0 GPU、24 h，同一64389 ABC与900 s工具时限；提交后总分配26 CPU/248 GiB/2 GPU。准备/分析源码`917d4d0`，driver字节不变；来源核验通过，尚无整批完成结论 |
 | 64405 | `20261112T002444Z-consistent-path-audit-batch7-e74274e8` | RUNNING：第五批完成后重新检查配额，冻结514 PASS/1 PARTIAL/390未记录，排除前六批已分配的364个精确目录，新增151个路径审计，包含mrc4有效测量。benchmark源码`160b218`，同一64389 ABC及900 s时限；准备/分析源码`ceb88f2`，driver字节不变。2 CPU/24 GiB/0 GPU、24 h，提交后总分配26 CPU/248 GiB/2 GPU；来源核验通过，尚无整批完成结论 |
-| 64406 | `20261112T004638Z-consistent-path-audit-batch8-b7761547` | RUNNING：第二、三批完成后重新检查配额，提交第八批；准备/分析源码`e9016eb`，复用相同driver字节，排除前七批已分配的515个精确目录。2 CPU/24 GiB/0 GPU、24 h，同一64389 ABC及900 s时限；提交后总分配24 CPU/224 GiB/2 GPU。仍在冻结来源阶段，新增范围及完成计数待实际清单确认 |
+| 64406 | `20261112T004638Z-consistent-path-audit-batch8-b7761547` | RUNNING：冻结550 PASS/1 PARTIAL/354未记录，排除前七批515个精确目录，新增36个路径审计，首个为index108。benchmark源码`160b218`，同一64389 ABC及900 s时限；准备/分析源码`e9016eb`，driver字节不变。2 CPU/24 GiB/0 GPU、24 h，提交后总分配24 CPU/224 GiB/2 GPU；来源核验通过，尚无整批完成结论 |
 
 ## 统一版本全量比较的准备与提交
 
@@ -134,7 +134,7 @@
 
 第七批`20261112T002444Z-consistent-path-audit-batch7-e74274e8`在64403完成、重新检查配额后，已作为64405启动。准备/分析源码为`ceb88f2`，driver字节仍为`f0f52ac8f165465781312fbba7296e9434af33186697d239e988855c1c9e3b11`。实际冻结514 PASS、1 PARTIAL、390未记录，排除前六批364项后新增151项，包含mrc4已有的有效测量；七批精确目录互斥、并集515。选择清单SHA256为`b41a2916c5c0d9cb10088e754636c5f4c38fb7c1c01e7d685fa328a0b4bca2b3`，首个输入index186。提交前24 CPU/224 GiB/2 GPU，提交后26 CPU/248 GiB/2 GPU；新作业2 CPU/24 GiB/0 GPU、24 h。准备记录与提交回执分别保留，已分配不等于已完成。
 
-第八批64406在第二、三批正常结束后启动，目录`20261112T004638Z-consistent-path-audit-batch8-b7761547`，准备/分析源码`e9016eb`。提交前再次核验集群、全部用户作业和冻结hash，总分配由22 CPU/200 GiB/2 GPU变为24 CPU/224 GiB/2 GPU。配置排除前七批515个精确目录；实际新增范围尚待启动时的来源核验及冻结清单，不将提交当作已完成审计。
+第八批64406在第二、三批正常结束后启动，目录`20261112T004638Z-consistent-path-audit-batch8-b7761547`，准备/分析源码`e9016eb`。提交前再次核验集群、全部用户作业和冻结hash，总分配由22 CPU/200 GiB/2 GPU变为24 CPU/224 GiB/2 GPU。实际冻结550 PASS、1 PARTIAL、354未记录，排除前七批515项后新增36项；八批精确目录互斥、并集551。选择清单SHA256为`fb2104a3bcbc417311185ed0aa6ea890422824dd34bdfdc9ad2de63fc38a7cbf`，首个输入index108。实际审计仍在运行，不能把已分配当作通过。
 
 各批完成的逐例报告位于`output/arrival_paths/*/summary.json`；原搜索结果保持不变。未来批次应排除所有前批选择清单中已分配的目录，避免重复运行；若确需重试失败审计，必须保留失败报告及单独声明的新尝试。最终使用`analyze_path_changes.py --audit-runs`合并各批证据，匹配最终905输入cohort选定的精确benchmark目录，不以相同输入hash的旧开发运行代替。各批冻结范围及未记录状态不随后续扫描回写。
 
@@ -143,6 +143,14 @@
 64397的`output/suite/case_0147`已完整PASS，整例3533.11 s、无缺失比较方法；源码`160b218`、每搜索8次预算、900 s工具/7200 s整例限制。原图/no-op/native delay分别26611.9902/26990.9844/25177.2832 ps。面积约束最终为25095.3848 ps / 30426.7109 area，较原图改善5.699%、较no-op改善7.023%，满足no-op面积的1.05倍约束。联合目标最终为25950.4219 ps / 31717.6816 area，较原图改善2.486%；该模式没有硬面积上限，其选点不满足另一模式的1.05倍约束。
 
 两模式各8条观察、5次失败、4次直接梯度请求；四次直接梯度组合均未完全ACCEPTED而被明确拒绝。最终成功点分别来自显式可行性修复eval7/eval2，不能将收益归为未修复梯度组合的直接成功。联合模式与同预算random joint的最终数值相同。原始CEC日志证实native及两最终点等价；证据见`report/comparison.csv`（SHA256 `b72bb05f84dbafcf8a83dd29a3a266e3d73d3e171cce052b2c519562549a712b`）和`report/observations.csv`（`284e12f4ebe0e50e9120da4f33c94a670d94dfee8e4e4d2cd1f25b5284f37323`）。旧64340.9的7200 s超时保留为FAIL；不同版本、工具和负载下的墙钟差异不作速度提升结论。本案例属于预先声明的统一全量分片，未根据结果额外挑选重跑。
+
+## 统一版本Back_End_With_Decode完整结果
+
+64399的`output/suite/case_0108`已完整PASS，整例4790.78 s，无缺失比较方法；源码`160b218`、每搜索8次预算、900 s工具/7200 s整例时限均未改变。这是预先声明的统一偶数分片结果，旧64340.14的7200.59 s失败及其他开发版本超时保留。共享负载与环境不同，不能用两次耗时相除声称算法加速。
+
+原图/no-op/native delay分别为24935.3438/29471.3691/29522.1465 ps。两种梯度模式均选择显式修复eval2，最终28706.1016 ps / 173185.203 area，1946项rewrite；较no-op改善2.597%，但较原图恶化15.122%。两模式各8条观察、5次失败、4次直接梯度请求，直接梯度组合均未完全ACCEPTED而FAIL。随机两模式均为25179.6484 ps / 173683.953 area，delay及joint目标优于梯度结果，仍较原图慢0.980%。不能把相对no-op的恢复解释为相对原图的优化成功，也不能把修复点归为直接梯度请求成功。
+
+原始CEC日志证实native及两模式eval2均等价，分别耗时544.64/259.81/261.26 s，returncode均0；两模式最终AIG文件SHA256相同。原图/no-op/最终梯度的critical PO分别为11505/278/282，独立路径审计已分配给第八批64406，尚未据此建立完整路径身份变化结论。证据hash：`report/comparison.csv`为`9c9d9d83f6ca94d699ff94798708452627ff26663b16d15c15582a5ab7bae62b`，`report/observations.csv`为`3a55a64ea2b4f13ac1fabf9f3b61a530afe1152240237c016bb678509d552bcb`，`report/method_failures.json`为`a69c982bdff8226fa49734973fc4e212f161d7149a8f0248177018dcbb7ceb51`。
 
 ## 统一版本mrc4不完整比较
 

@@ -100,6 +100,7 @@
 | 64403 | `20261111T233214Z-consistent-path-audit-batch5-33fcbf06` | COMPLETED_WITH_INCOMPLETE_BENCHMARK_COVERAGE：固定49/49个精确设计PASS，751份映射、898个成功测量引用均通过核验；原冻结cohort仍为290 PASS/615未记录。benchmark源码`160b218`，同一64389 ABC及900 s时限；准备/分析源码`c92852f`。Slurm正常退出0:0，1h04m46s、MaxRSS892840 KiB，2 CPU/24 GiB/0 GPU；选择与cohort哈希不变，不是全905完成 |
 | 64404 | `20261111T235819Z-consistent-path-audit-batch6-0fe6209c` | RUNNING：首批64398完成后重新检查配额，冻结两个分片的364个PASS输入、541未记录，排除前五批已分配的290个精确目录，新增74个路径审计；benchmark源码均为`160b218`。2 CPU/24 GiB/0 GPU、24 h，同一64389 ABC与900 s工具时限；提交后总分配26 CPU/248 GiB/2 GPU。准备/分析源码`917d4d0`，driver字节不变；来源核验通过，尚无整批完成结论 |
 | 64405 | `20261112T002444Z-consistent-path-audit-batch7-e74274e8` | RUNNING：第五批完成后重新检查配额，冻结514 PASS/1 PARTIAL/390未记录，排除前六批已分配的364个精确目录，新增151个路径审计，包含mrc4有效测量。benchmark源码`160b218`，同一64389 ABC及900 s时限；准备/分析源码`ceb88f2`，driver字节不变。2 CPU/24 GiB/0 GPU、24 h，提交后总分配26 CPU/248 GiB/2 GPU；来源核验通过，尚无整批完成结论 |
+| 64406 | `20261112T004638Z-consistent-path-audit-batch8-b7761547` | RUNNING：第二、三批完成后重新检查配额，提交第八批；准备/分析源码`e9016eb`，复用相同driver字节，排除前七批已分配的515个精确目录。2 CPU/24 GiB/0 GPU、24 h，同一64389 ABC及900 s时限；提交后总分配24 CPU/224 GiB/2 GPU。仍在冻结来源阶段，新增范围及完成计数待实际清单确认 |
 
 ## 统一版本全量比较的准备与提交
 
@@ -132,6 +133,8 @@
 第二批64400和第三批64401随后分别完成77/77与38/38个设计，1135/539份映射、1366/653个成功引用，逐例唯一AIG字节数之和911/453。两份`output/slurm_completion.json`的SHA256分别为`5d6ee75b249d6189b28f35fecca61c3a0614bb541901cb535a0829a62c484397`和`a159893702273262ca6918f1f732e4c61b60f5c10cc1f255cea420d82de35f63`；两者原选择/cohort哈希不变、Slurm均正常退出0:0。完成的四批共253个互斥设计、3836份映射及4595个成功引用，仍不是完整905覆盖。
 
 第七批`20261112T002444Z-consistent-path-audit-batch7-e74274e8`在64403完成、重新检查配额后，已作为64405启动。准备/分析源码为`ceb88f2`，driver字节仍为`f0f52ac8f165465781312fbba7296e9434af33186697d239e988855c1c9e3b11`。实际冻结514 PASS、1 PARTIAL、390未记录，排除前六批364项后新增151项，包含mrc4已有的有效测量；七批精确目录互斥、并集515。选择清单SHA256为`b41a2916c5c0d9cb10088e754636c5f4c38fb7c1c01e7d685fa328a0b4bca2b3`，首个输入index186。提交前24 CPU/224 GiB/2 GPU，提交后26 CPU/248 GiB/2 GPU；新作业2 CPU/24 GiB/0 GPU、24 h。准备记录与提交回执分别保留，已分配不等于已完成。
+
+第八批64406在第二、三批正常结束后启动，目录`20261112T004638Z-consistent-path-audit-batch8-b7761547`，准备/分析源码`e9016eb`。提交前再次核验集群、全部用户作业和冻结hash，总分配由22 CPU/200 GiB/2 GPU变为24 CPU/224 GiB/2 GPU。配置排除前七批515个精确目录；实际新增范围尚待启动时的来源核验及冻结清单，不将提交当作已完成审计。
 
 各批完成的逐例报告位于`output/arrival_paths/*/summary.json`；原搜索结果保持不变。未来批次应排除所有前批选择清单中已分配的目录，避免重复运行；若确需重试失败审计，必须保留失败报告及单独声明的新尝试。最终使用`analyze_path_changes.py --audit-runs`合并各批证据，匹配最终905输入cohort选定的精确benchmark目录，不以相同输入hash的旧开发运行代替。各批冻结范围及未记录状态不随后续扫描回写。
 

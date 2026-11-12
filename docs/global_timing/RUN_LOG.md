@@ -144,6 +144,8 @@
 
 第十批64408的目录为`20261112T010854Z-consistent-path-audit-batch10-1b537bfa`，准备/分析源码`b6bc67a`。第四批资源释放后重新核验集群、全部用户请求及输入hash，总分配由24 CPU/224 GiB/2 GPU变为26 CPU/248 GiB/2 GPU。实际冻结636 PASS、2 PARTIAL、267未记录，排除前九批603项后新增35项，包含codec有效测量，首个输入index374；十批精确目录互斥、并集638。选择清单SHA256为`c51e52282c6888eda0dcb1d33c839b0c0c36f7001012fb8ddd549455553ce157`。来源核验通过、审计仍在运行，不将已分配当作通过。
 
+第十一批`20261112T012322Z-consistent-path-audit-batch11-69a57845`目前仅PREPARED_NOT_SUBMITTED，没有Slurm ID或实验结果。准备/分析源码`e1880f0`，复用相同driver字节；前十批638个精确目录互斥，所有选择/cohort哈希已核验。准备时活动分配仍为26 CPU/248 GiB/2 GPU，新作业计划2 CPU/24 GiB/0 GPU、24 h，须等资源释放并重新核验配额后提交。未生成新选择清单，不计入已分配或已通过覆盖数。
+
 各批完成的逐例报告位于`output/arrival_paths/*/summary.json`；原搜索结果保持不变。未来批次应排除所有前批选择清单中已分配的目录，避免重复运行；若确需重试失败审计，必须保留失败报告及单独声明的新尝试。最终使用`analyze_path_changes.py --audit-runs`合并各批证据，匹配最终905输入cohort选定的精确benchmark目录，不以相同输入hash的旧开发运行代替。各批冻结范围及未记录状态不随后续扫描回写。
 
 ## 统一版本Division完整结果

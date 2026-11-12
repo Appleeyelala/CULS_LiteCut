@@ -96,7 +96,7 @@
 | 64399 | `20261111T184752Z-consistent-full-shard0-1568c1b9` | RUNNING：统一版本偶数453输入分片，由64396在配额检查后提交。启动75/75真实核心PASS，已进入4 worker benchmark；源码`160b218`、64389工具，8 CPU/64 GiB/1 GPU、5天。与64397相同的8预算、warmup2、梯度20/校准30步、整例7200 s/工具900 s；两份预定索引互斥且并集905。不是整分片或全量完成声明 |
 | 64400 | `20261111T225011Z-consistent-path-audit-batch2-7d3c9774` | COMPLETED_WITH_INCOMPLETE_BENCHMARK_COVERAGE：固定77/77个设计PASS，1135份映射、1366个成功测量引用；精确清单和冻结hash一致。原cohort保留166 PASS/739未记录，benchmark源码`160b218`，同一64389 ABC及900 s时限，准备/分析源码`5b22586`。Slurm正常退出0:0，1h50m45s、MaxRSS2300856 KiB，2 CPU/24 GiB/0 GPU；不代表全905完成 |
 | 64401 | `20261111T230414Z-consistent-path-audit-batch3-9f6ede4b` | COMPLETED_WITH_INCOMPLETE_BENCHMARK_COVERAGE：固定38/38个设计PASS，539份映射、653个成功测量引用，包含统一版本Division；精确清单和冻结hash一致。原cohort保留204 PASS/701未记录，benchmark源码`160b218`，同一64389 ABC及900 s时限，准备/分析源码`b057dc8`。Slurm正常退出0:0，1h39m13s、MaxRSS886968 KiB，2 CPU/24 GiB/0 GPU；不代表全905完成 |
-| 64402 | `20261111T231943Z-consistent-path-audit-batch4-c3f19ce7` | RUNNING：冻结两个分片的241个PASS输入、664未记录，核验并排除前三批已分配的204个精确目录，新增37个路径审计；benchmark源码均为`160b218`。2 CPU/24 GiB/0 GPU、24 h，同一64389 ABC与900 s工具时限。提交后总分配24 CPU/224 GiB/2 GPU；准备/分析源码`5116df5`，driver字节不变，配置显式列出三个前批。来源核验通过，已进入原有observer流程，尚无整批完成结论 |
+| 64402 | `20261111T231943Z-consistent-path-audit-batch4-c3f19ce7` | COMPLETED_WITH_INCOMPLETE_BENCHMARK_COVERAGE：固定37/37个设计PASS，662份映射、773个成功测量引用；精确清单及冻结hash一致。原cohort保留241 PASS/664未记录，benchmark源码`160b218`，同一64389 ABC及900 s时限，准备/分析源码`5116df5`。Slurm正常退出0:0，1h41m59s、MaxRSS6332912 KiB，2 CPU/24 GiB/0 GPU；不代表全905完成 |
 | 64403 | `20261111T233214Z-consistent-path-audit-batch5-33fcbf06` | COMPLETED_WITH_INCOMPLETE_BENCHMARK_COVERAGE：固定49/49个精确设计PASS，751份映射、898个成功测量引用均通过核验；原冻结cohort仍为290 PASS/615未记录。benchmark源码`160b218`，同一64389 ABC及900 s时限；准备/分析源码`c92852f`。Slurm正常退出0:0，1h04m46s、MaxRSS892840 KiB，2 CPU/24 GiB/0 GPU；选择与cohort哈希不变，不是全905完成 |
 | 64404 | `20261111T235819Z-consistent-path-audit-batch6-0fe6209c` | RUNNING：首批64398完成后重新检查配额，冻结两个分片的364个PASS输入、541未记录，排除前五批已分配的290个精确目录，新增74个路径审计；benchmark源码均为`160b218`。2 CPU/24 GiB/0 GPU、24 h，同一64389 ABC与900 s工具时限；提交后总分配26 CPU/248 GiB/2 GPU。准备/分析源码`917d4d0`，driver字节不变；来源核验通过，尚无整批完成结论 |
 | 64405 | `20261112T002444Z-consistent-path-audit-batch7-e74274e8` | RUNNING：第五批完成后重新检查配额，冻结514 PASS/1 PARTIAL/390未记录，排除前六批已分配的364个精确目录，新增151个路径审计，包含mrc4有效测量。benchmark源码`160b218`，同一64389 ABC及900 s时限；准备/分析源码`ceb88f2`，driver字节不变。2 CPU/24 GiB/0 GPU、24 h，提交后总分配26 CPU/248 GiB/2 GPU；来源核验通过，尚无整批完成结论 |
@@ -138,6 +138,8 @@
 第八批64406在第二、三批正常结束后启动，目录`20261112T004638Z-consistent-path-audit-batch8-b7761547`，准备/分析源码`e9016eb`。提交前再次核验集群、全部用户作业和冻结hash，总分配由22 CPU/200 GiB/2 GPU变为24 CPU/224 GiB/2 GPU。实际冻结550 PASS、1 PARTIAL、354未记录，排除前七批515项后新增36项；八批精确目录互斥、并集551。选择清单SHA256为`fb2104a3bcbc417311185ed0aa6ea890422824dd34bdfdc9ad2de63fc38a7cbf`，首个输入index108。实际审计仍在运行，不能把已分配当作通过。
 
 第九批64407的目录为`20261112T005832Z-consistent-path-audit-batch9-316b38d0`，准备/分析源码`46cabc2`，排除前八批551个精确目录。提交时重新核验集群、全部用户请求及输入hash，总分配由24 CPU/224 GiB/2 GPU变为26 CPU/248 GiB/2 GPU。实际冻结范围尚待选择清单，提交本身不增加通过覆盖率。
+
+第四批64402随后完成37/37个设计、662份映射和773个成功引用，逐例唯一AIG字节数之和533。`output/slurm_completion.json`的SHA256为`7f5e2407c20ffdbc11f5c79e88c7baf009c379ca53e267463cc838f306dea625`；原选择/cohort哈希不变，Slurm正常退出0:0。至此首五批全部完成，共290个互斥设计、4498份映射、5368个成功引用；后续批次和完整905覆盖仍须继续核验。
 
 各批完成的逐例报告位于`output/arrival_paths/*/summary.json`；原搜索结果保持不变。未来批次应排除所有前批选择清单中已分配的目录，避免重复运行；若确需重试失败审计，必须保留失败报告及单独声明的新尝试。最终使用`analyze_path_changes.py --audit-runs`合并各批证据，匹配最终905输入cohort选定的精确benchmark目录，不以相同输入hash的旧开发运行代替。各批冻结范围及未记录状态不随后续扫描回写。
 

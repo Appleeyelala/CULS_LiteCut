@@ -56,4 +56,4 @@
 
 第九批64407冻结602 PASS、1 PARTIAL、302未记录，排除前八批551项后新增52项，首个为index322；九批精确目录互斥、并集603。准备/分析源码`46cabc2`，选择清单为`20261112T005832Z-consistent-path-audit-batch9-316b38d0/output/path_audit_selection.json`，SHA256为`db9115336fdf856882fe73df5d3b30e0c093f503b0ec044badd1105541dc2677`。来源核验通过，审计仍在运行；晚于冻结的codec结果由后续批次纳入。
 
-第十批64408已启动，准备/分析源码`b6bc67a`，排除前九批已分配的603个目录；新增范围仍待冻结清单。实际提交回执为`20261112T010854Z-consistent-path-audit-batch10-1b537bfa/input/submission.json`，提交不增加已通过覆盖数。
+第十批64408冻结636 PASS、2 PARTIAL、267未记录，排除前九批603项后新增35项，包含codec有效测量；十批精确目录互斥、并集638。准备/分析源码`b6bc67a`，选择清单为`20261112T010854Z-consistent-path-audit-batch10-1b537bfa/output/path_audit_selection.json`，SHA256为`c51e52282c6888eda0dcb1d33c839b0c0c36f7001012fb8ddd549455553ce157`。来源核验通过，审计仍在运行。

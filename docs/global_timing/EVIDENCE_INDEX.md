@@ -33,6 +33,9 @@
 | 保存映射的最大arrival链 | `20261111T160518Z-frozen-cohort-path-audit-0994e1ac/output/arrival_paths/summary.json` | 固定清单中116个成功设计的1870份映射、2218个引用，通过新CEC和数值/网表正文不变核验 |
 | 路径变化与预测关联 | `20261111T182725Z-completed116-path-analysis-3a705938/output/path_changes/summary.json`、`retained_prefix_comparison.json` | 全部116设计只读复核，原39设计分析精确一致；不与191输入搜索快照拼成同一实验，不能证明唯一逻辑路径身份 |
 | 统一版本首批路径采集 | `20261111T221147Z-consistent-path-audit-batch1-4a351887/output/arrival_paths/summary.json`、`audit_summary.json`、`slurm_completion.json` | 固定89/89个设计PASS，1411份映射、1678个引用，精确benchmark目录与原清单一致；新CEC及数值/网表正文不变核验通过。benchmark源码`160b218`，与最终比较相同的64389 ABC；首批冻结cohort仍有816未记录，不是全905完成 |
+| 统一版本第二批路径采集 | `20261111T225011Z-consistent-path-audit-batch2-7d3c9774/output/arrival_paths/summary.json`、`audit_summary.json`、`slurm_completion.json` | 固定77/77设计PASS，1135份映射、1366个引用；精确清单、冻结hash及Slurm正常终态已核验。原166 PASS/739未记录保持不变 |
+| 统一版本第三批路径采集 | `20261111T230414Z-consistent-path-audit-batch3-9f6ede4b/output/arrival_paths/summary.json`、`audit_summary.json`、`slurm_completion.json` | 固定38/38设计PASS，539份映射、653个引用，包含Division；精确清单、冻结hash及Slurm正常终态已核验。原204 PASS/701未记录保持不变 |
+| 统一版本第五批路径采集 | `20261111T233214Z-consistent-path-audit-batch5-33fcbf06/output/arrival_paths/summary.json`、`audit_summary.json`、`slurm_completion.json` | 固定49/49个设计PASS，751份映射、898个引用，精确清单一致，新CEC及timing/网表正文不变；Slurm正常完成，选择/cohort哈希不变。原冻结290 PASS/615未记录保持不变，与首批及其他已分配批次互斥 |
 
 上述搜索比较未显示稳定优于对等预算随机搜索的结果。真实CEC通过、代理预测准确、优化收益和跨设计泛化是不同结论，分别见[搜索分析](INTERIM_SEARCH_ANALYSIS.md)、[路径分析](PATH_CHANGE_ANALYSIS.md)和[限制报告](LIMITATIONS.md)。
 
@@ -44,4 +47,4 @@
 
 最终比较须核对全部905个终态、同一来源与参数、各方法缺项、真实预算及失败请求。已有开发版本全量扫描和定向补验独立保存，不按结果优劣拼接为最终cohort。Slurm退出0也不等于全部case或历史程序PASS；应读取逐例和逐程序报告。当前不宣称全量验收完成。
 
-统一版本的路径证据已开始独立采集：64398、64400、64401、64402、64403和64404分别选择89、77、38、37、49和74个成功设计，目录见[运行记录](RUN_LOG.md#统一版本路径证据分批采集)。每批核验并排除所有前批已分配的精确目录，六批互斥、并集364，benchmark源码均为`160b218`。启动时分别冻结89/166/204/241/290/364个成功输入，816/739/701/664/615/541未记录的快照独立保留，不能将缺项相加。首批64398已完成并列入上表，其余五批仍在运行。选择清单见各自`output/path_audit_selection.json`，实际逐例报告见`output/arrival_paths/`；已分配不等于已完成。后续由现有多audit入口与最终cohort按精确benchmark目录关联，原开发版本的116设计报告不替代新结果。
+统一版本路径审计64398、64400、64401、64402、64403、64404、64405分别选择89、77、38、37、49、74、151个有测量结果的设计，目录见[运行记录](RUN_LOG.md#统一版本路径证据分批采集)。七批精确目录互斥、并集515，benchmark源码均为`160b218`；第七批冻结514 PASS、1 PARTIAL、390未记录，包含mrc4有效测量。各批启动快照独立保留，不将未记录计数相加。首批、第二批、第三批及第五批已完成，共253设计、3836份映射、4595个引用；第四、六、七批仍在运行。选择清单见各自`output/path_audit_selection.json`，逐例报告见`output/arrival_paths/`；已分配不等于已完成。最终按精确benchmark目录关联，旧116设计报告不替代新结果。

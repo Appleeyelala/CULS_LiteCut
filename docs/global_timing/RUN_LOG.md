@@ -126,6 +126,8 @@
 
 64404在首批资源释放后启动，冻结364个PASS输入，排除前五批290项后选择74个；六批选择互斥、并集364。第六批`output/path_audit_selection.json`的SHA256为`1eaa635e01ec0a9882f3f731b925bc88780829172d8f96649ed6eea1594283dc`，首个对象为index122 Core。首批metadata已进入完成状态，但其冻结cohort和选择清单保持原字节，来源核验通过；新批次不会重复首批或其他已分配目录。
 
+第七批`20261112T002444Z-consistent-path-audit-batch7-e74274e8`目前仅PREPARED_NOT_SUBMITTED，没有Slurm ID或实验结果。准备/分析源码为`ceb88f2`；driver字节仍为`f0f52ac8f165465781312fbba7296e9434af33186697d239e988855c1c9e3b11`，配置排除前六批互斥的364个精确目录，保留后续PARTIAL中的有效测量。准备时活动分配为26 CPU/248 GiB/2 GPU，须等待释放后重新核验集群与全部用户请求，方可提交2 CPU/24 GiB/0 GPU作业。新批范围以实际启动时生成的冻结清单为准，准备不计入覆盖率。
+
 各批完成的逐例报告位于`output/arrival_paths/*/summary.json`；原搜索结果保持不变。未来批次应排除所有前批选择清单中已分配的目录，避免重复运行；若确需重试失败审计，必须保留失败报告及单独声明的新尝试。最终使用`analyze_path_changes.py --audit-runs`合并各批证据，匹配最终905输入cohort选定的精确benchmark目录，不以相同输入hash的旧开发运行代替。各批冻结范围及未记录状态不随后续扫描回写。
 
 ## 统一版本Division完整结果

@@ -44,6 +44,7 @@ index197进一步暴露了原生顺序安装的三region引用环：旧trace把6
 - index108随后在预先声明的统一分片64399完整PASS，无缺失方法，native CEC544.64 s及两最终点CEC均通过。两梯度最终显式修复点28706.1016 ps，较no-op改善2.597%，但较原图恶化15.122%；各四次直接梯度请求全部FAIL，random的delay和joint目标更优。旧超时保留，4790.78 s不作为跨运行速度优势；详见[运行记录](RUN_LOG.md#统一版本back_end_with_decode完整结果)。
 - 统一版本64397的index611 `mrc4`自然触发ABC reverse-level更新断言，native rewrite返回−6；其余方法完成，整例PARTIAL。日志只定位断言位置，尚未证明深层根因。native没有CEC/timing结果，不补数值。两种梯度最终点均来自显式修复，四次直接梯度请求均FAIL；同预算random的delay与joint目标均更优。现有cohort保留其有效测量及缺失基线，不能因缺项丢弃整个输入或宣称完整PASS，见[运行记录](RUN_LOG.md#统一版本mrc4不完整比较)。
 - 统一版本64399的index392 `codec`也在原生rewrite中触发同一断言位置，整例PARTIAL、native指标缺失；相同报错文本不是相同深层根因的证明。两最终修复点较原图改善3.659%/2.371%，原始CEC通过，但各四次直接梯度请求全部FAIL，greedy的delay仍更低；详见[运行记录](RUN_LOG.md#统一版本codec不完整比较)。
+- 统一版本64399的index562 `loco_top`随后同样在native rewrite断言退出−6，整例PARTIAL。面积约束保留no-op，joint选择CEC通过的显式修复eval7，较原图分别慢1.364%/1.422%；各四次直接梯度请求全部FAIL，缺失native不填数值，见[运行记录](RUN_LOG.md#统一版本loco_top不完整比较)。
 
 ## 测试与可复现性
 

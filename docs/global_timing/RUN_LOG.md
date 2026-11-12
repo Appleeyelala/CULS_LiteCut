@@ -167,6 +167,14 @@
 
 原始CEC日志证实native及两模式eval2均等价，分别耗时544.64/259.81/261.26 s，returncode均0；两模式最终AIG文件SHA256相同。原图/no-op/最终梯度的critical PO分别为11505/278/282，独立路径审计已分配给第八批64406，尚未据此建立完整路径身份变化结论。证据hash：`report/comparison.csv`为`9c9d9d83f6ca94d699ff94798708452627ff26663b16d15c15582a5ab7bae62b`，`report/observations.csv`为`3a55a64ea2b4f13ac1fabf9f3b61a530afe1152240237c016bb678509d552bcb`，`report/method_failures.json`为`a69c982bdff8226fa49734973fc4e212f161d7149a8f0248177018dcbb7ceb51`。
 
+## 统一版本loco_top不完整比较
+
+64399的`output/suite/case_0562`（`forgeEDA/loco_top.aig`）在89.58 s完成其余方法后记PARTIAL，仅缺失`native_abc`。原生rewrite在0.166 s返回−6，日志仍定位到`Abc_AigUpdateLevelR_int`的`Abc_ObjIsNode(pNode)`断言，未进入native CEC/mapping。相同断言文本不证明与codec或mrc4具有相同深层根因，缺失指标没有替代值。
+
+原图/no-op delay为2899.5708/2939.12842 ps。面积约束最终保留no-op，较原图慢1.364%；joint选择显式修复eval7，2940.81323 ps / 6912.31982 area、23项rewrite，原始CEC日志证明等价，较原图慢1.422%。两模式各8条观察、5次失败、4次直接梯度请求，直接组合全部因未完全ACCEPTED失败。随机结果delay为2895.12598 ps、area为7022.19434，与joint的不同目标排序分别保留，不将无缺失的其他测量写成整例PASS。
+
+证据hash：`report/method_failures.json`为`3dce433916ea40bf406d6972520b5eb8b44b5272b50140cbb94f3a7a4d269448`，`report/comparison.csv`为`abc88ade31857bcb465ef47a1bf23b4bfd6143594f5eba68cd9d81514cd2206c`，`report/observations.csv`为`8f9986ff82a662b97e53b919877fa7bb0e02c0f696578f497026bb58b8111ad9`。原生单行断言日志SHA256仍为`3bae91fa57db71b5c07de6468665cc006c5d48a82656a75dcef7433d26858ac1`；本例终态晚于第十一批冻结起点，须按其实际选择清单决定后续审计归属。
+
 ## 统一版本codec不完整比较
 
 64399的`output/suite/case_0392`（`forgeEDA/codec.aig`）在84.76 s完成其余方法后记PARTIAL，缺失方法仅`native_abc`。原生rewrite在0.167 s返回−6，原始日志定位到`Abc_AigUpdateLevelR_int`中的`Abc_ObjIsNode(pNode)`断言，与mrc4的断言位置相同；这不证明两输入具有相同深层根因。native尚未进入CEC/mapping，未填充替代指标。

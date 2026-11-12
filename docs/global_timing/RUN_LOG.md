@@ -101,6 +101,7 @@
 | 64404 | `20261111T235819Z-consistent-path-audit-batch6-0fe6209c` | RUNNING：首批64398完成后重新检查配额，冻结两个分片的364个PASS输入、541未记录，排除前五批已分配的290个精确目录，新增74个路径审计；benchmark源码均为`160b218`。2 CPU/24 GiB/0 GPU、24 h，同一64389 ABC与900 s工具时限；提交后总分配26 CPU/248 GiB/2 GPU。准备/分析源码`917d4d0`，driver字节不变；来源核验通过，尚无整批完成结论 |
 | 64405 | `20261112T002444Z-consistent-path-audit-batch7-e74274e8` | RUNNING：第五批完成后重新检查配额，冻结514 PASS/1 PARTIAL/390未记录，排除前六批已分配的364个精确目录，新增151个路径审计，包含mrc4有效测量。benchmark源码`160b218`，同一64389 ABC及900 s时限；准备/分析源码`ceb88f2`，driver字节不变。2 CPU/24 GiB/0 GPU、24 h，提交后总分配26 CPU/248 GiB/2 GPU；来源核验通过，尚无整批完成结论 |
 | 64406 | `20261112T004638Z-consistent-path-audit-batch8-b7761547` | RUNNING：冻结550 PASS/1 PARTIAL/354未记录，排除前七批515个精确目录，新增36个路径审计，首个为index108。benchmark源码`160b218`，同一64389 ABC及900 s时限；准备/分析源码`e9016eb`，driver字节不变。2 CPU/24 GiB/0 GPU、24 h，提交后总分配24 CPU/224 GiB/2 GPU；来源核验通过，尚无整批完成结论 |
+| 64407 | `20261112T005832Z-consistent-path-audit-batch9-316b38d0` | RUNNING：准备/分析源码`46cabc2`，复用相同driver字节，排除前八批已分配的551个精确目录。2 CPU/24 GiB/0 GPU、24 h，同一64389 ABC及900 s时限；重新核验集群、全部请求及hash后提交，总分配26 CPU/248 GiB/2 GPU。仍在冻结来源阶段，新增范围待实际清单确认 |
 
 ## 统一版本全量比较的准备与提交
 
@@ -135,6 +136,8 @@
 第七批`20261112T002444Z-consistent-path-audit-batch7-e74274e8`在64403完成、重新检查配额后，已作为64405启动。准备/分析源码为`ceb88f2`，driver字节仍为`f0f52ac8f165465781312fbba7296e9434af33186697d239e988855c1c9e3b11`。实际冻结514 PASS、1 PARTIAL、390未记录，排除前六批364项后新增151项，包含mrc4已有的有效测量；七批精确目录互斥、并集515。选择清单SHA256为`b41a2916c5c0d9cb10088e754636c5f4c38fb7c1c01e7d685fa328a0b4bca2b3`，首个输入index186。提交前24 CPU/224 GiB/2 GPU，提交后26 CPU/248 GiB/2 GPU；新作业2 CPU/24 GiB/0 GPU、24 h。准备记录与提交回执分别保留，已分配不等于已完成。
 
 第八批64406在第二、三批正常结束后启动，目录`20261112T004638Z-consistent-path-audit-batch8-b7761547`，准备/分析源码`e9016eb`。提交前再次核验集群、全部用户作业和冻结hash，总分配由22 CPU/200 GiB/2 GPU变为24 CPU/224 GiB/2 GPU。实际冻结550 PASS、1 PARTIAL、354未记录，排除前七批515项后新增36项；八批精确目录互斥、并集551。选择清单SHA256为`fb2104a3bcbc417311185ed0aa6ea890422824dd34bdfdc9ad2de63fc38a7cbf`，首个输入index108。实际审计仍在运行，不能把已分配当作通过。
+
+第九批64407的目录为`20261112T005832Z-consistent-path-audit-batch9-316b38d0`，准备/分析源码`46cabc2`，排除前八批551个精确目录。提交时重新核验集群、全部用户请求及输入hash，总分配由24 CPU/224 GiB/2 GPU变为26 CPU/248 GiB/2 GPU。实际冻结范围尚待选择清单，提交本身不增加通过覆盖率。
 
 各批完成的逐例报告位于`output/arrival_paths/*/summary.json`；原搜索结果保持不变。未来批次应排除所有前批选择清单中已分配的目录，避免重复运行；若确需重试失败审计，必须保留失败报告及单独声明的新尝试。最终使用`analyze_path_changes.py --audit-runs`合并各批证据，匹配最终905输入cohort选定的精确benchmark目录，不以相同输入hash的旧开发运行代替。各批冻结范围及未记录状态不随后续扫描回写。
 

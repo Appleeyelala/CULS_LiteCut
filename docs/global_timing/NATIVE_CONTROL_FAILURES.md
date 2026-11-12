@@ -17,3 +17,5 @@ index108 `Back_End_With_Decode`在`20261111T174715Z-acyclic-terminal-case-retrie
 保存结果显示greedy两次请求中第一次安装被拒绝、修复请求CEC/mapping PASS；independent两次请求均FAIL，第二次CEC在900.19 s超时。随机搜索保存8条观察（含no-op），3 PASS/5 FAIL，其中一次CEC在900.24 s超时。面积约束进度记录到7条（含no-op），4条直接梯度请求均FAIL，随后整例超时；联合目标未启动。这证明自然native超时后的继续执行有效，但没有完成该设计的完整方法比较。已结束命令的计时边界见[性能检查](PERFORMANCE_AUDIT.md)，原始失败与中间产物保持不变。
 
 统一版本64399的预定index108后来完整PASS：原生ABC的CEC在544.64 s证明等价，所有比较方法完成，整例4790.78 s。两梯度最终均为显式修复点，较原图慢15.122%，各四次直接梯度请求全部失败。此独立运行不回写上述失败，也不证明跨负载速度优势；完整数值和hash见[运行记录](RUN_LOG.md#统一版本back_end_with_decode完整结果)。
+
+统一版本的mrc4（index611）和codec（index392）随后分别在native rewrite阶段自然触发`Abc_AigUpdateLevelR_int`断言并返回−6。其余方法完整结束，两例均记PARTIAL，native指标和路径缺失，没有替代数值。断言位置相同不证明根因相同；原始日志及已测量结果分别保留，见[运行记录](RUN_LOG.md#统一版本codec不完整比较)。

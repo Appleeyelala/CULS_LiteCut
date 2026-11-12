@@ -10,9 +10,16 @@
 |---|---|---|
 | 64852 | `20261112T093558Z-consistent-path-audit-batch13-67071026` | RUNNING：相同driver SHA256 `f0f52ac8f165465781312fbba7296e9434af33186697d239e988855c1c9e3b11`，排除前十二批738个精确目录，预期覆盖剩余167项；实际范围仍须以本批冻结清单核验。2 CPU/24 GiB/0 GPU |
 | 64853 | `20261112T102608Z-final905-search-analysis-5b1190b9` | FAILED：5 s，编排检查把首批/第五批完成记录缺少后增`frozen_cohort_status_counts`字段误判为计数冲突，尚未构建新cohort或执行任何实验。保留失败目录；早期已有计数与当前相同 |
-| 64854 | `20261112T103045Z-final905-search-analysis-v2-32c72d46` | RUNNING：显式兼容两份旧格式，并从原始冻结cohort及其hash核验缺失字段。执行终态审计、全905冻结、基线比较、预测/梯度来源分析及原始顺序replay trace审计，不进行新搜索、拟合或mapping。2 CPU/32 GiB/0 GPU |
+| 64854 | `20261112T103045Z-final905-search-analysis-v2-32c72d46` | COMPLETED_WITH_EXPLICIT_OMISSIONS：59m40s，MaxRSS978560 KiB。全905固定cohort、各基线比较、搜索来源审计错误0及原始执行核验905 PASS；四项native缺失保留，不做新实验。早期字段从原冻结cohort/hash验证，没有改写旧完成记录 |
+| 64905 | `20261112T122920Z-final905-path-analysis-61f92cbb` | 已提交、等待64852结束：完整十三批原始路径分析及各baseline相对original/no-op的统计；依赖afterany:64852，启动后严格检查原任务终态与逐设计结果，失败不冒充成功。2 CPU/48 GiB/0 GPU |
 
 64852提交前当前用户无活动作业，提交后2 CPU/24 GiB/0 GPU；64854重新检查全部活动请求后累计4 CPU/56 GiB/0 GPU，均在64 CPU/256 GiB/2 GPU以内。提交回执与检查在对应`input/`中，启动后由driver更新run.json，没有用提交快照覆盖运行状态。
+
+64854完成后核验了前十二批738个互斥设计、11324份映射、13538个引用，逐例唯一AIG字节计数之和8870。新增加的第七、八、十一、十二批完成记录hash分别为`de533a812897cd544440efe572ce45a1b7a7c4c593fe7de7488c01bc53070147`、`388842ee62a142039bde15bedb9ed7488a0330531630b277b8330421fc71d8b1`、`f361236bc87b0679548dc84099455a12416c3f0e8f7fcd8a32620246de6038a0`、`e237ba9d8dbf583f7afe6ee8be827db638352160205ccfcf54a1422e712da05b`。
+
+64852实际冻结全905终态，排除前十二批738项后选择167项，包含mrc3；十三批目录互斥、并集905。其选择/cohort SHA256为`711cf55685185661d271096a293180869a8a396d88fb35178d1c121c1a0b17c1`、`fd01816690ea817d250a78a4661a4949adf2bae15e4c77d62f672f0a0406a044`，cohort与最终搜索分析相同。64905提交前已重新检查全部活动及排队请求，含新pending任务总请求4 CPU/72 GiB/0 GPU；不把依赖提交计为分析完成。
+
+64854的最终搜索统计与限制见[FULL905_SEARCH_RESULTS.md](FULL905_SEARCH_RESULTS.md)。此前开发版本及完成前缀分析保留原样，未与统一版本拼接。
 
 统一版本新增PARTIAL为index610 `forgeEDA/mrc3.aig`：整例记录97.58 s，native rewrite在0.166 s断言退出−6，位置仍为`Abc_AigUpdateLevelR_int`，未进入native CEC/mapping。面积约束/joint最终均为显式修复eval7，分别6955.05762/6839.88867 ps，较原图改善0.702%/2.346%；两模式各四次直接梯度请求全部FAIL，同预算random为6332.51953 ps。相同断言文本不证明四设计根因相同。`report/method_failures.json`、`comparison.csv`、`observations.csv`的SHA256分别为`4e8ec1b62f34fd0f8396513e09ec27fe13f863dbf96ffbbef3a7f00ccc246dd7`、`ff64ae2a71531440ec830d019ffc838e29f5a97375e9e50636f86c18ff937899`、`bf1501744f49079ca80313119ece78f9f9da20c08154416bcd0efef3da2109b7`。
 

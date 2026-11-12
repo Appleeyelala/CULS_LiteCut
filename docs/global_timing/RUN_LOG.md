@@ -134,6 +134,14 @@
 
 两模式各8条观察、5次失败、4次直接梯度请求；四次直接梯度组合均未完全ACCEPTED而被明确拒绝。最终成功点分别来自显式可行性修复eval7/eval2，不能将收益归为未修复梯度组合的直接成功。联合模式与同预算random joint的最终数值相同。原始CEC日志证实native及两最终点等价；证据见`report/comparison.csv`（SHA256 `b72bb05f84dbafcf8a83dd29a3a266e3d73d3e171cce052b2c519562549a712b`）和`report/observations.csv`（`284e12f4ebe0e50e9120da4f33c94a670d94dfee8e4e4d2cd1f25b5284f37323`）。旧64340.9的7200 s超时保留为FAIL；不同版本、工具和负载下的墙钟差异不作速度提升结论。本案例属于预先声明的统一全量分片，未根据结果额外挑选重跑。
 
+## 统一版本mrc4不完整比较
+
+64397的`output/suite/case_0611`（`forgeEDA/mrc4.aig`，5805 AND、35 PI、2048 PO）完整执行搜索后记为PARTIAL，整例66.61 s；缺失方法仅为`native_abc`。原始`native_abc/rewrite.log`记录ABC在`Abc_AigUpdateLevelR_int`的`Abc_ObjIsNode(pNode)`断言失败，rewrite返回−6，耗时0.164 s；尚未进入该方法的CEC或mapping。该日志定位了失败位置，未证明其更深层根因。缺失native指标没有替代值，不据其他方法成功把整例改成PASS。
+
+原图/no-op为6971.78418/6924.9209 ps；面积约束/joint最终分别为6638.34766 ps / 5243.66797 area和6695.12695 ps / 5097.40137 area，均CEC PASS。两模式各8次预算、5次失败、4次直接梯度请求；直接梯度请求全部因未完全ACCEPTED失败，最终选点为显式修复eval2/eval7。相对原图的4.783%/3.968%改善不能归为未修复梯度组合的成功；同预算random两模式均为6413.0127 ps / 5190.94678 area，联合目标值也更低。原图与no-op的critical PO分别为90/94，路径身份变化仍以独立路径审计为准。
+
+原始证据hash：`native_abc/rewrite.log`为`3bae91fa57db71b5c07de6468665cc006c5d48a82656a75dcef7433d26858ac1`，`report/method_failures.json`为`9f1c27a9bad6e3ab7566b327bf453044aa9121333734688a8bcd8f0d0b33e7f2`，`report/comparison.csv`为`ef6455926f6d0f9b35c8889d90ca588cbb4b04fef24a7de0dba299622740d0fd`，`report/observations.csv`为`a9caf04b580d443acacef21d01abe90cc6cdc44633105557bda5293a71690e33`。现有cohort和路径入口保留PARTIAL的有效测量及缺失方法；后续统一汇总不得丢弃该输入或补造native数据。
+
 ## 统一版本c1355复现
 
 统一版本c1355的独立复现见64397.0的`output/verification.json`、`output/comparison/repeat_comparison.json`及`output/accounting.json`。参照是64397的`output/suite/case_0047`；两种梯度模式都保持360.111877 ps / 513.216003 area，CEC PASS，与original/no-op相同，未改善。每种搜索8条观察；比较包括中间成功/失败状态、全部PO、area/ADP和选择，墙钟时间不作为一致性条件。移除唯一ABC写入时间注释后，native输出字节相同；原文件与hash均保留。新运行的准备/分析源码为`58b3e6f`，实际优化器运行源码明确复用`160b218`，两种职责及hash分开记录。这是单设计复现，不代表全905结果可重复或优化有效。

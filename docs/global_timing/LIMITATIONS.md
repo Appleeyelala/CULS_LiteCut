@@ -41,6 +41,7 @@ index197进一步暴露了原生顺序安装的三region引用环：旧trace把6
 - 统一版本64397的Division随后完整PASS，保留旧失败。面积约束最终25095.3848 ps，较原图改善5.699%；joint最终25950.4219 ps，较原图改善2.486%。两模式各4次直接梯度请求全部因未完全安装而FAIL，最终成功点来自显式可行性修复；joint最终与random joint相同，且不满足另一模式的硬面积上限。该单例没有证明未修复梯度组合有效或稳定优于随机搜索；3533.11 s也不与旧超时作独占速度比较。完整路径和hash见[运行记录](RUN_LOG.md#统一版本division完整结果)。
 - index108 `Back_End_With_Decode`在64341.7使用性能修复及无环原生工具后，候选准备和no-op CEC/mapping通过，但native ABC rewrite的CEC仍在900.21 s超时。完整案例于1337.65 s记FAIL；没有取得该native结果的等价性证书，也没有执行其后的各搜索方法。该失败点与旧1800 s候选准备超时不同；不能把它写成不等价，或用已经通过的no-op代替缺失的native及搜索结果。
 - `94909a7`将独立native对照失败保留为无指标的失败项，允许其他方法继续；流程完整结束但方法缺失时记PARTIAL，整例超时仍FAIL。75项真实核心、两个正常完整benchmark及受控native故障的其余真实测量/路径检查通过。自然补验108随后在7200.59 s整例超时：greedy修复测量通过，independent仍失败，随机8条观察保存，面积约束未完成、joint未启动。该设计仍无完整比较，不能把失败隔离有效等同于整例通过。详见[NATIVE_CONTROL_FAILURES.md](NATIVE_CONTROL_FAILURES.md)。
+- 统一版本64397的index611 `mrc4`自然触发ABC reverse-level更新断言，native rewrite返回−6；其余方法完成，整例PARTIAL。日志只定位断言位置，尚未证明深层根因。native没有CEC/timing结果，不补数值。两种梯度最终点均来自显式修复，四次直接梯度请求均FAIL；同预算random的delay与joint目标均更优。现有cohort保留其有效测量及缺失基线，不能因缺项丢弃整个输入或宣称完整PASS，见[运行记录](RUN_LOG.md#统一版本mrc4不完整比较)。
 
 ## 测试与可复现性
 

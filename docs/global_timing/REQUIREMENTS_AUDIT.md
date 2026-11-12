@@ -1,6 +1,6 @@
 # 用户要求逐项验收
 
-要求来源为[USER_REQUIREMENTS.md](USER_REQUIREMENTS.md)，与原附件SHA256 `6c3aae48ad73c854f00f1db2f26fc9aeb87f0130124f91b391a2677b2af2bb2a`一致。当前尚有最后路径分析待完成；本文件记录可核验的完成证据及明确缺项，不用阶段成功替代整个目标。
+要求来源为[USER_REQUIREMENTS.md](USER_REQUIREMENTS.md)，与原附件SHA256 `6c3aae48ad73c854f00f1db2f26fc9aeb87f0130124f91b391a2677b2af2bb2a`一致。本轮完整框架、测试记录、全905比较和最终原始证据分析均已完成；本文件逐项列出实际证据及明确遗漏，不将研究效果、历史环境恢复或逐文件功能覆盖写成全部PASS。
 
 所有运行路径的共同前缀为`/data/wushangge/CULS_LiteCut/runs/`。
 
@@ -16,7 +16,7 @@
 | Phase3 Student语义、特征、批量、缓存与局部/全局区分 | 19维Student冻结；64357的123286条特征/score精确对照及真实缓存测试；全905 litecut.json及模型hash保留 | 完成推理接入；未重建Teacher训练 |
 | Phase4 DAG时序、多PO、近关键、加权LSE、面积及联合目标 | surrogate.py/arrival.py：端口结构成本、局部/直接前驱交互、no-op锚定、全部PO传播；scalar_objective支持正PO权重、面积惩罚和Smooth Tchebycheff；真实面积最终复核 | 已实现/执行；代理误差与路径身份边界明确 |
 | Phase5 可微松弛、联合更新、离散化、反馈、梯度与收敛 | optimization.py的Softmax/STE/Adam及冲突投影；pipeline.py反馈拟合；905份gradient目录及report/observations.csv、gradients.csv、convergence_and_prediction.png/PDF；64854预测先于标签审计错误0 | 完成可执行近似；不是精确离散导数或AGD复现 |
-| Phase6 Rewrite→CEC→统一Mapping/Timing→反馈及失败记录 | 全905 current-source比较、64854执行审计；真实CEC-n按端口位置、统一Liberty与全部PO/global一致；失败没有替代指标 | 主闭环完成；最终原始路径证据核验待64905 |
+| Phase6 Rewrite→CEC→统一Mapping/Timing→反馈及失败记录 | 全905 current-source比较、64854执行审计；真实CEC-n按端口位置、统一Liberty与全部PO/global一致；失败没有替代指标 | 主闭环和全905原始路径证据核验完成，最终检查PASS；四项native缺失保留 |
 
 ## 测试要求
 
@@ -36,7 +36,7 @@
 
 4.3的全905主实验已运行；各方法mapped delay、area、ADP、实际预算、rewrite数、runtime、CEC与来源在64854的comparison_all.csv，完整预测/梯度/收敛在每例report及汇总search_quality。各确定性基线调用数较少，随机与梯度按同输入/同已消耗预算配对。硬件不同的分片不作为同硬件速度比较；单种子/相关变体不证明统计显著性。
 
-## 八项交付与剩余检查
+## 八项交付与完成核验
 
 | 交付 | 文件或证据 | 当前状态 |
 |---|---|---|
@@ -44,9 +44,15 @@
 | 2 多目标梯度逻辑与复现 | optimization.py、surrogate.py、保存梯度、c1355独立重复及全905结果 | 有证据；无稳定优势 |
 | 3 自动化测试系统 | tests/、scripts/ci.py、run_tests.py、test_repository.py | 有执行证据 |
 | 4 测试报告及遗漏 | TEST_COVERAGE、64395矩阵、两主分片核心报告 | 有证据；FAIL/SKIP明确 |
-| 5 基线比较 | FULL905_SEARCH_RESULTS、64854 comparison/；64905 performance_overview/ | 主比较和各baseline额外总览已生成；最终验收待原始路径复核 |
-| 6 预测/梯度/收敛/路径变化分析 | 64854 search_quality/、逐例report/；64905 path_changes/ | 搜索分析完成；全量路径待64905 |
+| 5 基线比较 | FULL905_SEARCH_RESULTS、64854 comparison/；64905 performance_overview/ | 全905固定cohort、全部baseline及original/no-op分列总览完成 |
+| 6 预测/梯度/收敛/路径变化分析 | 64854 search_quality/、逐例report/；64905 path_changes/ | 全905搜索/梯度/收敛及原始路径分析完成，审计错误0 |
 | 7 使用说明 | USAGE、MODEL_AND_EXECUTION、OPERATIONS与各run/job.slurm | 已有具体命令、依赖与参数 |
-| 8 限制与失败报告 | LIMITATIONS、NATIVE_CONTROL_FAILURES、NATIVE_REPLAY_CYCLES、PERFORMANCE_AUDIT及原始failure_evidence | 已有证据；最终路径限制仍待核验 |
+| 8 限制与失败报告 | LIMITATIONS、NATIVE_CONTROL_FAILURES、NATIVE_REPLAY_CYCLES、PERFORMANCE_AUDIT及原始failure_evidence | 完整失败证据、环境遗漏与最终路径解释边界均已记录 |
 
-64852已COMPLETED/0:0，167/167项通过，与前十二批互斥合计905设计、13981份映射和16696个引用。任务完成前仍须确认64905成功结束、全905原始路径/CEC/timing/netlist证据复核无遗漏或审计错误，并核对最终报告及源码/测试来源一致；未满足时保留目标active。
+64852已COMPLETED/0:0，167/167项通过，与前十二批互斥合计905设计、13981份映射和16696个引用。64905随后正常结束：905项ANALYZED、审计错误0、无损坏快照/未选定报告、单一benchmark源码160b218和observer5327dacd，final_validation PASS。原901 PASS/4 PARTIAL状态未改变。
+
+完成核验还对照了：905个唯一索引/输入hash、同一工具/模型/库/预算；成功请求完整ACCEPTED与CEC正证明；面积约束真实检查；代理先预测后标签；完整程序矩阵及FAIL/SKIP原因；c1355同参数独立重复；构建/运行/环境/源码记录及全部八项交付。当前代码相对16ac3cd的程序目录没有变化，后续提交仅更新文档，测试证据按相同源码复用，没有用旧代码PASS代替新算法回归。
+
+真实可行域含静态约束、完整安装和CEC。代理提案可能被运行时拒绝，修复必须新请求；最终报告点仅来自真实成功观察，不能把失败的预测最优称为可执行结果。当前未建立代理准确性或稳定胜过随机搜索的优势，未完整复现AGD、Teacher训练环境、唯一逻辑路径身份，也未修复外部native四例断言的深层原因；这些均明确报告，不补造指标或隐去失败。研究方法的负结果按用户第7节允许的条件交付。
+
+本轮框架实现与验证任务完成，保留上述具体遗漏和边界。数据区的`20261112T122920Z-final905-path-analysis-61f92cbb/output/final_validation.json`、`slurm_completion.json`和`final_delivery_manifest.json`提供最终状态、作业及交付文件hash入口。

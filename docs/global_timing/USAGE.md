@@ -6,6 +6,8 @@
 
 当前验证环境为 Python 3.11（`/home/share/process/anaconda3/bin/python`）、GCC/G++ 11.4、CUDA 11.8、CMake 3.28，以及已有 Torch、NumPy、SciPy、pandas、networkx、scikit-learn、matplotlib。每个新运行的 `run.json` 保存具体版本、线程限制、Slurm环境、设备和依赖信息。`test_repository.py` 输出完整已安装包版本。未擅自安装或改动共享环境。
 
+本轮直接复用已安装的共享解释器和工具链，没有执行新的pip/conda安装。完整实际Python包版本清单保存在`20261111T191749Z-full905-partition-certificates-f9e48d3a/output/repository_tests/environment_packages.json`；各主分片`run.json/environment`另记设备、驱动、glibc和线程条件。复现当前结果优先使用上述已验证环境；新机器的依赖安装需匹配这些记录后重新运行核心/实际工具回归，包版本清单本身不算新环境测试通过。
+
 预训练Student、ASAP7和历史二进制的路径/hash见 `provenance/assets.json`。不需要重新训练Student。Teacher/DeepGate训练还需要原训练数据、DGL/DeepGate等依赖；这些入口不能因Student推理成功被标成训练PASS。
 
 ## 准备与提交

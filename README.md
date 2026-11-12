@@ -1,10 +1,10 @@
 # CULS LiteCut research workspace
 
-这里集中管理梯度下降与 LiteCut 研究的源码、证据和项目历史，研究对象是 AIG rewriting、strict maximal MFFC、候选局部 delay 与映射后 timing。长期目标是形成论文。当前已按用户的新任务进入完整优化框架的实现与验证阶段；[验收矩阵](docs/global_timing/IMPLEMENTATION_STATUS.md)记录尚未完成的要求，[运行记录](docs/global_timing/RUN_LOG.md)区分历史证据与新实验。
+这里集中管理梯度下降与 LiteCut 研究的源码、证据和项目历史，研究对象是 AIG rewriting、strict maximal MFFC、候选局部 delay 与映射后 timing。长期目标是形成论文。本轮完整优化框架的实现与全量验证已完成；[逐项验收](docs/global_timing/REQUIREMENTS_AUDIT.md)记录完成证据和明确遗漏，[运行记录](docs/global_timing/RUN_LOG.md)区分历史证据与新实验。工程完成不等于论文结论或算法优势已经确立。
 
 源码工作区是 `/home/wushangge/CULS_LiteCut`，运行与数据根目录是 `/data/wushangge/CULS_LiteCut`。
 
-新增框架的构建与运行方法见 [使用说明](docs/global_timing/USAGE.md)，数学与真实执行边界见 [模型契约](docs/global_timing/MODEL_AND_EXECUTION.md)，源码与已完成报告的对应关系见 [证据索引](docs/global_timing/EVIDENCE_INDEX.md)。统一版本905输入的主运行及保存搜索分析已完成，901 PASS、4项native对照缺失的PARTIAL；[全量搜索结果](docs/global_timing/FULL905_SEARCH_RESULTS.md)包含各baseline与original/no-op对照，未显示稳定优于同预算随机搜索的优势。十三批路径采集已覆盖全部905个设计的有效测量；最终原始证据交叉核验及最后验收仍在进行。
+新增框架的构建与运行方法见 [使用说明](docs/global_timing/USAGE.md)，数学与真实执行边界见 [模型契约](docs/global_timing/MODEL_AND_EXECUTION.md)，源码与报告的对应关系见 [证据索引](docs/global_timing/EVIDENCE_INDEX.md)。统一版本905输入主实验为901 PASS、4项native对照缺失的PARTIAL；全部905设计的有效测量完成路径采集和原始证据复核，13981份映射、16696个成功引用、最终审计错误0。[全量结果](docs/global_timing/FULL905_SEARCH_RESULTS.md)包含各baseline与original/no-op对照，尚未建立稳定优于同预算随机搜索的优势。
 
 完整 AIG 数据集现位于本仓库的 [open-sourceDataset](open-sourceDataset/)，包含 938 个文件（905 个 AIG/AAG），不进入 Git。后续统一从此目录选择输入；默认设计为 `OpenABC/c1355_orig.aig`，路径配置在 `config/workspace.json`。原 `/home/wushangge/cutLibOrigin/open-sourceDataset` 保留指向新目录的兼容链接，迁移记录见 [dataset_migration.json](provenance/dataset_migration.json)。实际运行前，准备工具会把选定设计复制到 `/data` 的运行目录并记录 SHA256。
 

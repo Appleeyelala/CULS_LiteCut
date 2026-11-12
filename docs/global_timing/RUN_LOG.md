@@ -4,14 +4,14 @@
 
 ## 全量主实验终态与最终审计
 
-2026-11-12重新核对了原始JSONL、suite summary及Slurm accounting：64399为453记录、450 PASS/3 PARTIAL，64397为452记录、451 PASS/1 PARTIAL。合计905个输入，索引恰为0至904、输入SHA256均唯一；没有按结果选择补验替换。两作业均COMPLETED/0:0，分别耗时5h23m44s与5h32m38s。四项PARTIAL仅缺native ABC对照，不能改为完整PASS。最终效果统计仍待保存证据审计。
+2026-11-12重新核对了原始JSONL、suite summary及Slurm accounting：64399为453记录、450 PASS/3 PARTIAL，64397为452记录、451 PASS/1 PARTIAL。合计905个输入，索引恰为0至904、输入SHA256均唯一；没有按结果选择补验替换。两作业均COMPLETED/0:0，分别耗时5h23m44s与5h32m38s。四项PARTIAL仅缺native ABC对照，不能改为完整PASS。随后64854和64905完成保存证据审计，终态如下。
 
 | Slurm ID | 目录后缀 | 当前结果 |
 |---|---|---|
 | 64852 | `20261112T093558Z-consistent-path-audit-batch13-67071026` | COMPLETED：相同driver/observer，精确排除738项后167/167设计审计PASS、2657份映射、3158个成功引用；Slurm0:0、4h00m51s、MaxRSS2807740 KiB。十三批互斥并集905，原选择/cohort hash不变 |
 | 64853 | `20261112T102608Z-final905-search-analysis-5b1190b9` | FAILED：5 s，编排检查把首批/第五批完成记录缺少后增`frozen_cohort_status_counts`字段误判为计数冲突，尚未构建新cohort或执行任何实验。保留失败目录；早期已有计数与当前相同 |
 | 64854 | `20261112T103045Z-final905-search-analysis-v2-32c72d46` | COMPLETED_WITH_EXPLICIT_OMISSIONS：59m40s，MaxRSS978560 KiB。全905固定cohort、各基线比较、搜索来源审计错误0及原始执行核验905 PASS；四项native缺失保留，不做新实验。早期字段从原冻结cohort/hash验证，没有改写旧完成记录 |
-| 64905 | `20261112T122920Z-final905-path-analysis-61f92cbb` | RUNNING：64852结束后已启动，正常终态/精确覆盖检查及各baseline汇总完成；继续只读复核全部原始CEC/timing/netlist/arrival链。2 CPU/48 GiB/0 GPU，不执行新搜索或mapping |
+| 64905 | `20261112T122920Z-final905-path-analysis-61f92cbb` | COMPLETED_WITH_EXPLICIT_OMISSIONS：全905原始CEC/timing/netlist/arrival链复核完成，905 ANALYZED、审计错误0，final_validation PASS；Slurm0:0、1h22m13s、MaxRSS8219292 KiB。四项native缺失保持PARTIAL，不执行新搜索或mapping |
 
 64852提交前当前用户无活动作业，提交后2 CPU/24 GiB/0 GPU；64854重新检查全部活动请求后累计4 CPU/56 GiB/0 GPU，均在64 CPU/256 GiB/2 GPU以内。提交回执与检查在对应`input/`中，启动后由driver更新run.json，没有用提交快照覆盖运行状态。
 
@@ -23,7 +23,9 @@
 
 64852的`output/slurm_completion.json` SHA256为`f616a55252bea6769c344e20a2a860b85649d2192c1cdd055fa90d848a709055`。与前十二批合计905个设计、13981份映射、16696个成功引用，逐例唯一AIG字节计数之和10758。index827的21份映射和24个成功引用已全部通过；其summary SHA256为`71ea0d0f82bfe6f2074b5f964dd6c079acef43247b4083065b02b5e5aaa95d3d`。四项native缺失不变，不将有效测量的路径PASS改写为benchmark全部方法PASS。
 
-64905已生成`output/performance_overview/`：面积约束/joint梯度相对原图delay胜平负658/158/89、656/150/99，逐设计改善中位数3.6586%/3.8708%；同预算随机仍无稳定优势。no-op相对原图320改善/319相同/266恶化。完整表、范围及hash见全905结果页；最终原始路径交叉核验仍在运行。
+64905已生成`output/performance_overview/`：面积约束/joint梯度相对原图delay胜平负658/158/89、656/150/99，逐设计改善中位数3.6586%/3.8708%；同预算随机仍无稳定优势。no-op相对原图320改善/319相同/266恶化。完整表、范围及hash见全905结果页。
+
+64905最终在2026-11-12 15:48:47 UTC正常结束，四个编排步骤全部PASS。`output/path_changes/summary.json`确认905 ANALYZED、901 PASS/4 PARTIAL原状态保留、审计错误0、无损坏快照/未选定路径报告；benchmark源码160b218和observer5327dacd各只有一个版本。`output/final_validation.json`为PASS，SHA256 `67c346b78f3415017830be96939cbb0cd7c976c65b18990311e6260b62f2db66`。原图→no-op有237个设计改变代表PI/PO对，两种梯度模式各430个保存最终点相对no-op改变代表对；不据此证明唯一逻辑路径切换。全部要求与遗漏的验收入口见[REQUIREMENTS_AUDIT.md](REQUIREMENTS_AUDIT.md)。
 
 统一版本新增PARTIAL为index610 `forgeEDA/mrc3.aig`：整例记录97.58 s，native rewrite在0.166 s断言退出−6，位置仍为`Abc_AigUpdateLevelR_int`，未进入native CEC/mapping。面积约束/joint最终均为显式修复eval7，分别6955.05762/6839.88867 ps，较原图改善0.702%/2.346%；两模式各四次直接梯度请求全部FAIL，同预算random为6332.51953 ps。相同断言文本不证明四设计根因相同。`report/method_failures.json`、`comparison.csv`、`observations.csv`的SHA256分别为`4e8ec1b62f34fd0f8396513e09ec27fe13f863dbf96ffbbef3a7f00ccc246dd7`、`ff64ae2a71531440ec830d019ffc838e29f5a97375e9e50636f86c18ff937899`、`bf1501744f49079ca80313119ece78f9f9da20c08154416bcd0efef3da2109b7`。
 

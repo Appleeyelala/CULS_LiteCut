@@ -2,7 +2,36 @@
 
 分析使用同一Liberty时序口径下的已保存映射和最大arrival链，不把历史Gate3F的MIO PO列混入。入口为`scripts/analyze_path_changes.py`，纯比较逻辑在`global_timing/path_changes.py`。每次使用新的Slurm数据目录，原搜索和路径审计不改写。
 
-最新已完成分析覆盖同一125输入冻结清单中的全部116个PASS设计；原39设计结果完全保留，见末节。它仍不是905输入的完整覆盖。
+最新完成的是统一版本全905设计分析64905。下列早期39/116设计结果保留为独立开发前缀，不与新cohort合并，不替代全量结论。
+
+## 统一版本全905设计
+
+64905（`20261112T122920Z-final905-path-analysis-61f92cbb`）已COMPLETED/0:0，1h22m13s、MaxRSS8219292 KiB。它只读核验十三批已经采集的13981份映射、16696个成功引用，重新解析原CEC/Liberty日志、逐arc重构、全部PO/area/global及AIG/netlist hash，没有执行新的rewrite、CEC、mapping或拟合。
+
+完整905项均ANALYZED，审计错误0、无损坏快照或未选定报告；原benchmark的901 PASS/4 PARTIAL保持不变。失败native没有数值或路径。benchmark源码统一为`160b2187eee3b47799e58b658e39f13d40064b61`，observer统一为`5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb`；分析/编排源码为`6145559`。
+
+| 方法 | 成功非锚点观察 | critical PO集合变化 | PO不变但代表PI变化 | 近关键PO集合变化 | 保存最终点代表对变化 |
+|---|---:|---:|---:|---:|---:|
+| 面积约束梯度 | 3128 | 1491 | 245 | 1717 | 430/905 |
+| joint梯度 | 3197 | 1539 | 275 | 1735 | 430/905 |
+| LiteCut贪心 | 905 | 436 | 83 | 529 | 519/905 |
+| 独立region | 905 | 426 | 86 | 502 | 512/905 |
+| 随机搜索 | 3135 | 1676 | 299 | 1917 | 不设统一final |
+
+上述变化相对各设计no-op。237/905个设计在original→no-op序列化阶段已经改变代表PI/PO对，必须单独控制。面积约束/joint分别1191/1160次成功转移跨越失败请求；失败仍没有路径标签。保存最终点可能来自修复、warmup或no-op，不代表直接梯度贡献。
+
+| 目标 | 端点变化类别 | 设计数 | 预测样本 | 按设计平均归一化Δdelay MAE |
+|---|---|---:|---:|---:|
+| 面积约束 | critical PO集合变化 | 551 | 1491 | 0.176418 |
+| 面积约束 | PO不变、代表PI变化 | 132 | 245 | 0.142471 |
+| 面积约束 | 代表PI/PO对集合相同 | 457 | 1392 | 0.044538 |
+| joint | critical PO集合变化 | 557 | 1539 | 0.179459 |
+| joint | PO不变、代表PI变化 | 141 | 275 | 0.139526 |
+| joint | 代表PI/PO对集合相同 | 440 | 1383 | 0.054245 |
+
+预测仅使用评估前保存值及更早成功校准标签。每类先按设计平均再跨设计等权；同一设计可贡献多个类别，设计数不能相加。类别组成不同且观察相关，误差差异不证明路径变化导致误差，也不证明未见设计泛化。代表对相同不表示内部路径不变；端点变化也不证明唯一逻辑路径或布尔可敏化性。
+
+所有文件位于该运行的`output/path_changes/`：`coverage.json`有905项身份和状态，`observations.csv`、`transitions.csv`、`prediction_path_changes.csv`及`prediction_error_by_endpoint_change.csv`保留逐观察和分母，`input_snapshots/`冻结原报告，`evidence_hashes.json`记录原始证据，`path_changes.png`/`.pdf`可导出。关键SHA256：summary为`38a6e3e0610ddafff585ccd8efb328c56454ea27820e2a808eb4871460ae8d1d`，coverage为`9d1c26fe0d6f66891313a3474ab10e295077cf7467f1b608cbad08d33683abcd`，evidence_hashes为`a32c1c577e3090f57fff98307913cf0ecc5804fe1d54057564035352efb8b368`。
 
 ## 已完成的首批分析
 

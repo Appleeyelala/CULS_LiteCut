@@ -1,10 +1,10 @@
 # 实现与验证证据入口
 
-本索引区分已完成的固定证据和仍在运行的全量验证。日期为2026-11-12（北京时间）；它不是整体验收通过声明。具体要求见[验收矩阵](IMPLEMENTATION_STATUS.md)，历史Gate结果见[工作历史](../WORK_HISTORY.md)。
+本索引区分原始历史证据和本轮已完成的全量验证。最终状态依据64905的905项原始证据审计及逐要求验收；不表示所有历史程序功能PASS或算法优势成立。具体要求见[验收矩阵](IMPLEMENTATION_STATUS.md)，历史Gate结果见[工作历史](../WORK_HISTORY.md)。
 
 最新主结果见[统一版本905输入搜索结果](FULL905_SEARCH_RESULTS.md)和[逐要求验收](REQUIREMENTS_AUDIT.md)。64854已完成全905固定cohort、搜索来源审计及原始replay执行核验：901 PASS/4个native对照缺失的PARTIAL，保存搜索与执行审计错误0；并未建立稳定优于随机搜索的优势。目录为`20261112T103045Z-final905-search-analysis-v2-32c72d46/`，其中`output/comparison/`、`search_quality/`、`execution_audit/`分别保留原始对比、误差/来源及trace证据。
 
-十三批路径采集已正常结束，精确互斥覆盖905设计、13981份映射、16696个成功引用；四项native缺失保留。64905已完成全部批次终态/覆盖检查及baseline总览，继续复核原始CEC/Liberty日志/netlist/arrival链。目录为`20261112T122920Z-final905-path-analysis-61f92cbb/`；最终`path_changes/`和`final_validation.json`仍待结果。下面的运行中前缀描述保留其当时范围，不替代最新完成记录。
+十三批路径采集已正常结束，精确互斥覆盖905设计、13981份映射、16696个成功引用；四项native缺失保留。64905已完成全部批次终态/覆盖检查、baseline总览及原始CEC/Liberty日志/netlist/arrival链复核：905 ANALYZED、审计错误0，无损坏快照或未选定报告，final_validation PASS。目录为`20261112T122920Z-final905-path-analysis-61f92cbb/`；最终入口是`output/path_changes/`、`output/final_validation.json`及`output/final_delivery_manifest.json`。下面的运行中前缀描述保留其当时范围，不替代最新完成记录。
 
 ## 代码与执行
 
@@ -50,7 +50,9 @@
 
 上述搜索比较未显示稳定优于对等预算随机搜索的结果。真实CEC通过、代理预测准确、优化收益和跨设计泛化是不同结论，分别见[搜索分析](INTERIM_SEARCH_ANALYSIS.md)、[路径分析](PATH_CHANGE_ANALYSIS.md)和[限制报告](LIMITATIONS.md)。
 
-## 全量状态与验收边界
+## 全量运行期间的阶段记录（历史前缀）
+
+本节保留当时的分配、运行和待验收状态；最终完成范围见本页首节和REQUIREMENTS_AUDIT，不将下面的旧状态作为当前状态。
 
 905个唯一文件hash的组合AIG已完整盘点和暂存。两个统一版本分片的源码固定为`160b218`，可执行代码与上述`94909a7`回归相同，分别覆盖453/452输入。偶数64399、奇数64397均已启动并分别通过75项真实核心测试；提交监测64396完成两次检查及提交后正常结束。目录及具体状态见[运行记录](RUN_LOG.md)。准备清单和提交成功都不算benchmark完成。
 

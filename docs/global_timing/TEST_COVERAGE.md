@@ -1,6 +1,6 @@
 # 测试证据与未覆盖部分
 
-测试按源码快照记录，不能把import、编译或`--help`成功解释为完整功能通过。统一版本905个benchmark主运行和保存搜索/执行审计现已结束，剩余路径审计及最后验收仍在进行；本文件不是整体验收声明。全905记录为901 PASS/4个native对照缺失的PARTIAL，详见[FULL905_SEARCH_RESULTS.md](FULL905_SEARCH_RESULTS.md)。
+测试按源码快照记录，不能把import、编译或`--help`成功解释为完整功能通过。统一版本905个benchmark主运行、保存搜索/执行审计及全部905设计原始路径证据复核均已结束，最后审计错误0。全905主实验仍为901 PASS/4个native对照缺失的PARTIAL，历史程序的FAIL/SKIP也保持原样；具体范围见[FULL905_SEARCH_RESULTS.md](FULL905_SEARCH_RESULTS.md)与[逐项验收](REQUIREMENTS_AUDIT.md)。
 
 ## 核心与实际工具
 

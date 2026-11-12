@@ -62,6 +62,6 @@
 
 第十批64408冻结636 PASS、2 PARTIAL、267未记录，排除前九批603项后新增35项，包含codec有效测量；十批精确目录互斥、并集638。准备/分析源码`b6bc67a`，选择清单为`20261112T010854Z-consistent-path-audit-batch10-1b537bfa/output/path_audit_selection.json`，SHA256为`c51e52282c6888eda0dcb1d33c839b0c0c36f7001012fb8ddd549455553ce157`。第十批随后完整结束，见上表；benchmark缺失方法保持缺失。
 
-第六、第九批完成后，已确认完成的首六批加第九批共416个互斥设计、6402份映射、7650个成功引用。第十一批64481已启动，准备/分析源码`e1880f0`，排除前十批638个目录；新增范围仍待冻结清单，提交回执见`20261112T012322Z-consistent-path-audit-batch11-69a57845/input/submission.json`。
+第六、第九批完成后，已确认完成的首六批加第九批共416个互斥设计、6402份映射、7650个成功引用。第十一批64481冻结712 PASS/2 PARTIAL/191未记录，排除前十批638项后新增76项，首个index408；十一批目录互斥、并集714。准备/分析源码`e1880f0`，选择清单为`20261112T012322Z-consistent-path-audit-batch11-69a57845/output/path_audit_selection.json`，SHA256为`3d6c9caa4f770e33bafe8308768b5db3f0f21b77e7ce92464fba23bfc8da89bb`。来源核验通过，实际审计仍在运行；晚于冻结的loco_top结果保留到后续批次。
 
 第十批完成后，已确认完成的首六批加第九、十批共451个互斥设计、6920份映射、8273个成功引用。审计PASS仅覆盖实际取得的有效测量，不把codec的benchmark PARTIAL改为PASS。

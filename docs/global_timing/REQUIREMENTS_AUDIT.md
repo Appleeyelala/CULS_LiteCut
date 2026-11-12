@@ -15,7 +15,7 @@
 | Phase2 root/cut/candidate/no-op、冲突、顺序、回退 | candidates.py、cut_validation.py、pipeline.py；64854原始执行审计905 PASS，含cut证明、choices、trace全ACCEPTED、顺序、AIG及CEC。动态失败请求保留并单独修复 | 成功请求完整验证；不保证所有静态投影请求可执行 |
 | Phase3 Student语义、特征、批量、缓存与局部/全局区分 | 19维Student冻结；64357的123286条特征/score精确对照及真实缓存测试；全905 litecut.json及模型hash保留 | 完成推理接入；未重建Teacher训练 |
 | Phase4 DAG时序、多PO、近关键、加权LSE、面积及联合目标 | surrogate.py/arrival.py：端口结构成本、局部/直接前驱交互、no-op锚定、全部PO传播；scalar_objective支持正PO权重、面积惩罚和Smooth Tchebycheff；真实面积最终复核 | 已实现/执行；代理误差与路径身份边界明确 |
-| Phase5 可微松弛、联合更新、离散化、反馈、梯度与收敛 | optimization.py的Softmax/STE/Adam及冲突投影；pipeline.py反馈拟合；905份gradient目录及report/convergence.csv、gradients.csv；64854预测先于标签审计错误0 | 完成可执行近似；不是精确离散导数或AGD复现 |
+| Phase5 可微松弛、联合更新、离散化、反馈、梯度与收敛 | optimization.py的Softmax/STE/Adam及冲突投影；pipeline.py反馈拟合；905份gradient目录及report/observations.csv、gradients.csv、convergence_and_prediction.png/PDF；64854预测先于标签审计错误0 | 完成可执行近似；不是精确离散导数或AGD复现 |
 | Phase6 Rewrite→CEC→统一Mapping/Timing→反馈及失败记录 | 全905 current-source比较、64854执行审计；真实CEC-n按端口位置、统一Liberty与全部PO/global一致；失败没有替代指标 | 主闭环完成；最终原始路径证据核验待64905 |
 
 ## 测试要求

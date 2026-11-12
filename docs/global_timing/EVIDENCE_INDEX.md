@@ -2,6 +2,10 @@
 
 本索引区分已完成的固定证据和仍在运行的全量验证。日期为2026-11-12（北京时间）；它不是整体验收通过声明。具体要求见[验收矩阵](IMPLEMENTATION_STATUS.md)，历史Gate结果见[工作历史](../WORK_HISTORY.md)。
 
+最新主结果见[统一版本905输入搜索结果](FULL905_SEARCH_RESULTS.md)和[逐要求验收](REQUIREMENTS_AUDIT.md)。64854已完成全905固定cohort、搜索来源审计及原始replay执行核验：901 PASS/4个native对照缺失的PARTIAL，保存搜索与执行审计错误0；并未建立稳定优于随机搜索的优势。目录为`20261112T103045Z-final905-search-analysis-v2-32c72d46/`，其中`output/comparison/`、`search_quality/`、`execution_audit/`分别保留原始对比、误差/来源及trace证据。
+
+前十二批路径已核验738个设计、11324份映射、13538个引用。第十三批64852精确选择剩余167项；64905依赖其结束后复核十三批全905的原始路径证据及各baseline总览。下面的运行中前缀描述保留其当时范围，不替代最新完成记录。
+
 ## 代码与执行
 
 | 内容 | 入口 |

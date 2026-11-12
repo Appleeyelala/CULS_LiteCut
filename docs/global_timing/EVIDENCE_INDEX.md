@@ -39,6 +39,8 @@
 | 统一版本第三批路径采集 | `20261111T230414Z-consistent-path-audit-batch3-9f6ede4b/output/arrival_paths/summary.json`、`audit_summary.json`、`slurm_completion.json` | 固定38/38设计PASS，539份映射、653个引用，包含Division；精确清单、冻结hash及Slurm正常终态已核验。原204 PASS/701未记录保持不变 |
 | 统一版本第四批路径采集 | `20261111T231943Z-consistent-path-audit-batch4-c3f19ce7/output/arrival_paths/summary.json`、`audit_summary.json`、`slurm_completion.json` | 固定37/37设计PASS，662份映射、773个引用；精确清单、冻结hash及Slurm正常终态已核验。原241 PASS/664未记录保持不变 |
 | 统一版本第五批路径采集 | `20261111T233214Z-consistent-path-audit-batch5-33fcbf06/output/arrival_paths/summary.json`、`audit_summary.json`、`slurm_completion.json` | 固定49/49个设计PASS，751份映射、898个引用，精确清单一致，新CEC及timing/网表正文不变；Slurm正常完成，选择/cohort哈希不变。原冻结290 PASS/615未记录保持不变，与首批及其他已分配批次互斥 |
+| 统一版本第六批路径采集 | `20261111T235819Z-consistent-path-audit-batch6-0fe6209c/output/arrival_paths/summary.json`、`audit_summary.json`、`slurm_completion.json` | 固定74/74设计审计PASS，1113份映射、1335个引用；精确清单、冻结hash及Slurm正常终态已核验。原364 PASS/541未记录保持不变 |
+| 统一版本第九批路径采集 | `20261112T005832Z-consistent-path-audit-batch9-316b38d0/output/arrival_paths/summary.json`、`audit_summary.json`、`slurm_completion.json` | 固定52/52设计审计PASS，791份映射、947个引用；精确清单、冻结hash及Slurm正常终态已核验。原602 PASS/1 PARTIAL/302未记录保持不变 |
 
 上述搜索比较未显示稳定优于对等预算随机搜索的结果。真实CEC通过、代理预测准确、优化收益和跨设计泛化是不同结论，分别见[搜索分析](INTERIM_SEARCH_ANALYSIS.md)、[路径分析](PATH_CHANGE_ANALYSIS.md)和[限制报告](LIMITATIONS.md)。
 
@@ -50,10 +52,12 @@
 
 最终比较须核对全部905个终态、同一来源与参数、各方法缺项、真实预算及失败请求。已有开发版本全量扫描和定向补验独立保存，不按结果优劣拼接为最终cohort。Slurm退出0也不等于全部case或历史程序PASS；应读取逐例和逐程序报告。当前不宣称全量验收完成。
 
-统一版本路径审计64398、64400、64401、64402、64403、64404、64405分别选择89、77、38、37、49、74、151个有测量结果的设计，目录见[运行记录](RUN_LOG.md#统一版本路径证据分批采集)。七批精确目录互斥、并集515，benchmark源码均为`160b218`；第七批冻结514 PASS、1 PARTIAL、390未记录，包含mrc4有效测量。各批启动快照独立保留，不将未记录计数相加。首五批均已完成，共290设计、4498份映射、5368个引用；第六、七批仍在运行。选择清单见各自`output/path_audit_selection.json`，逐例报告见`output/arrival_paths/`；已分配不等于已完成。最终按精确benchmark目录关联，旧116设计报告不替代新结果。
+统一版本路径审计64398、64400、64401、64402、64403、64404、64405分别选择89、77、38、37、49、74、151个有测量结果的设计，目录见[运行记录](RUN_LOG.md#统一版本路径证据分批采集)。七批精确目录互斥、并集515，benchmark源码均为`160b218`；第七批冻结514 PASS、1 PARTIAL、390未记录，包含mrc4有效测量。各批启动快照独立保留，不将未记录计数相加。首五批均已完成，共290设计、4498份映射、5368个引用；第六批随后完成，第七批仍在运行。选择清单见各自`output/path_audit_selection.json`，逐例报告见`output/arrival_paths/`；已分配不等于已完成。最终按精确benchmark目录关联，旧116设计报告不替代新结果。
 
 第八批64406冻结550 PASS、1 PARTIAL、354未记录，排除前七批515项后新增36项，首个为index108；八批精确目录互斥、并集551。准备/分析源码`e9016eb`，选择清单见`20261112T004638Z-consistent-path-audit-batch8-b7761547/output/path_audit_selection.json`，SHA256为`fb2104a3bcbc417311185ed0aa6ea890422824dd34bdfdc9ad2de63fc38a7cbf`。来源核验通过、审计仍在运行，分配范围不增加已通过覆盖数。
 
-第九批64407冻结602 PASS、1 PARTIAL、302未记录，排除前八批551项后新增52项，首个为index322；九批精确目录互斥、并集603。准备/分析源码`46cabc2`，选择清单为`20261112T005832Z-consistent-path-audit-batch9-316b38d0/output/path_audit_selection.json`，SHA256为`db9115336fdf856882fe73df5d3b30e0c093f503b0ec044badd1105541dc2677`。来源核验通过，审计仍在运行；晚于冻结的codec结果由后续批次纳入。
+第九批64407冻结602 PASS、1 PARTIAL、302未记录，排除前八批551项后新增52项，首个为index322；九批精确目录互斥、并集603。准备/分析源码`46cabc2`，选择清单为`20261112T005832Z-consistent-path-audit-batch9-316b38d0/output/path_audit_selection.json`，SHA256为`db9115336fdf856882fe73df5d3b30e0c093f503b0ec044badd1105541dc2677`。第九批随后完整结束，见上表；晚于冻结的codec结果由后续批次纳入。
 
 第十批64408冻结636 PASS、2 PARTIAL、267未记录，排除前九批603项后新增35项，包含codec有效测量；十批精确目录互斥、并集638。准备/分析源码`b6bc67a`，选择清单为`20261112T010854Z-consistent-path-audit-batch10-1b537bfa/output/path_audit_selection.json`，SHA256为`c51e52282c6888eda0dcb1d33c839b0c0c36f7001012fb8ddd549455553ce157`。来源核验通过，审计仍在运行。
+
+第六、第九批完成后，已确认完成的首六批加第九批共416个互斥设计、6402份映射、7650个成功引用。第十一批64481已启动，准备/分析源码`e1880f0`，排除前十批638个目录；新增范围仍待冻结清单，提交回执见`20261112T012322Z-consistent-path-audit-batch11-69a57845/input/submission.json`。

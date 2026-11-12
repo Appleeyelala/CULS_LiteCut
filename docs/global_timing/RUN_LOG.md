@@ -102,6 +102,7 @@
 | 64405 | `20261112T002444Z-consistent-path-audit-batch7-e74274e8` | RUNNING：第五批完成后重新检查配额，冻结514 PASS/1 PARTIAL/390未记录，排除前六批已分配的364个精确目录，新增151个路径审计，包含mrc4有效测量。benchmark源码`160b218`，同一64389 ABC及900 s时限；准备/分析源码`ceb88f2`，driver字节不变。2 CPU/24 GiB/0 GPU、24 h，提交后总分配26 CPU/248 GiB/2 GPU；来源核验通过，尚无整批完成结论 |
 | 64406 | `20261112T004638Z-consistent-path-audit-batch8-b7761547` | RUNNING：冻结550 PASS/1 PARTIAL/354未记录，排除前七批515个精确目录，新增36个路径审计，首个为index108。benchmark源码`160b218`，同一64389 ABC及900 s时限；准备/分析源码`e9016eb`，driver字节不变。2 CPU/24 GiB/0 GPU、24 h，提交后总分配24 CPU/224 GiB/2 GPU；来源核验通过，尚无整批完成结论 |
 | 64407 | `20261112T005832Z-consistent-path-audit-batch9-316b38d0` | RUNNING：冻结602 PASS/1 PARTIAL/302未记录，排除前八批551个精确目录，新增52个路径审计，首个为index322。benchmark源码`160b218`，同一64389 ABC及900 s时限；准备/分析源码`46cabc2`，driver字节不变。2 CPU/24 GiB/0 GPU、24 h，提交后总分配26 CPU/248 GiB/2 GPU；来源核验通过，尚无整批完成结论 |
+| 64408 | `20261112T010854Z-consistent-path-audit-batch10-1b537bfa` | RUNNING：第四批完成后重新检查配额，准备/分析源码`b6bc67a`，复用相同driver字节，排除前九批已分配的603个精确目录。2 CPU/24 GiB/0 GPU、24 h，同一64389 ABC及900 s时限；提交后总分配26 CPU/248 GiB/2 GPU。仍在冻结来源阶段，新增范围待实际清单确认 |
 
 ## 统一版本全量比较的准备与提交
 
@@ -140,6 +141,8 @@
 第九批64407的目录为`20261112T005832Z-consistent-path-audit-batch9-316b38d0`，准备/分析源码`46cabc2`。提交时重新核验集群、全部用户请求及输入hash，总分配由24 CPU/224 GiB/2 GPU变为26 CPU/248 GiB/2 GPU。实际冻结602 PASS、1 PARTIAL、302未记录，排除前八批551项后新增52项，首个输入index322；九批精确目录互斥、并集603。选择清单SHA256为`db9115336fdf856882fe73df5d3b30e0c093f503b0ec044badd1105541dc2677`。codec的终态晚于本批冻结，因此仍保留为该快照未记录，后续按实际终态纳入，不回写旧清单。
 
 第四批64402随后完成37/37个设计、662份映射和773个成功引用，逐例唯一AIG字节数之和533。`output/slurm_completion.json`的SHA256为`7f5e2407c20ffdbc11f5c79e88c7baf009c379ca53e267463cc838f306dea625`；原选择/cohort哈希不变，Slurm正常退出0:0。至此首五批全部完成，共290个互斥设计、4498份映射、5368个成功引用；后续批次和完整905覆盖仍须继续核验。
+
+第十批64408的目录为`20261112T010854Z-consistent-path-audit-batch10-1b537bfa`，准备/分析源码`b6bc67a`，排除前九批603个精确目录。第四批资源释放后重新核验集群、全部用户请求及输入hash，总分配由24 CPU/224 GiB/2 GPU变为26 CPU/248 GiB/2 GPU。该批按实际终态纳入新完成的PASS/PARTIAL输入，包括未分配的codec；具体范围待冻结清单，不将提交当作审计通过。
 
 各批完成的逐例报告位于`output/arrival_paths/*/summary.json`；原搜索结果保持不变。未来批次应排除所有前批选择清单中已分配的目录，避免重复运行；若确需重试失败审计，必须保留失败报告及单独声明的新尝试。最终使用`analyze_path_changes.py --audit-runs`合并各批证据，匹配最终905输入cohort选定的精确benchmark目录，不以相同输入hash的旧开发运行代替。各批冻结范围及未记录状态不随后续扫描回写。
 

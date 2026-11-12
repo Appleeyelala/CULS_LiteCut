@@ -36,3 +36,5 @@ python -B scripts/verify_import.py
 本仓库的历史脚本保留原样，其中仍有旧绝对路径。它们是有来源的源码快照，不表示所有历史命令已经迁移为可直接执行的统一入口。构建、推理、实验和输出必须在 `/data` 的独立 Slurm 工作目录进行。
 
 上游 CULS、Gate1、ABC 的许可证随源码保留。LiteCut 源目录未找到独立许可证文件；这里记录本地研究来源，未执行对外发布。模型、ASAP7 库和二进制不进入 Git，位置与哈希见 [资产清单](provenance/assets.json)。
+
+生成产物的清理范围、保留数据及删除清单见[运行产物清理记录](docs/GENERATED_ARTIFACT_CLEANUP.md)。历史缓存路径可能已清理，完整候选分数与实验原始证据仍保留。

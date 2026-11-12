@@ -2,6 +2,24 @@
 
 所有目录均在 `/data/wushangge/CULS_LiteCut/runs/`；原历史目录及 `evidence/` 未改写。下列“完成”仅指对应运行，不代表整体用户目标完成。
 
+## 全量主实验终态与最终审计
+
+2026-11-12重新核对了原始JSONL、suite summary及Slurm accounting：64399为453记录、450 PASS/3 PARTIAL，64397为452记录、451 PASS/1 PARTIAL。合计905个输入，索引恰为0至904、输入SHA256均唯一；没有按结果选择补验替换。两作业均COMPLETED/0:0，分别耗时5h23m44s与5h32m38s。四项PARTIAL仅缺native ABC对照，不能改为完整PASS。最终效果统计仍待保存证据审计。
+
+| Slurm ID | 目录后缀 | 当前结果 |
+|---|---|---|
+| 64852 | `20261112T093558Z-consistent-path-audit-batch13-67071026` | RUNNING：相同driver SHA256 `f0f52ac8f165465781312fbba7296e9434af33186697d239e988855c1c9e3b11`，排除前十二批738个精确目录，预期覆盖剩余167项；实际范围仍须以本批冻结清单核验。2 CPU/24 GiB/0 GPU |
+| 64853 | `20261112T102608Z-final905-search-analysis-5b1190b9` | FAILED：5 s，编排检查把首批/第五批完成记录缺少后增`frozen_cohort_status_counts`字段误判为计数冲突，尚未构建新cohort或执行任何实验。保留失败目录；早期已有计数与当前相同 |
+| 64854 | `20261112T103045Z-final905-search-analysis-v2-32c72d46` | RUNNING：显式兼容两份旧格式，并从原始冻结cohort及其hash核验缺失字段。执行终态审计、全905冻结、基线比较、预测/梯度来源分析及原始顺序replay trace审计，不进行新搜索、拟合或mapping。2 CPU/32 GiB/0 GPU |
+
+64852提交前当前用户无活动作业，提交后2 CPU/24 GiB/0 GPU；64854重新检查全部活动请求后累计4 CPU/56 GiB/0 GPU，均在64 CPU/256 GiB/2 GPU以内。提交回执与检查在对应`input/`中，启动后由driver更新run.json，没有用提交快照覆盖运行状态。
+
+统一版本新增PARTIAL为index610 `forgeEDA/mrc3.aig`：整例记录97.58 s，native rewrite在0.166 s断言退出−6，位置仍为`Abc_AigUpdateLevelR_int`，未进入native CEC/mapping。面积约束/joint最终均为显式修复eval7，分别6955.05762/6839.88867 ps，较原图改善0.702%/2.346%；两模式各四次直接梯度请求全部FAIL，同预算random为6332.51953 ps。相同断言文本不证明四设计根因相同。`report/method_failures.json`、`comparison.csv`、`observations.csv`的SHA256分别为`4e8ec1b62f34fd0f8396513e09ec27fe13f863dbf96ffbbef3a7f00ccc246dd7`、`ff64ae2a71531440ec830d019ffc838e29f5a97375e9e50636f86c18ff937899`、`bf1501744f49079ca80313119ece78f9f9da20c08154416bcd0efef3da2109b7`。
+
+index827 `sd_controller_test_driver`随后完整PASS。面积约束/joint分别43333.7031/43341.9375 ps，较原图改善8.946%/8.929%，仍比对应random更慢。两模式各5次直接梯度请求均成功；最终分别来自直接梯度eval6与warmup后的显式修复eval2，不能把两个模式都归为直接梯度选点。旧的长时间无新工具日志并不等于任务停滞或失败。
+
+## 阶段运行历史
+
 | Slurm ID | 目录后缀 | 结果与原因 |
 |---|---|---|
 | 64322 | `20261111T102740Z-historical-baseline-cab97f65` | FAIL：新编排脚本传错Gate3D raw trace目录；Gate3A–D完成 |

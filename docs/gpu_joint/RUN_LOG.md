@@ -22,6 +22,8 @@ Slurm **64983** 已由实时accounting确认 **COMPLETED/0:0，Elapsed 1:42:27**
 
 同时从既有64932原始JSON恢复组件Torch活跃分配峰值：div1099438592、hyp44398080、voter98498560 bytes。采集前实际执行reset_peak_memory_stats；不是reserved/context/原生CULS或整个闭环显存。只读sacct检查显示64983/64980的实际会计数据未提供gpumem/gpuutil，即使集群配置了这些TRES也不能填造峰值。数值与边界追加于FINAL_RESULTS，未重新运行组件实验。
 
+既有三个组件的保存partition进一步给出Region DAG最长层数4183/16269/1、最大同层宽128/12991/1，原始partition与kernel JSON hash保存在 `provenance/gpu_joint_component_structure.json`。该轻量静态读取得到结构元数据，没有执行模型或图实验；层数不是AND深度/真实timing，三例不是深度控制消融。结合保存的hyp CPU adjoint2.445s/全调用2.564s，明确CPU传播瓶颈与候选GPU工作量的不同作用。
+
 ## 已完成的诊断与旧方法基线
 
 - `20261113T031521Z-gpu-joint-saved-diagnostics-63af3c1f`，Slurm 64920，源码 `5025a6c`，COMPLETED/0:0。12 个历史样例的只读耗时、重复 AIG 字节和 trace 体积诊断；不是新优化或 GPU 性能测量。

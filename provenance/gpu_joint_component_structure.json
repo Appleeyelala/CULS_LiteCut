@@ -1,0 +1,49 @@
+{
+  "status": "PASS",
+  "metric_definition": "Region DAG layers count regions on the longest topological chain, one for a source region; this is not AND-depth or mapped timing. Width counts regions at the same computed layer. Derived from saved partitions only; no model, rewrite, CEC or mapping executed.",
+  "rows": [
+    {
+      "input": "ACE/div.aig",
+      "regions": 28306,
+      "region_edges": 72644,
+      "region_dag_layers": 4183,
+      "max_regions_in_one_layer": 128,
+      "decisions": 51140,
+      "padded_width": 7,
+      "peak_cuda_allocated_bytes": 1099438592,
+      "kernel_result_path": "/data/wushangge/CULS_LiteCut/runs/20261113T035708Z-joint-sparse-cpu-cuda-a65c4ca7/output/kernel_case_0020.json",
+      "kernel_result_sha256": "cac0e01129a6f49f7c40c58d888c141a93fdacf93901e8408df9fe1c8a1dea78",
+      "partition_path": "/data/wushangge/CULS_LiteCut/runs/20261111T184752Z-consistent-full-shard0-1568c1b9/output/suite/case_0020/partition/partition.json",
+      "partition_sha256": "b083a5eb3440d461fa8d87f4b493cee1f40f6188b170f867b612a254c8d58ef7"
+    },
+    {
+      "input": "ACE/hyp.aig",
+      "regions": 117509,
+      "region_edges": 266271,
+      "region_dag_layers": 16269,
+      "max_regions_in_one_layer": 12991,
+      "decisions": 2760,
+      "padded_width": 5,
+      "peak_cuda_allocated_bytes": 44398080,
+      "kernel_result_path": "/data/wushangge/CULS_LiteCut/runs/20261113T035708Z-joint-sparse-cpu-cuda-a65c4ca7/output/kernel_case_0022.json",
+      "kernel_result_sha256": "51476812c47a664d471f09b08c4d2d8aac49105a1847b7e377387853fd6c6359",
+      "partition_path": "/data/wushangge/CULS_LiteCut/runs/20261111T184752Z-consistent-full-shard0-1568c1b9/output/suite/case_0022/partition/partition.json",
+      "partition_sha256": "87943e64cea91b635e11df62d0e5426a1d5f97482bb62a6dc00ed80f07698bba"
+    },
+    {
+      "input": "ACE/voter.aig",
+      "regions": 1,
+      "region_edges": 0,
+      "region_dag_layers": 1,
+      "max_regions_in_one_layer": 1,
+      "decisions": 7007,
+      "padded_width": 6,
+      "peak_cuda_allocated_bytes": 98498560,
+      "kernel_result_path": "/data/wushangge/CULS_LiteCut/runs/20261113T035708Z-joint-sparse-cpu-cuda-a65c4ca7/output/kernel_case_0038.json",
+      "kernel_result_sha256": "be19460cb757f6443107f80f8b925c85dfe9800e3a296db0dc7d75e1f07b5934",
+      "partition_path": "/data/wushangge/CULS_LiteCut/runs/20261111T184752Z-consistent-full-shard0-1568c1b9/output/suite/case_0038/partition/partition.json",
+      "partition_sha256": "5180a6965e37ec80cbf3a06f206123e12d31534fea8b288035fda1c2c69fab76"
+    }
+  ],
+  "scope": "Three existing developmental component cases, not a formal-panel DAG-depth ablation or a causal scaling study. Torch active allocation excludes non-Torch/context/reserved/CULS memory."
+}

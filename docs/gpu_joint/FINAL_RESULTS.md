@@ -72,6 +72,16 @@ GPU对照为 **9设计、27个实际CUDA配对**：同分配、算法/模型/候
 
 原始路径为 `20261113T035708Z-joint-sparse-cpu-cuda-a65c4ca7/output/kernel_case_{0020,0022,0038}.json`（同上/data runs根目录），采集代码 `scripts/profile_joint_kernel.py` 在每次组件调用前reset峰值，再读取该Torch指标。它不含全部driver/context/reserved显存或原生CULS的分配，不能当作完整闭环显存峰值。Slurm虽然配置了gpumem/gpuutil TRES，但64983/64980实际会计字段未给出这两项；正式端到端显存仍未记录，不能填成0。
 
+保存分区的结构形状另有[只读核对记录](../../provenance/gpu_joint_component_structure.json)：
+
+| 输入 | Region数 / Region边数 | Region DAG最长层数 | 同层最大Region数 | Decisions / padded width |
+|---|---|---:|---:|---|
+| div | 28306 / 72644 | 4183 | 128 | 51140 / 7 |
+| hyp | 117509 / 266271 | 16269 | 12991 | 2760 / 5 |
+| voter | 1 / 0 | 1 | 1 | 7007 / 6 |
+
+“层数”按最长链上的region节点数定义，不是原AIG的AND深度或真实时序。hyp的CUDA组件调用中CPU adjoint约2.445s，接近整个2.564s；div相应为0.969/3.513s。它们说明剩余CPU传播与候选张量规模必须分开考虑，不能仅按Region数或GPU kernel倍数预测总加速。这三例同时改变了DAG形状、候选数等因素，是描述性瓶颈证据，不是独立控制深度的因果实验；voter也不构成跨MFFC收益例证。
+
 ## 真实差异、限制与仍待完成的控制
 
 - ALU_mod三seed中位delay：新1556.3812、旧1585.0527、random1585.3152ps，是本面板的有效局部结果；不代表各seed或各设计都胜出。

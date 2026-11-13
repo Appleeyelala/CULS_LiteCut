@@ -7,7 +7,7 @@ pipeline.Experiment; no partial rewrite is promoted to success here.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import math
 import time
 
@@ -385,3 +385,57 @@ def joint_proposals(model, seen, seed, incumbent=None, steps=40, restarts=2,
                'sampled_values': trace_values, 'trace_columns': ['local_objective', 'trust_penalty', 'conflict_penalty', 'total_gradient_norm', 'soft_edit_count'],
                'scope': 'Local surrogate approximation; soft inner optimization, hard legal final projection; no gradient through EDA or LiteCut.'}
     return sorted(proposals.values(), key=lambda p: (p['predicted_objective'], p['choices'])), [details]
+
+
+def select_proposal_engine(decisions, regions, width, trajectories=32, device_mode='auto',
+                           cuda_available=False, small_decisions=128, small_regions=4096,
+                           gpu_work_threshold=500000):
+    """Fixed metadata rule, independent of measured QoR or benchmark identity."""
+    if device_mode not in ('cpu', 'cuda', 'auto'):
+        raise ValueError('Unknown adaptive proposal device mode.')
+    if min(decisions, regions, small_decisions, small_regions) < 0 or min(width, trajectories, gpu_work_threshold) < 1:
+        raise ValueError('Invalid adaptive proposal dimensions or thresholds.')
+    work = decisions * width * trajectories
+    if decisions <= small_decisions and regions <= small_regions:
+        return {'engine': 'full_ste', 'device': 'cpu', 'work_items': work}
+    device = 'cuda' if device_mode == 'cuda' or (device_mode == 'auto' and cuda_available and work >= gpu_work_threshold) else 'cpu'
+    return {'engine': 'frozen_criticality', 'device': device, 'work_items': work}
+
+
+def adaptive_proposals(model, seen, seed, incumbent=None, steps=40, restarts=2,
+                       mode='area_constraint', area_limit_ratio=1.05, area_weight=0.5,
+                       config=JointProposalConfig(feedback=True), observations=None,
+                       device_mode='auto', small_decisions=128, small_regions=4096,
+                       gpu_work_threshold=500000):
+    """Retain cheap full STE, approximate/batch only the larger selection work.
+
+    A small design uses the original CPU selector (at most 20 steps) even in a
+    forced-CUDA comparison: there is no GPU contribution on that branch.
+    Auto's CUDA check occurs only beyond the fixed work threshold, avoiding
+    gratuitous CUDA initialization for small CPU-only proposal workloads.
+    """
+    config.validate()
+    small = model.n_decisions <= small_decisions and model.n_regions <= small_regions
+    work = model.n_decisions * model.width * config.trajectories
+    available = (torch.cuda.is_available() if not small and device_mode == 'auto'
+                 and work >= gpu_work_threshold else False)
+    selection = select_proposal_engine(model.n_decisions, model.n_regions, model.width,
+        config.trajectories, device_mode, available, small_decisions, small_regions, gpu_work_threshold)
+    if selection['engine'] == 'full_ste':
+        from .optimization import gradient_proposals
+        proposals, trace = gradient_proposals(model, seen, seed, incumbent, min(steps, 20), restarts,
+                                               mode, area_limit_ratio, area_weight)
+    else:
+        proposals, trace = joint_proposals(model, seen, seed, incumbent, steps, restarts,
+            mode, area_limit_ratio, area_weight, replace(config, device=selection['device']), observations)
+    for proposal in proposals:
+        proposal['proposal_engine'] = selection['engine']
+        proposal['proposal_device'] = selection['device']
+    for row in trace:
+        row.update(proposal_engine=selection['engine'], device=selection['device'])
+    if trace:
+        trace[0]['adaptive_selection'] = {**selection, 'requested_device_mode': device_mode,
+            'small_decisions': small_decisions, 'small_regions': small_regions,
+            'gpu_work_threshold': gpu_work_threshold,
+            'scope': 'Metadata-only selector rule; small branch has no CUDA gradient work.'}
+    return proposals, trace

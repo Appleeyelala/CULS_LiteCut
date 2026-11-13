@@ -6,12 +6,46 @@ import torch
 from global_timing.candidates import Catalogue
 from global_timing.joint_optimization import (
     FrozenCriticalityObjective, JointProposalConfig, joint_proposals, project_neighborhood,
+    adaptive_proposals, select_proposal_engine,
 )
 from global_timing.surrogate import scalar_objective
 from test_surrogate import model_fixture
 
 
 class JointOptimizationTests(unittest.TestCase):
+    def test_adaptive_small_design_preserves_original_full_ste_proposals(self):
+        from global_timing.optimization import gradient_proposals
+        model = model_fixture()
+        original, _ = gradient_proposals(model, {(0, 0)}, 57, [0, 0], steps=20, restarts=2,
+                                          mode='joint', area_weight=0.5)
+        adaptive, trace = adaptive_proposals(model, {(0, 0)}, 57, [0, 0], steps=40, restarts=2,
+                                             mode='joint', device_mode='cuda')
+        for row in adaptive:
+            self.assertEqual(row['proposal_engine'], 'full_ste')
+            self.assertEqual(row['proposal_device'], 'cpu')
+        stripped = [{k: v for k, v in r.items() if k not in ('proposal_engine', 'proposal_device')} for r in adaptive]
+        self.assertEqual(original, stripped)
+        self.assertTrue(all(r['device'] == 'cpu' for r in trace))
+
+    def test_adaptive_quadratic_branch_matches_standalone_cpu_proposals(self):
+        model = model_fixture()
+        config = JointProposalConfig(trajectories=8, max_changes=2)
+        original, _ = joint_proposals(model, {(0, 0)}, 77, [0, 0], steps=40, mode='joint', config=config)
+        adaptive, trace = adaptive_proposals(model, {(0, 0)}, 77, [0, 0], steps=40, mode='joint',
+                                             config=config, device_mode='cpu', small_decisions=0)
+        stripped = [{k: v for k, v in r.items() if k not in ('proposal_engine', 'proposal_device')} for r in adaptive]
+        self.assertEqual(original, stripped)
+        self.assertEqual(trace[0]['adaptive_selection']['engine'], 'frozen_criticality')
+
+    def test_adaptive_device_rule_uses_only_fixed_dimensions_and_availability(self):
+        self.assertEqual(select_proposal_engine(91, 62, 9, device_mode='cuda')['device'], 'cpu')
+        self.assertEqual(select_proposal_engine(7007, 1, 3, cuda_available=True)['device'], 'cuda')
+        self.assertEqual(select_proposal_engine(7007, 1, 3, cuda_available=False)['device'], 'cpu')
+        self.assertEqual(select_proposal_engine(2760, 117509, 5, cuda_available=True)['device'], 'cpu')
+        self.assertEqual(select_proposal_engine(2, 5000, 3)['engine'], 'frozen_criticality')
+        with self.assertRaises(ValueError):
+            select_proposal_engine(1, 1, 0)
+
     def test_local_model_value_and_gradient_match_full_surrogate_at_anchor(self):
         model = model_fixture()
         with torch.no_grad():

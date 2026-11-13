@@ -13,6 +13,13 @@ from threading import Lock
 
 ENTRY_TIME = time.perf_counter()
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+PROFILE_VARIANTS = (
+    'legacy_cpu', 'criticality_cpu', 'criticality_cuda', 'feedback_cpu', 'feedback_cuda',
+    'feedback_batch_cpu', 'feedback_batch_cuda', 'feedback_physical_cpu', 'feedback_physical_cuda',
+    'feedback_physical_batch_cpu', 'feedback_physical_batch_cuda',
+    'adaptive_cpu', 'adaptive_cuda', 'adaptive_auto', 'adaptive_batch_cpu', 'adaptive_batch_cuda', 'adaptive_batch_auto',
+    'adaptive_physical_batch_cpu', 'adaptive_physical_batch_cuda', 'adaptive_physical_batch_auto',
+)
 
 
 def run_case(args):
@@ -130,19 +137,29 @@ def run_case(args):
         if args.variant == 'legacy_cpu':
             search = experiment.gradient_search(baseline, 'area_constraint')
         else:
-            from functools import partial
             from global_timing import joint_optimization
             device = 'cuda' if args.variant.endswith('_cuda') else 'cpu'
             proposal_config = joint_optimization.JointProposalConfig(device=device, trajectories=args.trajectories,
                                                                      max_changes=args.max_changes,
-                                                                     feedback=args.variant.startswith('feedback_'))
+                                                                     feedback=args.variant.startswith(('feedback_', 'adaptive_')))
             record['joint_proposal_config'] = dict(proposal_config.__dict__)
+            record['requested_proposal_device_mode'] = args.variant.rsplit('_', 1)[-1]
             record['algorithm_sha256']['joint_optimization'] = digest(
                 Path(pipeline.__file__).with_name('joint_optimization.py'))
-            instrument(joint_optimization, 'joint_proposals', 'gradient_proposals')
+            generator_name = 'adaptive_proposals' if args.variant.startswith('adaptive_') else 'joint_proposals'
+            instrument(joint_optimization, generator_name, 'gradient_proposals')
+            devices, engines = set(), set()
+            extra_options = ({'device_mode': args.variant.rsplit('_', 1)[-1]} if generator_name == 'adaptive_proposals' else {})
+            def propose(*items, **options):
+                proposals, trace = getattr(joint_optimization, generator_name)(
+                    *items, **options, config=proposal_config, **extra_options)
+                devices.update(r['device'] for r in trace if 'device' in r)
+                engines.update(r.get('proposal_engine', 'frozen_criticality') for r in trace)
+                return proposals, trace
             search = experiment.gradient_search(baseline, 'area_constraint',
-                proposal_generator=partial(joint_optimization.joint_proposals, config=proposal_config),
+                proposal_generator=propose,
                 choice_batch_evaluator=experiment.evaluate_many if '_batch_' in args.variant else None)
+            record.update(proposal_devices_used=sorted(devices), proposal_engines_used=sorted(engines))
         record.update(status='PASS', original=original, no_op=baseline,
                       selected=search['best'], preparation_runtime_s=experiment.preparation_runtime_s,
                       method_runtime_s=search['exclusive_method_runtime_s'],
@@ -153,7 +170,7 @@ def run_case(args):
                       decisions=len(experiment.catalogue.decisions),
                       candidates=sum(d['candidate_count'] for d in experiment.catalogue.decisions),
                       litecut_cache_hit=experiment.cache['cache_hit'])
-        if args.variant.endswith('_cuda'):
+        if 'cuda' in record.get('proposal_devices_used', []):
             record['python_cuda_device'] = pipeline.torch.cuda.get_device_name(0)
     except Exception as exc:
         record.update(status='FAIL', error=f'{type(exc).__name__}: {exc}')
@@ -187,9 +204,7 @@ def main():
     parser.add_argument('--case-timeout', type=int, default=1800)
     parser.add_argument('--variants', default='legacy_cpu',
                         help='Sequential controls: legacy_cpu,criticality_cpu,criticality_cuda,feedback_cpu,feedback_cuda')
-    parser.add_argument('--variant', choices=['legacy_cpu', 'criticality_cpu', 'criticality_cuda', 'feedback_cpu', 'feedback_cuda',
-                                            'feedback_batch_cpu', 'feedback_batch_cuda', 'feedback_physical_cpu', 'feedback_physical_cuda',
-                                            'feedback_physical_batch_cpu', 'feedback_physical_batch_cuda'], default='legacy_cpu')
+    parser.add_argument('--variant', choices=PROFILE_VARIANTS, default='legacy_cpu')
     parser.add_argument('--legacy-source', type=Path, help='Frozen old /data source for legacy control.')
     parser.add_argument('--legacy-tool-run', type=Path, help='Frozen original binaries for legacy_cpu only.')
     parser.add_argument('--source-root', type=Path, help=argparse.SUPPRESS)
@@ -207,9 +222,7 @@ def main():
         run_case(args)
         return
     variants = args.variants.split(',')
-    if len(set(variants)) != len(variants) or not set(variants) <= {'legacy_cpu', 'criticality_cpu', 'criticality_cuda', 'feedback_cpu', 'feedback_cuda',
-                                                                'feedback_batch_cpu', 'feedback_batch_cuda', 'feedback_physical_cpu', 'feedback_physical_cuda',
-                                                                'feedback_physical_batch_cpu', 'feedback_physical_batch_cuda'}:
+    if len(set(variants)) != len(variants) or not set(variants) <= set(PROFILE_VARIANTS):
         parser.error('Unknown or repeated variant.')
     if args.legacy_source is not None and (not args.legacy_source.resolve().is_relative_to('/data/wushangge')
                                           or not (args.legacy_source / 'global_timing/pipeline.py').is_file()):

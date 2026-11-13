@@ -105,6 +105,18 @@ batch 将 DMA/c1355 的实际 replay 命令从 8 减至 5，ss_pcm 从 8 减至 
 
 ## 冻结评价面板
 
+补充实际搜索：`20261113T054320Z-adaptive-gain-search-dev-2896af18`，Slurm **64976**，源码 **7e5bbc1**，2 CPU、16 GiB、1 GPU，COMPLETED/0:0，2m20s，9/9冷进程闭环PASS。各方法8请求、seed20261111；旧5025a6c+741工具，新方法使用G的83d22440工具。只在开发0/47/80验证，没有使用最终面板调参。
+
+| 输入 | 旧CPU delay ps / cold wall s | adaptive batch auto正增益 | adaptive physical batch auto |
+|---|---|---|---|
+| DMA | 2380.250980 / 22.161 | 2301.566650 / 18.222 | 2396.672360 / 27.917 |
+| c1355 | 360.111877 / 11.810 | 360.111877 / 9.581 | 360.111877 / 14.042 |
+| ss_pcm | 323.908447 / 11.693 | 323.908447 / 11.102 | 323.908447 / 11.035 |
+
+均实际CEC PASS且面积可行。ss_pcm/c1355实际选择full_ste/CPU，DMA为frozen_criticality/CPU；没有CUDA内层贡献。正增益DMA best依然28rewrite显式修复、5失败；physical DMA则138rewrite直接点、0失败，但QoR更差。允许非正增益改变了早期warmup是否成功与后续校准/选择，不能用固定四向量probe的最佳点预言自由搜索胜出。保留该负结果，主方法仍选默认正增益；metadata自适应小图保留原STE有效避免已观察到的ss_pcm退化，三例单次计时仍不足证明稳定加速。
+
+逐例证据在 `output/<variant>/case_NNNN/gradient_area_constraint/{summary.json,gradients_*.json,eval_*/}`，元数据/完整命令在 `run.json`、`job.slurm`、`output/profile_summary.json`；父进程完成时间和每请求timeline均保留。后续独立审计不能在缺失或失败时补造成功标签。
+
 [config/gpu_joint_panel.json](../../config/gpu_joint_panel.json) 固定 16 个输入与种子 20261111/12/13；生成器为 [freeze_joint_panel.py](../../scripts/freeze_joint_panel.py)。只使用冻结输入清单的 AND 规模、来源、文件名家族和 SHA，不查看候选数、delay 或运行时间。排除开发家族，四个区间各选 4 项：128–4095、4096–8191、8192–16383、16384–50000 AND。第一区间原拟分成 128–511 与 512–4095，但输入清单前者只有两个设计且一个属于开发集，因此在成功生成/冻结之前合并，仍未使用结果信息。
 
 面板是已分析过的 905 数据中的冻结子集，不能称未见测试集；basename 规范化不证明所有功能相关设计都已去重。最终比较尚未执行，不能将固定清单视为已完成验证。

@@ -19,6 +19,8 @@ PROFILE_VARIANTS = (
     'feedback_physical_batch_cpu', 'feedback_physical_batch_cuda',
     'adaptive_cpu', 'adaptive_cuda', 'adaptive_auto', 'adaptive_batch_cpu', 'adaptive_batch_cuda', 'adaptive_batch_auto',
     'adaptive_physical_batch_cpu', 'adaptive_physical_batch_cuda', 'adaptive_physical_batch_auto',
+    'original', 'native_abc', 'native_culs', 'random_cpu', 'random_batch',
+    'random_physical_batch', 'greedy_litecut', 'greedy_litecut_physical',
 )
 
 
@@ -32,6 +34,10 @@ def run_case(args):
         if not args.source_root.resolve().is_relative_to('/data/wushangge'):
             raise ValueError('Source override must be an immutable /data snapshot.')
         sys.path.insert(0, str(args.source_root.resolve()))
+    if args.variant in ('original', 'native_abc', 'native_culs', 'random_cpu', 'random_batch',
+                        'random_physical_batch', 'greedy_litecut', 'greedy_litecut_physical'):
+        from global_timing.control_profile import run_control_case
+        return run_control_case(args, ENTRY_TIME)
     from global_timing import pipeline
     from global_timing.common import digest, save_json
     from global_timing.evaluation import Evaluator
@@ -170,6 +176,8 @@ def run_case(args):
                       decisions=len(experiment.catalogue.decisions),
                       candidates=sum(d['candidate_count'] for d in experiment.catalogue.decisions),
                       litecut_cache_hit=experiment.cache['cache_hit'])
+        record['search_summary'] = str(work / 'gradient_area_constraint/summary.json')
+        record['record_kind'] = 'candidate_search'
         if 'cuda' in record.get('proposal_devices_used', []):
             record['python_cuda_device'] = pipeline.torch.cuda.get_device_name(0)
     except Exception as exc:

@@ -10,7 +10,7 @@ import numpy as np
 import torch
 
 from .common import ROOT, digest, legacy, save_json
-from .truth import ContextProofRequired, support_cut_truth
+from .boolean_candidates import verify_cut_truth, verify_library_truth
 
 
 def original_cone(aig, decision):
@@ -32,56 +32,6 @@ def original_cone(aig, decision):
     return graph
 
 
-def verify_library_truth(decision, subgraph, library):
-    """Exhaustive four-input truth check, allowing the engine's output phase.
-
-    Engine ReplaceSubgr aligns zero-input phases when installing a DAG. The
-    cut truth and complement are the only admissible library functions.
-    End-to-end CEC independently checks actual installation and global phase.
-    """
-    truth = int(decision['truth']) & 0xffff
-    phase = library['p_phases'][truth]
-    permutation = library['perms4'][library['p_perms'][truth]]
-    data = library['classes'][decision['truth_class']]
-    patterns = [0xaaaa, 0xcccc, 0xf0f0, 0xff00]
-    values = [(patterns[permutation[i]] ^ (0xffff if (phase >> i) & 1 else 0)) for i in range(4)]
-    for a, b, ca, cb in data['fanins']:
-        values.append((values[a] ^ (0xffff if ca else 0)) & (values[b] ^ (0xffff if cb else 0)))
-    actual = values[data['roots'][subgraph]]
-    if actual not in (truth, truth ^ 0xffff):
-        raise ValueError(f'Library candidate function mismatch at {decision["root"]}:{decision["cut_slot"]}:{subgraph}')
-    return {'truth_verified': True, 'output_phase_complement': actual != truth}
-
-
-def verify_cut_truth(aig, decision):
-    """Validate the exported cut's boundary and truth against original AIG IDs."""
-    leaves = decision['cut_leaves']
-    if len(leaves) not in {3, 4} or len(set(leaves)) != len(leaves):
-        raise ValueError('Expected distinct 3/4-leaf rewrite cut.')
-    values = {node: pattern for node, pattern in zip(leaves, [0xaaaa, 0xcccc, 0xf0f0, 0xff00])}
-    values.setdefault(0, 0)
-    pending, interior, external_pis = [decision['root']], set(), set()
-    while pending:
-        node = pending.pop()
-        if node in values or node in interior or node in external_pis:
-            continue
-        if node not in aig.fanin_literals:
-            if 0 < node <= aig.pi_count:
-                external_pis.add(node)
-                continue
-            raise ValueError('Cut contains a node absent from original AIG.')
-        interior.add(node)
-        pending.extend(literal >> 1 for literal in aig.fanin_literals[node])
-    if external_pis:
-        return support_cut_truth(aig, decision, interior, external_pis)
-    for node in sorted(interior):
-        left, right = aig.fanin_literals[node]
-        values[node] = (values[left >> 1] ^ (0xffff if left & 1 else 0)) & (values[right >> 1] ^ (0xffff if right & 1 else 0))
-    if values[decision['root']] != (int(decision['truth']) & 0xffff):
-        raise ContextProofRequired('Independent cut truth differs; original cut-leaf relationships require CEC.')
-    return {'cut_semantics': 'STRUCTURAL_BOUNDARY', 'boolean_validator': 'EXHAUSTIVE_16_BIT_TRUTH'}
-
-
 def score_catalogue(aig_path, partition, catalogue, checkpoint, cache_dir, batch_size=128):
     if batch_size <= 0:
         raise ValueError('batch_size must be positive.')
@@ -97,6 +47,7 @@ def score_catalogue(aig_path, partition, catalogue, checkpoint, cache_dir, batch
                 'batch_size': batch_size,
                 'truth_validator': digest(ROOT / 'global_timing/truth.py'),
                 'context_validator': digest(ROOT / 'global_timing/cut_validation.py'),
+                'boolean_validator': digest(ROOT / 'global_timing/boolean_candidates.py'),
                 'decisions': [[d['root'], d['cut_slot'], d['truth'], d['cut_leaves'], d['decision_owner_region'],
                                d['truth_class'], d['candidate_subgraph_indices']] for d in catalogue.decisions]}
     key = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()

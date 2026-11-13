@@ -10,7 +10,7 @@ from pathlib import Path
 from .candidates import Catalogue
 from .common import ToolError, run_tool, save_json, tool_path
 from .evaluation import cec_passed
-from .litecut import verify_cut_truth
+from .boolean_candidates import verify_cut_truth
 from .truth import ContextProofRequired
 
 

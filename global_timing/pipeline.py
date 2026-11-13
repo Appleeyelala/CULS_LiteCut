@@ -9,7 +9,8 @@ import time
 
 import torch
 
-from .candidates import enumerate_candidates, replay
+from .candidates import enumerate_candidates
+from .execution import execute_one, repair_rejected
 from .common import ToolError, digest, run_tool, save_json, tool_path
 from .evaluation import Evaluator, failed_comparisons
 from .cut_validation import validate_catalogue
@@ -72,37 +73,10 @@ class Experiment:
         self.preparation_runtime_s = time.monotonic() - started
 
     def evaluate_choice(self, choices, method, index, predicted=None):
-        work = self.output / method / f'eval_{index:04d}'
-        work.mkdir(parents=True, exist_ok=False)
-        start = time.monotonic()
-        result = {'method': method, 'index': index, 'choices': choices, 'status': 'RUNNING', 'prediction_before_evaluation': predicted}
-        try:
-            candidate, execution = replay(self.gpuls, self.aig, self.output / 'partition/owners.csv',
-                                           self.catalogue, choices, work / 'rewrite', self.config.timeout_s,
-                                           allow_nonpositive_gain=self.config.allow_nonpositive_gain)
-            metrics = self.evaluator.evaluate(candidate, work / 'evaluation')
-            result.update(status='PASS', metrics=metrics, applied_rewrites=execution['applied_rewrites'], aig=str(candidate))
-        except Exception as exc:
-            result.update(status='FAIL', error=f'{type(exc).__name__}: {exc}')
-            trace_summary = work / 'rewrite/replay.json'
-            if trace_summary.exists():
-                result['execution_failure'] = json.loads(trace_summary.read_text())
-        result['runtime_s'] = time.monotonic() - start
-        save_json(work / 'observation.json', result)
-        return result
+        return execute_one(self, choices, method, index, predicted)
 
     def repair_choice(self, observation):
-        """A new, explicit request, never reinterpret a failed partial replay."""
-        rejected = observation.get('execution_failure', {}).get('rejected_requests', [])
-        if not rejected:
-            return None
-        failed = {(row['root'], row['cut_slot']) for row in rejected}
-        choices = observation['choices'].copy()
-        for index, decision in enumerate(self.catalogue.decisions):
-            if (decision['root'], decision['cut_slot']) in failed:
-                choices[index] = 0
-        self.catalogue.validate(choices)
-        return choices if choices != observation['choices'] else None
+        return repair_rejected(self, observation)
 
     def deterministic_baseline(self, choices, method, baseline, selection_runtime_s=0.0):
         started = time.monotonic()

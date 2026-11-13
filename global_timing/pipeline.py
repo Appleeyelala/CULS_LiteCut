@@ -184,9 +184,10 @@ class Experiment:
                 save_json(self.output / method / f'calibration_{iteration:04d}.json', calibration)
                 best = min(observations, key=lambda row: self.rank_actual(row, baseline['metrics'], mode))
                 generator = gradient_proposals if proposal_generator is None else proposal_generator
+                context = {} if proposal_generator is None else {'observations': observations}
                 proposals, trace = generator(model, seen, self.config.seed + iteration,
                     incumbent=best['choices'], steps=self.config.gradient_steps, restarts=self.config.gradient_restarts,
-                    mode=mode, area_limit_ratio=self.config.area_limit_ratio, area_weight=self.config.area_weight)
+                    mode=mode, area_limit_ratio=self.config.area_limit_ratio, area_weight=self.config.area_weight, **context)
                 save_json(self.output / method / f'gradients_{iteration:04d}.json', trace)
                 candidates = [dict(p, source='joint_selection_gradient') for p in proposals[:min(remaining, self.config.feedback_batch)]]
             if not candidates:

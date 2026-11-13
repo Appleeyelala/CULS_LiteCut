@@ -17,6 +17,16 @@
 
 本条提交时作业尚在运行，不能把初步已落盘的个别结果当作完整比较。终态以该 run 的 `run.json`、`output/profile_summary.json`、逐例 profile/choices/trace/CEC/timing 及 Slurm accounting 为准。新的数学机制见 [IMPLEMENTATION.md](IMPLEMENTATION.md)，评价规则见 [PLAN_AND_EVALUATION.md](PLAN_AND_EVALUATION.md)。
 
+更新：64923 已 **COMPLETED/0:0，Elapsed 2m46s，9/9 PASS**。所有最终点 CEC PASS；以下 wall 为父进程记录的完整子进程时间，单次诊断不作稳定加速声明：
+
+| 输入 | 旧 CPU：delay ps / wall s / 失败数 | 基础近似 CPU | 基础近似 CUDA |
+|---|---|---|---|
+| DMA | 2380.250980 / 22.307 / 4 | 2345.209470 / 32.689 / 1 | 2345.209470 / 29.580 / 1 |
+| c1355 | 360.111877 / 13.014 / 1 | 360.111877 / 12.492 / 1 | 360.111877 / 14.650 / 1 |
+| ss_pcm | 323.908447 / 12.692 / 0 | 332.451324 / 12.705 / 0 | 332.451324 / 13.561 / 0 |
+
+新 CPU/CUDA 的最终离散选择和数值一致；DMA 的更少失败使更多请求继续做 CEC/mapping，因此较低 delay 不等于更低 runtime。ss_pcm 最终点来自 warmup，不能归因于梯度；CUDA 在小图上增加冷初始化成本。基础近似尚未达到总体目标。后续增加可关闭的八维成功反馈残差排序，是对这组失败证据的具体调整；尚不能预先声称有效。
+
 ## 冻结评价面板
 
 [config/gpu_joint_panel.json](../../config/gpu_joint_panel.json) 固定 16 个输入与种子 20261111/12/13；生成器为 [freeze_joint_panel.py](../../scripts/freeze_joint_panel.py)。只使用冻结输入清单的 AND 规模、来源、文件名家族和 SHA，不查看候选数、delay 或运行时间。排除开发家族，四个区间各选 4 项：128–4095、4096–8191、8192–16383、16384–50000 AND。第一区间原拟分成 128–511 与 512–4095，但输入清单前者只有两个设计且一个属于开发集，因此在成功生成/冻结之前合并，仍未使用结果信息。

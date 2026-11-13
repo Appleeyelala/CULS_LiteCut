@@ -35,3 +35,23 @@ Q(v)=J(v_0)+\sum_i L_i^T(e_i(v)-e_i(v_0))
 `scripts/profile_single_method.py --variants legacy_cpu,criticality_cpu,criticality_cuda --legacy-source <冻结旧src>` 在一个分配中顺序运行三种控制，每个案例轮换控制顺序，独立冷子进程。旧方法从明确的旧快照导入；保存实际导入路径和源码哈希。新 CPU/GPU 的算法、精度、噪声、轨迹/步数和预算一致。源码/模型准备成本、实际 EDA 调用和不同参数均需分列；首轮单次计时不能证明稳定加速。
 
 已知限制：局部近似可能忽略路径竞争变化；冻结的梯度可能为零；相邻交互为零时目标可退化；贪心投影可能丢弃有用的组合；最终 proposals 可能重复，触发原 pipeline 的随机探索。没有通过局部测试就宣称梯度的因果收益、QoR 改善或端到端加速。
+
+## 可关闭的成功反馈残差排序
+
+首轮真实开发对照中，基础近似在 DMA 有更低 delay 和更少失败，但更慢；ss_pcm 质量退化。该负结果保留在运行记录中。为检验局部敏感度遗漏实际重映射影响的问题，`JointProposalConfig(feedback=True)` 增加八维标量残差，不另建精确时序模型：
+
+\[
+\phi(C)=\left[\sum_i\frac{n_{i0}}{N_{AND}}e_i(C),\quad
+\frac{1}{|E_a|}\sum_{(r,s)\in E_a}\frac{F_r(C)\odot F_s(C)}{D_rD_s}\right].
+\]
+
+\(E_a\) 是两端都有 Decision 的原始 region 邻接，\(D_r\) 是该 region 的 Decision 数。没有此类边时后四维为零。对此前 PASS 的每次真实测量，用相同标量目标计算 \(J_j^{ABC}\)，定义：
+
+\[
+X_j=\phi(C_j)-\phi(C_0),\quad
+y_j=J_j^{ABC}-[Q(C_j)-Q(C_0)+J_0^{ABC}].
+\]
+
+每列按当前样本 RMS（下限 \(10^{-4}\)）缩放成 \(Z\)，解 \(\beta=(Z^TZ+I)^{-1}Z^Ty\)，再换回原特征尺度。内层目标为 \(Q_f(C)=Q(C)-Q(C_0)+J_0^{ABC}+X(C)^T w\)。系数吸收入同一个线性/双线性目标，GPU 内层不增加 DAG 传播。failed、部分安装及后续尚未发生的测量均不进入拟合；训练样本索引和残差 MSE 明确记录。anchor 与真实标量目标相同按构造成立，不算预测准确性。
+
+该功能的标签是当前成功真实评估，作用是提供低成本的在线排序信号。训练残差下降、非零系数或梯度增大不能代替真实 QoR、泛化或独立贡献检验。`feedback_cpu/feedback_cuda` 为其对照入口；`criticality_cpu/criticality_cuda` 保留不使用残差的基础版本。`profile_joint_kernel.py` 另用保存的大图代理输入比较相同 CPU/CUDA 计算，不运行 EDA，也不把局部计时当端到端加速。

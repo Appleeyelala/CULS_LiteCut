@@ -112,6 +112,9 @@ class FrozenCriticalityObjective(nn.Module):
                     pair = (compressed[target], compressed[source])
                     value = log_adjoint[edge] * model.interaction_weights.detach()
                     pairs[pair] = pairs.get(pair, torch.zeros_like(value)) + value
+            self.structural_pairs = sorted(pairs)
+            self.register_buffer('feature_sizes', model.sizes.detach().clone() / max(model.partition.aig.and_count, 1))
+            self.register_buffer('region_decision_counts', torch.bincount(inverse, minlength=len(active_regions)).to(torch.float64))
             # Zero interaction weights are common before calibration. Remove
             # exactly zero terms; CPU and GPU receive identical compressed data.
             pairs = {pair: value for pair, value in pairs.items() if torch.count_nonzero(value)}
@@ -130,6 +133,78 @@ class FrozenCriticalityObjective(nn.Module):
             self.register_buffer('anchor_hot', anchor_hot)
             self.register_buffer('offset', objective.detach() - self._unshifted(anchor_hot)[0])
             self.anchor_objective = float(objective.detach())
+
+    def feedback_features(self, values):
+        """Eight structure descriptors, not endpoint timing predictions."""
+        batch = values.unsqueeze(0) if values.ndim == 2 else values
+        expected = (batch.unsqueeze(-1) * self.features).sum(2)
+        local = (expected * self.feature_sizes[None, :, None]).sum(1)
+        coupled = torch.zeros_like(local)
+        if self.structural_pairs:
+            region = expected.new_zeros((batch.shape[0], self.n_active_regions, 4)).index_add(1, self.decision_region, expected)
+            target = torch.tensor([p[0] for p in self.structural_pairs], dtype=torch.long, device=values.device)
+            source = torch.tensor([p[1] for p in self.structural_pairs], dtype=torch.long, device=values.device)
+            scale = self.region_decision_counts[target] * self.region_decision_counts[source] * len(self.structural_pairs)
+            coupled = (region[:, target] * region[:, source] / scale[None, :, None]).sum(1)
+        result = torch.cat((local, coupled), -1)
+        return result[0] if values.ndim == 2 else result
+
+    def fit_feedback(self, model, observations, ridge=1.0, mode='area_constraint',
+                     area_limit_ratio=1.05, area_weight=0.5):
+        """Fit a regularized scalar residual using only earlier PASS labels.
+
+        Absorb the eight descriptor coefficients into the same linear/bilinear
+        Q; the CUDA inner loop does not gain a network or extra DAG traversal.
+        Anchor to the measured incumbent objective; this is ranking feedback,
+        not a claim of accurate local-to-global timing reconstruction.
+        """
+        if not math.isfinite(ridge) or ridge <= 0:
+            raise ValueError('Positive finite feedback ridge required.')
+        usable = [row for row in observations if row.get('status') == 'PASS']
+        anchors = [row for row in usable if row['choices'] == self.anchor]
+        if not anchors:
+            raise ValueError('Feedback requires a previously successful measured incumbent.')
+        with torch.no_grad():
+            values = torch.stack([model.one_hot(row['choices']) for row in usable])
+            descriptors = self.feedback_features(values)
+            anchor_features = self.feedback_features(self.anchor_hot)
+            x = descriptors - anchor_features
+            targets = torch.stack([scalar_objective(
+                torch.tensor(row['metrics']['po_arrivals_ps'], dtype=torch.float64),
+                torch.tensor(row['metrics']['area'], dtype=torch.float64),
+                model.delay_reference, model.area_reference, mode, area_limit_ratio,
+                area_weight=area_weight) for row in usable])
+            anchor_position = next(i for i, row in enumerate(usable) if row is anchors[-1])
+            actual_anchor = targets[anchor_position]
+            prior = self(values) - self(self.anchor_hot) + actual_anchor
+            residual = targets - prior
+            scale = x.square().mean(0).sqrt().clamp_min(1e-4)
+            normalized = x / scale
+            coefficients = torch.linalg.solve(
+                normalized.T @ normalized + ridge * torch.eye(8, dtype=torch.float64),
+                normalized.T @ residual) / scale
+            if not torch.isfinite(targets).all() or not torch.isfinite(coefficients).all():
+                raise ValueError('Non-finite measured feedback or residual coefficients.')
+            before = residual.square().mean()
+            self.linear_candidates.add_((self.features * self.feature_sizes[:, None, None]
+                                         * coefficients[None, None, :4]).sum(-1))
+            weights = {pair: value.clone() for pair, value in zip(
+                zip(self.pair_target.tolist(), self.pair_source.tolist()), self.pair_weights)}
+            for target, source in self.structural_pairs:
+                denominator = self.region_decision_counts[target] * self.region_decision_counts[source] * len(self.structural_pairs)
+                pair = (target, source)
+                weights[pair] = weights.get(pair, torch.zeros(4, dtype=torch.float64)) + coefficients[4:] / denominator
+            keys = sorted(weights)
+            self.pair_target = torch.tensor([p[0] for p in keys], dtype=torch.long)
+            self.pair_source = torch.tensor([p[1] for p in keys], dtype=torch.long)
+            self.pair_weights = torch.stack([weights[p] for p in keys]) if keys else torch.empty((0, 4), dtype=torch.float64)
+            self.offset.copy_(actual_anchor - self._unshifted(self.anchor_hot)[0])
+            self.anchor_objective = float(actual_anchor)
+            after = (targets - self(values)).square().mean()
+        return {'samples': len(usable), 'training_observation_indices': [row['index'] for row in usable],
+                'ridge': ridge, 'feature_scale': scale.tolist(), 'coefficients': coefficients.tolist(),
+                'training_residual_mse_before': float(before), 'training_residual_mse_after': float(after),
+                'scope': 'Training scalar ranking residual only; eight aggregate structural descriptors, no new EDA labels or validation accuracy claim.'}
 
     def _unshifted(self, values):
         batch = values.unsqueeze(0) if values.ndim == 2 else values
@@ -154,19 +229,21 @@ class JointProposalConfig:
     trust_penalty: float = 0.05
     conflict_penalty: float = 0.1
     learning_rate: float = 0.15
+    feedback: bool = False
+    feedback_ridge: float = 1.0
 
     def validate(self):
         if self.device not in ('cpu', 'cuda'):
             raise ValueError('Joint proposal device must be cpu or cuda.')
         if min(self.trajectories, self.max_changes) < 1:
             raise ValueError('Positive trajectory count and edit limit required.')
-        if any(not math.isfinite(x) or x <= 0 for x in (self.trust_penalty, self.conflict_penalty, self.learning_rate)):
+        if any(not math.isfinite(x) or x <= 0 for x in (self.trust_penalty, self.conflict_penalty, self.learning_rate, self.feedback_ridge)):
             raise ValueError('Positive finite penalties and learning rate required.')
 
 
 def joint_proposals(model, seen, seed, incumbent=None, steps=40, restarts=2,
                     mode='area_constraint', area_limit_ratio=1.05, area_weight=0.5,
-                    config=JointProposalConfig()):
+                    config=JointProposalConfig(), observations=None):
     """Batched soft-relaxation Adam, then CPU legal neighborhood projection.
 
     ``restarts`` is accepted for the pipeline callback interface; the actual
@@ -185,6 +262,10 @@ def joint_proposals(model, seen, seed, incumbent=None, steps=40, restarts=2,
     anchor = incumbent if incumbent is not None else [0] * model.n_decisions
     model.requires_grad_(False)
     objective = FrozenCriticalityObjective(model, anchor, mode, area_limit_ratio, area_weight)
+    base_anchor = model.one_hot(anchor).requires_grad_()
+    original_signal_norm = float(torch.autograd.grad(objective(base_anchor), base_anchor)[0].norm())
+    feedback_fit = (objective.fit_feedback(model, observations or [], config.feedback_ridge,
+                                          mode, area_limit_ratio, area_weight) if config.feedback else None)
     anchor_value = model.one_hot(anchor).requires_grad_()
     signal_norm = float(torch.autograd.grad(objective(anchor_value), anchor_value)[0].norm())
     prepared = time.perf_counter()
@@ -243,7 +324,7 @@ def joint_proposals(model, seen, seed, incumbent=None, steps=40, restarts=2,
     with torch.no_grad():
         for proposal in proposals.values():
             proposal['predicted_objective'] = float(cpu_objective(model.one_hot(proposal['choices'])))
-            proposal['objective_kind'] = 'frozen_criticality_quadratic'
+            proposal['objective_kind'] = 'feedback_corrected_quadratic' if config.feedback else 'frozen_criticality_quadratic'
     trace_values = torch.stack(trace_tensors).cpu().tolist()
     elapsed = time.perf_counter() - started
     details = {'trace_schema': 'joint_criticality_v1',
@@ -251,6 +332,8 @@ def joint_proposals(model, seen, seed, incumbent=None, steps=40, restarts=2,
                'steps': steps, 'seed': seed, 'anchor': list(anchor),
                'anchor_objective': objective.anchor_objective,
                'anchor_objective_gradient_norm': signal_norm,
+               'original_anchor_objective_gradient_norm': original_signal_norm,
+               'feedback_fit': feedback_fit,
                'retained_interaction_pairs': int(cpu_objective.pair_target.numel()),
                'prepare_adjoint_s': prepared - started, 'total_proposal_s': elapsed,
                'sampled_values': trace_values, 'trace_columns': ['local_objective', 'trust_penalty', 'conflict_penalty', 'total_gradient_norm', 'soft_edit_count'],

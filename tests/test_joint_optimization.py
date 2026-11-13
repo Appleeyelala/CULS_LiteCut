@@ -114,6 +114,42 @@ class JointOptimizationTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 config.validate()
 
+    def test_feedback_is_anchored_uses_only_pass_labels_and_reduces_training_residual(self):
+        model = model_fixture()
+        objective = FrozenCriticalityObjective(model, [0, 0], 'joint')
+        observations = []
+        for index, choice in enumerate(([0, 0], [1, 0], [0, 2])):
+            amount = sum(choice)
+            observations.append({'index': index, 'status': 'PASS', 'choices': list(choice),
+                                 'metrics': {'po_arrivals_ps': [60.0 - amount, 100.0 - 6 * amount],
+                                             'area': 10.0 - amount * 0.1}})
+        observations.append({'index': 3, 'status': 'FAIL', 'choices': [2, 2],
+                             'metrics': {'po_arrivals_ps': [float('nan')], 'area': float('nan')}})
+        fit = objective.fit_feedback(model, observations, mode='joint')
+        self.assertEqual(fit['training_observation_indices'], [0, 1, 2])
+        self.assertLess(fit['training_residual_mse_after'], fit['training_residual_mse_before'])
+        anchor_actual = scalar_objective(torch.tensor([60., 100.], dtype=torch.float64),
+                                        torch.tensor(10., dtype=torch.float64), 100., 10., 'joint', area_weight=0.5)
+        torch.testing.assert_close(objective(model.one_hot([0, 0])), anchor_actual, rtol=1e-12, atol=1e-12)
+        self.assertTrue(any(abs(x) > 1e-8 for x in fit['coefficients']))
+        with self.assertRaises(ValueError):
+            FrozenCriticalityObjective(model, [2, 2]).fit_feedback(model, observations)
+
+    def test_feedback_cpu_cuda_match_with_measured_history(self):
+        model = model_fixture()
+        history = [{'index': i, 'status': 'PASS', 'choices': c,
+                    'metrics': {'po_arrivals_ps': [60., 100. - sum(c) * 6], 'area': 10. - sum(c) * 0.1}}
+                   for i, c in enumerate(([0, 0], [1, 0], [0, 2]))]
+        args = dict(model=model, seen={(0, 0), (1, 0), (0, 2)}, seed=31,
+                    incumbent=[0, 0], steps=40, mode='joint', observations=history)
+        cpu, trace = joint_proposals(**args, config=JointProposalConfig(trajectories=8, max_changes=2, feedback=True))
+        self.assertEqual(trace[0]['feedback_fit']['training_observation_indices'], [0, 1, 2])
+        self.assertTrue(cpu)
+        if torch.cuda.is_available():
+            gpu, _ = joint_proposals(**args, config=JointProposalConfig(device='cuda', trajectories=8,
+                                                                      max_changes=2, feedback=True))
+            self.assertEqual(cpu, gpu)
+
 
 if __name__ == '__main__':
     unittest.main()

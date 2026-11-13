@@ -88,9 +88,10 @@ def run_case(args):
         else:
             from functools import partial
             from global_timing import joint_optimization
-            device = 'cuda' if args.variant == 'criticality_cuda' else 'cpu'
+            device = 'cuda' if args.variant.endswith('_cuda') else 'cpu'
             proposal_config = joint_optimization.JointProposalConfig(device=device, trajectories=args.trajectories,
-                                                                     max_changes=args.max_changes)
+                                                                     max_changes=args.max_changes,
+                                                                     feedback=args.variant.startswith('feedback_'))
             record['joint_proposal_config'] = dict(proposal_config.__dict__)
             record['algorithm_sha256']['joint_optimization'] = digest(
                 Path(pipeline.__file__).with_name('joint_optimization.py'))
@@ -130,8 +131,8 @@ def main():
     parser.add_argument('--tool-timeout', type=int, default=900)
     parser.add_argument('--case-timeout', type=int, default=1800)
     parser.add_argument('--variants', default='legacy_cpu',
-                        help='Sequential controls: legacy_cpu,criticality_cpu,criticality_cuda')
-    parser.add_argument('--variant', choices=['legacy_cpu', 'criticality_cpu', 'criticality_cuda'], default='legacy_cpu')
+                        help='Sequential controls: legacy_cpu,criticality_cpu,criticality_cuda,feedback_cpu,feedback_cuda')
+    parser.add_argument('--variant', choices=['legacy_cpu', 'criticality_cpu', 'criticality_cuda', 'feedback_cpu', 'feedback_cuda'], default='legacy_cpu')
     parser.add_argument('--legacy-source', type=Path, help='Frozen old /data source for legacy control.')
     parser.add_argument('--source-root', type=Path, help=argparse.SUPPRESS)
     parser.add_argument('--output-base', type=Path, help=argparse.SUPPRESS)
@@ -147,7 +148,7 @@ def main():
         run_case(args)
         return
     variants = args.variants.split(',')
-    if len(set(variants)) != len(variants) or not set(variants) <= {'legacy_cpu', 'criticality_cpu', 'criticality_cuda'}:
+    if len(set(variants)) != len(variants) or not set(variants) <= {'legacy_cpu', 'criticality_cpu', 'criticality_cuda', 'feedback_cpu', 'feedback_cuda'}:
         parser.error('Unknown or repeated variant.')
     if args.legacy_source is not None and (not args.legacy_source.resolve().is_relative_to('/data/wushangge')
                                           or not (args.legacy_source / 'global_timing/pipeline.py').is_file()):

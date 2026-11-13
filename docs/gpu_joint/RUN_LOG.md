@@ -18,6 +18,10 @@ Slurm **64983** 已由实时accounting确认 **COMPLETED/0:0，Elapsed 1:42:27**
 
 65004已实际通过 **37/37回归**、同分配默认c1355对冻结2257998的逐请求/真实PO/area/delay兼容检查，以及四个真实smoke配置的原始审计；48方法点正式补充仍在运行。未将前置PASS记为整个消融完成，也未重新提交原实验。
 
+后续只读来源核对：全部432正式方法点的3120记录模块引用，20种模块身份均与实际快照及Git对象hash匹配；另核对两份冻结快照的全部框架Python包和指定Student/feature/bridge/library共65文件，全部匹配，记录于 `provenance/gpu_joint_source_audit.json`。检查只读取约34MB正式审计JSON和小型源码，没有运行EDA、模型或性能测试。它不推断未记录外部import或精确binary可重建性。
+
+同时从既有64932原始JSON恢复组件Torch活跃分配峰值：div1099438592、hyp44398080、voter98498560 bytes。采集前实际执行reset_peak_memory_stats；不是reserved/context/原生CULS或整个闭环显存。只读sacct检查显示64983/64980的实际会计数据未提供gpumem/gpuutil，即使集群配置了这些TRES也不能填造峰值。数值与边界追加于FINAL_RESULTS，未重新运行组件实验。
+
 ## 已完成的诊断与旧方法基线
 
 - `20261113T031521Z-gpu-joint-saved-diagnostics-63af3c1f`，Slurm 64920，源码 `5025a6c`，COMPLETED/0:0。12 个历史样例的只读耗时、重复 AIG 字节和 trace 体积诊断；不是新优化或 GPU 性能测量。

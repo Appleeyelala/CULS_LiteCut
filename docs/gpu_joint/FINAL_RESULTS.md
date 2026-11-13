@@ -56,7 +56,21 @@
 
 GPU对照为 **9设计、27个实际CUDA配对**：同分配、算法/模型/候选域/精度/配置/内层调用数相同，完整请求向量、状态、成功PO/delay/area及EDA调用数一致，CPU/auto完整wall比中位数 **1.326246**。其余21对为CPU或没有提案，未计入GPU贡献。27对的最终QoR与CPU相同；已有CULS的GPU枚举/重写能力没有当成新增梯度GPU贡献。
 
+保存源码还通过[独立静态身份核对](../../provenance/gpu_joint_source_audit.json)：432方法点的3120个记录模块引用（20种身份）均与实际快照及所记Git对象相同；两快照全部框架Python包和指定canonical Student/feature/bridge/library共65文件也逐项匹配。该轻量检查不运行实验，不替代工具构建或原始测量审计。
+
 这解释了“GPU确实有用但整体对旧版仅1.0355倍”：新CPU联合方法本身更贵，GPU减少了其中的部分成本；Student特征准备、CPU校准、adjoint、投影和真实EDA仍限制端到端收益。开发集div另有327.206/169.602s、1.929倍的完整CPU/CUDA配对，但最终均no-op；该单例不并入正式16设计，也不证明更早找到改善点。
+
+### 已有内存/显存数据的范围
+
+正式64983的batch MaxRSS为2083396K，独立分析64984为420804K；这是Slurm进程内存记录，不是GPU显存。已有64932保存了三个大图提案组件的 `torch.cuda.max_memory_allocated()`：
+
+| 输入 | Torch活跃CUDA分配峰值 bytes | 对应组件调用 |
+|---|---:|---|
+| div | 1099438592 | 32轨迹×40步，CUDA3.513s |
+| hyp | 44398080 | 同配置，CUDA2.564s |
+| voter | 98498560 | 同配置，CUDA0.184s；只有1个MFFC |
+
+原始路径为 `20261113T035708Z-joint-sparse-cpu-cuda-a65c4ca7/output/kernel_case_{0020,0022,0038}.json`（同上/data runs根目录），采集代码 `scripts/profile_joint_kernel.py` 在每次组件调用前reset峰值，再读取该Torch指标。它不含全部driver/context/reserved显存或原生CULS的分配，不能当作完整闭环显存峰值。Slurm虽然配置了gpumem/gpuutil TRES，但64983/64980实际会计字段未给出这两项；正式端到端显存仍未记录，不能填成0。
 
 ## 真实差异、限制与仍待完成的控制
 
@@ -75,4 +89,4 @@ A已通过37项控制/代理/CPU-CUDA回归、c1355默认对冻结2257998的同�
 
 改进实现、统一主面板和GPU独立对照已有可复现证据；目前只达到对旧版的预定QoR非劣，没有达到整体1.5倍加速，也没有建立梯度胜过简单搜索的优势。这是有完整负结果的研究实现，不是已成立的论文性能结论。
 
-16输入来自已经分析的905集合；三seed、少量来源和规模区间不建立未见泛化或显著性。当前测量仍是ABC逻辑映射/Liberty timing，没有布局布线signoff、精确可微mapper、唯一跨网表逻辑路径身份或AGD论文严格复现。作业MaxRSS记录不等于GPU显存，显存峰值未专门测量。
+16输入来自已经分析的905集合；三seed、少量来源和规模区间不建立未见泛化或显著性。当前测量仍是ABC逻辑映射/Liberty timing，没有布局布线signoff、精确可微mapper、唯一跨网表逻辑路径身份或AGD论文严格复现。内存数据按上节的CPU进程/组件Torch/未记录的整闭环显存分别解释。

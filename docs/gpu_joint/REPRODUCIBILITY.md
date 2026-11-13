@@ -25,6 +25,8 @@
 
 新工具构建/默认与prepared回归的入口为 `scripts/build_replay_tools.py`；G的 `run.json`、`job.slurm`、`build/framework_tools/build_report.json` 和 `output/{replay_tests,prepared_regressions,batch_regressions}.json` 保存实际构建和验证。Release CULS及上游优化ABC的口径见 `docs/global_timing/PERFORMANCE_AUDIT.md`。旧二进制和新二进制分列，不承诺不同编译环境逐字节重建同一binary。
 
+[实际源码核对记录](../../provenance/gpu_joint_source_audit.json)覆盖全部432个正式方法点的3120个记录模块引用，20种模块身份的记录hash、实际快照文件与Git blob逐项相同；另检查两份快照的全部 `global_timing/*.py` 和指定Student/feature/bridge/library文件，共65项，均与对应commit相同。它验证保存源码的身份，不把未记录的外部import或二进制逐字节重建当成已经证明。
+
 ## 正式命令与参数
 
 实际顶层argv在正式目录 `input/command.json`；driver为：

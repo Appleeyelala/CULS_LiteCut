@@ -1,0 +1,569 @@
+{
+  "status": "PASS",
+  "reviewed_at": "2026-11-13T08:27:30.129711+00:00",
+  "record_source": "/data/wushangge/CULS_LiteCut/runs/20261113T070050Z-frozen-joint-final-synthesis-f895a375/output/final_synthesis/audited_records.json",
+  "record_source_sha256": "56ef12c8e9366d4235c2eb94330ca05420c5e41096199ddf80787f9c7881daff",
+  "formal_method_points": 432,
+  "module_references_checked": 3120,
+  "unique_module_identities": 20,
+  "source_roots": {
+    "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src": "5025a6c863f0a7766c41707bcc1828723afce447",
+    "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src": "22579982d22d741d47600a6406b09f00f4a4b46b"
+  },
+  "modules": [
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/arrival.py",
+      "sha256": "d3df1a72997d5685249d0212eb7f7644a6c9ddfb4d7b388cfdbaec800497e8aa",
+      "matches_recorded_hash": true,
+      "matches_git_blob": true
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/candidates.py",
+      "sha256": "a29e06c51b880871c697d85bf253d70d9d36e4d5686d9200d20cc4a9065b32b4",
+      "matches_recorded_hash": true,
+      "matches_git_blob": true
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/litecut.py",
+      "sha256": "ee8452926b9506fdb76b310a0ce7e2e5b66781f7ce664d503f246547cd980445",
+      "matches_recorded_hash": true,
+      "matches_git_blob": true
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/optimization.py",
+      "sha256": "8ac387cfffcab3e51cf96368e0d55612eff336f47b51670cdb0b6dae98f37c39",
+      "matches_recorded_hash": true,
+      "matches_git_blob": true
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/pipeline.py",
+      "sha256": "0190c42efcdabf86e5875701559473214a7529712c981bcd9afa82e19619a80d",
+      "matches_recorded_hash": true,
+      "matches_git_blob": true
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/surrogate.py",
+      "sha256": "def54222fa9c978aefd8ede7902f75c1c22d45b08c8dcfc65521b40d3ac8afe0",
+      "matches_recorded_hash": true,
+      "matches_git_blob": true
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/arrival.py",
+      "sha256": "d3df1a72997d5685249d0212eb7f7644a6c9ddfb4d7b388cfdbaec800497e8aa",
+      "matches_recorded_hash": true,
+      "matches_git_blob": true
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/batch_execution.py",
+      "sha256": "6f26e5e2c06ce2d92166ef5d8801e5d0f08cc40a2aeafa43484e3b075977b853",
+      "matches_recorded_hash": true,
+      "matches_git_blob": true
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/candidates.py",
+      "sha256": "3fb98bf72ade31a0e9791fa984fb41b21c9861e5a7a4de9bdb1ef476c1aab040",
+      "matches_recorded_hash": true,
+      "matches_git_blob": true
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/joint_optimization.py",
+      "sha256": "53973fbe85be0ed4b7024a8cf74669871f334ee0d096900b4025f52c08d607e5",
+      "matches_recorded_hash": true,
+      "matches_git_blob": true
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/litecut.py",
+      "sha256": "167534964b0ceac0cb26509d8bd5600820970a0b3a4a2ee80f3e6963a483b649",
+      "matches_recorded_hash": true,
+      "matches_git_blob": true
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/optimization.py",
+      "sha256": "8ac387cfffcab3e51cf96368e0d55612eff336f47b51670cdb0b6dae98f37c39",
+      "matches_recorded_hash": true,
+      "matches_git_blob": true
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/pipeline.py",
+      "sha256": "937aa4b31664c2728311936ad6bea783335cb215459aa46ad5c8e65664402045",
+      "matches_recorded_hash": true,
+      "matches_git_blob": true
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/surrogate.py",
+      "sha256": "def54222fa9c978aefd8ede7902f75c1c22d45b08c8dcfc65521b40d3ac8afe0",
+      "matches_recorded_hash": true,
+      "matches_git_blob": true
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/boolean_candidates.py",
+      "sha256": "bcdd6277bdcdb10ffbd611bdeb94011f8e3d0bb5322faaa08c777f620b9dc717",
+      "matches_recorded_hash": true,
+      "matches_git_blob": true
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/control_profile.py",
+      "sha256": "b8b15e236f5384935c60e6c76382bc50de241dfc0f7c69f94cd0779406dc303f",
+      "matches_recorded_hash": true,
+      "matches_git_blob": true
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/controls.py",
+      "sha256": "a8c77d9a87d3ebe3ab8ef542f90e825ba95720b136b3589ffe860bcce7e78913",
+      "matches_recorded_hash": true,
+      "matches_git_blob": true
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/cut_validation.py",
+      "sha256": "03253a99b83125d760292b2e59a7adf73f2e65127518458a4556d311d8021cd1",
+      "matches_recorded_hash": true,
+      "matches_git_blob": true
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/evaluation.py",
+      "sha256": "adbdc042db1f76bc9a82dfe1c2a87b65cfc99c897c4263e0206becb3274c4772",
+      "matches_recorded_hash": true,
+      "matches_git_blob": true
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/execution.py",
+      "sha256": "a3ba5d4c57a0f159563f7aa4721fd58f36860288cf8eb92c0a1e5d7f40b3eb63",
+      "matches_recorded_hash": true,
+      "matches_git_blob": true
+    }
+  ],
+  "scope": "Lightweight read-only static provenance audit. Every recorded formal-method module hash equals both the actual immutable snapshot file and its recorded Git commit blob. This adds no EDA, model execution or performance measurement; it does not independently prove unrecorded imports or exact binary rebuild reproducibility. All tracked global_timing Python modules plus the specified canonical Student/feature/bridge/library sources in both snapshots also match the recorded Git blobs; runtime imports outside these paths are not inferred.",
+  "snapshot_package_files_checked": 65,
+  "snapshot_package_files": [
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/__init__.py",
+      "sha256": "ef8d605468ecd81c0918fb2ce55d95469928f62c7f41384c6c583ccc83957aea"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/__main__.py",
+      "sha256": "9c504961490c44fc783f03a9b7b03001bec9f0d395a3e4dbf198d3b519ea7524"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/arrival.py",
+      "sha256": "d3df1a72997d5685249d0212eb7f7644a6c9ddfb4d7b388cfdbaec800497e8aa"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/candidates.py",
+      "sha256": "a29e06c51b880871c697d85bf253d70d9d36e4d5686d9200d20cc4a9065b32b4"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/cohort.py",
+      "sha256": "25a857127b966e8a7058a152f72c9685dd4c3208b5a0b87a8d3b607287bb2e3c"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/common.py",
+      "sha256": "c5c3a0bcdf4ea41b1843f1a8ce8039479d564bae97f0eb49b966a019fc843dd9"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/cut_validation.py",
+      "sha256": "757b8ae517198d4dd81dc70e3e0bdfb7d2685569ad10dddcf7b0dafb410e68d9"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/evaluation.py",
+      "sha256": "adbdc042db1f76bc9a82dfe1c2a87b65cfc99c897c4263e0206becb3274c4772"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/failure_analysis.py",
+      "sha256": "d116c91ee515728120782bca63086f61285144f28105c78f623647b5a57dcd0b"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/litecut.py",
+      "sha256": "ee8452926b9506fdb76b310a0ce7e2e5b66781f7ce664d503f246547cd980445"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/optimization.py",
+      "sha256": "8ac387cfffcab3e51cf96368e0d55612eff336f47b51670cdb0b6dae98f37c39"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/partition_validation.py",
+      "sha256": "c3f0eccafe48f0facbb3ddf08519623af3fcd5b22af02544a52c2963a95c880c"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/path_analysis.py",
+      "sha256": "75672b5d819ca413edb3022d48cd079093b814601991ef1144da84ccee3ff3ba"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/path_changes.py",
+      "sha256": "c0b7fc9aeb20f51b5b3e6c718fa455e8b5f0810d505d837e5ae9006cd44b6a01"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/pipeline.py",
+      "sha256": "0190c42efcdabf86e5875701559473214a7529712c981bcd9afa82e19619a80d"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/processes.py",
+      "sha256": "849a438ac3d2d020e5c20fa0c96dba449502b02f49c43f501c36240fb8c24aec"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/reporting.py",
+      "sha256": "2407fc477ae60f9723f2f26c0426b9f57b95c073693fc8393384ba7c88644094"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/search_analysis.py",
+      "sha256": "3bb78448253a1ada0679269b07dc2360f1c23f4f3684f3470c4b36f206a6093b"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/structure.py",
+      "sha256": "7581cf9e0835efa18db6ce1aef440604b3354f56928c687a5ff5561216845d4e"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/surrogate.py",
+      "sha256": "def54222fa9c978aefd8ede7902f75c1c22d45b08c8dcfc65521b40d3ac8afe0"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "global_timing/truth.py",
+      "sha256": "99460f5c7c5015f393a571a6fb89e67605b553ca44f99c99b587861ed4314025"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "projects/culs/src/algorithms/rewrite_library.inc",
+      "sha256": "48864b4f297b3c667c3dd7ddfb7a5f6e1f287838374ed7be0afbe9254fae0884"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "projects/culs/tools/gate3e_run.py",
+      "sha256": "ab536cb64fbb2a922795a519e2d29de41d868f214712cecb1f2003157804e280"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "projects/litecut/gate2a_candidate_inference.py",
+      "sha256": "5ebe661fc772265fcc96b02dab2a0c7666e3d9a5716868315580519bf0e96bbe"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "projects/litecut/src/data_preprocess/feat_extraction_v3.py",
+      "sha256": "d63eaaf695555d88746b32d68caf817478e76c8e48f217ef5d3cea9554ade7fe"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "projects/litecut/src/extract_cutlib_student/config.py",
+      "sha256": "6004afe7dca5a06047ad73a51af95517e99b965746410661befe08698f6c9bc3"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "projects/litecut/src/extract_cutlib_student/modeling.py",
+      "sha256": "3d94b2b8f869954c9fb4aaa6c0f318310e4d36101c4df312eea3595b14f033d1"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "projects/litecut/src/extract_cutlib_teacher/feature_branch.py",
+      "sha256": "b7af571acf55b8a5e09eb948fb110808f24e72f3d2548dec5c296abe315129bc"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src",
+      "source_commit": "5025a6c863f0a7766c41707bcc1828723afce447",
+      "relative_path": "projects/litecut/src/validate/eval_prediction_accuracy.py",
+      "sha256": "a68d8c5830a2847458d43afc84d4998a5c027f60f89445a6f75ddf5984b54032"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/__init__.py",
+      "sha256": "ef8d605468ecd81c0918fb2ce55d95469928f62c7f41384c6c583ccc83957aea"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/__main__.py",
+      "sha256": "9c504961490c44fc783f03a9b7b03001bec9f0d395a3e4dbf198d3b519ea7524"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/arrival.py",
+      "sha256": "d3df1a72997d5685249d0212eb7f7644a6c9ddfb4d7b388cfdbaec800497e8aa"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/batch_execution.py",
+      "sha256": "6f26e5e2c06ce2d92166ef5d8801e5d0f08cc40a2aeafa43484e3b075977b853"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/boolean_candidates.py",
+      "sha256": "bcdd6277bdcdb10ffbd611bdeb94011f8e3d0bb5322faaa08c777f620b9dc717"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/candidates.py",
+      "sha256": "3fb98bf72ade31a0e9791fa984fb41b21c9861e5a7a4de9bdb1ef476c1aab040"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/cohort.py",
+      "sha256": "25a857127b966e8a7058a152f72c9685dd4c3208b5a0b87a8d3b607287bb2e3c"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/common.py",
+      "sha256": "c5c3a0bcdf4ea41b1843f1a8ce8039479d564bae97f0eb49b966a019fc843dd9"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/control_profile.py",
+      "sha256": "b8b15e236f5384935c60e6c76382bc50de241dfc0f7c69f94cd0779406dc303f"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/controls.py",
+      "sha256": "a8c77d9a87d3ebe3ab8ef542f90e825ba95720b136b3589ffe860bcce7e78913"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/cut_validation.py",
+      "sha256": "03253a99b83125d760292b2e59a7adf73f2e65127518458a4556d311d8021cd1"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/evaluation.py",
+      "sha256": "adbdc042db1f76bc9a82dfe1c2a87b65cfc99c897c4263e0206becb3274c4772"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/execution.py",
+      "sha256": "a3ba5d4c57a0f159563f7aa4721fd58f36860288cf8eb92c0a1e5d7f40b3eb63"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/failure_analysis.py",
+      "sha256": "d116c91ee515728120782bca63086f61285144f28105c78f623647b5a57dcd0b"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/joint_optimization.py",
+      "sha256": "53973fbe85be0ed4b7024a8cf74669871f334ee0d096900b4025f52c08d607e5"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/litecut.py",
+      "sha256": "167534964b0ceac0cb26509d8bd5600820970a0b3a4a2ee80f3e6963a483b649"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/optimization.py",
+      "sha256": "8ac387cfffcab3e51cf96368e0d55612eff336f47b51670cdb0b6dae98f37c39"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/partition_validation.py",
+      "sha256": "c3f0eccafe48f0facbb3ddf08519623af3fcd5b22af02544a52c2963a95c880c"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/path_analysis.py",
+      "sha256": "75672b5d819ca413edb3022d48cd079093b814601991ef1144da84ccee3ff3ba"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/path_changes.py",
+      "sha256": "c0b7fc9aeb20f51b5b3e6c718fa455e8b5f0810d505d837e5ae9006cd44b6a01"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/pipeline.py",
+      "sha256": "937aa4b31664c2728311936ad6bea783335cb215459aa46ad5c8e65664402045"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/processes.py",
+      "sha256": "849a438ac3d2d020e5c20fa0c96dba449502b02f49c43f501c36240fb8c24aec"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/profile_results.py",
+      "sha256": "45ae93759fa644d61a0be5a5add0abf6f91568255390bbab6570869aad6eb660"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/reporting.py",
+      "sha256": "2407fc477ae60f9723f2f26c0426b9f57b95c073693fc8393384ba7c88644094"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/search_analysis.py",
+      "sha256": "3bb78448253a1ada0679269b07dc2360f1c23f4f3684f3470c4b36f206a6093b"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/structure.py",
+      "sha256": "7581cf9e0835efa18db6ce1aef440604b3354f56928c687a5ff5561216845d4e"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/surrogate.py",
+      "sha256": "def54222fa9c978aefd8ede7902f75c1c22d45b08c8dcfc65521b40d3ac8afe0"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "global_timing/truth.py",
+      "sha256": "99460f5c7c5015f393a571a6fb89e67605b553ca44f99c99b587861ed4314025"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "projects/culs/src/algorithms/rewrite_library.inc",
+      "sha256": "48864b4f297b3c667c3dd7ddfb7a5f6e1f287838374ed7be0afbe9254fae0884"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "projects/culs/tools/gate3e_run.py",
+      "sha256": "ab536cb64fbb2a922795a519e2d29de41d868f214712cecb1f2003157804e280"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "projects/litecut/gate2a_candidate_inference.py",
+      "sha256": "5ebe661fc772265fcc96b02dab2a0c7666e3d9a5716868315580519bf0e96bbe"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "projects/litecut/src/data_preprocess/feat_extraction_v3.py",
+      "sha256": "d63eaaf695555d88746b32d68caf817478e76c8e48f217ef5d3cea9554ade7fe"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "projects/litecut/src/extract_cutlib_student/config.py",
+      "sha256": "6004afe7dca5a06047ad73a51af95517e99b965746410661befe08698f6c9bc3"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "projects/litecut/src/extract_cutlib_student/modeling.py",
+      "sha256": "3d94b2b8f869954c9fb4aaa6c0f318310e4d36101c4df312eea3595b14f033d1"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "projects/litecut/src/extract_cutlib_teacher/feature_branch.py",
+      "sha256": "b7af571acf55b8a5e09eb948fb110808f24e72f3d2548dec5c296abe315129bc"
+    },
+    {
+      "source_root": "/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/src",
+      "source_commit": "22579982d22d741d47600a6406b09f00f4a4b46b",
+      "relative_path": "projects/litecut/src/validate/eval_prediction_accuracy.py",
+      "sha256": "a68d8c5830a2847458d43afc84d4998a5c027f60f89445a6f75ddf5984b54032"
+    }
+  ]
+}

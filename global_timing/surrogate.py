@@ -173,9 +173,10 @@ class TimingSurrogate(nn.Module):
                                                 if port in ports_at[catalogue.decisions[i]['root']]]
         sources, targets, depths, sparse_rows, sparse_cols = [], [], [], [], []
         levels = {}
-        for rid in partition.order:
-            predecessors = [partition.owner[p] for p in partition.transfers[rid] if p in partition.owner]
-            levels[rid] = 1 + max((levels[p] for p in predecessors), default=-1)
+        if not defer_baseline:
+            for rid in partition.order:
+                predecessors = [partition.owner[p] for p in partition.transfers[rid] if p in partition.owner]
+                levels[rid] = 1 + max((levels[p] for p in predecessors), default=-1)
         edge_by_target = {}
         for rid, transfers in enumerate(partition.transfers):
             for port, depth in transfers.items():
@@ -183,7 +184,8 @@ class TimingSurrogate(nn.Module):
                 sources.append(partition.owner.get(port, -1))
                 targets.append(rid)
                 depths.append(depth)
-                edge_by_target.setdefault(rid, []).append(edge)
+                if not defer_baseline:
+                    edge_by_target.setdefault(rid, []).append(edge)
                 for decision in self.port_decisions[rid, port]:
                     sparse_rows.append(edge)
                     sparse_cols.append(decision)
@@ -196,8 +198,9 @@ class TimingSurrogate(nn.Module):
             (len(sources), self.n_decisions)).coalesce())
         self.layers = []
         nodes_by_level = {}
-        for rid in partition.order:
-            nodes_by_level.setdefault(levels[rid], []).append(rid)
+        if not defer_baseline:
+            for rid in partition.order:
+                nodes_by_level.setdefault(levels[rid], []).append(rid)
         for layer in sorted(nodes_by_level):
             nodes = nodes_by_level[layer]
             edges, destinations = [], []
@@ -206,7 +209,7 @@ class TimingSurrogate(nn.Module):
                 destinations.extend([position] * len(edge_by_target[rid]))
             self.layers.append((torch.tensor(nodes, dtype=torch.long), torch.tensor(edges, dtype=torch.long),
                                 torch.tensor(destinations, dtype=torch.long)))
-        self.arrival_layers = prepare_arrival_layers(self.edge_sources, self.layers)
+        self.arrival_layers = () if defer_baseline else prepare_arrival_layers(self.edge_sources, self.layers)
         self.register_buffer('output_regions', torch.tensor([partition.owner.get(lit >> 1, -1)
                                                             for lit in partition.aig.po_literals], dtype=torch.long))
         structural_arrivals = {}

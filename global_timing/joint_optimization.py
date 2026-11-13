@@ -255,8 +255,11 @@ class JointProposalConfig:
     learning_rate: float = 0.15
     feedback: bool = False
     feedback_ridge: float = 1.0
+    inner_updates: bool = True
 
     def validate(self):
+        if type(self.inner_updates) is not bool:
+            raise ValueError('Inner-update ablation must be an explicit boolean.')
         if self.device not in ('cpu', 'cuda'):
             raise ValueError('Joint proposal device must be cpu or cuda.')
         if min(self.trajectories, self.max_changes) < 1:
@@ -304,14 +307,14 @@ def joint_proposals(model, seen, seed, incumbent=None, steps=40, restarts=2,
     # Start near the same actual incumbent; no additional mapping labels.
     bias = torch.log((count * max(width - 1, 1)) / budgets_cpu) + 2.0
     starting = noise + bias[:, None, None] * objective.anchor_hot.detach().cpu()[None, :, :]
-    logits = nn.Parameter(starting.to(device))
+    logits = nn.Parameter(starting.to(device), requires_grad=config.inner_updates)
     budgets = budgets_cpu.to(device)
-    optimizer = torch.optim.Adam([logits], lr=config.learning_rate, eps=1e-12)
+    optimizer = torch.optim.Adam([logits], lr=config.learning_rate, eps=1e-12) if config.inner_updates else None
     if device.type == 'cuda':
         torch.cuda.synchronize()
     initialized = time.perf_counter()
     trace_tensors = []
-    for step in range(steps):
+    for step in range(steps if config.inner_updates else 1):
         temperature = max(0.3, 1 - 0.7 * step / max(steps - 1, 1))
         probabilities = torch.softmax(logits.masked_fill(~objective.valid, -torch.inf) / temperature, dim=-1)
         value = objective(probabilities)
@@ -323,15 +326,20 @@ def joint_proposals(model, seen, seed, incumbent=None, steps=40, restarts=2,
         else:
             conflict = torch.zeros_like(value)
         loss_rows = value + config.trust_penalty * trust + config.conflict_penalty * conflict
-        optimizer.zero_grad()
-        # Sum keeps each trajectory's Adam and clipping independent of batch size.
-        loss_rows.sum().backward()
-        norms = logits.grad.flatten(1).norm(dim=-1)
-        logits.grad.mul_((5 / norms.clamp_min(1e-30)).clamp_max(1)[:, None, None])
+        if config.inner_updates:
+            optimizer.zero_grad()
+            # Sum keeps each trajectory's Adam and clipping independent of batch size.
+            loss_rows.sum().backward()
+            norms = logits.grad.flatten(1).norm(dim=-1)
+            logits.grad.mul_((5 / norms.clamp_min(1e-30)).clamp_max(1)[:, None, None])
         if step in (0, steps - 1) or step % 10 == 0:
-            trace_tensors.append(torch.stack((value.detach(), trust.detach(), conflict.detach(), norms.detach(), changes.detach()), dim=-1))
-        optimizer.step()
-    if not torch.isfinite(logits).all() or not torch.isfinite(logits.grad).all():
+            values = (value.detach(), trust.detach(), conflict.detach())
+            if config.inner_updates:
+                values += (norms.detach(),)
+            trace_tensors.append(torch.stack(values + (changes.detach(),), dim=-1))
+        if config.inner_updates:
+            optimizer.step()
+    if not torch.isfinite(logits).all() or (config.inner_updates and not torch.isfinite(logits.grad).all()):
         raise ValueError('Non-finite joint optimization state.')
     optimized = time.perf_counter()
     # Argmax/margins are parallel on the selected device. Transfer only edits,
@@ -365,11 +373,14 @@ def joint_proposals(model, seen, seed, incumbent=None, steps=40, restarts=2,
         for proposal in proposals.values():
             proposal['predicted_objective'] = float(cpu_objective.hard_value(proposal['choices']))
             proposal['objective_kind'] = 'feedback_corrected_quadratic' if config.feedback else 'frozen_criticality_quadratic'
+            if not config.inner_updates:
+                proposal['source'] = 'initialization_without_inner_updates'
     trace_values = torch.stack(trace_tensors).cpu().tolist()
     elapsed = time.perf_counter() - started
-    details = {'trace_schema': 'joint_criticality_v1',
+    details = {'trace_schema': 'joint_criticality_v1' if config.inner_updates else 'joint_initialization_control_v1',
                'device': config.device, 'dtype': 'float64', 'trajectories': config.trajectories,
-               'steps': steps, 'seed': seed, 'anchor': list(anchor),
+               'steps': steps if config.inner_updates else 0, 'seed': seed, 'anchor': list(anchor),
+               'inner_gradients_computed': config.inner_updates,
                'anchor_objective': objective.anchor_objective,
                'anchor_objective_gradient_norm': signal_norm,
                'original_anchor_objective_gradient_norm': original_signal_norm,
@@ -382,8 +393,9 @@ def joint_proposals(model, seen, seed, incumbent=None, steps=40, restarts=2,
                'cpu_legal_projection_s': projected - transferred,
                'cpu_final_ranking_and_trace_s': elapsed - (projected - started),
                'transferred_edits': len(sparse_positions),
-               'sampled_values': trace_values, 'trace_columns': ['local_objective', 'trust_penalty', 'conflict_penalty', 'total_gradient_norm', 'soft_edit_count'],
-               'scope': 'Local surrogate approximation; soft inner optimization, hard legal final projection; no gradient through EDA or LiteCut.'}
+               'sampled_values': trace_values, 'trace_columns': ['local_objective', 'trust_penalty', 'conflict_penalty'] + (['total_gradient_norm'] if config.inner_updates else []) + ['soft_edit_count'],
+               'scope': ('Local surrogate approximation; soft inner optimization, hard legal final projection; no gradient through EDA or LiteCut.' if config.inner_updates else
+                         'Initialization-only control: same outer DAG adjoint, feedback, noise and final projection; no inner backward/Adam. This is not a fully gradient-free method.')}
     return sorted(proposals.values(), key=lambda p: (p['predicted_objective'], p['choices'])), [details]
 
 
@@ -422,9 +434,32 @@ def adaptive_proposals(model, seen, seed, incumbent=None, steps=40, restarts=2,
     selection = select_proposal_engine(model.n_decisions, model.n_regions, model.width,
         config.trajectories, device_mode, available, small_decisions, small_regions, gpu_work_threshold)
     if selection['engine'] == 'full_ste':
-        from .optimization import gradient_proposals
-        proposals, trace = gradient_proposals(model, seen, seed, incumbent, min(steps, 20), restarts,
-                                               mode, area_limit_ratio, area_weight)
+        if config.inner_updates:
+            from .optimization import gradient_proposals
+            proposals, trace = gradient_proposals(model, seen, seed, incumbent, min(steps, 20), restarts,
+                                                   mode, area_limit_ratio, area_weight)
+        else:
+            # Same two initializations as original STE; score initial hard points
+            # without optimizer/backward. No measured labels are added here.
+            model.requires_grad_(False)
+            generator = torch.Generator(device='cpu').manual_seed(seed)
+            unique = {}
+            with torch.no_grad():
+                for restart in range(restarts):
+                    logits = torch.randn(model.features.shape[:2], dtype=torch.float64, generator=generator) * .2
+                    if restart == 0:
+                        logits += model.one_hot(incumbent if incumbent is not None else [0] * model.n_decisions)
+                    choice = model.catalogue.project([r[:n] for r, n in zip(logits.tolist(), model.counts)])
+                    if tuple(choice) not in seen:
+                        po, area = model(model.one_hot(choice))
+                        objective = scalar_objective(po, area, model.delay_reference, model.area_reference,
+                                                     mode, area_limit_ratio, area_weight=area_weight)
+                        unique[tuple(choice)] = {'choices': choice, 'predicted_objective': float(objective),
+                            'restart': restart, 'step': 0, 'source': 'initialization_without_inner_updates'}
+            proposals = sorted(unique.values(), key=lambda p: (p['predicted_objective'], p['choices']))
+            trace = [{'trace_schema': 'full_initialization_control_v1', 'steps': 0,
+                      'inner_gradients_computed': False, 'seed': seed,
+                      'scope': 'Original STE initial hard states only; no backward/Adam. Existing proxy calibration retained.'}]
     else:
         proposals, trace = joint_proposals(model, seen, seed, incumbent, steps, restarts,
             mode, area_limit_ratio, area_weight, replace(config, device=selection['device']), observations)

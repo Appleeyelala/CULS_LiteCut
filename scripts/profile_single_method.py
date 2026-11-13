@@ -21,6 +21,7 @@ PROFILE_VARIANTS = (
     'adaptive_physical_batch_cpu', 'adaptive_physical_batch_cuda', 'adaptive_physical_batch_auto',
     'original', 'native_abc', 'native_culs', 'random_cpu', 'random_batch',
     'random_physical_batch', 'greedy_litecut', 'greedy_litecut_physical',
+    'adaptive_no_inner_batch_auto',
 )
 
 
@@ -147,7 +148,8 @@ def run_case(args):
             device = 'cuda' if args.variant.endswith('_cuda') else 'cpu'
             proposal_config = joint_optimization.JointProposalConfig(device=device, trajectories=args.trajectories,
                                                                      max_changes=args.max_changes,
-                                                                     feedback=args.variant.startswith(('feedback_', 'adaptive_')))
+                                                                     feedback=args.variant.startswith(('feedback_', 'adaptive_')),
+                                                                     inner_updates='_no_inner_' not in args.variant)
             record['joint_proposal_config'] = dict(proposal_config.__dict__)
             record['requested_proposal_device_mode'] = args.variant.rsplit('_', 1)[-1]
             record['algorithm_sha256']['joint_optimization'] = digest(

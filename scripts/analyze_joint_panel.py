@@ -20,7 +20,7 @@ def comparisons(rows):
             raise ValueError('Ambiguous repeated input/seed/method; analyze separate repetitions explicitly.')
         lookup[key] = row
     results = {}
-    for control in ('legacy_cpu', 'random_batch', 'adaptive_batch_cpu', 'greedy_litecut', 'native_abc', 'native_culs'):
+    for control in ('legacy_cpu', 'random_batch', 'adaptive_batch_cpu', 'adaptive_no_inner_batch_auto', 'greedy_litecut', 'native_abc', 'native_culs'):
         pairs = []
         for row in rows:
             if row['variant'] != 'adaptive_batch_auto':

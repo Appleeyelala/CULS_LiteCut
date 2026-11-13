@@ -1,40 +1,29 @@
 # GPU 联合梯度优化：当前进度
 
-本任务仍在进行，未完成最终验收。目标保持为联合选择、单电路 GPU 并行、竞争性的真实 mapped delay 和低端到端 runtime；不以组件加速替代完整目标。
+当前目标仍在进行，尚未完成最终验收。主线为跨MFFC梯度联合选择、单电路GPU并行、真实mapped delay与端到端runtime；原905实验保持原样，不作为新版方法的大样本验证。
 
-## 已实现与已验证
+## 已实现与已有证据
 
-- 保留冻结旧算法控制；新增一次原 DAG adjoint 的局部二次提案器，保留相邻 MFFC 双线性项，批量优化 32 个轨迹，最终做有 edit 预算的全局冲突投影。
-- 可关闭的八维成功反馈残差排序，标签只来自当轮之前的 PASS 测量；固定 LiteCut 仍为 CPU 冻结特征，不反传进 Student。
-- 稀疏传回 argmax 编辑、复用 CPU 冲突索引、稀疏 hard 组合打分。Slurm 64931 的相关数值、梯度、反馈、合法性和 CPU/CUDA 测试为 27/27 PASS。
-- 真实开发闭环两轮各 9/9 PASS；每方法 8 请求，包含失败/修复/基线。新 CPU/CUDA 的最终选择与 QoR 一致。
-- 三个大图的同算法 float64 CPU/CUDA 组件对照完成；稀疏版与旧版本代理输入哈希、最终组合和顺序哈希都匹配。div/hyp/voter 的单次提案调用 CPU/CUDA 比值约 27.59/1.70/23.03，均只属于组件范围。
-- 原生多配置 replay 的一次枚举复用已编译；no-op/四组跨 MFFC 配置的完整 trace/AIG 与默认和冻结旧工具一致，动态拒绝一致。64935 的默认/新功能回归 15/15 PASS，开启复用回归另 12/12 PASS。Python 批量接口在 64939 的 7 项集成/旧 pipeline 回归通过，自由搜索的端到端对照尚未完成。
+- 保留冻结旧STE控制；新增一次原DAG adjoint、保留邻接双线性项的局部二次提案，32条轨迹×40步，CPU/CUDA float64，支持八维既往PASS标量反馈。
+- 稀疏传回argmax编辑、CPU冲突索引和hard打分复用；64932大图同工作量组件有1.70–27.59倍单次CPU/CUDA差异，选择/顺序hash一致。这不是端到端加速。
+- 原生多配置命令一次枚举复用，逐配置从原图安装；每个完整组合各自CEC与Liberty mapping。64945/64951的12最终点和6个seq/batch逐请求配对一致，端到端时间仍不稳定。
+- 新增按固定规模选择旧全代理STE或局部批量提案：64957数值30/30 PASS；64976真实9/9冷进程通过。c1355/ss_pcm实际仍用CPU全代理，DMA用局部近似CPU。
+- 独立自然成本original/native ABC/native CULS/random/LiteCut greedy入口已实现；共享原Boolean与真实执行函数，random/native不加载不用的ML。64977为51/51回归PASS；64978为15/15真实开发方法点PASS。
+- 64979通过3项反例/时间截点测试，并审计上述两组24个方法点的94次成功测量：精确完整安装、原始CEC、Liberty、网表、资产/命令hash与真实完成事件通过。时间阈值按已有协议，不由mtime推测。
 
-源码、数学与边界见 [IMPLEMENTATION.md](IMPLEMENTATION.md)；实际路径、失败记录和数值见 [RUN_LOG.md](RUN_LOG.md)；原生部分见 [PREPARED_REPLAY.md](PREPARED_REPLAY.md)。
+## 当前真实结果与边界
 
-## 实际 QoR 与失败证据
+64976中，正增益adaptive batch：DMA2301.566650ps（28rewrite显式修复），ss_pcm323.908447ps，c1355360.111877ps/no-op。相同分配旧版分别2380.250980、323.908447、360.111877ps。小图旧STE避免了此前ss_pcm近似版328.026855ps的退化；单次wall不能证明稳定加速。
 
-种子 20261111 的开发输入结果为：DMA 旧方法 2380.25 ps，基础近似 2345.21 ps，反馈版 2301.57 ps；反馈版最终为 **28 个 rewrites、25 个 MFFC 的显式修复**。ss_pcm 旧方法 323.91 ps，基础近似 332.45 ps，反馈版 328.03 ps，仍退化。c1355 三者均返回 360.11 ps 的 no-op。
+允许非正AIG增益的64956固定四向量全部CEC/面积可行，最佳2288.404300ps；但64976中同策略自由搜索DMA返回2396.672360ps、耗时27.917s，差于正增益2301.566650ps/18.222s。该政策改变warmup和反馈序列，保留负结果，默认仍正增益，不将固定probe最佳点冒充搜索最佳点。
 
-反馈版 DMA 的四个直接梯度请求重复因 `(root=2901, cut_slot=5, subgraph_index=4)` 被 REVERTED，实际 saved=2、added=4；修复后才成功。证据是 `20261113T034453Z-joint-feedback-dev-3776f84d/output/feedback_cpu/case_0000/gradient_area_constraint/eval_000{3,4,5,6}/rewrite/raw/traces/choice.jsonl`。这提示安装的正 AIG 节点增益策略与 mapped-delay 目标需分别审查；尚未更改增益策略，也未验证允许该动作后的 CEC/area/timing。
+64978自然成本强基线：ss_pcm原生CULS同样323.908447ps/1.618s，random319.488068ps/8.381s；c1355原生CULS353.219391ps/1.668s，优于梯度no-op。DMA梯度点低于本轮随机/CULS，但更慢。两组不同分配，不作严格端到端加速配对。
 
-以上不是稳定胜过随机/Native ABC 的证据，端到端 runtime 也未稳定下降。初步 wall 存在同节点并行诊断的影响，不能用单次最好时间作最终加速声明。
+## 当前待验证与交付边界
 
-## 五项交付的完成边界
+- Slurm64980正在执行大图ACE/div同算法CPU/CUDA完整八请求闭环，包含全部准备、真实安装/CEC/mapping；终态与结果尚待核对，不预言端到端收益。
+- 新增初始化不更新控制只关闭内层backward/Adam，仍保留既有校准/大图adjoint；不是全无梯度方法，尚待回归与真实验证。说明见[INNER_UPDATE_CONTROL.md](INNER_UPDATE_CONTROL.md)。
+- 多种子冷进程入口与前瞻最终协议已写入，固定面板16输入×3seed未执行。主方法、强基线、CPU/auto及内层更新控制将同分配顺序比较；自然成本口径见[BASELINE_PROTOCOL.md](BASELINE_PROTOCOL.md)。
+- 竞争性整体QoR、稳定低runtime、梯度独立价值和最终Delay–Runtime比较尚未建立；完整五项交付尚未完成。
 
-| 要求 | 当前证据与剩余内容 |
-|---|---|
-| 可复现改进实现 | 核心提案器、数学和测试已有；原生批量复用尚需完成回归并接入真实搜索 |
-| 公平旧版及相关基线比较 | 有同分配旧 CPU 与新 CPU/CUDA 开发对照；最终 native/greedy/random/CULS 及统一冷/热缓存比较未完成 |
-| 梯度和 GPU 独立贡献 | 同工作量 GPU 组件贡献已验证；梯度、LiteCut/交互、反馈/修复的受控消融未完成 |
-| Delay–Runtime 实验 | 有三例真实最终点和失败；固定时间截点、time-to-quality、多种子面板及重复时间分布尚未完成 |
-| 有效结论与限制 | 当前负结果和范围明确保留；完整最终报告仍需基于后续冻结比较 |
-
-16 输入×3种子的最终面板已按元数据冻结在 [gpu_joint_panel.json](../../config/gpu_joint_panel.json)，尚未执行。不得按开发结果改面板或放宽已固定的主评价口径。
-
-## 当前正在收尾的验证
-
-Slurm 64935/64936/64939 均已 COMPLETED/0:0。此前 64933/64934 失败目录保留，原因分别是测试夹具覆盖 unittest.run、错误地假设旧 dispatcher 必然非零退出，不能回写为 PASS。下一项是用同一分配的顺序冷进程比较冻结旧方法、新方法顺序执行与新方法批量 CPU/CUDA，检查实际搜索的每个请求、最终 QoR 和完整成本；固定 16 输入×3种子及消融仍未完成。
-
-后续依次以这些验证决定是否接入批量 replay，检查增益拒绝策略和重复失败成本，再实施独立消融与冻结面板比较；仍保留完整安装、CEC、真实面积约束和统一 Liberty timing。上述待办不是已经实现或获得优势的结论。
+具体源码/数学见[IMPLEMENTATION.md](IMPLEMENTATION.md)、[ADAPTIVE_SELECTOR.md](ADAPTIVE_SELECTOR.md)；所有路径、失败与实际数值见[RUN_LOG.md](RUN_LOG.md)。主报告是7e5bbc1记录的阅读截点，后续新实现和实验在本目录继续追加，不回写旧905证据。

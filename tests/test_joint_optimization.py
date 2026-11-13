@@ -1,5 +1,6 @@
 """Analytical local-model/feasibility tests; these are not timing benchmarks."""
 import unittest
+from unittest.mock import patch
 
 import torch
 
@@ -13,6 +14,40 @@ from test_surrogate import model_fixture
 
 
 class JointOptimizationTests(unittest.TestCase):
+    def test_initialization_control_has_no_inner_adam_or_backward(self):
+        model = model_fixture()
+        config = JointProposalConfig(trajectories=8, max_changes=2, inner_updates=False)
+        with patch('torch.optim.Adam', side_effect=AssertionError('No inner optimizer allowed')), \
+             patch.object(torch.Tensor, 'backward', side_effect=AssertionError('No inner backward allowed')):
+            proposals, trace = joint_proposals(model, {(0, 0)}, 31, [0, 0], steps=40, config=config)
+        self.assertEqual(trace[0]['steps'], 0)
+        self.assertFalse(trace[0]['inner_gradients_computed'])
+        self.assertNotIn('total_gradient_norm', trace[0]['trace_columns'])
+        for row in proposals:
+            model.catalogue.validate(row['choices'])
+
+    def test_small_initialization_control_matches_original_initial_hard_states(self):
+        from global_timing.optimization import gradient_proposals
+        model = model_fixture()
+        original, _ = gradient_proposals(model, {(0, 0)}, 57, [0, 0], steps=1, restarts=2,
+                                         mode='joint', area_weight=.5)
+        with patch('torch.optim.Adam', side_effect=AssertionError('No inner optimizer allowed')), \
+             patch.object(torch.Tensor, 'backward', side_effect=AssertionError('No inner backward allowed')):
+            control, trace = adaptive_proposals(model, {(0, 0)}, 57, [0, 0], steps=40, restarts=2,
+                mode='joint', config=JointProposalConfig(inner_updates=False))
+        self.assertEqual([(r['choices'], r['predicted_objective']) for r in original],
+                         [(r['choices'], r['predicted_objective']) for r in control])
+        self.assertFalse(trace[0]['inner_gradients_computed'])
+
+    @unittest.skipUnless(torch.cuda.is_available(), 'Requires Slurm GPU allocation.')
+    def test_initialization_control_cpu_cuda_hard_proposals_agree(self):
+        model = model_fixture()
+        args = dict(model=model, seen=set(), seed=31, incumbent=[0, 0], steps=40, mode='joint')
+        left, _ = joint_proposals(**args, config=JointProposalConfig(trajectories=8, inner_updates=False))
+        right, _ = joint_proposals(**args, config=JointProposalConfig(device='cuda', trajectories=8, inner_updates=False))
+        self.assertTrue(left)
+        self.assertEqual(left, right)
+
     def test_adaptive_small_design_preserves_original_full_ste_proposals(self):
         from global_timing.optimization import gradient_proposals
         model = model_fixture()

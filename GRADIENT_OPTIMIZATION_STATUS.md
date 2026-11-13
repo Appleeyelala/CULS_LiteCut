@@ -1,25 +1,23 @@
 # 梯度优化闭环：实现与实验状态
 
-后续进展（2026-11-14）：本报告主体保留下述只读审查截点；此后已实现完整MFFC GPU队列前反传播、全局梯度联合块和候选复用预检，通过41项回归及6开发输入的18个真实A/B/Ours方法点。源码/完整905协议已冻结，正式2715点作业65245正在运行，尚无全量结论。新增实现、数学和实际终态入口见[修订实现](docs/mffc_gpu/IMPLEMENTATION.md)、[MFFC运行记录](docs/mffc_gpu/RUN_LOG.md)和[冻结协议](BENCHMARK905_PROTOCOL.md)；不能再把主体截点中的“GPU草稿未验证”当作后续状态，也不能将开发结果当905结果。
-
 审查日期：2026-11-14（北京时间）。本次仅阅读源码、保存的配置、JSON/CSV、trace 和 CEC/mapping 日志，更新本报告；没有运行优化器、测试、构建、训练或 ABC，也没有提交、取消或重启作业。文中“已验证”均指已有运行记录，不表示本次重新验证了全部测量。
 
-**当前闭环已经实现候选联合选择、可微代理优化、严格真实 Rewrite、CEC 和 ABC Liberty Timing 反馈；部分电路有真实改善，但尚未建立梯度稳定优于同预算随机搜索、LiteCut 标量带来独立收益，或代理下降可靠对应真实 Mapping Delay 下降的证据。** 后续 GPU 版本在限定配对中有加速，整体加速目标未达到。完整 Region DAG 的 MFFC 级 GPU 传播目前只有未接入的草稿，不能计为已完成能力。
+**当前已实现“冻结 LiteCut 特征 → 多 PO/面积可微代理 → 全局梯度指导离散联合候选 → 真实 Rewrite + CEC + ABC Liberty Timing → 成功测量反馈”的闭环。最新 MFFC 版本已接入完整 GPU DAG 前/反传播，并完成六个开发输入的十八个真实 A/B/Ours 方法点。** c1355 等例有实际改善；但代理下降不保证真实 delay 下降，尚无稳定算法优势或 LiteCut 独立收益的结论。新版完整 905 实验仍在运行，不能用旧版 905 或开发正例替代其全量结论。
 
 ## 1. 版本范围与证据口径
 
-阅读时分支为 `work/mffc-gpu-905`，HEAD 为 `babdcb1ddfa21b76f7b67e39677be158c733b4d1`。开始审查时已有两个未跟踪文件：`global_timing/mffc_gpu.py`、`framework/mffc_gpu/region_lse.cu`；本次保留原样。旧同名报告是 2026-11-13 15:57 的历史截点，可从 Git 的 `9b5b065` 或本次修改前的 HEAD 查看；本报告汇入其后已经完成的结果，不改写原始实验目录。
+阅读时分支为 `work/mffc-gpu-905`，报告修改前 HEAD 为 `84ec94d`，工作区干净。最新正式实验使用冻结源码 `ecc85e6ac82571caf9f1a6004098dbe976536256`，tag 为 `mffc-gpu-905-freeze-20261114`；后续提交补充交付分析与文档，不是该实验运行源码。旧同名报告在 Git 中保留，本报告修正其“GPU 草稿未接入”等过时描述，不改写原始实验目录。
 
 | 范围 | 实际源码 / 入口 | 已有证据与边界 |
 |---|---|---|
 | 旧版完整代理 STE | 主实验 `160b2187eee3b47799e58b658e39f13d40064b61`；后续冻结控制 `5025a6c863f0a7766c41707bcc1828723afce447` | 全 905 输入、两种目标；901 PASS、4 PARTIAL。控制的八个核心 Python 模块与主实验相同 |
 | 后续联合/自适应 CPU–CUDA | 正式快照 `22579982d22d741d47600a6406b09f00f4a4b46b` | 16 输入 × 3 seeds × 9 方法 = 432 个真实冷方法点；全部完成并审计 |
 | 通道与修复控制 | `db64308d53dcdd37b075d35b0da08f1f5cf9f458` | 4 输入 × 3 seeds × 4 配置 = 48 个真实方法点；全部完成，不与主面板混成独立 20 输入 |
-| 当前新改造 | `MFFC_GPU_REVISION_PLAN.md`；上述两个未跟踪文件 | 设备就绪队列前/反传播草稿，未接入当前优化器；没有发现相应构建、数值测试或正式结果证据。新三方法 905/2715 点评估未验证 |
+| 当前 MFFC 全局梯度版本 | `mffc_experiment.py`、`mffc_search.py`、`mffc_model.py`、`mffc_gpu.py`、`region_lse.cu`；正式快照 `ecc85e6` | 设备队列完整前/反传播已实现；32项模型/数值/回归与最终41项冻结门槛通过；六开发输入18点全部PASS。三方法905/2715点正式作业65245进行中，尚无全量审计终态 |
 
 文档时效需注意：`docs/WORK_HISTORY.md` 末尾“未建立通用联合优化器”属于初始导入阶段，不能替代后来的框架/实验状态；旧同名报告中的正式面板 RUNNING/PENDING 与“消融尚无结果”已过时。这里根据终态文件更新解释，原文档和运行证据保持原样。
 
-**默认 CLI 仍调用旧版 `gradient_proposals`，不会因为新模块存在而自动使用新版。** 新版由 `scripts/profile_single_method.py` 显式注入 `adaptive_proposals` 与批量执行器。正式 432 点只验证 `area_constraint`，不代表新版 `joint` 目标也完成同规模验证。[pipeline.py](/home/wushangge/CULS_LiteCut/global_timing/pipeline.py:138)、[自适应入口](/home/wushangge/CULS_LiteCut/global_timing/joint_optimization.py:418)。
+**入口决定算法。** `python -m global_timing` / `pipeline.Experiment` 仍用旧版 `gradient_proposals`；432点面板由 `profile_single_method.py` 注入 `adaptive_proposals`；最新版本由 `scripts/run_mffc905.py` 的 Ours 子进程显式构造 `MffcExperiment`，不走前两种候选优化器。432点和最新版本均仅验证 `area_constraint`，不能写成两者也已完成 delay–area `joint` 的同规模验证。[旧入口](global_timing/pipeline.py:138)、[自适应入口](global_timing/joint_optimization.py:418)、[MFFC入口](scripts/run_mffc905.py:83)。
 
 本文真实优化结果统一采用 `ABC_SCL_LIBERTY`：相同 ABC、ASAP7、`map; topo; stime -p`，同一 `SC_Man` 输出 global、全部 PO rise/fall 和 area。不要与 Gate3F 的固定 MIO PO arrival、corrected `print_pair_delay`、初始 mapper mode0 arrival 混用。已撤回的旧 `print_delay PO PI` 标签及其校准指标未用于本报告的有效性结论。原始说明见 [KNOWN_LIMITATIONS](docs/KNOWN_LIMITATIONS.md) 与 [标签更正](evidence/path_delay_model/LABEL_CORRECTION_NOTE.md)。
 
@@ -31,10 +29,10 @@
 | 2 分区 | CPU ref/deref，strict maximal MFFC；检查 AND 全覆盖与不重叠 | root/member、owner、Region DAG、拓扑序、各边界入口到 root 的最长 AND 距离 | `structure.make_partition` |
 | 3 枚举 | CULS GPU 导出保留的 3/4-leaf cuts 与正节点增益候选 | Decision 域、library subgraph IDs、cut-bounded removable cones、静态冲突 | `candidates.enumerate_candidates/catalogue_from_raw` |
 | 4 函数核验 | cut 真值、必要的原上下文 CEC、候选相位/置换真值检查 | verified catalogue；不能证明的 cut 排除并留审计记录 | `cut_validation.validate_catalogue`、`boolean_candidates`、`litecut.score_catalogue` |
-| 5 局部推理 | 原 cone/no-op 与 replacement DAG 的 19 维特征，冻结 Student | 各选项局部 `predicted_local_abc_delay`，保存 `litecut.json` | `litecut.score_catalogue` |
-| 6 实际基线 | original 与零选择 replay 分别做 CEC/mapping | no-op 的全部 PO、delay、area，作为代理锚点与面积参考；original 分列 | `Experiment.run` / profiler、`Evaluator.evaluate` |
-| 7 校准 | warmup 的真实测量与以前 PASS 观察 | 12 个代理参数；大图分支另有八维标量残差 | `TimingSurrogate.fit_observations`、`FrozenCriticalityObjective.fit_feedback` |
-| 8 梯度选候选 | 固定代理参数，联合更新所有 Decision 的候选 logits | 排序的候选组合与梯度轨迹；这里开始选择变量优化 | `gradient_proposals` 或 `adaptive_proposals` |
+| 5 实际基线 | original 与零选择 replay 分别做 CEC/mapping；original在初始化最先测量 | no-op 的全部 PO、delay、area，作为代理锚点与面积参考；original 分列 | `MffcExperiment.__init__`、`Evaluator.evaluate` |
+| 6 局部推理 | 原 cone/no-op 与 replacement DAG 的 19 维特征，冻结 Student | 各选项局部 `predicted_local_abc_delay`，保存 `litecut.json` | `litecut.score_catalogue` |
+| 7 初始化/校准 | 以真实no-op锚定；最新版本首轮用12参数先验，有新PASS后才校准 | 12个参数；旧432点大图分支另有八维标量残差，最新版本不使用它 | `MffcGpuSurrogate.fit_observations` / `TimingSurrogate.fit_observations` |
+| 8 梯度选候选 | 最新版本固定代理参数，在当前真实incumbent的one-hot上求完整全局梯度 | 方向导数排序→合法联合块→完整DAG重评分；这里开始选择变量优化。旧版本另用logits | `mffc_search.gradient_blocks`；旧版为`gradient_proposals/adaptive_proposals` |
 | 9 投影与真实安装 | 合法离散组合→原 root/cut/subgraph；原 root 升序顺序安装 | 完整 AIG、逐请求 trace；全部指定选择必须 ACCEPTED | `Catalogue.project/requested`、`replay/execute_many`、原生 `rewrite.cu` |
 | 10 真实验证与反馈 | 完整安装→严格 CEC→统一 Liberty mapping | 实际 delay/area/PO；失败无标签。修复另占请求预算，成功观察反馈校准，返回真实 best | `Evaluator.evaluate`、`repair_rejected`、`rank_actual` |
 
@@ -44,11 +42,12 @@ MFFC **Region** 是严格分组；Rewrite **Decision** 是 `(root, cut_slot)`；
 flowchart TD
     A[输入组合 AIG] --> B[Strict maximal MFFC / owner / Region DAG]
     B --> C[GPU 枚举 Decision / Candidate 与 Boolean 核验]
-    C --> D[冻结 LiteCut 19维输入与局部分数]
+    C --> E
     A --> E[分别真实测量 original / replay no-op]
+    E --> D[冻结 LiteCut 19维输入与局部分数]
     D --> F[此前 PASS 观察校准多 PO / 面积代理]
     E --> F
-    F --> G[联合候选 logits 梯度优化]
+    F --> G[当前组合 one-hot 上求全局代理梯度]
     G --> H[离散合法投影]
     H --> I[从原图真实顺序 Rewrite]
     I --> J{完整 ACCEPTED 且 CEC PASS}
@@ -60,7 +59,7 @@ flowchart TD
     M -- 预算结束 --> N[返回真实验证结果与完整来源]
 ```
 
-随机 warmup/重复投影后的探索存在于已验证版本，不能把全部请求叫梯度请求。批量 replay 只复用原图枚举上下文，各组合独立恢复原图，再各自 CEC/mapping；不是累计改写。代码见 [execution.py](/home/wushangge/CULS_LiteCut/global_timing/execution.py:16)。
+最新 MFFC 版本没有随机 warmup/探索；旧版905和432点包含这些请求，不能把它们全部叫梯度请求。最新版本先测original，再准备结构/候选和replay no-op，随后推理LiteCut与构造代理；表中按数据依赖组织，原始时序见 [MffcExperiment.__init__](global_timing/mffc_experiment.py:49)。批量 replay 只复用原图枚举上下文，各组合独立恢复原图，再各自 CEC/mapping；不是累计改写。[execution.py](global_timing/execution.py:16)。
 
 ## 3. 梯度如何指导候选选择
 
@@ -73,7 +72,7 @@ x_i\in\{0,1,\ldots,K_i\},\quad x_i=0:\text{no-op},\quad
 x_i>0\mapsto\texttt{candidate\_subgraph\_indices}[x_i-1].
 \]
 
-优化 logits 为 float64 的 \(z\in\mathbb R^{D\times W}\)，\(W=\max_i(K_i+1)\)，padding 用 valid mask 排除。`choice_index` 是域内序号，通常不等于 `subgraph_index`。c1355 为 91 个变量、326 个 physical candidates，加 no-op 共 417 个有效选项，不是 62 个 Region 变量。
+选择张量为 float64 的 \(v\in\mathbb R^{D\times W}\)，\(W=\max_i(K_i+1)\)，padding 用valid mask排除。最新版本用真实组合的one-hot，求其连续扩展的方向导数；旧版才引入同形状logits \(z\) 和Softmax。`choice_index` 是域内序号，通常不等于 `subgraph_index`。c1355 为91个变量、326个physical candidates，加no-op共417个有效选项，不是62个Region变量。
 
 设 \(\ell_{ik}\) 为局部 LiteCut 分数，\(d_{ik}\) 为原 19D 特征中的 `Weighted_Depth`（索引 8），\(n_{ik}\) 为 `Node_Count`（索引 11）。代理只使用四维相对特征：
 
@@ -149,7 +148,38 @@ Tchebycheff 的两个维度是 delay 和 area，不是每条路径一个维度�
 
 最终实际排名与代理优化分开：面积模式只在真实 \(A\le1.05A_0\) 的 PASS 点中最小化真实硬最大 delay；joint 将真实全部 PO/area 代入联合目标，不额外应用 1.05 硬面积约束。[scalar_objective](/home/wushangge/CULS_LiteCut/global_timing/surrogate.py:390)、[rank_actual](/home/wushangge/CULS_LiteCut/global_timing/pipeline.py:125)。
 
-### 3.4 旧版全代理：Softmax + STE + Adam
+### 3.4 最新 MFFC 版本：one-hot 全局方向导数与离散联合块
+
+令当前已真实验证且面积可行的组合为 \(x^t\)，\(v^t=\operatorname{OneHot}(x^t)\)。冻结12个代理参数后，只对选择张量求导：
+
+\[
+g_{ik}=\left.\frac{\partial J_{area}(v)}{\partial v_{ik}}\right|_{v=v^t},\qquad
+G_{ik}=g_{i,x_i^t}-g_{ik}.
+\]
+
+从当前选项换到 \(k\) 的方向是 \(\Delta v_i=e_k-e_{x_i^t}\)，故一阶预测 \(\Delta J\approx-G_{ik}\)。每个Decision选择允许且 \(G_{ik}>0\) 的最佳替换，GPU按收益稳定排序，最多向CPU传 `8 × maximum_edits` 条稀疏编辑。CPU按1/2/4/8/16编辑预算构造合法块：
+
+\[
+x_b=\Pi_{feasible}(x^t,\{G_{ik},i,k\},b),\qquad
+\text{proposals}=\operatorname{Top}_{2}^{\min}\{J_{area}(\operatorname{OneHot}(x_b))\}.
+\]
+
+这些hard组合会再次执行**完整DAG前向**，不是各MFFC独立选局部最小值，也不是冻结二次Q打分。代码没有要求每个重评分都严格小于anchor；最终保留标准由真实测量决定。候选更新没有学习率、Softmax、STE、Gumbel或内层Adam；Adam仅用于反馈校准12个代理参数。实现：[gradient_blocks](global_timing/mffc_search.py:15)、[prepare_selection_mask](global_timing/mffc_search.py:9)。
+
+完整反传链为：\(J\) → 全PO平滑目标/面积 → no-op锚定 → Region DAG LSE → 入口成本/相邻特征乘积 → Decision/Candidate相对特征 → \(v\)。Region入口的LSE导数为：
+
+\[
+\frac{\partial a_r}{\partial(a_{u(p)}+c_{rp})}
+=\exp\left(\frac{a_{u(p)}+c_{rp}-a_r}{\tau_g}\right).
+\]
+
+反向按依赖把所有下游/PO贡献累加到前驱。`MffcGpuSurrogate`在CUDA聚合Candidate→Decision→Region及port incidence；原生`region_forward/region_backward`用每个warp处理一个就绪MFFC、CSR依赖计数和原子队列推进整个DAG，不再由Python逐层发射，也没有CPU DAG adjoint。自定义autograd只支持一阶导数。Student、投影、Rewrite、CEC、ABC仍在反传链外。[mffc_model.py](global_timing/mffc_model.py:24)、[autograd包装](global_timing/mffc_gpu.py:137)、[CUDA前向](framework/mffc_gpu/region_lse.cu:61)、[CUDA反向](framework/mffc_gpu/region_lse.cu:103)。
+
+D<32且R<1024时使用同方程CPU参考；超阈值缺CUDA就失败，不静默CPU回退。没有verified Decision时不加载Student/代理。解析、分区、Boolean证明、局部特征/Student推理和合法投影仍在CPU；CULS的GPU枚举/rewrite是另一部分工作。并行计算代理不表示并行安装所有MFFC。
+
+当前协议最多2轮、每轮最多2提案/16 edits；第二轮可在已改变的incumbent上继续编辑，因此final可多于16个rewrite。预算4包括no-op、失败及显式repair，original另计一次真实测量；因此并非固定做4个有效梯度组合。有至少两个PASS观察时，用此前标签拟合12步，之后重新求完整全局梯度。原图不充当第二个zero-choice校准标签。最终返回面积可行PASS观察中的真实最小delay；只有自己已付费测量的original更好时，才标为`original_fallback`。[MffcExperiment.run](global_timing/mffc_experiment.py:131)。
+
+### 3.5 历史旧版全代理：Softmax + STE + Adam
 
 \[
 p_{ik}=\operatorname{Softmax}_k(z_i/T_t),\quad
@@ -173,7 +203,7 @@ P=|\mathcal C|^{-1}\sum_{(i,j)\in\mathcal C}\alpha_i\alpha_j
 
 真正反传链为：目标→全部 PO/area→DAG LSE→入口成本/交互→相对候选特征→STE/Softmax→logits。DAG 的局部导数是各入口 LSE 的 Softmax 权重，`arrival.py` 按逆拓扑累积 adjoint；`bounded_tape` 只支持一阶导数。**Student、候选物化、离散投影、Rewrite、CEC、ABC 不参与反传。** [optimization.gradient_proposals](/home/wushangge/CULS_LiteCut/global_timing/optimization.py:9)、[arrival.backward](/home/wushangge/CULS_LiteCut/global_timing/arrival.py:76)。
 
-### 3.5 后续大图：一次 adjoint + 局部二次目标 + 批量连续松弛
+### 3.6 历史432点大图分支：一次 adjoint + 局部二次目标 + 批量连续松弛
 
 `FrozenCriticalityObjective` 在当前实际 incumbent \(v_0\) 上先做一次完整 CPU DAG forward/backward。令 \(g_e=\partial J/\partial c_e\)：
 
@@ -190,7 +220,7 @@ Q(v)=J(v_0)+\sum_i L_i^T(e_i-e_i^0)
 
 未加入反馈时，Q 在 anchor 匹配原代理的值和一阶导数；只保留显式双线性项，**不是完整 Hessian 展开，也不在远离 anchor 时等价于原目标**。Q 是无量纲排序目标，不是 ps。
 
-当前大图默认再用此前 PASS 的真实标量目标拟合八维 ridge 残差：\(\phi\) 前四维是 size 加权局部特征均值，后四维是相邻 Region 乘积按双方 Decision 数和边数归一化的均值。以 incumbent 为中心：
+该历史大图分支再用此前 PASS 的真实标量目标拟合八维 ridge 残差：\(\phi\) 前四维是 size 加权局部特征均值，后四维是相邻 Region 乘积按双方 Decision 数和边数归一化的均值。以 incumbent 为中心：
 
 \[
 X_j=\phi(v_j)-\phi(v_0),\quad
@@ -214,9 +244,9 @@ L_b=Q_f(p_b)+0.05[\max(0,m_b/B_b-1)]^2+0.1P_b.
 
 \(B_b\) 循环取 1/2/4/8/16/32 的合法编辑预算。对 \(\sum_b L_b\) 反传，逐轨迹梯度裁剪为 5；Adam lr=0.15、eps=1e-12，温度 1→0.3。最后 GPU/CPU 批量 argmax，只传正优势稀疏 edits，CPU 按 logit 优势投影、保留未编辑 incumbent；激活、停用、换候选各计一次 edit。合法 hard 点按 Qf 排序，实际请求前还用完整原代理保存 PO/area 预测。[joint_proposals](/home/wushangge/CULS_LiteCut/global_timing/joint_optimization.py:271)。
 
-已有 GPU 加速范围是批量候选/轨迹的内层张量计算；Student 推理、代理校准、一次原 DAG adjoint、最终投影/排序仍在 CPU。不能称已有结果实现了完整 MFFC DAG 的 GPU 前/反传播。
+该历史版本的GPU加速范围是批量候选/轨迹的内层张量计算；Student推理、代理校准、一次原DAG adjoint、最终投影/排序仍在CPU。其432点证据不能用来证明最新原生MFFC GPU DAG；后者有独立的65237～65244验证记录。
 
-### 3.6 自适应规则、校准与可执行性
+### 3.7 历史自适应规则、共同校准与真实可执行性
 
 固定元数据规则：Decision≤128 且 Region≤4096 时用 CPU 全代理 STE，最多 20 步；否则用局部二次分支。auto 模式在 `D × padded_width × 32 ≥ 500000` 且 CUDA 可用时启用 CUDA。小图即便要求 CUDA 仍按规则用 CPU，日志记录真实分支。[select_proposal_engine](/home/wushangge/CULS_LiteCut/global_timing/joint_optimization.py:403)。
 
@@ -228,7 +258,9 @@ L_b=Q_f(p_b)+0.05[\max(0,m_b/B_b-1)]^2+0.1P_b.
 2. 真实顺序安装重新检查 leaf、saved/added gain 和传递引用环。默认仍要求正节点增益；可选允许非正 gain 的固定 probe 与自由搜索单列，未改默认。
 3. 必须精确预选并 ACCEPTED 全部请求，再 CEC，再 mapping。任何部分安装都记失败，不能用其电路替换原请求。修复将被拒绝 Decision 清零，从原图重新执行，占新预算，保留 parent index/source。
 
-静态冲突不能完整预知结构哈希复用、顺序增益或环依赖，这是直接请求失败率高的实际限制。新草稿方案里的候选级复用预检尚不能算现有能力。[candidates.py](/home/wushangge/CULS_LiteCut/global_timing/candidates.py:66)、[严格 replay](/home/wushangge/CULS_LiteCut/global_timing/candidates.py:133)、[repair_rejected](/home/wushangge/CULS_LiteCut/global_timing/execution.py:122)、[原生动态检查](/home/wushangge/CULS_LiteCut/projects/culs/src/algorithms/rewrite.cu:1280)。
+上述旧版静态冲突不能完整预知结构哈希复用、顺序增益或环依赖，这是旧直接请求失败率高的实际限制。[candidates.py](/home/wushangge/CULS_LiteCut/global_timing/candidates.py:66)、[严格 replay](/home/wushangge/CULS_LiteCut/global_timing/candidates.py:133)、[repair_rejected](/home/wushangge/CULS_LiteCut/global_timing/execution.py:122)、[原生动态检查](/home/wushangge/CULS_LiteCut/projects/culs/src/algorithms/rewrite.cu:1280)。
+
+最新版本另已实现并测试 [CandidateFeasibility](global_timing/feasibility.py:9)：按候选library相位/置换解码，在原AIG结构哈希中找复用的原AND；禁止与删除这些节点的其他Decision共选，原root或传递后继自引用选项预先屏蔽，重复哈希保守保留所有原身份。同root/removable overlap/cut leaf deletion约束继续生效；输入叶共享本身不禁止。投影仍是按收益顺序的保守启发式，不是精确约束求解器，不能完整预判重写后新哈希、动态增益或所有别名环。真实完整ACCEPTED/CEC仍是最终标准。
 
 ## 4. LiteCut 实际承担什么
 
@@ -242,7 +274,7 @@ L_b=Q_f(p_b)+0.05[\max(0,m_b/B_b-1)]^2+0.1P_b.
 | 是否冻结 | 是：`model.eval()` + `torch.inference_mode()`；不加入候选优化器，不重训 Student。已有推理入口加载 CPU 模型 |
 | 如何影响优化 | 相对 no-op 的局部标量差作为四维代理特征之一；greedy 对照则直接按局部分数选候选 |
 | 梯度是否穿过模型 | 否。结果先变为 NumPy/JSON/Python 常量，再组成代理特征；反传只经过这些固定特征的选择权重与代理计算 |
-| 新时序模块 | 已实现第 3.2 节的 12 参数多 PO/area 代理及大图八维排序残差；尚未验证为可靠的 Mapping 后时序预测器 |
+| 新时序模块 | 已实现第3.2节的12参数多PO/area代理，最新版本把完整传播接入GPU；历史432点大图另有八维排序残差，最新版本不使用它。两者都不是已证实可靠的Mapping后时序预测器 |
 
 源码：[litecut.score_catalogue](/home/wushangge/CULS_LiteCut/global_timing/litecut.py:35)、[推理/逆变换](/home/wushangge/CULS_LiteCut/global_timing/litecut.py:92)、[LiteCutPredictor](/home/wushangge/CULS_LiteCut/projects/culs/tools/gate3e_run.py:57)、[StudentModel](/home/wushangge/CULS_LiteCut/projects/litecut/src/extract_cutlib_student/modeling.py:79)、[标签生成](/home/wushangge/CULS_LiteCut/projects/litecut/src/subutils/Parser.py:673)。
 
@@ -272,13 +304,44 @@ L_b=Q_f(p_b)+0.05[\max(0,m_b/B_b-1)]^2+0.1P_b.
 | CPU/CUDA 完整开发配对 | 64980 div：327.206/169.602 s，8 请求及指标一致，最终均 no-op | 一个真实完整配对约 1.929 倍；不证明质量改善或普遍加速 |
 | 正式新面板 | F 精确 432 点终态；S 审计 1119 成功观察错误 0、10 项分析测试通过 | 完整真实闭环与公平配对；最终性能含负结果 |
 | 补充控制 | A 精确 48 点、115 成功观察审计；默认兼容、四配置 smoke 通过 | 通道/修复有限子集贡献；不扩大到全部 905 |
-| 当前原生 MFFC GPU 草稿 | 未找到接入/构建/数值验证证据 | **未验证**；不能沿用旧 CPU/CUDA tests 的 PASS |
+| 当前原生MFFC GPU数值/单元 | 65237原生队列7/7；65238及65239完整32/32、无SKIP；65244最终41/41、无SKIP | 有限差分、逐候选/参数梯度、CPU参考、深链/宽层/重汇合、候选复用、预算/恢复边界；人工fixture不计真实QoR |
+| 当前MFFC真实开发 | 65239/65240六输入×A/B/Ours=18/18 PASS；65241只读审计38份真实测量、20个成功replay观察 | 完整安装/CEC/原始GT_META/netlist hash通过；是开发而非完整905结果 |
+| 当前MFFC交付分析 | 65241统计测试4/4；65246安装/成本/缺失值测试4/4，并只读处理两开发批次 | 补充统计和文件审计，不是新增模型训练、搜索或ABC实验 |
+| 保留的失败记录 | 65236原生编译失败；65243新增fixture缺字段而2 ERROR | 后续修复验证通过；失败原日志保留，不计为成功测试，也不误称真实CEC失败 |
 
 全仓库早期矩阵仍有 17 个 import FAIL 与 1 SKIP，主要涉及 DGL/einops/deepgate、历史命令脚本的参数/输入、训练数据权限或 import 外部写入。Student 闭环通过不等于全部历史训练程序都可用；没有行覆盖率或“全源码测试通过”的证据。
 
 ## 6. 已完成的真实实验结果
 
-### 6.1 旧版：905 输入、两种目标
+### 6.1 最新 MFFC 全局梯度版本：六个开发输入、十八个真实方法点
+
+以下数值直接读取65239/65240的 `output/records/*.json` 和各 Ours 的 `work/summary.json`，并抽查c1355的原始choices、CEC文本和mapping `GT_META`。A=原图，B=一次 `strash; rewrite` 后用共同Evaluator重读，Ours=本版梯度闭环。全部18点有真实最终CEC/Liberty结果；所有Ours final满足各自no-op面积上限，20个replay观察无失败。**开发集用于实现检查，没有同预算random/greedy控制，不是完整905性能结论。**
+
+| 输入（数据集相对路径） | MFFC / Decision / physical Candidate | A Delay ps | B Delay ps | Ours Delay ps | Ours Area | 冷E2E A / B / Ours s |
+|---|---:|---:|---:|---:|---:|---|
+| `OpenABC/c1355_orig.aig` | 62 / 91 / 326 | 360.111877 | 359.501831 | 319.617096 | 520.214417 | 0.916 / 0.968 / 7.580 |
+| `OpenABC/ss_pcm_orig.aig` | 97 / 11 / 31 | 350.016113 | 319.565643 | 325.867493 | 213.451202 | 1.117 / 1.017 / 5.830 |
+| `ACE/DMA_comb.aig` | 1801 / 632 / 1745 | 2463.366460 | 2491.453120 | 2411.792720 | 5180.449220 | 1.819 / 2.119 / 17.153 |
+| `ACE/div.aig` | 28306 / 51140 / 71729 | 75831.046900 | 67247.359400 | 75760.148400 | 12654.273400 | 6.476 / 6.576 / 87.328 |
+| `ACE/hyp.aig` | 117509 / 2760 / 2840 | 1774327.750000 | 1772861.750000 | 1774327.750000 | 176938.922000 | 16.093 / 20.654 / 149.424 |
+| `forgeEDA/mig_7series_v2_1_ecc_merge_enc.aig` | 576 / 0 / 0 | 688.224609 | 688.224609 | 688.224609 | 21071.250000 | 1.968 / 2.220 / 6.337 |
+
+Area为实际库面积，记录未另标物理单位；时间来自外层冷方法wall，不是kernel时间。A/B完整面积也保存在records和开发CSV中；例如div的B面积25400.459，超出该例no-op×1.05界，表中其原始delay照实保留，不把它当面积可行胜出。hyp返回付费原图而非候选改善；mig无Decision，不算梯度贡献。所有例子Ours均比A/B耗时更多，不能由GPU被调用就宣布完整方法加速。
+
+| 输入 | 实际选择梯度轮数 / 请求数（含no-op） | final非零Decision / 原MFFC数 | final来源 / 设备 | 结构DAG层数 / 最大层宽 |
+|---|---|---|---|---|
+| c1355 | 2 / 4 | 18 / 18 | 直接全局梯度 / CUDA | 6 / 32 |
+| ss_pcm | 2 / 3 | 3 / 3 | 直接全局梯度 / CPU小图回退 | 3 / 54 |
+| DMA | 2 / 4 | 16 / 16 | 直接全局梯度 / CUDA | 11 / 473 |
+| div | 2 / 4 | 16 / 4 | 直接全局梯度 / CUDA | 4183 / 128 |
+| hyp | 2 / 4 | 0 / 0 | original_fallback / 搜索阶段CUDA | 16269 / 12991 |
+| mig | 0 / 1 | 0 / 0 | replay_noop / 无代理 | 2 / 512 |
+
+ss_pcm第二轮有梯度但没有未见合法块，所以没有第四个请求；mig未使用任何梯度。div有多个Decision在同一MFFC中同时被接受。此处“梯度轮数”是选择变量的全局梯度调用次数，不包含反馈校准的12次反传；没有40步logits内循环。
+
+最新完整905作业65245的源码/工具/输入已冻结。**2026-11-14 03:57:26 +08:00只读截点**：Slurm仍RUNNING，已保存168个终态（A/B/Ours各56），覆盖56个完整三方法输入，这些点状态均PASS；其余点没有用预测补齐。`output/formal_completion.json` 和 `output/benchmark905_delivery/analysis_completion.json`均不存在。**新版全905比较、成功率、总体质量和速度优势均未验证**，不能用部分PASS作总体结论。本次没有启动或干预这个已有作业，也不以预检通过宣告完成。
+
+### 6.2 历史旧版：905 输入、两种目标
 
 输入清单来自 I，905 个 hash 唯一：ACE 40、OpenABC 47、forgeEDA 805、iwls2022 5、iwls2024 8。种子 20261111；每模式最多 8 请求，warmup 参数 2，20 步×2 restarts，校准 30 步，batch 4。全部905并非都进行了非平凡梯度：两模式各 799 设计有非零梯度轨迹，106 设计无此类轨迹。
 
@@ -308,7 +371,7 @@ MAE 定义为 `abs(predicted_delta-actual_delta)/measured_noop_delay`，先设�
 
 901 PASS / 4 PARTIAL 对应 `forgeEDA/codec.aig`、`loco_top.aig`、`mrc3.aig`、`mrc4.aig` 的 native ABC 断言退出，缺 native CEC/mapping。其他方法结果保留，未填入 no-op 冒充缺失对照。完整数值与面积/ADP/时间见 Q 的 `comparison_all.csv`；原图与 no-op 分列。[完整905报告](docs/global_timing/FULL905_SEARCH_RESULTS.md)。
 
-### 6.2 后续正式面板：16 输入 × 3 seeds × 9 方法
+### 6.3 历史联合/自适应正式面板：16 输入 × 3 seeds × 9 方法
 
 F/S 已完成，方法点 432/432 PASS；这里的 PASS 是方法运行完成并有实际验证 final，不代表每个内部请求都成功。16 输入取自已经分析过的 905 集合，非未见集；三个种子不能当三倍独立电路。以下为各自三个 seeds 的**中位数**，由 S 的 `method_points.csv` 只读汇总；Delay/Area/时间中位数可能属于不同 seed，不能拼成一个候选组合。各新版 final 均真实 CEC PASS、满足 no-op 面积 1.05 倍。
 
@@ -359,7 +422,7 @@ R/D/C 是全部 verified 域，不是 final 实际启用数；c1355/ss_pcm/DMA �
 
 30/120/600 s 曲线只使用已完成真实验证点。它们是最多8请求运行的时间截点，不是在600秒内继续搜索到耗尽时间的实验，也不证明收敛。[FINAL_RESULTS](docs/gpu_joint/FINAL_RESULTS.md)、[修复祖先审计](provenance/gpu_joint_repair_ancestry.json)。
 
-### 6.3 四输入通道 / 修复控制
+### 6.4 历史四输入通道 / 修复控制
 
 A 使用索引65/96/625/587，各三种子、默认与三个开关，共48点、115成功测量。选择发生于正式面板运行期间，不称未见集或完全预结果设计。
 
@@ -373,7 +436,7 @@ no-score 仍执行 Student/19D 准备，只屏蔽局部标量差；no-pairs 在�
 
 ## 7. 候选、Loss 与真实测量的逐项案例
 
-### 7.1 c1355：Loss 下降不保证真实 Delay 下降
+### 7.1 历史旧版c1355：Loss下降不保证真实Delay下降
 
 旧 O 的 `output/suite/case_0047/`：输入 `OpenABC/c1355_orig.aig`，41 PI/32 PO/512 AND、62 MFFC、128条Region边、91 Decisions、326 candidates；原图 SHA256 为 `2602b10f131a6ba5996521036ba130aab128a4aa15e3ab49ce44f2f02047f0b0`。初始/最终都为91个0；两目标最后均返回 no-op，CEC PASS，Delay=360.111877 ps、Area=513.216003。
 
@@ -398,7 +461,7 @@ no-score 仍执行 Student/19D 准备，只屏蔽局部标量差；no-pairs 在�
 
 同期30步校准用成功观察 `[0,1,3]`，loss 0.007882506→0.002957139。真实梯度候选有变化，但预测改善与实际相反。原图/no-op=360.111877、native ABC=359.501831、greedy=359.873505、独立Region=399.386475、同预算random=360.111877 ps。总比较运行含准备28.649s；area/joint exclusive记账7.739/8.410s，不是独立冷 E2E。后续 seed12 小预算入口确有337.477661ps的实际点，不能把本例负结果扩大成该设计永远不能改善；它不属于上述905运行或正式16面板。
 
-### 7.2 ss_pcm：跨两个 MFFC 的真实候选组合
+### 7.2 历史旧版ss_pcm：跨两个MFFC的真实候选组合
 
 旧 E 的 `output/suite/case_0080/`：`OpenABC/ss_pcm_orig.aig`，104 PI/90 PO/403 AND、97 MFFC、11 Decisions、31 candidates，3个MFFC有机会。初始均11个0；两模式各8请求，无失败，final均来自直接梯度 `eval_0003`：
 
@@ -431,9 +494,9 @@ joint final = [0,0,0,0,3,0,0,4,0,0,0]
 
 后续64976自适应正增益搜索得到2301.566650ps，28 rewrites的显式修复点；同轮非正增益自由搜索2396.672360ps更差。虽然固定配置probe曾得2288.404300ps，不能把固定probe最佳点当自由搜索结果或宣布安装政策优越。该轮c1355仍no-op，ss_pcm恢复323.908447ps。详见 [INSTALL_POLICY](docs/gpu_joint/INSTALL_POLICY.md)、GPU RUN_LOG；这些开发结果未混入正式16设计。
 
-### 7.4 新版大图轨迹：有梯度、下降与真实结果，但不等于可靠全局预测
+### 7.4 历史432点大图轨迹：有梯度与真实结果，不等于可靠全局预测
 
-F 的 `output/seed_20261111/adaptive_batch_auto/case_0096/`（ALU_mod）：5694 Decisions/12408 candidates。`gradients_0002.json` 为32轨迹×40步、CUDA、proposal seed=20261113；trajectory0的记录：
+F 的 `output/seed_20261111/adaptive_batch_auto/case_0096/gradient_area_constraint/`（ALU_mod）：5694 Decisions/12408 candidates。`gradients_0002.json` 为32轨迹×40步、CUDA、proposal seed=20261113；trajectory0的记录：
 
 | step | Qf | trust | conflict | Loss=Qf+0.05trust+0.1conflict | 梯度范数 |
 |---|---:|---:|---:|---:|---:|
@@ -444,6 +507,38 @@ F 的 `output/seed_20261111/adaptive_batch_auto/case_0096/`（ALU_mod）：5694 
 该seed最终为 `eval_0007`：484 rewrites跨441MFFC，来自失败梯度 `eval_0003` 的新修复请求；真实1583.211670ps/7502.984380，CEC PASS。三seed中位数1556.381230ps不是这个seed的数值。完整5694维向量与原root/cut/subgraph在该eval的 `observation.json`、`rewrite/choices.txt`；不能凭中位数虚构一个“代表组合”。
 
 另一正式例 ex27：seed11直接梯度587 rewrites跨226MFFC，CEC PASS、1254.321410ps/2223.391600；但三seed旧版中位1180.348390、random1171.958620、native ABC1087.577390ps，均更低。其局部 trajectory0 的Qf在step39降到−1.217123596，含惩罚loss为−0.769527368，说明局部排序近似可为负，绝不能解释为负delay或精确global预测。trace未保存每步完整logits/hard组合，不能编造全部候选变化序列。
+
+### 7.5 最新 MFFC c1355：完整全局梯度、选择变化与真实改善
+
+65239的 `output/case_0047_Ours/work/`。从91维全0开始，final是 `optimization/eval_0003`，非零项如下；未列出的Decision仍为0：
+
+```text
+decision_index:choice_index =
+13:3, 18:1, 22:1, 28:3, 33:1, 36:1, 46:2, 49:1, 58:2,
+62:1, 65:1, 66:1, 68:1, 78:1, 79:1, 80:1, 81:1, 85:1
+```
+
+这是候选域序号；真实 `(root,cut_slot,subgraph)` 在该eval的 `rewrite/choices.txt`，例如 `13:3→(160,4,2)`、`18:1→(197,2,0)`，不能将choice直接当subgraph。
+
+| 观察 | 启用Decision数 | 评估前预测global ps | 真实global ps | 代理J（本轮anchor → hard组合） |
+|---|---:|---:|---:|---|
+| no-op eval0 | 0 | — | 360.111877 | — |
+| 第1轮 eval1 | 16 | 347.709794 | 320.165070 | 1.067185055 → 1.030441716 |
+| 第1轮 eval2 | 8 | 347.709794 | 320.165070 | 1.067185055 → 1.032286322 |
+| 第2轮 eval3 | 18 | 317.036766 | 319.617096 | 0.970528291 → 0.957485565 |
+
+两轮梯度范数为0.055311159和0.318594856；每轮对417个有效候选/no-op坐标求导。第二轮之前，用已PASS观察 `[0,1,2]` 校准12步，训练loss为0.007359337→0.000982436。参数已变化，因此不同轮anchor J不可当作同一固定目标的连续收敛曲线。final的18个请求均精确ACCEPTED；CEC原文为 `Networks are equivalent.`，Liberty原始摘要为 `GT_META 520.214417 319.617096 32 398`。这是有真实收益的跨18个MFFC联合组合，不证明18者的协同收益大于分别优化之和，也没有本版本的去梯度对照。
+
+对应文件：`optimization/gradient_{00,01}.json`、`calibration_01.json`、`eval_0003/observation.json`、`eval_0003/rewrite/{choices.txt,replay.json,raw/traces/choice.jsonl}`、`eval_0003/evaluation/{cec.log,mapping.log}`。完整绝对run前缀见第8.3节N。
+
+### 7.6 最新版本的边界：代理与真实时序仍可不一致
+
+- **ss_pcm**：初始11维全0，final为 `[0,0,0,0,4,1,0,0,0,0,2]`，对应 `(279,3,3)`、`(293,2,0)`、`(504,3,12)`；3项完整接受/CEC PASS，真实350.016113→325.867493ps，但评估前预测global仍为350.016113ps。目标由全部PO平滑聚合，其他端点可驱动改动，不能把J下降等同于硬最大预测下降。12步校准loss 0.009355256→0.005974000，第二轮没有新合法组合。最终仍劣于B的319.565643ps。
+- **div**：no-op为76414.9844ps。第1轮16项联合块预测76412.4707，真实75760.1484ps；第2轮32项组合预测76410.9563、J为1.082940413→1.082905410，却真实恶化到79586.7656ps。所有项ACCEPTED/CEC PASS；因此这不是失败安装产生的伪反例。final保留第1轮，不能据best-so-far不升证明梯度方向可靠。
+- **hyp**：original1774327.75ps，序列化no-op1855694.62ps；候选best1855683.12ps仍不如原图，返回 `original_fallback`。GPU完整传播已运行，但没有最终delay收益。其12步校准loss从约6.92e−9升到1.08e−7，并非每次拟合都下降；训练loss本身也不代表预测泛化。
+- **DMA**：final为16项跨16MFFC，真实no-op2450.76538→2411.79272ps；此前预测global约2450.76529ps，主要没有预测出真实global变化幅度。final完整632维向量在65239的 `case_0000_Ours/work/summary.json:selected.choices`，准确tuple在 `optimization/eval_0001/rewrite/choices.txt`。
+
+最新六例的每个原始选择向量、被弃组合、预测及真实指标都在N/H各case的 `work/summary.json:observations`。hyp final是原图，choices为null；不能伪造一个等价的“原图候选向量”。mig final为空向量，表示根本没有可执行Decision。
 
 ## 8. 代码、命令、配置与原始证据索引
 
@@ -465,7 +560,11 @@ F 的 `output/seed_20261111/adaptive_batch_auto/case_0096/`（ALU_mod）：5694 
 | [controls.py](global_timing/controls.py)、[ablations.py](global_timing/ablations.py) | 自然成本baseline、score/pair/repair开关 |
 | [profile_single_method.py](scripts/profile_single_method.py)、[run_final_joint_panel.py](scripts/run_final_joint_panel.py) | 显式新版入口、独立冷child、正式输入/协议与方法记录 |
 | [run_benchmark_suite.py](scripts/run_benchmark_suite.py)、[summarize_final_joint.py](scripts/summarize_final_joint.py)、[run_joint_ablations.py](scripts/run_joint_ablations.py) | 原905分片、正式统计/审计、补充控制；本次均未执行 |
-| [mffc_gpu.py](global_timing/mffc_gpu.py)、[region_lse.cu](framework/mffc_gpu/region_lse.cu) | 当前未跟踪的设备队列草稿；非上述已验证算法的一部分 |
+| [mffc_experiment.py](global_timing/mffc_experiment.py:48)、[mffc_search.py](global_timing/mffc_search.py:15) | 最新Ours闭环、预算/真实best/校准；完整全局梯度与离散联合块，无logits内循环 |
+| [mffc_model.py](global_timing/mffc_model.py:12)、[mffc_gpu.py](global_timing/mffc_gpu.py:61)、[region_lse.cu](framework/mffc_gpu/region_lse.cu:61) | 12参数模型的CUDA张量聚合、原生依赖队列与一阶autograd |
+| [feasibility.py](global_timing/feasibility.py:9) | 候选级原结构复用/自引用预检、保守合法联合投影 |
+| [run_mffc905.py](scripts/run_mffc905.py:134)、[validate_mffc_loop.py](scripts/validate_mffc_loop.py:12) | 最新冷方法运行与开发核验；方法A/B/Ours、终态发布、原始命令/成本留存 |
+| [analyze_mffc905.py](scripts/analyze_mffc905.py)、[finalize_mffc905.py](scripts/finalize_mffc905.py) | 只读证据审计、汇总/绘图及安装/成本补充；不是优化器，也不产生新的EDA标签 |
 
 ### 8.2 实际运行配置与命令
 
@@ -483,6 +582,19 @@ F 的 `output/seed_20261111/adaptive_batch_auto/case_0096/`（ALU_mod）：5694 
 
 注意 `SearchConfig` 当前默认24请求/warmup6/gradient60/calibration80，不等于实际主实验参数。每轮proposal seed使用外层seed+iteration。随机/反馈/修复及重启可能使同seed不同算法走不同测量序列。
 
+最新MFFC使用独立的 `MffcSearchConfig` / [mffc905_protocol.json](config/mffc905_protocol.json)，不能继承上表的8请求、随机warmup或40步内循环：seed=20261114、4 replay请求含no-op/失败/repair、最多2轮×2提案、每轮最多16 edits、12步校准、area≤1.05×no-op、tool timeout900s、冷方法timeout1800s。候选方向更新本身没有随机采样；seed是运行配置记录，不能由单seed宣称统计稳定性。正式65245为4CPU/64GiB/1×RTX4090，固定eda，时限48h；计算float64、冻结Student float32，Torch/OMP/OpenBLAS/MKL各1线程、2个validation workers。A/B没有加载它们不使用的ML。
+
+校准损失（共同形式）为：
+
+\[
+L_{fit}=\operatorname{MSE}\left(\frac{\widehat T-T^{ABC}}{D_{ref}}\right)
++\operatorname{MSE}\left(\frac{\widehat A-A^{ABC}}{A_{ref}}\right)
++0.002\left[\operatorname{mean}\bigl((w_\ell-w_\ell^0)^2\bigr)+
+\operatorname{mean}(w_{int}^2)+\operatorname{mean}\bigl((w_A-w_A^0)^2\bigr)\right].
+\]
+
+Adam lr0.025、clip norm5；最新仅12步。这里只拟合更早PASS观察，不包含失败/部分安装标签或Student参数。[GPU校准](global_timing/mffc_model.py:37)、[CPU校准](global_timing/surrogate.py:365)。
+
 以下仅抄录已执行命令的变量化形式，**本次没有执行；旧输出目录不可用于重新运行**。完整展开argv在各run的 `input/command.json`、`job.slurm` 与子进程记录。
 
 ```bash
@@ -495,13 +607,23 @@ INVENTORY=/data/wushangge/CULS_LiteCut/runs/20261111T105821Z-benchmark-inventory
   --shard-count 2 --shard-index 0 --workers 4 --evaluations 8 --warmup 2 \
   --gradient-steps 20 --calibration-steps 30 --case-timeout 7200 --tool-timeout 900
 
-# 新正式 F，读自身冻结的 config/gpu_joint_final_protocol.json 与 gpu_joint_panel.json
+# 历史432点正式 F，读自身冻结的 config/gpu_joint_final_protocol.json 与 gpu_joint_panel.json
 RUN=/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3
 NEWTOOLS=/data/wushangge/CULS_LiteCut/runs/20261113T050552Z-replay-gain-policy-probe-1d5e6f0a
 LEGACY=/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2/src
 /home/share/process/anaconda3/bin/python -B "$RUN/src/scripts/run_final_joint_panel.py" \
   --run "$RUN" --tool-run "$NEWTOOLS" --legacy-tool-run "$TOOLS" --legacy-source "$LEGACY"
+
+# 最新正式65245中已经执行的主命令；仅供定位，不要对活run再次执行
+RUN=/data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db
+NATIVE=/data/wushangge/CULS_LiteCut/runs/20261113T182919Z-mffc-native-loop-validation-d928356f
+/home/share/process/anaconda3/bin/python -B "$RUN/src/scripts/run_mffc905.py" \
+  --run "$RUN" --manifest "$RUN/src/benchmark905_manifest.json" \
+  --tool-run "$NEWTOOLS" --native-build-run "$NATIVE" \
+  --protocol "$RUN/src/config/mffc905_protocol.json" --case-timeout 1800
 ```
+
+最新正式完整展开命令保存在Z的 `input/formal-command.json` 与 `run.json:command`；同一作业在全部方法点后才调用 `analyze_mffc905.py`，当前没有该后处理完成证据。65239的开发命令为 `validate_mffc_loop.py --run N --tool-run NEWTOOLS --manifest I/output/benchmark_manifest.json`，内部限定indices47,80,0；65240使用相同runner加 `--indices 20,22,587`，native build引用N。两者实际argv在各自 `run.json:command`，本次没有执行这些命令。
 
 原生真实验证固定为 `cec -n original.aig candidate.aig`（PI/PO位置契约），再 `read_lib asap7.lib; read_aiger candidate.aig; map; topo; stime -p; write_verilog mapped.v`，启用 `CULS_GLOBAL_TIMING_REPORT=1`。完整 `mapping.command.json/cec.command.json`、运行时间、错误与hash随各请求保存。
 
@@ -509,7 +631,7 @@ LEGACY=/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baselin
 
 ### 8.3 实际存在的证据目录
 
-下表所有目录的**共同绝对前缀为 `/data/wushangge/CULS_LiteCut/runs/`**；I/E/O/Q/T/P/F/S/A/D在正文只作路径别名，不是方法名。
+下表所有目录的**共同绝对前缀为 `/data/wushangge/CULS_LiteCut/runs/`**；字母在正文只作路径别名。旧控制run的A与最新三方法中的方法A是不同含义，不能混淆。
 
 | 别名 / 已有运行 | 实际目录名 | 关键文件 |
 |---|---|---|
@@ -525,12 +647,20 @@ LEGACY=/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baselin
 | S 正式独立后处理，64984 | `20261113T070050Z-frozen-joint-final-synthesis-f895a375` | `output/post_tests.json`、`final_synthesis/{statistics.json,method_points.csv,methods.csv,pairs.csv,audited_records.json,analysis_completion.json}` |
 | A 补充控制，65004 | `20261113T073402Z-channel-repair-ablation-c9634975` | `output/{ablation_tests.json,default_compatibility.json,smoke_audit.json,ablation_analysis/}` |
 | D 最终来源/阶段/图，65009 | `20261113T081810Z-joint-final-delivery-d22ea3ab` | `output/delivery/{source_groups.json,stage_summary.json,accounting.json,completion.json,figures/}` |
+| N 最新小中图开发，65239 | `20261113T182919Z-mffc-native-loop-validation-d928356f` | `output/mffc_gpu_tests.json`、`mffc_loop_validation.json`、`records/*.json`、`case_NNNN_METHOD/work/`；`build/mffc_gpu/build_report.json` |
+| H 最新深/宽/空域开发，65240 | `20261113T183438Z-mffc-deep-empty-validation-0eb1e760` | `output/records/`、`case_{0020,0022,0587}_Ours/work/{summary.json,optimization/}` |
+| V 最新开发独立审计，65241 | `20261113T184502Z-mffc-development-evidence-audit-b33d3b0f` | `output/result_tests.json`；两个 `development_<N或H目录名>/`，各有 `DEVELOPMENT_RESULTS.csv`、`DEVELOPMENT_SUMMARY.json`、`audited_records.json`、`analysis_completion.json`及PNG/PDF |
+| C 最新冻结门槛，65244 | `20261113T190558Z-mffc-freeze-gate-validation-8e9a544c` | `output/final_regressions.json`、`preflight_check.json`；41/41 PASS，905输入检查、methods_launched=0 |
+| Z 最新完整905，65245 | `20261113T191340Z-mffc-full905-frozen-6a45b8db` | `input/formal-command.json`、`run.json`、`logs/slurm-65245.{out,err}`、`output/records/`；**仍在运行，最终交付未形成** |
+| W 最新交付分析验证，65246 | `20261113T193807Z-mffc-delivery-validation-906a915b` | 4项统计测试及 `output/supplement_<N或H目录名>/delivery_completion.json`；formal=false，不是新EDA实验 |
 
 每个 `gradient_*/` 内：`calibration_*.json` 为训练loss，`gradients_*.json` 为优化轨迹，`summary.json`/`progress_*.json` 为真实best；`eval_NNNN/observation.json` 保留选择和评估前预测，`rewrite/choices.txt`/`replay.json`/`raw/traces/choice.jsonl` 保留精确安装证据，`evaluation/{cec.log,mapping.log,result.json,mapped.v}` 是真实标签。批量AIG/trace可能是指向同run共享原始输出的链接，不能删除共享目标。
 
 **同名目录的范围差异：** F 的 `output/panel_analysis/summary.json` 为432点/1119成功测量；S 的同名文件为26点/108成功开发测量，因为其 `run.json` 另行列出三个开发run的审计命令。正式后处理使用S的 `output/final_synthesis/`，其 `provenance.json:experiment_run` 明确指向F；不能将S的26点摘要当成正式432点审计。
 
-本次直接抽查了旧c1355/ss_pcm/DMA原始summary与轨迹，以及F的ALU_mod/ex27原始choices来源、CEC文本与GT_META；其余全覆盖数量引用已保存的审计终态，并未本次重跑13981份映射。F completion 为 `EXECUTED_AND_AUDITED`，S为 `ANALYSIS_COMPLETE`，A为 `EXECUTED_AND_AUDITED`，D为完成交付；不再沿用旧报告中的“正式面板未完成/控制尚无结果”。
+历史部分沿用同名报告已留证据的数值及Q/S/A/D审计；本次另外读取旧c1355、ss_pcm原始summary、旧c1355和F/ALU_mod梯度文件、Q配对统计以及F/S/A完成状态。全覆盖数量引用已保存的审计终态，并未本次重跑13981份映射。F completion 为 `EXECUTED_AND_AUDITED`，S为 `ANALYSIS_COMPLETE`，A为 `EXECUTED_AND_AUDITED`，D为完成交付；不再沿用旧报告中的“正式面板未完成/控制尚无结果”。
+
+最新部分逐项读取N/H的18个终态和六份Ours summary/梯度/校准记录，并核对V、C、W的既存测试/审计状态，抽查c1355最终choices、CEC与GT_META；没有重新执行这些测试或测量。原有报告保留的历史抽查与最新直接读取分开解释，不能把本次生成文档当作再次全库复现实验。
 
 ### 8.4 输入、模型、库与二进制身份
 
@@ -543,26 +673,29 @@ LEGACY=/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baselin
 | ABC | `20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc`（runs前缀） | `5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb` |
 | 旧gpuls | 同工具目录 `culs/gpuls` | `741990f3e8a9f270c0a9b3fa3a8889296f5c153749ad09bb91c83aeda59dda2e` |
 | 新gpuls | `20261113T050552Z-replay-gain-policy-probe-1d5e6f0a/build/framework_tools/culs/gpuls`（runs前缀） | `83d22440e2846054ea80e5c1cced97fefe8a25d51a499380d76225a9bb936776` |
+| 最新MFFC原生库 | `20261113T182919Z-mffc-native-loop-validation-d928356f/build/mffc_gpu/libmffc_region.so`（runs前缀） | `0e53c03c0d473a2d083e3db6f3062e837b408c0991a6b992a63e004bc9a771fa` |
 
 来源身份与实际引用匹配的已有核对：正式432点3120模块引用、两快照65个包/Student等文件；补充48点420模块引用、12个默认完整请求轨迹/成功指标。见 `provenance/gpu_joint_source_audit.json` 与 `gpu_joint_ablation_source_audit.json`。不同Python源码、原生工具和外层profiler的commit分别记录，不只报告当前HEAD。
 
-当前未跟踪草稿的读取SHA256为 `mffc_gpu.py:460ea5e20ccdbc1515aaa793b578ba49f786a5f08d69155baeb61c4e80cb334e`、`region_lse.cu:fa50445d09cba612680dcb14b5f91509bf63fd0cc18a528dbc2c8e3c90f70506`；仅用于识别本次看到的文件，不代表编译/运行通过。
+最新冻结的输入清单是 [benchmark905_manifest.json](benchmark905_manifest.json)，905个唯一输入，SHA256 `8c93bf7988c1707efd4b392663062eef651e9e679329f0056e802250671cf935`；附加的是既有结构/域元数据，不是供Ours免费读取的旧timing标签。`provenance/mffc_gpu_freeze_audit.json`记录47个运行源码与65244通过快照的逐字节一致性。原生库CUDA11.8/GCC11.4，`-O3`、sm80/86/89与compute80 PTX；C++源码SHA256为 `5003ca9f7133f4d27f230f1421cd2bdbccede8c436f0862e6c698a15e434d588`。源码/构建身份见N的 `build/mffc_gpu/build_report.json` 和Z的 `input/freeze_identity.json`。ABC实际构建默认OPTFLAGS是`-g -O`，不误写成原生CUDA库的`-O3`。
 
 ## 9. 当前有效性判断与距离研究目标的差距
 
 | 问题 | 按已有证据的判断 |
 |---|---|
-| 梯度能否正常计算、更新？ | **已实现且已验证**代理梯度、Adam、候选改变与CPU/CUDA数值一致；不是所有905输入都执行非平凡更新 |
-| 是否联合多个MFFC？ | **已验证**多MFFC精确安装能力与部分真实改善；ss_pcm跨2个，旧DMA跨13/56个，正式大图亦有多MFFC安装 |
-| Loss下降是否对应真实delay下降？ | **未建立，已有明确反例**；c1355预测下降而实际恶化，ss_pcm预测global不变而实际改善，旧905方向正确率约0.44–0.45 |
-| 梯度是否优于随机/贪心/native？ | **稳定优势未成立**；旧905与新16面板均保留较强随机/native结果，新正式梯度对random及no-inner整体不占优 |
-| 跨MFFC交互是否被准确学到？ | 有结构耦合实现、历史Gate3F有真实interaction；**当前模型的独立有效性未建立**，四设计去pair控制未支持默认收益 |
-| LiteCut是否确实提供收益？ | 推理接入与特征一致性已验证；**四设计标量通道收益未成立**，不能由恢复模型/局部准确性推断global贡献 |
-| 修复有无作用？ | 四设计控制支持实际质量收益；它是失败后的新测量请求，且既有梯度父请求也有warmup父请求，不全归梯度 |
-| GPU是否有效？ | 同算法27实际CUDA配对支持1.326246倍E2E中位加速；整体对旧版仅1.0355倍，未达1.5。完整MFFC DAG GPU新草稿**未验证** |
-| 是否收敛/泛化/论文性能已成立？ | **未验证**；best-so-far单调来自保留最优，单种子905/三seed16设计、相关输入和小预算不足以证明这些主张 |
+| 梯度能否正常计算、更新？ | **已实现且已验证**代理的一阶梯度与候选变化；最新CUDA队列有数值/参考证据，候选使用方向导数，Adam仅校准代理。无Decision输入不执行非平凡更新 |
+| 是否联合多个MFFC？ | **已验证**最新c1355跨18个、DMA跨16个，div同MFFC内有多个Decision；均完整ACCEPTED/CEC。不能由联合安装自动推出超加性协同收益 |
+| Loss下降是否对应真实delay下降？ | **未建立，已有明确反例**；最新div第二轮J下降而实际恶化，ss_pcm预测global不变而实际改善；旧905方向正确率约0.44–0.45。最新c1355正例不抵消反例 |
+| 梯度是否优于随机/贪心/native？ | **稳定优势未成立**；旧905和432点均保留较强random/native结果；最新六例有正负结果，最新905未完成、最新去梯度/random/greedy比较未验证 |
+| 跨MFFC交互是否被准确学到？ | 有结构耦合实现、历史Gate3F有真实interaction；**模型独立有效性未建立**。旧四设计去pair未支持默认收益，不能当最新版本的消融结果；初始交互权重为0，首次方向没有学得显式pair项 |
+| LiteCut是否确实提供收益？ | 推理接入与特征一致性已验证；旧四设计标量通道收益未成立，最新版本的独立贡献**未验证**。接入冻结模型不等于得到可靠global梯度 |
+| 修复有无作用？ | 旧四设计控制支持实际质量收益，且父请求并非全来自梯度。最新保留显式repair实现，六开发例无失败/修复，不能据这些例子证明新版修复贡献或通用零失败 |
+| GPU是否有效？ | 最新完整DAG前/反传播**已实现并验证可运行**，六开发例整体慢于A/B；最新同算法CPU/GPU完整因果加速**未验证**。旧432点的27个配对中位1.326246倍、相对旧STE整体1.0355倍，仅适用于其自身版本 |
+| 是否收敛/泛化/论文性能已成立？ | **未验证**；best-so-far单调来自保留最优；不同轮代理参数会变化。单种子905/三seed16设计、相关输入和有限预算不足以证明这些主张 |
 
-当前仍缺少、或尚未验证的能力是：可靠预测真实 remapping 后全PO时序与criticality变化；精确可微mapper或可微ABC链；完整动态候选复用/顺序冲突预判；实际重写后代理拓扑更新；唯一跨网表内部路径身份；AGD论文算法的严格复现；所有路径作为独立多目标的实现；新版完整905三方法实验；布局布线后signoff与未见设计泛化。`Smooth Tchebycheff` 已实现的是delay–area标量化，不能据此宣称全部研究路线均完成。
+**尚未实现**：精确可微mapper或对真实ABC链求导；每次实际改写后重建/更新代理DAG、端口与深度；全部独立PI→PO路径各自的优化目标；完整动态引用/顺序增益/新哈希冲突预测；跨网表唯一内部逻辑路径身份；AGD论文算法的严格复现。已实现的Smooth Tchebycheff是旧版delay–area标量化，最新实验使用面积约束模式，不能据此宣称全部研究路线均完成。
+
+**尚未验证或没有成立结论**：现有代理能可靠预测remapping后的全部PO/global及criticality变化；最新版本的全905三方法终态、稳定质量/时间取舍、梯度/LiteCut/显式交互的独立贡献；未见设计泛化。布局布线后signoff没有测量记录，不属于已实现的ABC验证闭环。上述是证据缺口，不是本次拟定的新框架或新实验计划。
 
 现有测量还显示序列化影响：旧905的original→no-op已有237设计改变代表PI/PO对，两种梯度final各430设计相对no-op改变代表对；这不等价于证明唯一逻辑critical path switching。Student精确历史训练数据/Teacher环境未恢复。正式整闭环GPU显存峰值未记录；K仅记录Torch组件活跃分配（例如div约1.10GB），Slurm MaxRSS不是显存，缺失不得填0。
 

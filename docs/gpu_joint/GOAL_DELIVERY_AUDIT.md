@@ -31,7 +31,7 @@
 
 - 正式实验：`/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3/`，源2257998，Slurm64983。
 - 后处理：`/data/wushangge/CULS_LiteCut/runs/20261113T070050Z-frozen-joint-final-synthesis-f895a375/`，源acdf988，Slurm64984，afterany:64983。
-- 补充控制：`/data/wushangge/CULS_LiteCut/runs/20261113T073402Z-channel-repair-ablation-c9634975/`，源db64308，Slurm65004，afterany:64984；实际产物应在`output/{ablation_tests.json,default_compatibility.json,smoke_audit.json,ablation_analysis/}`，尚待生成。
+- 补充控制：`/data/wushangge/CULS_LiteCut/runs/20261113T073402Z-channel-repair-ablation-c9634975/`，源db64308，Slurm65004；`output/{ablation_tests.json,default_compatibility.json,smoke_audit.json}`已实际生成并检查，最终`ablation_analysis/`仍待48方法点完成。
 - 最终汇总/显示修正：`/data/wushangge/CULS_LiteCut/runs/20261113T081810Z-joint-final-delivery-d22ea3ab/`，源1994e57，Slurm65009，afterany:65004；`output/delivery/`仅消费已完成原始审计产物，不执行EDA/模型。尚待实际生成及人工检查，不能凭代码记完成。
 - 正式原始审计/覆盖应在前者`output/{final_panel_completion.json,panel_analysis/}`；新来源核对、统计测试、中文报告与图应在后者`output/{post_tests.json,panel_analysis/,final_synthesis/}`。这些是预期路径；须在实际生成后核验，缺失不能补造。
 

@@ -53,6 +53,30 @@
 
 6 个配对的最终候选向量及排序均一致。该证据支持新近似提案器内的单电路 GPU 并行计算收益，**不支持整个优化闭环也快 6–10 倍**；CUDA context 在作业内共享，首次调用/缓存成本与后续调用不同，少量重复不是严谨分布估计。hyp 的一次 adjoint 约 2.45–3.26 s，占调用较多，说明剩余 CPU 部分限制加速。原始 JSON 入口为 `output/kernel_summary.json` 及各 `kernel_case_NNNN.json`；每项保留实际代理输入文件哈希，校准数据不能用作新方法的在线免费历史标签。
 
+## 稀疏传输/投影版本
+
+`20261113T035458Z-joint-sparse-validation-d7e72b17`，Slurm **64931**，源码 **f209a70**，COMPLETED/0:0，**27/27 PASS**，含 sparse hard-value 与 dense one-hot 数值对照。
+
+`20261113T035708Z-joint-sparse-cpu-cuda-a65c4ca7`，Slurm **64932**，源码 **f209a70**。RTX4090/eda，同工作量 32×40，三例各 1 个配对；`output/kernel_summary.json` 的 CPU/CUDA 顺序一致与旧版选择哈希一致两项均为 true。旧版和本版代理输入文件哈希严格相同：
+
+| 输入 | CPU 调用 s | CUDA 调用 s | 比值 | CUDA adjoint / 内层 / CPU合法投影 s |
+|---|---:|---:|---:|---|
+| div | 96.932 | 3.513 | 27.589 | 0.969 / 0.596 / 0.452 |
+| hyp | 4.362 | 2.564 | 1.701 | 2.445 / 0.086 / 0.010 |
+| voter | 4.227 | 0.184 | 23.034 | 0.030 / 0.053 / 0.054 |
+
+稀疏传回与投影索引复用降低了大变量数时的非 GPU 开销，保存的选择没有改变。div 的第一次 CUDA 初始化/传输仍占 1.443 s；hyp 受 CPU adjoint 限制。这里只是组件和一次配对，未建立对应端到端加速，更没有新 QoR 结论。64932 前段与原生构建共存，计时仍是诊断范围。
+
+## 原生命令内枚举复用的构建与回归
+
+`20261113T040333Z-prepared-replay-build-499f58ff`，Slurm **64933**，源码 **b30bdaa**。CMake Release 编译和链接完成，但回归入口失败：新测试夹具把类属性命名为 `run`，覆盖了 `unittest.TestCase.run`，导致 `TypeError: PosixPath object is not callable`，**测试没有实际执行，不能记为 PASS**。原始失败目录保留。
+
+已在后续源码中改为 `run_root`。重新验证使用新 committed-source 目录；构建入口允许在精确比较全部 CULS 源文件哈希后复用已编译二进制，明确只复用编译，不改变原作业失败状态。原生命令能力的契约见 [PREPARED_REPLAY.md](PREPARED_REPLAY.md)，尚不能据编译成功宣称执行语义或加速已验证。
+
+## 后续计时证据的格式
+
+`profile_single_method.py` 新增独立 `case_NNNN_timeline.json`，记录真实请求完成时的 monotonic 时间、来源和已验证 delay/area。父进程记录子进程启动时间，供相同时间截点与 time-to-quality 统计使用；不从文件 mtime 推断，也不回写上述旧 run。旧诊断 run 没有这些结构化时间戳，只能引用其总 wall 和工具计时，不能补造 30/120/600 秒处曲线。
+
 ## 冻结评价面板
 
 [config/gpu_joint_panel.json](../../config/gpu_joint_panel.json) 固定 16 个输入与种子 20261111/12/13；生成器为 [freeze_joint_panel.py](../../scripts/freeze_joint_panel.py)。只使用冻结输入清单的 AND 规模、来源、文件名家族和 SHA，不查看候选数、delay 或运行时间。排除开发家族，四个区间各选 4 项：128–4095、4096–8191、8192–16383、16384–50000 AND。第一区间原拟分成 128–511 与 512–4095，但输入清单前者只有两个设计且一个属于开发集，因此在成功生成/冻结之前合并，仍未使用结果信息。

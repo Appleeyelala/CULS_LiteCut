@@ -14,14 +14,14 @@ from global_timing.structure import make_partition, parse_aig
 class PreparedReplayTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.run = Path(os.environ['CULS_TEST_RUN'])
-        cls.work = cls.run / 'output' / ('prepared-replay-' + uuid.uuid4().hex[:8])
+        cls.run_root = Path(os.environ['CULS_TEST_RUN'])
+        cls.work = cls.run_root / 'output' / ('prepared-replay-' + uuid.uuid4().hex[:8])
         cls.work.mkdir()
-        cls.aig = cls.run / 'input/design.aig'
+        cls.aig = cls.run_root / 'input/design.aig'
         cls.gpuls = Path(os.environ['CULS_TEST_GPULS'])
         partition = make_partition(parse_aig(cls.aig))
         partition.write(cls.work / 'partition')
-        cls.evaluator = Evaluator(Path(os.environ['CULS_TEST_ABC']), cls.run / 'input/asap7', cls.aig)
+        cls.evaluator = Evaluator(Path(os.environ['CULS_TEST_ABC']), cls.run_root / 'input/asap7', cls.aig)
 
     def replay(self, config, label, prepared, gpuls=None):
         raw = self.work / label

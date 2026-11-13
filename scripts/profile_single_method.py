@@ -33,17 +33,31 @@ def run_case(args):
         raise ValueError('Profile output must stay inside its run.')
     work = output / f'case_{row["index"]:04d}'
     stages = defaultdict(lambda: {'calls': 0, 'inclusive_s': 0.0})
+    timeline = []
 
     def instrument(owner, name, label):
         original = getattr(owner, name)
 
         def wrapped(*items, **kw):
             started = time.perf_counter()
+            result = None
             try:
-                return original(*items, **kw)
+                result = original(*items, **kw)
+                return result
             finally:
+                completed = time.perf_counter()
                 stages[label]['calls'] += 1
-                stages[label]['inclusive_s'] += time.perf_counter() - started
+                stages[label]['inclusive_s'] += completed - started
+                event = {'stage': label, 'started_monotonic': started,
+                         'completed_monotonic': completed, 'elapsed_s': completed - started}
+                if label == 'request_replay_and_validation' and isinstance(result, dict):
+                    event.update(kind='request_completed', index=result['index'], method=result['method'],
+                                 status=result['status'],
+                                 source=(result.get('prediction_before_evaluation') or {}).get('source', 'replay_noop'))
+                    if result.get('metrics'):
+                        event['metrics'] = {k: result['metrics'][k] for k in
+                                            ['cec', 'timing_model', 'delay_ps', 'area']}
+                timeline.append(event)
         setattr(owner, name, wrapped)
 
     for name in ['parse_aig', 'make_partition', 'enumerate_candidates',
@@ -113,6 +127,13 @@ def run_case(args):
     finally:
         record['cold_child_wall_s'] = time.perf_counter() - ENTRY_TIME
         record['stages'] = dict(stages)
+        record['clock'] = dict(time.get_clock_info('perf_counter').__dict__)
+        record['script_entry_monotonic'] = ENTRY_TIME
+        timeline_path = output / f'case_{row["index"]:04d}_timeline.json'
+        save_json(timeline_path, {'clock': record['clock'], 'script_entry_monotonic': ENTRY_TIME,
+                                 'events': timeline, 'scope': 'Completion times, not inferred from file mtimes. Parent subprocess start supplies the cold-process origin; nested stages overlap.'})
+        record['timeline'] = str(timeline_path)
+        record['timeline_sha256'] = digest(timeline_path)
         record['timing_scope'] = ('Stage values are inclusive and overlap; do not sum them. '
                                   'The parent records full subprocess wall time including interpreter startup. '
                                   'The deployment baseline excludes separately evaluated controls, equally for future variants.')
@@ -214,6 +235,7 @@ def main():
                     process.wait()
             record = {'index': row['index'], 'input_name': row['relative_path'], 'variant': variant,
                       'command': command, 'returncode': process.returncode,
+                      'subprocess_started_monotonic': started,
                       'full_process_wall_s': time.perf_counter() - started, 'log': str(log)}
             path = base / f'case_{row["index"]:04d}_profile.json'
             if path.exists():

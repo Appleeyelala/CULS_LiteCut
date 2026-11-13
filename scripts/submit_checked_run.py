@@ -39,6 +39,7 @@ def main():
     parser.add_argument('--gpus', type=int, default=0)
     parser.add_argument('--walltime', required=True)
     parser.add_argument('--job-name', required=True)
+    parser.add_argument('--nodelist', help='Optional single inspected host for consistent hardware across a suite/resume.')
     parser.add_argument('--afterany-job', help='Optional existing own job; run only after it reaches any terminal state.')
     args = parser.parse_args()
     run = args.run.resolve()
@@ -50,6 +51,8 @@ def main():
         parser.error('A finite positive HH:MM:SS walltime is required.')
     if not re.fullmatch(r'[A-Za-z0-9_-]+', args.job_name):
         parser.error('Use a simple job name.')
+    if args.nodelist and not re.fullmatch(r'[A-Za-z0-9_-]+', args.nodelist):
+        parser.error('Select one simple node name, not an unchecked host expression.')
     if args.afterany_job is not None and not re.fullmatch(r'[1-9][0-9]*', args.afterany_job):
         parser.error('Dependency must be an existing numeric Slurm job ID.')
     metadata_path = run / 'run.json'
@@ -66,6 +69,11 @@ def main():
     cluster = {'sinfo': output('sinfo', '-o', '%P %a %l %D %G'),
                'partition': output('scontrol', 'show', 'partition', args.partition),
                'queue': output('squeue', '-r', '-h', '-u', username, '-o', '%i')}
+    if args.nodelist:
+        nodes = output('sinfo', '-h', '-N', '-p', args.partition, '-o', '%N')
+        if args.nodelist not in nodes.split():
+            parser.error('Requested host is not in the inspected partition.')
+        cluster['selected_node'] = output('scontrol', 'show', 'node', args.nodelist)
     if args.afterany_job:
         cluster['dependency_job'] = output('scontrol', 'show', 'job', '-o', args.afterany_job)
         owner = re.search(r'\bUserId=([^\s(]+)\(', cluster['dependency_job'])
@@ -84,7 +92,7 @@ def main():
         with (run / 'input' / filename).open('x') as stream:
             json.dump(value, stream, indent=2)
     metadata.update(command=command, resources={'partition': args.partition, 'cpus_per_task': args.cpus,
-        'memory_gib': args.memory_gib, 'gpus': args.gpus, 'walltime': args.walltime})
+        'memory_gib': args.memory_gib, 'gpus': args.gpus, 'walltime': args.walltime, 'nodelist': args.nodelist})
     metadata['slurm_dependency'] = {'type': 'afterany', 'job_id': args.afterany_job} if args.afterany_job else None
     metadata_path.write_text(json.dumps(metadata, indent=2) + '\n')
     lines = ['#!/bin/bash', '#SBATCH --job-name=' + args.job_name, '#SBATCH --partition=' + args.partition,
@@ -94,6 +102,8 @@ def main():
              '#SBATCH --export=NONE']
     if args.gpus:
         lines.append(f'#SBATCH --gres=gpu:{args.gpus}')
+    if args.nodelist:
+        lines.append('#SBATCH --nodelist=' + args.nodelist)
     if args.afterany_job:
         lines.append('#SBATCH --dependency=afterany:' + args.afterany_job)
     lines += ['set -Eeuo pipefail',

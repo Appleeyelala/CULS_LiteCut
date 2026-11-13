@@ -134,6 +134,7 @@ class MffcExperiment:
         fitted = [0]
         while self.model is not None and len(observations) < self.config.evaluation_budget:
             remaining = self.config.evaluation_budget - len(observations)
+            pending = [p for p in pending if tuple(p['choices']) not in seen]
             if pending:
                 candidates, pending = pending[:remaining], pending[remaining:]
             elif round_index < self.config.gradient_rounds:

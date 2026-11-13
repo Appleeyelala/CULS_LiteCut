@@ -26,5 +26,6 @@
 - 冻结16输入×3seed×9方法的正式比较已提交为Slurm64983，数据目录`/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3`，快照2257998/tag gpu-joint-evaluation-freeze-20261113。完成情况尚待sacct及最终覆盖/原始审计，不将提交当作结果。自然成本口径见[BASELINE_PROTOCOL.md](BASELINE_PROTOCOL.md)。
 - 竞争性整体QoR、稳定低runtime、梯度独立价值和最终Delay–Runtime比较尚未建立；完整五项交付尚未完成。
 - 后处理工具已在独立快照acdf988准备，Slurm64984依赖afterany:64983，当前PENDING/Dependency；正式运行结束后才执行统计/来源/原始数据复核与PNG/PDF导出，不干扰正式计时。其测试与结果尚未发生，完整交付检查见[GOAL_DELIVERY_AUDIT.md](GOAL_DELIVERY_AUDIT.md)。
+- 按目标的贡献分离要求，补充四设计×三seed×四配置的LiteCut标量/显式pair/修复控制已实现并提交65004，依赖afterany:64984；默认行为先与冻结2257998同分配真实对照，主面板保持原样。实际验证与贡献结论仍待发生，详见[CHANNEL_ABLATIONS.md](CHANNEL_ABLATIONS.md)。
 
 具体源码/数学见[IMPLEMENTATION.md](IMPLEMENTATION.md)、[ADAPTIVE_SELECTOR.md](ADAPTIVE_SELECTOR.md)；所有路径、失败与实际数值见[RUN_LOG.md](RUN_LOG.md)。主报告是7e5bbc1记录的阅读截点，后续新实现和实验在本目录继续追加，不回写旧905证据。

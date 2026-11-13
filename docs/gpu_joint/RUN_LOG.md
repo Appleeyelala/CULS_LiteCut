@@ -109,6 +109,12 @@ batch 将 DMA/c1355 的实际 replay 命令从 8 减至 5，ss_pcm 从 8 减至 
 
 ### 最终面板提交与原始审计完成
 
+补充贡献控制已准备为 **`20261113T073402Z-channel-repair-ablation-c9634975`**，源码 **db64308**，Slurm **65004**，2 CPU/16GiB/1GPU、2h有限墙钟，依赖 **afterany:64984**。因此主正式计时与其后处理完成后才开始，不与64983/64984并发。提交时三个RUNNING+PENDING任务共6 CPU/56GiB/2GPU，仍在用户上限内；未取消、重启或改动两个既有作业。
+
+用户研究说明要求区分LiteCut/显式交互/修复。按原冻结面板每个AND区间的第一行固定65/96/625/587，三个原seed、默认+no-score/no-pairs/no-repair，共48方法点；选择时主面板在运行，未查看指标来选择补充输入，且不把它冒称为完全预结果选择。协议在 `config/gpu_joint_ablation_protocol.json`，作用与边界见[CHANNEL_ABLATIONS.md](CHANNEL_ABLATIONS.md)。
+
+该job先运行新开关与默认数值回归，再用新建 `20261113T073404Z-ablation-real-smoke-3c7df183` 和 `20261113T073406Z-ablation-default-reference-bd1bb4e0` 进行同分配c1355四请求的当前默认/冻结2257998真实对照，并验证三个开关；这些标签不进入研究反馈。兼容检查不通过就停止，不自动改写参考结果。随后才执行48点及逐点原始审计。当前仅静态语法/元数据规则检查，实际测试和贡献结果仍未发生。
+
 后处理已独立准备为 **`20261113T070050Z-frozen-joint-final-synthesis-f895a375`**，源码 **acdf988**，Slurm **64984**，2 CPU/8GiB/无GPU，有限45m，依赖 **afterany:64983**。提交时确认64983仍RUNNING、64984为PENDING/Dependency；累计RUNNING+PENDING请求4 CPU/40GiB/1GPU，未干扰主实验计时。此任务只做统计fixture、开发证据回归、正式原始证据复核、表格/中文报告与PNG/PDF图；不运行EDA或模型，且不改写正式快照。
 
 新分析工具区分外层运行commit与实际旧源码import commit，并核对原生ABC/CULS命令、工具与模型hash；严格记录相同工作量/请求的GPU配对，CPU分支不计GPU贡献。完整来源见[FINAL_ANALYSIS_CONTRACT.md](FINAL_ANALYSIS_CONTRACT.md)。测试和图表尚待任务实际执行，提交与语法检查不是PASS证据；若64983失败，afterany也不会伪造有效最终数据，而应停止并保留失败原因。逐项完成审查在[GOAL_DELIVERY_AUDIT.md](GOAL_DELIVERY_AUDIT.md)，当前仍未完成。

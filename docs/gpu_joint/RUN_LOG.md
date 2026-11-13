@@ -107,6 +107,14 @@ batch 将 DMA/c1355 的实际 replay 命令从 8 减至 5，ss_pcm 从 8 减至 
 
 ### 独立自然成本基线与回归
 
+### 最终面板提交与原始审计完成
+
+`20261113T062030Z-complete-developer-audit-2d3f409e`，Slurm **64982**，源码 **2257998**，2 CPU/4GiB/无GPU，COMPLETED/0:0，24s。上述64976/64978/64980合计26方法点、108成功测量均通过完整原始审计。`output/panel_analysis/comparisons.json` 保存div实际CUDA/CPU全请求一致性和同分配E2E比值；未将它计作更好的QoR或稳定总体速度分布。
+
+最终运行 **`20261113T062048Z-frozen-joint-final-panel-b9c390b3`**，Slurm **64983**，已按前瞻协议提交，源码 **22579982d22d741d47600a6406b09f00f4a4b46b**，本地tag **gpu-joint-evaluation-freeze-20261113**。请求2 CPU、32GiB、1GPU、Compute、12h有限墙钟，提交时无其他本用户RUNNING/PENDING请求，总额仍在64 CPU/256GiB/2GPU内；任务为16输入×3种子×9方法共432冷child，顺序执行而非多benchmark吞吐。
+
+此记录仅代表提交，不代表完成或已取得优势。权威状态需检查该job的squeue/sacct与run.json；精确命令/集群检查在 `input/{requested_command.json,command.json,submission.json}`、`job.slurm`。预检/最终覆盖/实际配置/逐点原始审计由 `scripts/run_final_joint_panel.py` 强制，成功后应生成 `output/final_panel_completion.json` 和 `output/panel_analysis/`。未生成或审计失败时不得以意图、部分目录或旧测试替代最终结果。
+
 最终入口验证 `20261113T061111Z-final-entry-validation-3cdd96be`，Slurm **64981**，源码 **7087364**，2 CPU/12GiB/1GPU，COMPLETED/0:0，51s。`output/entry_tests.json` **36/36 PASS**，含新增3项no-inner更新的无Adam/backward与CPU/CUDA一致性检查；随后c1355的2seed×4方法8个冷进程全部PASS，22次成功测量完整原始审计。初始化控制的请求没有误标梯度，未生成不存在的梯度范数；同seed各方法数据/候选/库/ABC和面积参考一致；多seed输出及cache相互隔离，没有覆盖既有文件。
 
 冻结最终协议为 `config/gpu_joint_final_protocol.json`，主面板sha不变，16输入×3seed×9方法共432个冷child：旧CPU、adaptive CPU/auto、no-inner控制、自然成本random/greedy/original/native ABC/native CULS。主方法默认正增益，8逻辑请求和原评价阈值不变，prospective协议不是已经执行的结果。新入口 `scripts/run_final_joint_panel.py` 提交前核对精确面板/清单/输入hash，运行后核对完整覆盖并逐点审计，显式保留失败；不因少数开发案例调整主面板或评价阈值。

@@ -21,9 +21,9 @@
 
 ## 当前待验证与交付边界
 
-- Slurm64980正在执行大图ACE/div同算法CPU/CUDA完整八请求闭环，包含全部准备、真实安装/CEC/mapping；终态与结果尚待核对，不预言端到端收益。
-- 新增初始化不更新控制只关闭内层backward/Adam，仍保留既有校准/大图adjoint；不是全无梯度方法，尚待回归与真实验证。说明见[INNER_UPDATE_CONTROL.md](INNER_UPDATE_CONTROL.md)。
-- 多种子冷进程入口与前瞻最终协议已写入，固定面板16输入×3seed未执行。主方法、强基线、CPU/auto及内层更新控制将同分配顺序比较；自然成本口径见[BASELINE_PROTOCOL.md](BASELINE_PROTOCOL.md)。
+- Slurm64980已完成大图ACE/div完整CPU/CUDA配对：327.206/169.602s，约1.929倍，八请求向量/状态/成功指标一致；最终都返回no-op，没有QoR改善。64982随后完成26开发/基线方法点的108成功测量完整原始审计。
+- 初始化不更新控制只关闭内层backward/Adam，仍保留既有校准/大图adjoint；不是全无梯度方法。64981为36/36回归PASS，2seed×4方法8个真实冷child及22个成功测量审计PASS。说明见[INNER_UPDATE_CONTROL.md](INNER_UPDATE_CONTROL.md)。
+- 冻结16输入×3seed×9方法的正式比较已提交为Slurm64983，数据目录`/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3`，快照2257998/tag gpu-joint-evaluation-freeze-20261113。完成情况尚待sacct及最终覆盖/原始审计，不将提交当作结果。自然成本口径见[BASELINE_PROTOCOL.md](BASELINE_PROTOCOL.md)。
 - 竞争性整体QoR、稳定低runtime、梯度独立价值和最终Delay–Runtime比较尚未建立；完整五项交付尚未完成。
 
 具体源码/数学见[IMPLEMENTATION.md](IMPLEMENTATION.md)、[ADAPTIVE_SELECTOR.md](ADAPTIVE_SELECTOR.md)；所有路径、失败与实际数值见[RUN_LOG.md](RUN_LOG.md)。主报告是7e5bbc1记录的阅读截点，后续新实现和实验在本目录继续追加，不回写旧905证据。

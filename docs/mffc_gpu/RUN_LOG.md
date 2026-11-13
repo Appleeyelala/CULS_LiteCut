@@ -31,3 +31,9 @@
 目录：`/data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db`。`input/{formal-command.json,freeze_identity.json,submission.json,mffc905_preflight.json,session_65245.json}`保存真实命令、冻结身份、资源核验和设备；`output/records/`逐点独占原子发布终态，原始文件在`output/case_NNNN_A|B|Ours/`。脚本完成所有905×3点后自动执行同快照的原始证据审计、统计与图表，输出`output/benchmark905_delivery/`。
 
 当前只有部分方法点终态，不能宣布905完成或给出总体改善。以实时Slurm和`output/formal_completion.json`、`benchmark905_delivery/analysis_completion.json`及精确2715终态覆盖共同判定，不能以本条RUNNING记录代替最终证明。不得重提交仍在运行的65245，已完成点不挑最佳重跑。最终需将完整CSV/JSON/中文报告的小型交付文件放到仓库规定名称，保留所有原始失败、超时及真实runtime。
+
+## 冻结后的纯交付分析
+
+65246（源adc877a，`20261113T193807Z-mffc-delivery-validation-906a915b`）已COMPLETED/0:0、3s。四项安装/部分工作/丢失时钟/取舍分母测试通过；分别对两批已审计开发9点生成补充CSV/JSON/中文报告，保留原始比较统计不变，并核对每例实际资产hash。没有启动新的EDA或模型。输出在`output/supplement_<开发实验名>/`，明确`formal=false`，不计入正式905。
+
+新增 `scripts/finalize_mffc905.py` / `global_timing/mffc_delivery.py` 只补全规定的安装成功/失败、修复成本、DAG形状与具名取舍，冻结算法/data源码不变。正式交付门槛和待核验项见 [DELIVERY_AUDIT.md](DELIVERY_AUDIT.md)。

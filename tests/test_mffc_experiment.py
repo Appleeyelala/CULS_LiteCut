@@ -36,6 +36,7 @@ class FeedbackControlTests(unittest.TestCase):
         obj.original = {'area': 11., 'delay_ps': 100., 'po_arrivals_ps': [60., 100.]}
         obj.aig = Path('unit_fixture_original.aig')
         obj.stages, obj.native_profiles = [], []
+        obj.structure_meta = {'regions': len(obj.partition.regions), 'region_edges': len(obj.partition.edges)}
         obj.backend = {'device': 'cpu', 'reason': 'Analytical control-flow fixture.'}
         return obj
 

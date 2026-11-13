@@ -13,6 +13,16 @@ spec.loader.exec_module(driver)
 
 
 class ResumeTests(unittest.TestCase):
+    def test_terminal_json_publication_is_exclusive_and_preserves_existing_bytes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'record.json'
+            driver.save(path, {'status': 'PASS'})
+            original = path.read_bytes()
+            with self.assertRaises(FileExistsError):
+                driver.save(path, {'status': 'FAIL'})
+            self.assertEqual(path.read_bytes(), original)
+            self.assertEqual(list(path.parent.glob('*.partial')), [])
+
     def test_live_job_rejected_and_terminal_incomplete_attempt_not_rerun(self):
         with tempfile.TemporaryDirectory() as directory:
             outer = Path(directory)

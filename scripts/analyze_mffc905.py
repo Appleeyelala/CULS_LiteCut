@@ -125,14 +125,50 @@ def main():
                   'pi_count': input_row['pi_count'], 'po_count': input_row['po_count'], 'detail_path': str(work),
                   'delay_ps': None, 'area': None, 'cec': None, 'final_source': None, 'area_feasible': None}
         commands, seconds = Counter(), Counter()
+        incomplete_command_files = []
         for command_path in work.rglob('*.command.json'):
-            command = read(command_path)
+            try:
+                command = read(command_path)
+            except (ValueError, OSError):
+                if point['status'] == 'PASS':
+                    raise
+                incomplete_command_files.append(str(command_path))
+                continue
             category = command_path.name.removesuffix('.command.json')
             commands[category] += 1
             seconds[category] += command['elapsed_s']
         record.update(cec_commands=commands['cec'], mapping_commands=commands['mapping'], replay_commands=commands['rewrite'],
                       abc_native_rewrite_commands=commands['native_rewrite'],
-                      tool_seconds_inclusive=dict(seconds))
+                      tool_seconds_inclusive=dict(seconds), unreadable_partial_command_files=incomplete_command_files)
+        if point['method'] == 'Ours':
+            request_dirs = list((work / 'replay_noop').glob('eval_*')) + list((work / 'optimization').glob('eval_*'))
+            request_rows = []
+            for directory in request_dirs:
+                try:
+                    request_rows.append(read(directory / 'observation.json'))
+                except (ValueError, OSError):
+                    if point['status'] == 'PASS':
+                        raise
+            record.update(requests_including_noop_failed_repair=len(request_dirs),
+                          incomplete_internal_requests=len(request_dirs) - len(request_rows),
+                          failed_requests=sum(o['status'] == 'FAIL' for o in request_rows),
+                          repair_requests=sum((o.get('prediction_before_evaluation') or {}).get('source') == 'explicit_feasibility_repair' for o in request_rows))
+            meta = work / 'structure_meta.json'
+            if meta.exists():
+                try:
+                    record.update(read(meta))
+                except (ValueError, OSError):
+                    if point['status'] == 'PASS':
+                        raise
+            anchor = next((o for o in request_rows if o['index'] == 0 and o['status'] == 'PASS'), None)
+            if anchor:
+                record.update(noop_area=anchor['metrics']['area'], noop_delay_ps=anchor['metrics']['delay_ps'])
+            if point['status'] != 'PASS':
+                try:
+                    decisions = read(work / 'cut_validation/verified_catalogue.json')['decisions']
+                    record.update(decisions=len(decisions), candidates=sum(d['candidate_count'] for d in decisions))
+                except (ValueError, OSError):
+                    pass  # Actual candidate counts stay unknown, never zero-filled.
         if point['status'] == 'PASS':
             result = read(point['result_path'])
             if result['tools'] != preflight['tools'] or result['source_commit'] != preflight['source_commit']:
@@ -199,7 +235,7 @@ def main():
     with (output / (prefix + '_RESULTS.csv')).open('x', newline='') as stream:
         writer = csv.DictWriter(stream, fieldnames=fields)
         writer.writeheader()
-        writer.writerows({k: json.dumps(v, sort_keys=True) if isinstance(v, dict) else v for k, v in r.items()}
+        writer.writerows({k: json.dumps(v, sort_keys=True) if isinstance(v, (dict, list)) else v for k, v in r.items()}
                          for r in records)
     save_json(output / (prefix + '_SUMMARY.json'), summary)
     save_json(output / 'audited_records.json', records)

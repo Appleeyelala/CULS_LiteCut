@@ -96,6 +96,7 @@ def write_report(output, prefix, records, summary):
     for name, data in summary['methods']['Ours']['inclusive_stages_s'].items():
         lines.append(f"| {name} | {data['n']} | {number(data['median'])} | {number(data['p90'])} | {number(data['sum'])} |")
     lines += ['', '阶段和工具调用可嵌套/并发，不能相加当完整wall或直接换算独占百分比。整批本次driver elapsed为' + number(summary['suite_completion']['session_elapsed_s']) + 's；与单电路cold latency分开。断点多session的总elapsed需结合各Slurm记录。', '',
+              '已中断且无完整观察的内部请求：' + str({m: d['incomplete_internal_requests'] for m, d in summary['methods'].items()}) + '；损坏/不完整的失败命令文件：' + str({m: d['unreadable_partial_command_files'] for m, d in summary['methods'].items()}) + '。这些保持显式缺失，不补造成成功或零成本。', '',
               '## 图与完整数据', '']
     for name in ['delay_relative_A_B', 'runtime_relative_A_B', 'quality_runtime_by_size']:
         lines += [f'![{name}](figures/{name}.png)', '', f'[导出PDF](figures/{name}.pdf)', '']

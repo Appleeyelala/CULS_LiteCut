@@ -10,6 +10,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 import traceback
 
@@ -28,8 +29,17 @@ def sha(path):
 
 def save(path, data):
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open('x') as stream:
-        json.dump(data, stream, indent=2, allow_nan=False)
+    # A crash may leave an unlinked .partial file, never a half terminal JSON.
+    # Hard-link publication preserves exclusive creation without overwrites.
+    descriptor, temporary = tempfile.mkstemp(prefix='.' + path.name + '-', suffix='.partial', dir=path.parent)
+    try:
+        with os.fdopen(descriptor, 'w') as stream:
+            json.dump(data, stream, indent=2, allow_nan=False)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.link(temporary, path)
+    finally:
+        Path(temporary).unlink(missing_ok=True)
 
 
 def recover_point(outer, row, method, source_commit):

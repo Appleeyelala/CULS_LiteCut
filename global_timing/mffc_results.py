@@ -103,6 +103,8 @@ def summarize(records, protocol):
             'replay_commands': sum(r.get('replay_commands', 0) for r in rows),
             'failed_requests': sum(r.get('failed_requests', 0) or 0 for r in rows),
             'repair_requests': sum(r.get('repair_requests', 0) or 0 for r in rows)}
+        methods[method]['incomplete_internal_requests'] = sum(r.get('incomplete_internal_requests', 0) for r in rows)
+        methods[method]['unreadable_partial_command_files'] = sum(len(r.get('unreadable_partial_command_files', [])) for r in rows)
     return {'designs': len({r['index'] for r in records}), 'method_points': len(records), 'methods': methods,
             'comparisons': comparisons,
             'known_no_candidate_designs': len({r['index'] for r in records if r['method'] == 'Ours' and r.get('decisions') == 0}),

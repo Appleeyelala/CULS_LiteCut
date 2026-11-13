@@ -16,6 +16,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 def run_case(args):
     # Import startup is part of this child's wall clock, not hidden setup.
+    if args.source_root is not None:
+        if not args.source_root.resolve().is_relative_to('/data/wushangge'):
+            raise ValueError('Source override must be an immutable /data snapshot.')
+        sys.path.insert(0, str(args.source_root.resolve()))
     from global_timing import pipeline
     from global_timing.common import digest, save_json
     from global_timing.evaluation import Evaluator
@@ -24,7 +28,10 @@ def run_case(args):
     run = args.run.resolve()
     rows = json.loads((run / 'input/profile_cases.json').read_text())
     row = next(r for r in rows if r['index'] == args.case_index)
-    work = run / 'output' / f'case_{row["index"]:04d}'
+    output = args.output_base.resolve() if args.output_base else run / 'output'
+    if not output.is_relative_to(run / 'output'):
+        raise ValueError('Profile output must stay inside its run.')
+    work = output / f'case_{row["index"]:04d}'
     stages = defaultdict(lambda: {'calls': 0, 'inclusive_s': 0.0})
 
     def instrument(owner, name, label):
@@ -56,10 +63,14 @@ def run_case(args):
             raise ValueError('Frozen binary hash mismatch: ' + name)
     config = pipeline.SearchConfig(
         seed=args.seed, evaluation_budget=args.evaluations, warmup_evaluations=2,
-        gradient_steps=20, gradient_restarts=2, calibration_steps=30,
+        gradient_steps=20 if args.variant == 'legacy_cpu' else args.proposal_steps,
+        gradient_restarts=2, calibration_steps=30,
         feedback_batch=4, modes=('area_constraint',), timeout_s=args.tool_timeout)
     record = {'status': 'RUNNING', 'index': row['index'], 'input_name': row['relative_path'],
-              'input_sha256': row['sha256'], 'strategy': 'legacy_gradient_cpu',
+              'input_sha256': row['sha256'], 'strategy': args.variant,
+              'source_root': str(Path(pipeline.__file__).resolve().parents[1]),
+              'algorithm_sha256': {name: digest(Path(pipeline.__file__).with_name(name + '.py'))
+                                   for name in ['pipeline', 'optimization', 'surrogate', 'arrival', 'litecut', 'candidates']},
               'child_import_s': imported - ENTRY_TIME, 'stages': stages,
               'scope': 'One cold child process, one circuit, one gradient strategy; '
                        'includes required preparation and original/noop measurements. '
@@ -72,7 +83,20 @@ def run_case(args):
         baseline = experiment.evaluate_choice(experiment.noop, 'replay_noop', 0)
         if baseline['status'] != 'PASS':
             raise RuntimeError('Required no-op failed.')
-        search = experiment.gradient_search(baseline, 'area_constraint')
+        if args.variant == 'legacy_cpu':
+            search = experiment.gradient_search(baseline, 'area_constraint')
+        else:
+            from functools import partial
+            from global_timing import joint_optimization
+            device = 'cuda' if args.variant == 'criticality_cuda' else 'cpu'
+            proposal_config = joint_optimization.JointProposalConfig(device=device, trajectories=args.trajectories,
+                                                                     max_changes=args.max_changes)
+            record['joint_proposal_config'] = dict(proposal_config.__dict__)
+            record['algorithm_sha256']['joint_optimization'] = digest(
+                Path(pipeline.__file__).with_name('joint_optimization.py'))
+            instrument(joint_optimization, 'joint_proposals', 'gradient_proposals')
+            search = experiment.gradient_search(baseline, 'area_constraint',
+                proposal_generator=partial(joint_optimization.joint_proposals, config=proposal_config))
         record.update(status='PASS', original=original, no_op=baseline,
                       selected=search['best'], preparation_runtime_s=experiment.preparation_runtime_s,
                       method_runtime_s=search['exclusive_method_runtime_s'],
@@ -91,7 +115,7 @@ def run_case(args):
         record['timing_scope'] = ('Stage values are inclusive and overlap; do not sum them. '
                                   'The parent records full subprocess wall time including interpreter startup. '
                                   'The deployment baseline excludes separately evaluated controls, equally for future variants.')
-        save_json(run / 'output' / f'case_{row["index"]:04d}_profile.json', record)
+        save_json(output / f'case_{row["index"]:04d}_profile.json', record)
 
 
 def main():
@@ -105,6 +129,15 @@ def main():
     parser.add_argument('--evaluations', type=int, default=8)
     parser.add_argument('--tool-timeout', type=int, default=900)
     parser.add_argument('--case-timeout', type=int, default=1800)
+    parser.add_argument('--variants', default='legacy_cpu',
+                        help='Sequential controls: legacy_cpu,criticality_cpu,criticality_cuda')
+    parser.add_argument('--variant', choices=['legacy_cpu', 'criticality_cpu', 'criticality_cuda'], default='legacy_cpu')
+    parser.add_argument('--legacy-source', type=Path, help='Frozen old /data source for legacy control.')
+    parser.add_argument('--source-root', type=Path, help=argparse.SUPPRESS)
+    parser.add_argument('--output-base', type=Path, help=argparse.SUPPRESS)
+    parser.add_argument('--proposal-steps', type=int, default=40)
+    parser.add_argument('--trajectories', type=int, default=32)
+    parser.add_argument('--max-changes', type=int, default=32)
     args = parser.parse_args()
     args.run = args.run.resolve()
     args.tool_run = args.tool_run.resolve()
@@ -113,6 +146,12 @@ def main():
     if args.case_index is not None:
         run_case(args)
         return
+    variants = args.variants.split(',')
+    if len(set(variants)) != len(variants) or not set(variants) <= {'legacy_cpu', 'criticality_cpu', 'criticality_cuda'}:
+        parser.error('Unknown or repeated variant.')
+    if args.legacy_source is not None and (not args.legacy_source.resolve().is_relative_to('/data/wushangge')
+                                          or not (args.legacy_source / 'global_timing/pipeline.py').is_file()):
+        parser.error('Legacy source must be a frozen /data source snapshot.')
     from global_timing.common import digest, save_json
     if args.manifest is None:
         parser.error('--manifest is required for parent mode.')
@@ -146,13 +185,23 @@ def main():
     metadata_path.write_text(json.dumps(metadata, indent=2) + '\n')
     records = []
     try:
-        for row in selected:
+        # Variant order rotates per circuit to expose simple order/cache bias;
+        # these first profiles are diagnostic, not repeated final speed trials.
+        tasks = [(row, variant) for position, row in enumerate(selected)
+                 for variant in variants[position % len(variants):] + variants[:position % len(variants)]]
+        for row, variant in tasks:
+            base = args.run / 'output' if variants == ['legacy_cpu'] else args.run / 'output' / variant
+            base.mkdir(exist_ok=True)
+            source = args.legacy_source.resolve() if variant == 'legacy_cpu' and args.legacy_source else args.run / 'src'
             command = [sys.executable, '-B', str(Path(__file__).resolve()),
                        '--run', str(args.run), '--tool-run', str(args.tool_run),
                        '--case-index', str(row['index']), '--seed', str(args.seed),
-                       '--evaluations', str(args.evaluations), '--tool-timeout', str(args.tool_timeout)]
+                       '--evaluations', str(args.evaluations), '--tool-timeout', str(args.tool_timeout),
+                       '--variant', variant, '--source-root', str(source), '--output-base', str(base),
+                       '--proposal-steps', str(args.proposal_steps), '--trajectories', str(args.trajectories),
+                       '--max-changes', str(args.max_changes)]
             started = time.perf_counter()
-            log = args.run / 'logs' / f'profile_{row["index"]:04d}.log'
+            log = args.run / 'logs' / f'profile_{variant}_{row["index"]:04d}.log'
             with log.open('x') as stream:
                 process = subprocess.Popen(command, cwd=args.run, stdout=stream,
                                            stderr=subprocess.STDOUT, start_new_session=True)
@@ -162,10 +211,10 @@ def main():
                     from global_timing.processes import terminate_tree
                     terminate_tree(process.pid)
                     process.wait()
-            record = {'index': row['index'], 'input_name': row['relative_path'],
+            record = {'index': row['index'], 'input_name': row['relative_path'], 'variant': variant,
                       'command': command, 'returncode': process.returncode,
                       'full_process_wall_s': time.perf_counter() - started, 'log': str(log)}
-            path = args.run / 'output' / f'case_{row["index"]:04d}_profile.json'
+            path = base / f'case_{row["index"]:04d}_profile.json'
             if path.exists():
                 detail = json.loads(path.read_text())
                 record.update(status=detail['status'], detail=str(path), detail_sha256=digest(path))
@@ -176,7 +225,7 @@ def main():
         summary = {'records': records, 'status': 'PASS' if all(
             r['status'] == 'PASS' and r['returncode'] == 0 for r in records) else 'PARTIAL',
             'source_commit': metadata['source_commit'],
-            'scope': 'Sequential per-circuit cold-process baseline on a single allocation; '
+            'scope': 'Sequential per-circuit cold-process controls on a single allocation; '
                      'no cross-benchmark parallel throughput speedup claim.'}
         save_json(args.run / 'output/profile_summary.json', summary)
         metadata.update(state='COMPLETED' if summary['status'] == 'PASS'

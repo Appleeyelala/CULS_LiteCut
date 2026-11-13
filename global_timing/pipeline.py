@@ -157,7 +157,7 @@ class Experiment:
         return float(scalar_objective(po, area, reference['delay_ps'], reference['area'], mode,
                                       self.config.area_limit_ratio, area_weight=self.config.area_weight))
 
-    def gradient_search(self, baseline, mode):
+    def gradient_search(self, baseline, mode, proposal_generator=None):
         started = time.monotonic()
         method = 'gradient_' + mode
         model = TimingSurrogate(self.partition, self.catalogue, self.scores, baseline['metrics'])
@@ -183,7 +183,8 @@ class Experiment:
                 calibration['training_observation_indices'] = fitted_indices.copy()
                 save_json(self.output / method / f'calibration_{iteration:04d}.json', calibration)
                 best = min(observations, key=lambda row: self.rank_actual(row, baseline['metrics'], mode))
-                proposals, trace = gradient_proposals(model, seen, self.config.seed + iteration,
+                generator = gradient_proposals if proposal_generator is None else proposal_generator
+                proposals, trace = generator(model, seen, self.config.seed + iteration,
                     incumbent=best['choices'], steps=self.config.gradient_steps, restarts=self.config.gradient_restarts,
                     mode=mode, area_limit_ratio=self.config.area_limit_ratio, area_weight=self.config.area_weight)
                 save_json(self.output / method / f'gradients_{iteration:04d}.json', trace)

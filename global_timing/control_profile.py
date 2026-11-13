@@ -38,7 +38,7 @@ def run_control_case(args, entry_time):
             stages['request_replay_and_validation']['inclusive_s'] += end - begin
             events.append(event)
 
-    record = {'status': 'RUNNING', 'index': row['index'], 'input_name': row['relative_path'],
+    record = {'status': 'RUNNING', 'index': row['index'], 'seed': args.seed, 'input_name': row['relative_path'],
               'input_sha256': row['sha256'], 'strategy': args.variant,
               'source_root': str(Path(__file__).resolve().parents[1]),
               'algorithm_sha256': {n: digest(Path(__file__).with_name(n + '.py')) for n in

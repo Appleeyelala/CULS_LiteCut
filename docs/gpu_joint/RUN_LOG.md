@@ -105,6 +105,22 @@ batch 将 DMA/c1355 的实际 replay 命令从 8 减至 5，ss_pcm 从 8 减至 
 
 ## 冻结评价面板
 
+### 独立自然成本基线与回归
+
+`20261113T055037Z-standalone-controls-validation-97d74575`，Slurm **64977**，源码 **dc95c8c**，2 CPU/12GiB/1GPU，COMPLETED/0:0，53s，`output/controls_tests.json` **51/51 PASS**。包括6项新control、3项真实batch、4项pipeline、14项joint、9项surrogate、3项arrival、12项真实工具。random/native导入路径不加载未使用的Torch/NumPy/NetworkX；共享Boolean parser与原canonical完整返回结构一致；实际random/greedy/native各自CEC+Liberty验证。新共享执行模块由原已验证函数提取，不改变默认安装政策。
+
+`20261113T055431Z-standalone-controls-dev-0e1ce7d6`，Slurm **64978**，同源码，2 CPU/16GiB/1GPU，COMPLETED/0:0，1m10s，15/15独立冷child PASS；seed20261111。
+
+| 输入 | original delay ps / wall s | native ABC | native CULS | random batch（8请求） | LiteCut greedy |
+|---|---|---|---|---|---|
+| DMA | 2463.366460 / 2.519 | 2491.453120 / 2.869 | 2328.766110 / 3.170 | 2371.904300 / 13.391 | 2352.961910 / 10.538 |
+| c1355 | 360.111877 / 1.366 | 359.501831 / 1.467 | 353.219391 / 1.668 | 360.111877 / 7.078 | 359.873505 / 5.374 |
+| ss_pcm | 350.016113 / 1.316 | 319.565643 / 1.416 | 323.908447 / 1.618 | 319.488068 / 8.381 | 338.486664 / 4.723 |
+
+各方法最终点CEC PASS。随机/greedy最终点按真实no-op面积1.05倍选择，原图/native的同约束可行性需对照同输入no-op分析。greedy实际3/3/2请求（含no-op及修复），不凑满8。所有random/native profile明确`torch_loaded=false`，greedy为true；没有不计时的免费ML或人为给简单基线增加unused fit。方法范围和自然成本见[BASELINE_PROTOCOL.md](BASELINE_PROTOCOL.md)。本表与64976不同分配，不能据此作严格同硬件E2E配对加速声明；保留作基线能力和后续统一计时的依据。
+
+ss_pcm原生CULS恰好取得与旧/自适应梯度相同的323.908447ps，但自然成本显著较低；random/ABC的delay还更低。DMA新正增益梯度可找到更低delay，但绝不能据三个样例宣称全局竞争力或低runtime。最终冻结面板仍未运行。
+
 补充实际搜索：`20261113T054320Z-adaptive-gain-search-dev-2896af18`，Slurm **64976**，源码 **7e5bbc1**，2 CPU、16 GiB、1 GPU，COMPLETED/0:0，2m20s，9/9冷进程闭环PASS。各方法8请求、seed20261111；旧5025a6c+741工具，新方法使用G的83d22440工具。只在开发0/47/80验证，没有使用最终面板调参。
 
 | 输入 | 旧CPU delay ps / cold wall s | adaptive batch auto正增益 | adaptive physical batch auto |

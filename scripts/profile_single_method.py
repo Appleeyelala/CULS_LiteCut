@@ -27,7 +27,7 @@ PROFILE_VARIANTS = (
 def run_case(args):
     # Import startup is part of this child's wall clock, not hidden setup.
     run = args.run.resolve()
-    cuda_cache = run / 'cache' / f'cuda_{args.variant}_{args.case_index:04d}'
+    cuda_cache = run / 'cache' / f'cuda_{args.variant}_{args.seed}_{args.case_index:04d}'
     cuda_cache.mkdir(exist_ok=False)
     os.environ['CUDA_CACHE_PATH'] = str(cuda_cache)
     if args.source_root is not None:
@@ -100,7 +100,7 @@ def run_case(args):
         gradient_steps=20 if args.variant == 'legacy_cpu' else args.proposal_steps,
         gradient_restarts=2, calibration_steps=30,
         feedback_batch=4, modes=('area_constraint',), timeout_s=args.tool_timeout, **config_extra)
-    record = {'status': 'RUNNING', 'index': row['index'], 'input_name': row['relative_path'],
+    record = {'status': 'RUNNING', 'index': row['index'], 'seed': args.seed, 'input_name': row['relative_path'],
               'input_sha256': row['sha256'], 'strategy': args.variant,
               'source_root': str(Path(pipeline.__file__).resolve().parents[1]),
               'algorithm_sha256': {name: digest(Path(pipeline.__file__).with_name(name + '.py'))
@@ -207,6 +207,7 @@ def main():
     parser.add_argument('--indices', default='0,47,80')
     parser.add_argument('--case-index', type=int)
     parser.add_argument('--seed', type=int, default=20261111)
+    parser.add_argument('--seeds', help='Explicit comma-separated seeds; each method/seed gets isolated output/cache.')
     parser.add_argument('--evaluations', type=int, default=8)
     parser.add_argument('--tool-timeout', type=int, default=900)
     parser.add_argument('--case-timeout', type=int, default=1800)
@@ -232,6 +233,12 @@ def main():
     variants = args.variants.split(',')
     if len(set(variants)) != len(variants) or not set(variants) <= set(PROFILE_VARIANTS):
         parser.error('Unknown or repeated variant.')
+    try:
+        seeds = [int(s) for s in args.seeds.split(',')] if args.seeds else [args.seed]
+    except ValueError:
+        parser.error('--seeds must contain integers.')
+    if len(set(seeds)) != len(seeds) or any(s < 0 or s >= 2**63 for s in seeds):
+        parser.error('Use distinct nonnegative seeds below 2**63.')
     if args.legacy_source is not None and (not args.legacy_source.resolve().is_relative_to('/data/wushangge')
                                           or not (args.legacy_source / 'global_timing/pipeline.py').is_file()):
         parser.error('Legacy source must be a frozen /data source snapshot.')
@@ -273,22 +280,26 @@ def main():
     try:
         # Variant order rotates per circuit to expose simple order/cache bias;
         # these first profiles are diagnostic, not repeated final speed trials.
-        tasks = [(row, variant) for position, row in enumerate(selected)
-                 for variant in variants[position % len(variants):] + variants[:position % len(variants)]]
-        for row, variant in tasks:
-            base = args.run / 'output' if variants == ['legacy_cpu'] else args.run / 'output' / variant
-            base.mkdir(exist_ok=True)
+        tasks = [(row, variant, seed) for seed_position, seed in enumerate(seeds)
+                 for position, row in enumerate(selected)
+                 for variant in variants[(position + seed_position) % len(variants):] + variants[:(position + seed_position) % len(variants)]]
+        for row, variant, seed in tasks:
+            root_output = args.run / 'output'
+            if len(seeds) > 1:
+                root_output = root_output / f'seed_{seed}'
+            base = root_output if variants == ['legacy_cpu'] else root_output / variant
+            base.mkdir(parents=True, exist_ok=True)
             source = args.legacy_source.resolve() if variant == 'legacy_cpu' and args.legacy_source else args.run / 'src'
             tool_source = args.legacy_tool_run.resolve() if variant == 'legacy_cpu' and args.legacy_tool_run else args.tool_run
             command = [sys.executable, '-B', str(Path(__file__).resolve()),
                        '--run', str(args.run), '--tool-run', str(tool_source),
-                       '--case-index', str(row['index']), '--seed', str(args.seed),
+                       '--case-index', str(row['index']), '--seed', str(seed),
                        '--evaluations', str(args.evaluations), '--tool-timeout', str(args.tool_timeout),
                        '--variant', variant, '--source-root', str(source), '--output-base', str(base),
                        '--proposal-steps', str(args.proposal_steps), '--trajectories', str(args.trajectories),
                        '--max-changes', str(args.max_changes), '--validation-workers', str(args.validation_workers)]
             started = time.perf_counter()
-            log = args.run / 'logs' / f'profile_{variant}_{row["index"]:04d}.log'
+            log = args.run / 'logs' / f'profile_{variant}_{seed}_{row["index"]:04d}.log'
             with log.open('x') as stream:
                 process = subprocess.Popen(command, cwd=args.run, stdout=stream,
                                            stderr=subprocess.STDOUT, start_new_session=True)
@@ -298,7 +309,7 @@ def main():
                     from global_timing.processes import terminate_tree
                     terminate_tree(process.pid)
                     process.wait()
-            record = {'index': row['index'], 'input_name': row['relative_path'], 'variant': variant,
+            record = {'index': row['index'], 'seed': seed, 'input_name': row['relative_path'], 'variant': variant,
                       'command': command, 'returncode': process.returncode,
                       'subprocess_started_monotonic': started,
                       'full_process_wall_s': time.perf_counter() - started, 'log': str(log)}

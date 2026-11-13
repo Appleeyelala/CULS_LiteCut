@@ -87,6 +87,7 @@ def summarize(records, protocol):
             for name, value in r.get('stage_seconds', {}).items():
                 stages[name].append(value)
         methods[method] = {'attempted': len(rows), 'states': dict(Counter(r['status'] for r in rows)),
+            'runtime_unavailable': sum(r.get('end_to_end_runtime_s') is None for r in rows),
             'runtime_all_terminal': describe([r['end_to_end_runtime_s'] for r in rows]),
             'runtime_successful': describe([r['end_to_end_runtime_s'] for r in successes]),
             'delay_ps': describe([r.get('delay_ps') for r in successes]),

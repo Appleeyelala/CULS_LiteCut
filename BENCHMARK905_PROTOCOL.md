@@ -1,6 +1,6 @@
 # MFFC GPU 全 905 三方法评估协议
 
-状态：**开发后冻结前草案，尚未开展正式2715点实验**。机器可读规则为 `config/mffc905_protocol.json`；正式冻结时记录Git源码/配置、native CUDA与CULS/ABC二进制、Student/ASAP7、完整输入manifest和运行命令的身份。不得把本页当执行完成证明。
+状态：**开发检查完成、最终入口预检中的草案，尚未开展正式2715点实验**。机器可读规则为 `config/mffc905_protocol.json`；正式冻结时记录Git源码/配置、native CUDA与CULS/ABC二进制、Student/ASAP7、完整输入manifest和运行命令的身份。不得把本页当执行完成证明。
 
 ## 输入、方法与正确性
 

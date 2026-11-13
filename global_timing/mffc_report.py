@@ -26,6 +26,8 @@ def write_report(output, prefix, records, summary):
         ax.axvline(1, color='gray', linestyle='--', linewidth=1)
         if logarithmic:
             ax.set_xscale('log')
+        else:
+            ax.ticklabel_format(axis='x', style='plain', useOffset=False)
         ax.set(xlabel=title, ylabel='Fraction of defined successful pairs', ylim=(0, 1.02))
         ax.legend()
         ax.grid(alpha=.25)
@@ -50,6 +52,7 @@ def write_report(output, prefix, records, summary):
         ax.axvline(1, color='gray', linestyle='--', linewidth=1)
         ax.set(xscale='log', xlabel=f'Runtime Ours / {baseline}', ylabel=f'Delay Ours / {baseline}',
                title='All three valid and area feasible')
+        ax.ticklabel_format(axis='y', style='plain', useOffset=False)
         ax.grid(alpha=.25)
         ax.legend(fontsize=7)
     fig.tight_layout()
@@ -70,6 +73,7 @@ def write_report(output, prefix, records, summary):
         gm = data['delay_ratio_geometric']
         lines.append(f"| 相对{baseline} | {data['successful_pairs']} | {w.get('better',0)}/{w.get('tie',0)}/{w.get('worse',0)} | {number(data['improvement_percent']['median'])} | {number(gm['value'],6)} ({gm['n_positive_defined']}) | {number(data['paired_runtime_ratio']['median'])} |")
     lines += ['', 'Delay ratio=Ours/baseline，越低越好；时间比=baseline/Ours，越高越好。全部单方法runtime含失败/超时；配对比只含成功方法。面积单位为固定Liberty的库单位。CEC通过仅指成功测量；失败不给替代delay。', '',
+              '缺少完整冷时钟的方法点数：' + str({m: d['runtime_unavailable'] for m, d in summary['methods'].items()}) + '；这类中断保持N/A，不补零，总记录时间仅求和可用时钟。', '',
               'GPU并行的是Candidate→Decision→MFFC聚合与保留依赖的完整Region DAG前/反传播，最终真实改图仍顺序受控。仅A/B对照不能独立证明GPU或梯度的因果收益；阶段与设备是实现证据。候选预检仍非完整可执行性预测。', '',
               '原始目录：`' + summary['experiment'] + '`；算法源码`' + summary['source_commit'] + '`。所有预测、Student分数与真实ABC_SCL_LIBERTY分列。无候选设计数：' + str(summary['known_no_candidate_designs']) + '，未知候选数设计：' + str(summary['unknown_candidate_count_designs']) + '。', '',
               '## 完整来源与规模分组', '',

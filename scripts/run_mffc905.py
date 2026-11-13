@@ -32,6 +32,44 @@ def save(path, data):
         json.dump(data, stream, indent=2, allow_nan=False)
 
 
+def recover_point(outer, row, method, source_commit):
+    """A terminal old job may leave a point directory but no parent record.
+
+    Never restart this attempt or infer success from incomplete artifacts. If
+    its cold-command clock is absent, elapsed runtime is honestly unavailable.
+    """
+    attempt = json.loads((outer / 'point_attempt.json').read_text())
+    if (attempt['source_commit'] != source_commit or attempt['input_sha256'] != row['sha256']
+            or attempt['method'] != method):
+        raise ValueError('Interrupted point belongs to another source/input/method.')
+    previous = str(attempt['slurm_job_id'])
+    if previous == os.environ['SLURM_JOB_ID']:
+        raise RuntimeError('Existing point belongs to this live allocation; refusing a duplicate.')
+    account = subprocess.check_output(['sacct', '-j', previous, '--format=JobIDRaw,State,End', '-n', '-P'], text=True)
+    fields = next((line.split('|') for line in account.splitlines() if line.split('|')[0] == previous), None)
+    terminal = {'COMPLETED', 'FAILED', 'CANCELLED', 'TIMEOUT', 'OUT_OF_MEMORY', 'NODE_FAIL', 'PREEMPTED', 'BOOT_FAIL', 'DEADLINE', 'REVOKED'}
+    if fields is None or fields[1].split()[0].rstrip('+') not in terminal:
+        raise RuntimeError('Previous attempt job is not confirmed terminal; do not restart it.')
+    command_file = outer / 'cold_method.command.json'
+    command = json.loads(command_file.read_text()) if command_file.exists() else None
+    result_path = outer / 'child_result.json'
+    result = json.loads(result_path.read_text()) if command and command['returncode'] == 0 and result_path.exists() else None
+    good = bool(result and result.get('status') == 'PASS' and result['selected']['metrics'].get('cec') == 'PASS')
+    clock_path = outer / 'pre_launch.json'
+    staging_s = json.loads(clock_path.read_text())['elapsed_s'] if clock_path.exists() else None
+    record = {'index': row['index'], 'input': row['relative_path'], 'input_sha256': row['sha256'],
+              'method': method, 'status': 'PASS' if good else 'TIMEOUT' if command and command.get('timed_out') else 'FAIL',
+              'error': None if good else 'Interrupted prior terminal job; no substituted metrics or automatic retry.',
+              'end_to_end_runtime_s': command['elapsed_s'] + staging_s if command and staging_s is not None else None,
+              'runtime_scope': 'Recovered staging plus recorded cold-command wall; missing clock is N/A, not zero.',
+              'result_path': str(result_path) if good else None, 'detail_path': str(outer),
+              'source_commit': source_commit, 'slurm_job_id': previous,
+              'recovered_from_terminal_job': {'job_id': previous, 'state': fields[1], 'end': fields[2]}}
+    if good:
+        record.update(metrics=result['selected']['metrics'], final_source=result['selected']['source'], backend=result['backend'])
+    return record
+
+
 def child(args):
     # These shared validation modules do not import Torch. Only Ours pays for
     # importing/preparing the Student and gradient stack in its cold child.
@@ -91,6 +129,7 @@ def main():
     parser.add_argument('--native-build-run', type=Path)
     parser.add_argument('--indices', help='Explicit development subset; omitted only with a frozen full905 protocol.')
     parser.add_argument('--protocol', type=Path)
+    parser.add_argument('--check-only', action='store_true', help='Validate full905 preflight; never launch method children.')
     parser.add_argument('--case-timeout', type=int, default=1800)
     parser.add_argument('--child', action='store_true')
     parser.add_argument('--context', type=Path)
@@ -114,10 +153,15 @@ def main():
     rows = inventory['rows']
     from dataclasses import asdict
     protocol = json.loads(args.protocol.read_text()) if args.protocol else {'search': asdict(MffcSearchConfig()), 'validation_workers': 2}
+    MffcSearchConfig(**protocol['search']).validate()
     if not args.indices:
-        if (protocol.get('state') != 'FROZEN' or len(rows) != 905 or
+        if ((protocol.get('state') != 'FROZEN' and not args.check_only) or len(rows) != 905 or
                 protocol.get('input_inventory_sha256') != sha(args.manifest)):
             parser.error('Full905 requires a frozen matching protocol; development must name indices.')
+        if args.case_timeout != protocol['cold_method_timeout_s']:
+            raise ValueError('Cold method timeout differs from the frozen protocol.')
+        if os.environ.get('SLURM_JOB_NODELIST') != protocol['required_node']:
+            raise ValueError('Formal/resumed suite must use the frozen host.')
     else:
         wanted = [int(i) for i in args.indices.split(',')]
         by_index = {r['index']: r for r in rows}
@@ -138,6 +182,17 @@ def main():
         if tool.get('sha256', actual) != actual:
             raise ValueError('Tool/asset identity changed: ' + name)
         tool['sha256'] = actual
+    if not args.indices and {k: v['sha256'] for k, v in tools.items()} != protocol['frozen_tool_sha256']:
+        raise ValueError('Formal tools/model/library differ from the frozen protocol.')
+    gpu = subprocess.check_output(['nvidia-smi', '--id=' + os.environ.get('CUDA_VISIBLE_DEVICES', '0'),
+        '--query-gpu=uuid,name,driver_version', '--format=csv,noheader'], text=True).strip()
+    if not args.indices and protocol['required_gpu_name'] not in gpu:
+        raise ValueError('Formal/resumed suite requires the frozen GPU type.')
+    session = run / 'input' / ('session_' + os.environ['SLURM_JOB_ID'] + '.json')
+    if not session.exists():
+        save(session, {'job_id': os.environ['SLURM_JOB_ID'], 'node': os.environ.get('SLURM_JOB_NODELIST'),
+                      'gpu': gpu, 'driver_argv': sys.argv, 'slurm_cpus': os.environ.get('SLURM_CPUS_PER_TASK'),
+                      'environment': {k: os.environ.get(k) for k in ['CUDA_VISIBLE_DEVICES', 'OMP_NUM_THREADS', 'OPENBLAS_NUM_THREADS', 'MKL_NUM_THREADS']}})
     frozen = {'input_inventory': str(args.manifest), 'input_inventory_sha256': sha(args.manifest),
               'rows': rows, 'protocol': protocol, 'tools': tools, 'source_commit': metadata['source_commit'],
               'scope': 'Development subset' if args.indices else 'Complete905 three-method formal cohort'}
@@ -147,6 +202,11 @@ def main():
             raise ValueError('Resume would change frozen input/protocol/tool identity.')
     else:
         save(preflight, frozen)
+    if args.check_only:
+        save(run / 'output/preflight_check.json', {'status': 'CHECKED_NOT_EXECUTED', 'inputs': len(rows),
+                                                  'methods_launched': 0, 'tools': tools, 'gpu': gpu})
+        print(json.dumps({'status': 'CHECKED_NOT_EXECUTED', 'inputs': len(rows), 'methods_launched': 0}))
+        return 0
     began = time.perf_counter()
     records = []
     for position, row in enumerate(rows):
@@ -159,7 +219,16 @@ def main():
                 continue
             start = time.perf_counter()
             outer = run / 'output' / f'case_{row["index"]:04d}_{method}'
+            if outer.exists() and (outer / 'point_attempt.json').exists():
+                record = recover_point(outer, row, method, metadata['source_commit'])
+                save(record_path, record)
+                records.append(record)
+                continue
             outer.mkdir(parents=True, exist_ok=False)
+            attempt = {'slurm_job_id': os.environ['SLURM_JOB_ID'], 'started_epoch_s': time.time(),
+                       'started_monotonic_s': start, 'source_commit': metadata['source_commit'],
+                       'input_sha256': row['sha256'], 'method': method}
+            save(outer / 'point_attempt.json', attempt)
             source = Path(row['staged_path'])
             if sha(source) != row['sha256']:
                 raise ValueError('Frozen staged AIG changed before cold method.')
@@ -172,6 +241,9 @@ def main():
             environment = dict(os.environ, PYTHONPATH=str(ROOT), CUDA_CACHE_PATH=str(cache),
                                XDG_CACHE_HOME=str(cache), TORCH_EXTENSIONS_DIR=str(cache / 'torch'),
                                PYTHONDONTWRITEBYTECODE='1')
+            save(outer / 'pre_launch.json', {'elapsed_s': time.perf_counter() - start})
+            # Persist separately so a later allocation can recover the already
+            # attempted point without editing its immutable start record.
             status, error = 'PASS', None
             try:
                 run_tool([sys.executable, '-B', str(Path(__file__).resolve()), '--child', '--context', str(context),

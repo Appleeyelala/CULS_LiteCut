@@ -1,0 +1,181 @@
+{
+  "status": "PASS",
+  "records_source": "/data/wushangge/CULS_LiteCut/runs/20261113T073402Z-channel-repair-ablation-c9634975/output/ablation_analysis/records.json",
+  "records_sha256": "58263a74bd002fa6a3d2aeb87f28cae08dcc1d7c49b3c8be335e80c252aa09fc",
+  "formal_records_source": "/data/wushangge/CULS_LiteCut/runs/20261113T070050Z-frozen-joint-final-synthesis-f895a375/output/final_synthesis/audited_records.json",
+  "formal_records_sha256": "56ef12c8e9366d4235c2eb94330ca05420c5e41096199ddf80787f9c7881daff",
+  "method_points": 48,
+  "module_references_checked": 420,
+  "module_identities": [
+    {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261113T073402Z-channel-repair-ablation-c9634975/src/global_timing/arrival.py",
+      "commit": "db64308d53dcdd37b075d35b0da08f1f5cf9f458",
+      "sha256": "d3df1a72997d5685249d0212eb7f7644a6c9ddfb4d7b388cfdbaec800497e8aa"
+    },
+    {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261113T073402Z-channel-repair-ablation-c9634975/src/global_timing/batch_execution.py",
+      "commit": "db64308d53dcdd37b075d35b0da08f1f5cf9f458",
+      "sha256": "6f26e5e2c06ce2d92166ef5d8801e5d0f08cc40a2aeafa43484e3b075977b853"
+    },
+    {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261113T073402Z-channel-repair-ablation-c9634975/src/global_timing/candidates.py",
+      "commit": "db64308d53dcdd37b075d35b0da08f1f5cf9f458",
+      "sha256": "3fb98bf72ade31a0e9791fa984fb41b21c9861e5a7a4de9bdb1ef476c1aab040"
+    },
+    {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261113T073402Z-channel-repair-ablation-c9634975/src/global_timing/joint_optimization.py",
+      "commit": "db64308d53dcdd37b075d35b0da08f1f5cf9f458",
+      "sha256": "583632cbc385371a3dbe972ab5195c71fcd2f77bd7e507b6b4bebb251ca18c5b"
+    },
+    {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261113T073402Z-channel-repair-ablation-c9634975/src/global_timing/litecut.py",
+      "commit": "db64308d53dcdd37b075d35b0da08f1f5cf9f458",
+      "sha256": "167534964b0ceac0cb26509d8bd5600820970a0b3a4a2ee80f3e6963a483b649"
+    },
+    {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261113T073402Z-channel-repair-ablation-c9634975/src/global_timing/optimization.py",
+      "commit": "db64308d53dcdd37b075d35b0da08f1f5cf9f458",
+      "sha256": "8ac387cfffcab3e51cf96368e0d55612eff336f47b51670cdb0b6dae98f37c39"
+    },
+    {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261113T073402Z-channel-repair-ablation-c9634975/src/global_timing/pipeline.py",
+      "commit": "db64308d53dcdd37b075d35b0da08f1f5cf9f458",
+      "sha256": "5fece8b0ca2081a1e70cf6a9975841a80be25ff4bb23564e59dc24df3d23477e"
+    },
+    {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261113T073402Z-channel-repair-ablation-c9634975/src/global_timing/surrogate.py",
+      "commit": "db64308d53dcdd37b075d35b0da08f1f5cf9f458",
+      "sha256": "def54222fa9c978aefd8ede7902f75c1c22d45b08c8dcfc65521b40d3ac8afe0"
+    },
+    {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261113T073402Z-channel-repair-ablation-c9634975/src/global_timing/ablations.py",
+      "commit": "db64308d53dcdd37b075d35b0da08f1f5cf9f458",
+      "sha256": "8e7e5624526ad5adfd80d502a6728cb0c537b5e8ac5cf2235dc4a95329173e2b"
+    }
+  ],
+  "default_comparisons_to_frozen_formal": [
+    {
+      "index": 65,
+      "seed": 20261111,
+      "request_sequence_sha256": "e1e6f58961fdcaab18fb4a9f383a056067344f628e301ee912520e6bccd51883",
+      "same_actual_sequence_and_metrics": true
+    },
+    {
+      "index": 96,
+      "seed": 20261111,
+      "request_sequence_sha256": "a2cb154b6be04be1234a6a8cbd42b54c0405398b4eb658c63126cb1b1b3495fe",
+      "same_actual_sequence_and_metrics": true
+    },
+    {
+      "index": 587,
+      "seed": 20261111,
+      "request_sequence_sha256": "160ff5a2afa137a711e7c20bd6f3a6e415caf75c3ba6130634bbaf7c3077e85e",
+      "same_actual_sequence_and_metrics": true
+    },
+    {
+      "index": 625,
+      "seed": 20261111,
+      "request_sequence_sha256": "7e5347b52861dddf24de2a0db47bfe85f47b86e5567a099a8ae64c309751a53c",
+      "same_actual_sequence_and_metrics": true
+    },
+    {
+      "index": 65,
+      "seed": 20261112,
+      "request_sequence_sha256": "5ed06781b0d6e19429695b78ff63476b9af88e327b68f59e3eadc6baab05a5b2",
+      "same_actual_sequence_and_metrics": true
+    },
+    {
+      "index": 96,
+      "seed": 20261112,
+      "request_sequence_sha256": "a742fe41967eb0fd955816c4b7a4f3ae10437d3a77dc319fec444dece0cd0fb7",
+      "same_actual_sequence_and_metrics": true
+    },
+    {
+      "index": 587,
+      "seed": 20261112,
+      "request_sequence_sha256": "160ff5a2afa137a711e7c20bd6f3a6e415caf75c3ba6130634bbaf7c3077e85e",
+      "same_actual_sequence_and_metrics": true
+    },
+    {
+      "index": 625,
+      "seed": 20261112,
+      "request_sequence_sha256": "3cd9c05e81dd440fa3120464bd7b2f034a4bc5c05421c6818346a33fc60644ad",
+      "same_actual_sequence_and_metrics": true
+    },
+    {
+      "index": 65,
+      "seed": 20261113,
+      "request_sequence_sha256": "13348c82488adc165e72502928baf21e34979ae6070387a25d0cbe7b811b5e16",
+      "same_actual_sequence_and_metrics": true
+    },
+    {
+      "index": 96,
+      "seed": 20261113,
+      "request_sequence_sha256": "c4d92f28a0f33f91500b2ff8433be188e19c86c344a526c87b3f00dd38094384",
+      "same_actual_sequence_and_metrics": true
+    },
+    {
+      "index": 587,
+      "seed": 20261113,
+      "request_sequence_sha256": "160ff5a2afa137a711e7c20bd6f3a6e415caf75c3ba6130634bbaf7c3077e85e",
+      "same_actual_sequence_and_metrics": true
+    },
+    {
+      "index": 625,
+      "seed": 20261113,
+      "request_sequence_sha256": "330969b04e42b75da486404bce1f7d054afb48299af38c2990976800927be00c",
+      "same_actual_sequence_and_metrics": true
+    }
+  ],
+  "counts_by_variant": {
+    "adaptive_batch_auto": {
+      "method_points": 12,
+      "requests": 75,
+      "failed_requests": 45,
+      "direct_requests": 36,
+      "direct_successes": 0,
+      "final_sources": {
+        "explicit_feasibility_repair": 9,
+        "replay_noop": 3
+      },
+      "points_with_executable_decisions": 9
+    },
+    "adaptive_no_pairs_batch_auto": {
+      "method_points": 12,
+      "requests": 75,
+      "failed_requests": 45,
+      "direct_requests": 36,
+      "direct_successes": 0,
+      "final_sources": {
+        "explicit_feasibility_repair": 9,
+        "replay_noop": 3
+      },
+      "points_with_executable_decisions": 9
+    },
+    "adaptive_no_repair_batch_auto": {
+      "method_points": 12,
+      "requests": 75,
+      "failed_requests": 50,
+      "direct_requests": 45,
+      "direct_successes": 13,
+      "final_sources": {
+        "joint_selection_gradient": 3,
+        "replay_noop": 9
+      },
+      "points_with_executable_decisions": 9
+    },
+    "adaptive_no_score_batch_auto": {
+      "method_points": 12,
+      "requests": 75,
+      "failed_requests": 45,
+      "direct_requests": 36,
+      "direct_successes": 0,
+      "final_sources": {
+        "explicit_feasibility_repair": 9,
+        "replay_noop": 3
+      },
+      "points_with_executable_decisions": 9
+    }
+  },
+  "scope": "Saved-result/static source review, not new experiments. All twelve supplementary default trajectories also match the frozen formal 2257998 trajectories including successful PO/delay/area; this is not a cross-job runtime comparison. Each variant contains three no-decision/no-op points, leaving nine points with a variable candidate domain. Full twelve-pair protocol denominators remain unchanged."
+}

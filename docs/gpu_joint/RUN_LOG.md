@@ -2,6 +2,18 @@
 
 原始 905 运行与状态报告保留；本页只记录本轮新增证据，路径均在 `/data/wushangge/CULS_LiteCut/runs/` 下。真实 Timing 统一使用冻结 ABC/ASAP7 的 `ABC_SCL_LIBERTY`，不引用撤回的 pair 标签。
 
+## 最终终态与交付核验
+
+四个最终作业均成功终态：64983（正式432方法点，1:42:27）、64984（独立正式统计，7:01）、65004（四设计补充48点，30:01）、65009（最终来源/阶段与显示修正，13s），退出码均0:0。正式1119与补充115成功观察通过完整安装、CEC、统一Liberty、网表及资产/命令hash原始审计；方法点PASS不抹去失败请求。S/D的18/14产物hash逐项再核对，四PDF各1页可读取；修正曲线图已人工查看，另三PNG与已查看原图逐字节相同。
+
+65004结果：默认/no-score、默认/no-pairs的delay比几何均值1.002822/1.002929，均2胜7平3负；默认/no-repair为0.952208、9胜3平0负。每配置3个无Decision/no-op点保留。默认36直接请求全失败，最终9repair/3no-op；9repair的父请求5来自梯度、4来自warmup。37项回归与4配置真实smoke、同分配默认兼容均已完成；再核对12个正式/补充默认全轨迹选择、状态、成功PO/delay/area一致。数值与scope见[FINAL_RESULTS.md](FINAL_RESULTS.md)。
+
+最后来源检查另核对补充420模块引用与实际/Git一致；正式3120引用/65包文件已有核对。所有最终repair父请求逐项存在、早于child且FAIL，来源相符：主方法28个中17梯度/11warmup，旧版31个中8梯度/23warmup；no-inner31个中24探索/7warmup。来源关系不能当作梯度的因果优势，完整记录在 `provenance/gpu_joint_{ablation_source_audit,repair_ancestry}.json`。
+
+65009的 `output/delivery/` 已有五数据来源分组、阶段中位与分母、原始作业accounting、四组PNG/PDF、hash与完成标记。实际cold wall包含全部在线成本；阶段inclusive不可相加，原始1119观察另有192个梯度original测量计入总1311次mapping成本。该13s短后处理的Slurm MaxRSS1640K采样不足以表示真实Python/Matplotlib峰值，不作为内存改善证据；共享旧Matplotlib style键警告保留，实际输出已复核，不为消除警告改动软件环境。
+
+本轮对旧版QoR非劣通过，整体1.5倍runtime目标未达，梯度/局部标量/显式pair总体优势未成立；GPU与修复在上述限定范围有独立证据。按用户研究说明§6交付负结果，逐项审查已完成，见[GOAL_DELIVERY_AUDIT.md](GOAL_DELIVERY_AUDIT.md)。本地里程碑 `gpu-joint-study-evidence-20261113`只标记研究交付，不标称性能目标达成；未merge main、push、发布或设置remote。下文按开发过程保留旧阶段状态，不替代本节最终终态。
+
 ## 正式面板执行完成，独立后处理尚在进行
 
 Slurm **64983** 已由实时accounting确认 **COMPLETED/0:0，Elapsed 1:42:27**，2CPU/32GiB/1GPU；batch MaxRSS为2083396K，不是GPU显存峰值。目录 `20261113T062048Z-frozen-joint-final-panel-b9c390b3`，快照2257998。精确16设计×3seed×9方法共 **432/432冷方法点PASS**，原始保存证据审计 **1119次成功测量、错误0**；方法进程PASS不代表其全部候选请求成功或QoR胜出。

@@ -15,6 +15,7 @@
 | 905输入清单 | `20261111T105821Z-benchmark-inventory-114a3573/output/benchmark_manifest.json`；SHA256 `e4211308a06fc5b2bb02614b965c4b93dcf08f6f7ea2a73af2f2e1405da1e167` |
 | 正式分析源码 | `20261113T070050Z-frozen-joint-final-synthesis-f895a375/src/`；commit `acdf98867e5afe628ba487c5361eb7d9aa36e6af` |
 | 补充消融源码 | `20261113T073402Z-channel-repair-ablation-c9634975/src/`；commit `db64308d53dcdd37b075d35b0da08f1f5cf9f458` |
+| 来源分组/最终显示修正 | `20261113T081810Z-joint-final-delivery-d22ea3ab/src/`；commit `1994e57`，Slurm65009已完成，产物在`output/delivery/` |
 
 固定资产（不进入Git）：
 
@@ -26,6 +27,8 @@
 新工具构建/默认与prepared回归的入口为 `scripts/build_replay_tools.py`；G的 `run.json`、`job.slurm`、`build/framework_tools/build_report.json` 和 `output/{replay_tests,prepared_regressions,batch_regressions}.json` 保存实际构建和验证。Release CULS及上游优化ABC的口径见 `docs/global_timing/PERFORMANCE_AUDIT.md`。旧二进制和新二进制分列，不承诺不同编译环境逐字节重建同一binary。
 
 [实际源码核对记录](../../provenance/gpu_joint_source_audit.json)覆盖全部432个正式方法点的3120个记录模块引用，20种模块身份的记录hash、实际快照文件与Git blob逐项相同；另检查两份快照的全部 `global_timing/*.py` 和指定Student/feature/bridge/library文件，共65项，均与对应commit相同。它验证保存源码的身份，不把未记录的外部import或二进制逐字节重建当成已经证明。
+
+[补充来源核对](../../provenance/gpu_joint_ablation_source_audit.json)检查48个控制点的420模块引用，并验证12个默认完整请求轨迹/成功实际指标与正式2257998相同；不同作业节点不能据此作runtime配对。最终本地审查里程碑为 `gpu-joint-study-evidence-20261113`，它标记代码/文档及外部证据索引；复现正式算法仍使用上表2257998冻结版本，而非把文档里程碑当成同一实验源。
 
 ## 正式命令与参数
 

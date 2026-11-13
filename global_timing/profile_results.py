@@ -14,7 +14,7 @@ def read(path):
     return json.loads(Path(path).read_text())
 
 
-def audit_measurement(observation, request, catalogue, hashes):
+def audit_measurement(observation, request, catalogue, hashes, execution_contract=None):
     result_path = request / 'evaluation/result.json'
     measured = read(result_path)
     metrics = observation['metrics']
@@ -52,6 +52,28 @@ def audit_measurement(observation, request, catalogue, hashes):
         'cec -n ' + measured['provenance']['original']['path'] + ' ' + str(candidate)]:
         raise ValueError('CEC command differs from the common positional protocol.')
     files += [command, cec_command]
+    if execution_contract is not None:
+        if execution_contract['abc']['sha256'] != measured['provenance']['abc']['sha256']:
+            raise ValueError('Measured ABC differs from the child frozen tool report.')
+        if catalogue is None:
+            method = observation['method']
+            if method == 'original':
+                if str(candidate) != measured['provenance']['original']['path']:
+                    raise ValueError('Original control did not map the original input.')
+            else:
+                native_command = request / 'rewrite.command.json'
+                original = measured['provenance']['original']['path']
+                if method == 'native_abc':
+                    expected_native = [execution_contract['abc']['path'], '-c',
+                        f'read_aiger {original}; strash; rewrite; write_aiger {candidate}']
+                elif method == 'native_culs':
+                    expected_native = [execution_contract['gpuls']['path'], '-c',
+                        f'read {original}; rewrite; write {candidate}']
+                else:
+                    raise ValueError('Unknown standalone native control.')
+                if read(native_command)['argv'] != expected_native:
+                    raise ValueError('Native rewrite command differs from the fixed baseline.')
+                files.append(native_command)
     accepted, regions = None, None
     if catalogue is not None:
         requested = set(catalogue.requested(observation['choices']))
@@ -102,6 +124,19 @@ def audit_profiles(profiles):
             if detail['status'] != 'PASS':
                 raise ValueError('Parent and child success statuses disagree.')
             case = detail_path.parent / f'case_{record["index"]:04d}'
+            tool_run = Path(command[command.index('--tool-run') + 1])
+            tool_report_path = tool_run / 'build/framework_tools/build_report.json'
+            contract = read(tool_report_path)['binaries']
+            hashes[str(tool_report_path)] = digest(tool_report_path)
+            for tool in contract.values():
+                if tool['path'] not in hashes:
+                    hashes[tool['path']] = digest(Path(tool['path']))
+                if hashes[tool['path']] != tool['sha256']:
+                    raise ValueError('Frozen child tool binary changed.')
+            source_root = Path(detail['source_root'])
+            source_metadata_path = source_root.parent / 'run.json'
+            source_metadata = read(source_metadata_path)
+            hashes[str(source_metadata_path)] = digest(source_metadata_path)
             native = detail.get('record_kind') == 'native_control'
             summary_path = Path(detail.get('search_summary', case / 'gradient_area_constraint/summary.json'))
             search = read(summary_path)
@@ -144,7 +179,7 @@ def audit_profiles(profiles):
                         raise ValueError('Failed request acquired a timing label.')
                     continue
                 request = case if native else Path(observation['aig']).parents[3]
-                installed = audit_measurement(observation, request, catalogue, hashes)
+                installed = audit_measurement(observation, request, catalogue, hashes, contract)
                 if installed['original_sha256'] != detail['input_sha256']:
                     raise ValueError('Measured original input differs from the profiled input.')
                 identities.append((installed['abc_sha256'], installed['library_sha256']))
@@ -168,6 +203,19 @@ def audit_profiles(profiles):
             counts = Counter(p.name.removesuffix('.command.json') for p in case.rglob('*.command.json'))
             direct = [o for o in observations if (o.get('prediction_before_evaluation') or {}).get('source') == 'joint_selection_gradient']
             row.update(delay_ps=search['best']['metrics']['delay_ps'], area=search['best']['metrics']['area'],
+                timing_model='ABC_SCL_LIBERTY', detail_path=str(detail_path),
+                gpuls_sha256=contract['gpuls']['sha256'],
+                gpuls_used=(not native or record['variant'] == 'native_culs'),
+                imported_source_root=str(source_root), imported_source_commit=source_metadata['source_commit'],
+                algorithm_sha256=detail['algorithm_sha256'],
+                record_kind='native_control' if native else 'candidate_search',
+                preparation_runtime_s=detail.get('preparation_runtime_s'),
+                method_runtime_s=detail.get('method_runtime_s'), stages=detail.get('stages', {}),
+                torch_num_threads=detail.get('torch_num_threads'), cuda_cache_regime=detail.get('cuda_cache_regime'),
+                torch_version=detail.get('torch_version'),
+                python_cuda_device=detail.get('python_cuda_device'),
+                joint_proposal_config=detail.get('joint_proposal_config'),
+                regions=detail.get('regions'), decisions=detail.get('decisions'), candidates=detail.get('candidates'),
                 input_sha256=detail['input_sha256'], domain_sha256=domain_hash,
                 baseline=baseline, points=points, requests=len(observations),
                 failed_requests=sum(o['status'] != 'PASS' for o in observations),
@@ -184,6 +232,12 @@ def audit_profiles(profiles):
                 row.update(best_choices_sha256=hashlib.sha256(json.dumps(search['best']['choices']).encode()).hexdigest(),
                     request_sequence_sha256=hashlib.sha256(json.dumps(signature, sort_keys=True).encode()).hexdigest(),
                     checkpoint_sha256=read(case / 'config.json').get('checkpoint_sha256'))
+                if row['checkpoint_sha256'] is not None:
+                    checkpoint_path = profile / 'input/student_checkpoint'
+                    if str(checkpoint_path) not in hashes:
+                        hashes[str(checkpoint_path)] = digest(checkpoint_path)
+                    if hashes[str(checkpoint_path)] != row['checkpoint_sha256']:
+                        raise ValueError('Used Student checkpoint changed or differs from the recorded model.')
             hashes[str(timeline_path)] = digest(timeline_path)
             rows.append(row)
     return rows, hashes

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Submit an already prepared /data snapshot after live aggregate quota checks."""
 import argparse
-import getpass
 import json
+import os
 from pathlib import Path
+import pwd
 import re
 import subprocess
 
@@ -38,6 +39,7 @@ def main():
     parser.add_argument('--gpus', type=int, default=0)
     parser.add_argument('--walltime', required=True)
     parser.add_argument('--job-name', required=True)
+    parser.add_argument('--afterany-job', help='Optional existing own job; run only after it reaches any terminal state.')
     args = parser.parse_args()
     run = args.run.resolve()
     if not run.is_relative_to('/data/wushangge') or not re.fullmatch(r'[/A-Za-z0-9_.-]+', str(run)):
@@ -48,6 +50,8 @@ def main():
         parser.error('A finite positive HH:MM:SS walltime is required.')
     if not re.fullmatch(r'[A-Za-z0-9_-]+', args.job_name):
         parser.error('Use a simple job name.')
+    if args.afterany_job is not None and not re.fullmatch(r'[1-9][0-9]*', args.afterany_job):
+        parser.error('Dependency must be an existing numeric Slurm job ID.')
     metadata_path = run / 'run.json'
     metadata = json.loads(metadata_path.read_text())
     if metadata['state'] != 'PREPARED_NOT_SUBMITTED' or (run / 'job.slurm').exists():
@@ -58,9 +62,15 @@ def main():
     extra_env = json.loads(args.env_json.read_text()) if args.env_json else {}
     if any(not re.fullmatch(r'[A-Z][A-Z0-9_]*', k) or not isinstance(v, str) for k, v in extra_env.items()):
         parser.error('Invalid explicit environment override.')
+    username = pwd.getpwuid(os.getuid()).pw_name
     cluster = {'sinfo': output('sinfo', '-o', '%P %a %l %D %G'),
                'partition': output('scontrol', 'show', 'partition', args.partition),
-               'queue': output('squeue', '-r', '-h', '-u', getpass.getuser(), '-o', '%i')}
+               'queue': output('squeue', '-r', '-h', '-u', username, '-o', '%i')}
+    if args.afterany_job:
+        cluster['dependency_job'] = output('scontrol', 'show', 'job', '-o', args.afterany_job)
+        owner = re.search(r'\bUserId=([^\s(]+)\(', cluster['dependency_job'])
+        if owner is None or owner[1] != username:
+            parser.error('Dependency must be a confirmed job owned by the current OS user.')
     jobs, used = [], [0, 0., 0]
     for identifier in cluster['queue'].split():
         job = output('scontrol', 'show', 'job', '-o', identifier)
@@ -75,6 +85,7 @@ def main():
             json.dump(value, stream, indent=2)
     metadata.update(command=command, resources={'partition': args.partition, 'cpus_per_task': args.cpus,
         'memory_gib': args.memory_gib, 'gpus': args.gpus, 'walltime': args.walltime})
+    metadata['slurm_dependency'] = {'type': 'afterany', 'job_id': args.afterany_job} if args.afterany_job else None
     metadata_path.write_text(json.dumps(metadata, indent=2) + '\n')
     lines = ['#!/bin/bash', '#SBATCH --job-name=' + args.job_name, '#SBATCH --partition=' + args.partition,
              f'#SBATCH --cpus-per-task={args.cpus}', f'#SBATCH --mem={args.memory_gib}G',
@@ -83,6 +94,8 @@ def main():
              '#SBATCH --export=NONE']
     if args.gpus:
         lines.append(f'#SBATCH --gres=gpu:{args.gpus}')
+    if args.afterany_job:
+        lines.append('#SBATCH --dependency=afterany:' + args.afterany_job)
     lines += ['set -Eeuo pipefail',
               'export PATH=/home/share/process/anaconda3/bin:/usr/local/cuda-11.8/bin:/usr/local/bin:/usr/bin:/bin',
               'export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 MKL_THREADING_LAYER=GNU',
@@ -108,7 +121,8 @@ def main():
     identifier = output('sbatch', '--parsable', str(job_path)).strip()
     with (run / 'input/submission.json').open('x') as stream:
         json.dump({'job_id': identifier, 'cluster': cluster, 'other_jobs': jobs,
-                   'resource_use_before': used, 'request': requested, 'resource_use_after': total}, stream, indent=2)
+                   'resource_use_before': used, 'request': requested, 'resource_use_after': total,
+                   'dependency': metadata['slurm_dependency']}, stream, indent=2)
     print(json.dumps({'job_id': identifier, 'run': str(run), 'total_resources': total}))
 
 

@@ -23,3 +23,11 @@
 65240的真实A/B/Ours delay（ps）为：div `75831.0469/67247.3594/75760.1484`，hyp `1774327.75/1772861.75/1774327.75`，mig `688.224609/688.224609/688.224609`。Ours冷E2E为87.328/149.424/6.337s，来源为直接梯度/付费原图回退/no-op。div的B area25400.459超出no-op面积阈值，raw QoR照实保留。hyp没有delay收益；不得把运行成功称性能成功。完整逐点Area/时间/设备/来源及图在65241的两个`output/development_<实验名>/`中，均明确标为开发而非全905。
 
 正式源冻结门槛已满足：`provenance/mffc_gpu_freeze_audit.json`逐字节核对47个运行源码与65244通过快照相同；冻结后仅协议状态/身份和文档/来源变更。固定seed20261114、预算4含no-op/失败/repair、最多2轮×2提案、每轮16edits、12步校准、area≤1.05no-op、900/1800s时限。正式运行必须独立新目录、使用本地tag `mffc-gpu-905-freeze-20261114`，预检本身不是2715点实验结果。
+
+## 正式完整905运行：进行中
+
+65245已于2026-11-14 03:16:19（北京时间）在Compute/eda实际RUNNING，4CPU/64GiB/1GPU RTX4090、时限48h；提交时本用户其他RUNNING/PENDING为空，总请求4/64/1，未取消任何作业。源码固定为 `ecc85e6ac82571caf9f1a6004098dbe976536256`，本地tag同上。
+
+目录：`/data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db`。`input/{formal-command.json,freeze_identity.json,submission.json,mffc905_preflight.json,session_65245.json}`保存真实命令、冻结身份、资源核验和设备；`output/records/`逐点独占原子发布终态，原始文件在`output/case_NNNN_A|B|Ours/`。脚本完成所有905×3点后自动执行同快照的原始证据审计、统计与图表，输出`output/benchmark905_delivery/`。
+
+当前只有部分方法点终态，不能宣布905完成或给出总体改善。以实时Slurm和`output/formal_completion.json`、`benchmark905_delivery/analysis_completion.json`及精确2715终态覆盖共同判定，不能以本条RUNNING记录代替最终证明。不得重提交仍在运行的65245，已完成点不挑最佳重跑。最终需将完整CSV/JSON/中文报告的小型交付文件放到仓库规定名称，保留所有原始失败、超时及真实runtime。

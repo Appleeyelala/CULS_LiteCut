@@ -9,6 +9,13 @@ using device_int = cuda::atomic_ref<int, cuda::thread_scope_device>;
 using device_double = cuda::atomic_ref<double, cuda::thread_scope_device>;
 constexpr unsigned ALL = 0xffffffffu;
 
+__device__ void add_adjoint(double &location, double value) {
+    // CUDA 11.8 atomic_ref<double> has generic CAS but no floating fetch_add.
+    device_double slot(location);
+    double previous = slot.load(cuda::memory_order_relaxed);
+    while (!slot.compare_exchange_weak(previous, previous + value, cuda::memory_order_acq_rel)) {}
+}
+
 __device__ int take_job(int *queue, int *state, int regions) {
     int previous_done = device_int(state[2]).load(cuda::memory_order_acquire);
     unsigned long long last_progress = clock64();
@@ -111,7 +118,7 @@ __global__ void region_backward(int regions, int edges, int batch,
                 double value = signal * exp((upstream + cost[(int64_t)b * edges + e] - current) / temperature);
                 gradient[(int64_t)b * edges + e] = value;
                 if (s >= 0)
-                    device_double(adjoint[(int64_t)b * regions + s]).fetch_add(value, cuda::memory_order_acq_rel);
+                    add_adjoint(adjoint[(int64_t)b * regions + s], value);
             }
             if (s >= 0 && device_int(pending[s]).fetch_sub(1, cuda::memory_order_acq_rel) == 1)
                 publish((int)s, queue, state, regions);

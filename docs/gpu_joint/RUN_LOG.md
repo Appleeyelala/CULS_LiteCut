@@ -2,6 +2,16 @@
 
 原始 905 运行与状态报告保留；本页只记录本轮新增证据，路径均在 `/data/wushangge/CULS_LiteCut/runs/` 下。真实 Timing 统一使用冻结 ABC/ASAP7 的 `ABC_SCL_LIBERTY`，不引用撤回的 pair 标签。
 
+## 正式面板执行完成，独立后处理尚在进行
+
+Slurm **64983** 已由实时accounting确认 **COMPLETED/0:0，Elapsed 1:42:27**，2CPU/32GiB/1GPU；batch MaxRSS为2083396K，不是GPU显存峰值。目录 `20261113T062048Z-frozen-joint-final-panel-b9c390b3`，快照2257998。精确16设计×3seed×9方法共 **432/432冷方法点PASS**，原始保存证据审计 **1119次成功测量、错误0**；方法进程PASS不代表其全部候选请求成功或QoR胜出。
+
+实际完成文件 `output/final_panel_completion.json` 为 `EXECUTED_AND_AUDITED`；其记录的 `profile_summary.json` SHA256为 `f9b89532eb9d9e7521930bcfcf370ff3d11107f210691917cdfa6fceb7cb7f31`，协议SHA256仍为 `3999f37580ac0923b19d5c4766d26fec53b57ea46f19869461a7e303e325f326`。未修改算法、面板、种子、预算或评价门槛。
+
+依赖后处理 **64984** 已开始；其10项统计/原始审计测试PASS，26开发方法点/108成功测量新来源审计PASS。正式1119测量的独立复核尚在运行，暂不报告完整统计或图表完成。65004仍等待该后处理终态，没有重复提交已有作业。
+
+只读状态报告已单独提交为9b5b065，阅读截点15:57:12；其当时的RUNNING/PENDING状态保留为时间快照，不用于覆盖这里后续的实际终态。新增[复现索引](REPRODUCIBILITY.md)明确区分正式2257998、冻结旧5025a6c和补充控制db64308，源归档/工具构建与每电路完整wall分别说明。
+
 ## 已完成的诊断与旧方法基线
 
 - `20261113T031521Z-gpu-joint-saved-diagnostics-63af3c1f`，Slurm 64920，源码 `5025a6c`，COMPLETED/0:0。12 个历史样例的只读耗时、重复 AIG 字节和 trace 体积诊断；不是新优化或 GPU 性能测量。

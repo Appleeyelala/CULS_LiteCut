@@ -89,14 +89,17 @@ def make_figures(rows, panel, protocol, summary, output):
         ax.set_xlim(.1, 600)
         ax.axhline(1, color='#999999', lw=.6, ls='--')
         ax.set_title(f'{design["index"]:04d} {Path(design["relative_path"]).stem[:24]}', fontsize=8)
+        ax.ticklabel_format(axis='y', style='plain', useOffset=False)
         ax.grid(alpha=.2)
     for ax in list(axes.flat)[len(designs):]:
         ax.set_visible(False)
     handles = [Line2D([], [], color=COLORS[v], label=LABELS[v]) for v in curve_methods]
-    fig.legend(handles=handles, loc='upper center', ncol=3, fontsize=9)
+    # Put the legend outside the figure frame so its two rows cannot cover
+    # the evidence note. bbox_inches='tight' retains it in PNG and PDF.
+    fig.legend(handles=handles, loc='lower center', bbox_to_anchor=(.5, 1.01), ncol=3, fontsize=9)
     fig.text(.5, .01, 'Complete E2E seconds including input staging (log scale)', ha='center')
     fig.text(.005, .5, 'Best validated delay / measured no-op delay', rotation=90, va='center')
-    fig.text(.5, .965, 'All seeds must have a validated area-feasible point; absent curves are not imputed.', ha='center', fontsize=8)
+    fig.text(.5, .985, 'All seeds must have a validated area-feasible point; absent curves are not imputed.', ha='center', fontsize=8)
     fig.tight_layout(rect=(.02, .035, 1, .95))
     save(fig, 'validated_delay_time_curves')
 

@@ -2,6 +2,14 @@
 
 当前目标仍在进行，尚未完成最终验收。主线为跨MFFC梯度联合选择、单电路GPU并行、真实mapped delay与端到端runtime；原905实验保持原样，不作为新版方法的大样本验证。
 
+## 正式结果已完成，补充交付仍在进行
+
+64983和独立分析64984均已COMPLETED/0:0：432个方法点、1119个成功观察的原始证据审计通过。主方法/旧版delay比几何均值0.999398、P90=1.007710，达到预定QoR非劣；总体旧版/主方法中位wall比1.0355，未达到1.5。GPU在9设计27个实际CUDA且请求/工作量一致的配对上中位加速1.326246；其余21对不计CUDA贡献。主方法对random的delay比1.026663，对关闭内层更新为1.043888，梯度独立优势没有成立。
+
+实际结果、全部baseline、时间截点和限制见[FINAL_RESULTS.md](FINAL_RESULTS.md)，复现入口见[REPRODUCIBILITY.md](REPRODUCIBILITY.md)。下文较早条目是开发阶段证据，不覆盖本节终态。
+
+65004已通过37项回归、默认对2257998的同分配真实兼容和四配置smoke，48方法点补充控制仍在运行。65009（`20261113T081810Z-joint-final-delivery-d22ea3ab`、1994e57）依赖afterany:65004，随后只复用审计产物汇总来源/阶段，并重新导出经人工发现遮挡的曲线图，不运行EDA/模型。最终人工复核、补充贡献结论和交付审查仍待完成，因此保持目标进行中。
+
 ## 已实现与已有证据
 
 - 保留冻结旧STE控制；新增一次原DAG adjoint、保留邻接双线性项的局部二次提案，32条轨迹×40步，CPU/CUDA float64，支持八维既往PASS标量反馈。
@@ -23,9 +31,8 @@
 
 - Slurm64980已完成大图ACE/div完整CPU/CUDA配对：327.206/169.602s，约1.929倍，八请求向量/状态/成功指标一致；最终都返回no-op，没有QoR改善。64982随后完成26开发/基线方法点的108成功测量完整原始审计。
 - 初始化不更新控制只关闭内层backward/Adam，仍保留既有校准/大图adjoint；不是全无梯度方法。64981为36/36回归PASS，2seed×4方法8个真实冷child及22个成功测量审计PASS。说明见[INNER_UPDATE_CONTROL.md](INNER_UPDATE_CONTROL.md)。
-- 冻结16输入×3seed×9方法的正式比较已提交为Slurm64983，数据目录`/data/wushangge/CULS_LiteCut/runs/20261113T062048Z-frozen-joint-final-panel-b9c390b3`，快照2257998/tag gpu-joint-evaluation-freeze-20261113。完成情况尚待sacct及最终覆盖/原始审计，不将提交当作结果。自然成本口径见[BASELINE_PROTOCOL.md](BASELINE_PROTOCOL.md)。
-- 竞争性整体QoR、稳定低runtime、梯度独立价值和最终Delay–Runtime比较尚未建立；完整五项交付尚未完成。
-- 后处理工具已在独立快照acdf988准备，Slurm64984依赖afterany:64983，当前PENDING/Dependency；正式运行结束后才执行统计/来源/原始数据复核与PNG/PDF导出，不干扰正式计时。其测试与结果尚未发生，完整交付检查见[GOAL_DELIVERY_AUDIT.md](GOAL_DELIVERY_AUDIT.md)。
-- 按目标的贡献分离要求，补充四设计×三seed×四配置的LiteCut标量/显式pair/修复控制已实现并提交65004，依赖afterany:64984；默认行为先与冻结2257998同分配真实对照，主面板保持原样。实际验证与贡献结论仍待发生，详见[CHANNEL_ABLATIONS.md](CHANNEL_ABLATIONS.md)。
+- 冻结16输入×3seed×9方法的正式比较64983已完成，独立64984统计与四组PNG/PDF已生成并人工查看；正式终态与数值见本页上节，不把原905计入新版验证。自然成本口径见[BASELINE_PROTOCOL.md](BASELINE_PROTOCOL.md)。
+- 整体1.5倍runtime目标和梯度独立价值未得到支持；完整五项交付的最后补充及审查尚未完成。
+- 65004的贡献分离研究正在进行，默认兼容与smoke已通过，48方法点结论待实际完成；主面板保持原样。范围详见[CHANNEL_ABLATIONS.md](CHANNEL_ABLATIONS.md)。
 
 具体源码/数学见[IMPLEMENTATION.md](IMPLEMENTATION.md)、[ADAPTIVE_SELECTOR.md](ADAPTIVE_SELECTOR.md)；所有路径、失败与实际数值见[RUN_LOG.md](RUN_LOG.md)。主报告是7e5bbc1记录的阅读截点，后续新实现和实验在本目录继续追加，不回写旧905证据。

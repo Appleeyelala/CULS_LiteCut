@@ -12,6 +12,12 @@ Slurm **64983** 已由实时accounting确认 **COMPLETED/0:0，Elapsed 1:42:27**
 
 只读状态报告已单独提交为9b5b065，阅读截点15:57:12；其当时的RUNNING/PENDING状态保留为时间快照，不用于覆盖这里后续的实际终态。新增[复现索引](REPRODUCIBILITY.md)明确区分正式2257998、冻结旧5025a6c和补充控制db64308，源归档/工具构建与每电路完整wall分别说明。
 
+后续更新：**64984已COMPLETED/0:0，Elapsed7:01，MaxRSS420804K**。10/10分析测试通过，正式432方法点/1119成功观察独立原始复核通过，四组PNG/PDF和完整CSV/JSON在 `20261113T070050Z-frozen-joint-final-synthesis-f895a375/output/final_synthesis/`。主方法相对旧版geom=0.999398、P90=1.007710，QoR非劣门槛通过；中位wall比1.0355未达到1.5。相对random和no-inner的delay比1.026663/1.043888，保留负结果。实际CUDA的9设计27同工作量配对中位端到端加速1.326246；21个CPU/无提案配对不计GPU贡献。详细解释见[FINAL_RESULTS.md](FINAL_RESULTS.md)。
+
+四张PNG已逐张人工查看：散点/GPU/来源图可读，时间曲线顶端图例与说明重叠，且微小ratio差异使用加性offset。只调整显示、保留数值和原图，另加入尚缺的数据来源分组与阶段成本摘要；追加分析源1994e57，目录 `20261113T081810Z-joint-final-delivery-d22ea3ab`，Slurm **65009**，2CPU/8GiB/0GPU/15min，afterany:65004。提交前读取当前Compute配置、全部本用户RUNNING/PENDING及65004真实handle；加入后总请求4CPU/24GiB/1GPU。它只消费完成审计产物，不执行新的EDA或模型，不干扰正式和补充计时。
+
+65004已实际通过 **37/37回归**、同分配默认c1355对冻结2257998的逐请求/真实PO/area/delay兼容检查，以及四个真实smoke配置的原始审计；48方法点正式补充仍在运行。未将前置PASS记为整个消融完成，也未重新提交原实验。
+
 ## 已完成的诊断与旧方法基线
 
 - `20261113T031521Z-gpu-joint-saved-diagnostics-63af3c1f`，Slurm 64920，源码 `5025a6c`，COMPLETED/0:0。12 个历史样例的只读耗时、重复 AIG 字节和 trace 体积诊断；不是新优化或 GPU 性能测量。

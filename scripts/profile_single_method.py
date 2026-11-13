@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 import time
+from threading import Lock
 
 ENTRY_TIME = time.perf_counter()
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -34,6 +35,7 @@ def run_case(args):
     work = output / f'case_{row["index"]:04d}'
     stages = defaultdict(lambda: {'calls': 0, 'inclusive_s': 0.0})
     timeline = []
+    accounting_lock = Lock()
 
     def instrument(owner, name, label):
         original = getattr(owner, name)
@@ -46,8 +48,6 @@ def run_case(args):
                 return result
             finally:
                 completed = time.perf_counter()
-                stages[label]['calls'] += 1
-                stages[label]['inclusive_s'] += completed - started
                 event = {'stage': label, 'started_monotonic': started,
                          'completed_monotonic': completed, 'elapsed_s': completed - started}
                 if label == 'request_replay_and_validation' and isinstance(result, dict):
@@ -57,7 +57,10 @@ def run_case(args):
                     if result.get('metrics'):
                         event['metrics'] = {k: result['metrics'][k] for k in
                                             ['cec', 'timing_model', 'delay_ps', 'area']}
-                timeline.append(event)
+                with accounting_lock:
+                    stages[label]['calls'] += 1
+                    stages[label]['inclusive_s'] += completed - started
+                    timeline.append(event)
         setattr(owner, name, wrapped)
 
     for name in ['parse_aig', 'make_partition', 'enumerate_candidates',
@@ -90,9 +93,28 @@ def run_case(args):
                        'includes required preparation and original/noop measurements. '
                        'No execution of unrelated greedy/random/joint controls.'}
     try:
-        experiment = pipeline.Experiment(
+        experiment_class, extra = pipeline.Experiment, {}
+        if '_batch_' in args.variant:
+            from global_timing.batch_execution import BatchedExperiment
+            def completed(result, began, ended):
+                event = {'stage': 'request_replay_and_validation', 'kind': 'request_completed',
+                         'started_monotonic': began, 'completed_monotonic': ended, 'elapsed_s': ended - began,
+                         'index': result['index'], 'method': result['method'], 'status': result['status'],
+                         'source': (result.get('prediction_before_evaluation') or {}).get('source', 'unknown')}
+                if result.get('metrics'):
+                    event['metrics'] = {k: result['metrics'][k] for k in ['cec', 'timing_model', 'delay_ps', 'area']}
+                with accounting_lock:
+                    stages['request_replay_and_validation']['calls'] += 1
+                    stages['request_replay_and_validation']['inclusive_s'] += ended - began
+                    timeline.append(event)
+            experiment_class = BatchedExperiment
+            extra = {'validation_workers': args.validation_workers, 'on_completion': completed}
+            record['validation_workers'] = args.validation_workers
+            record['algorithm_sha256']['batch_execution'] = digest(
+                Path(pipeline.__file__).with_name('batch_execution.py'))
+        experiment = experiment_class(
             source, tools['gpuls'], tools['abc'], run / 'input/asap7',
-            run / 'input/student_checkpoint', work, config)
+            run / 'input/student_checkpoint', work, config, **extra)
         original = experiment.evaluator.evaluate(source, work / 'original')
         baseline = experiment.evaluate_choice(experiment.noop, 'replay_noop', 0)
         if baseline['status'] != 'PASS':
@@ -111,7 +133,8 @@ def run_case(args):
                 Path(pipeline.__file__).with_name('joint_optimization.py'))
             instrument(joint_optimization, 'joint_proposals', 'gradient_proposals')
             search = experiment.gradient_search(baseline, 'area_constraint',
-                proposal_generator=partial(joint_optimization.joint_proposals, config=proposal_config))
+                proposal_generator=partial(joint_optimization.joint_proposals, config=proposal_config),
+                choice_batch_evaluator=experiment.evaluate_many if '_batch_' in args.variant else None)
         record.update(status='PASS', original=original, no_op=baseline,
                       selected=search['best'], preparation_runtime_s=experiment.preparation_runtime_s,
                       method_runtime_s=search['exclusive_method_runtime_s'],
@@ -153,13 +176,15 @@ def main():
     parser.add_argument('--case-timeout', type=int, default=1800)
     parser.add_argument('--variants', default='legacy_cpu',
                         help='Sequential controls: legacy_cpu,criticality_cpu,criticality_cuda,feedback_cpu,feedback_cuda')
-    parser.add_argument('--variant', choices=['legacy_cpu', 'criticality_cpu', 'criticality_cuda', 'feedback_cpu', 'feedback_cuda'], default='legacy_cpu')
+    parser.add_argument('--variant', choices=['legacy_cpu', 'criticality_cpu', 'criticality_cuda', 'feedback_cpu', 'feedback_cuda',
+                                            'feedback_batch_cpu', 'feedback_batch_cuda'], default='legacy_cpu')
     parser.add_argument('--legacy-source', type=Path, help='Frozen old /data source for legacy control.')
     parser.add_argument('--source-root', type=Path, help=argparse.SUPPRESS)
     parser.add_argument('--output-base', type=Path, help=argparse.SUPPRESS)
     parser.add_argument('--proposal-steps', type=int, default=40)
     parser.add_argument('--trajectories', type=int, default=32)
     parser.add_argument('--max-changes', type=int, default=32)
+    parser.add_argument('--validation-workers', type=int, default=2)
     args = parser.parse_args()
     args.run = args.run.resolve()
     args.tool_run = args.tool_run.resolve()
@@ -169,7 +194,8 @@ def main():
         run_case(args)
         return
     variants = args.variants.split(',')
-    if len(set(variants)) != len(variants) or not set(variants) <= {'legacy_cpu', 'criticality_cpu', 'criticality_cuda', 'feedback_cpu', 'feedback_cuda'}:
+    if len(set(variants)) != len(variants) or not set(variants) <= {'legacy_cpu', 'criticality_cpu', 'criticality_cuda', 'feedback_cpu', 'feedback_cuda',
+                                                                'feedback_batch_cpu', 'feedback_batch_cuda'}:
         parser.error('Unknown or repeated variant.')
     if args.legacy_source is not None and (not args.legacy_source.resolve().is_relative_to('/data/wushangge')
                                           or not (args.legacy_source / 'global_timing/pipeline.py').is_file()):
@@ -221,7 +247,7 @@ def main():
                        '--evaluations', str(args.evaluations), '--tool-timeout', str(args.tool_timeout),
                        '--variant', variant, '--source-root', str(source), '--output-base', str(base),
                        '--proposal-steps', str(args.proposal_steps), '--trajectories', str(args.trajectories),
-                       '--max-changes', str(args.max_changes)]
+                       '--max-changes', str(args.max_changes), '--validation-workers', str(args.validation_workers)]
             started = time.perf_counter()
             log = args.run / 'logs' / f'profile_{variant}_{row["index"]:04d}.log'
             with log.open('x') as stream:

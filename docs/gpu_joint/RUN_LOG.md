@@ -75,9 +75,13 @@
 
 `20261113T040910Z-prepared-replay-validation-9244db37`，Slurm **64934**，源码 **6eed787**，失败保留：首组 **14 PASS/1 FAIL**，后续全量开启复用的回归因前组失败未执行。已通过的是 no-op/四组联合配置与当前默认路径、冻结旧二进制的全部 AIG/trace 精确一致，以及动态拒绝一致、12 项默认真实工具回归。失败项为负向夹具错误地期待 gpuls 必然非零退出；原 CLI 实际打印候选越界错误、没有成功 AIG/trace，却可能返回 0。后续修正检查明确错误与成功产物缺失，未修改原 dispatcher，也未把旧作业改成 PASS。复用编译前核对了 125 个 CULS 文件，源树 SHA256 `04d5f0135e5bd0c4d27fb49ecddc460b205d8bbfd338c5d9bea7d38c2eea20f4`，新 gpuls SHA256 `b7fb8732e3cc9a25a20176660e0ba48f365b21999f1acf1df41fb9e2a3fdcf5d`。
 
+`20261113T041250Z-prepared-replay-negative-fix-3ce36193`，Slurm **64935**，源码 **85acd9f**，COMPLETED/0:0，Elapsed 1m11s。`output/replay_tests.json` **15/15 PASS**；随后开启复用的 `output/prepared_regressions.json` **12/12 PASS**，覆盖常量、重复实例、接口、CEC/Liberty、一致性与错误处理。新编译二进制仍为上述 b7fb8732…；只复用精确匹配的编译产物，两个旧失败作业保持 FAILED。
+
 ## 后续计时证据的格式
 
 `profile_single_method.py` 新增独立 `case_NNNN_timeline.json`，记录真实请求完成时的 monotonic 时间、来源和已验证 delay/area。父进程记录子进程启动时间，供相同时间截点与 time-to-quality 统计使用；不从文件 mtime 推断，也不回写上述旧 run。旧诊断 run 没有这些结构化时间戳，只能引用其总 wall 和工具计时，不能补造 30/120/600 秒处曲线。
+
+`20261113T041347Z-joint-timeline-check-8ad162dc`，Slurm **64936**，源码 **85acd9f**，COMPLETED/0:0，Elapsed 33s。真实 ss_pcm 反馈 CPU/CUDA 均 PASS、最终 328.026855 ps；cold wall 13.402/16.574 s。每模式保存 8 个真实请求完成事件，时间均在父进程的启动/退出区间内，timeline 文件哈希匹配。该检查验证了稀疏版的真实安装与时间轴，仍没有使 ss_pcm 优于旧方法，也不是 GPU 冷进程加速结果。
 
 ## 冻结评价面板
 

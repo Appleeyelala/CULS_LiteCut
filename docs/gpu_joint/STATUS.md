@@ -9,7 +9,7 @@
 - 稀疏传回 argmax 编辑、复用 CPU 冲突索引、稀疏 hard 组合打分。Slurm 64931 的相关数值、梯度、反馈、合法性和 CPU/CUDA 测试为 27/27 PASS。
 - 真实开发闭环两轮各 9/9 PASS；每方法 8 请求，包含失败/修复/基线。新 CPU/CUDA 的最终选择与 QoR 一致。
 - 三个大图的同算法 float64 CPU/CUDA 组件对照完成；稀疏版与旧版本代理输入哈希、最终组合和顺序哈希都匹配。div/hyp/voter 的单次提案调用 CPU/CUDA 比值约 27.59/1.70/23.03，均只属于组件范围。
-- 原生多配置 replay 的一次枚举复用已编译；no-op/四组跨 MFFC 配置的完整 trace/AIG 与默认和冻结旧工具一致，动态拒绝一致。完整开启复用回归正在继续，不先接入梯度闭环。
+- 原生多配置 replay 的一次枚举复用已编译；no-op/四组跨 MFFC 配置的完整 trace/AIG 与默认和冻结旧工具一致，动态拒绝一致。64935 的默认/新功能回归 15/15 PASS，开启复用回归另 12/12 PASS。已提供 Python 批量接口，集成回归尚未完成。
 
 源码、数学与边界见 [IMPLEMENTATION.md](IMPLEMENTATION.md)；实际路径、失败记录和数值见 [RUN_LOG.md](RUN_LOG.md)；原生部分见 [PREPARED_REPLAY.md](PREPARED_REPLAY.md)。
 
@@ -35,6 +35,6 @@
 
 ## 当前正在收尾的验证
 
-Slurm 64935 在新目录复用精确源树匹配的编译产物，重验非法候选及全部默认/开启复用回归；64936 用真实 ss_pcm CPU/CUDA 闭环验证稀疏版与新请求完成时间轴。此前 64933/64934 失败目录保留，原因分别是测试夹具覆盖 unittest.run、错误地假设旧 dispatcher 必然非零退出，不能回写为 PASS。
+Slurm 64935/64936 均已 COMPLETED/0:0；64936 的真实 ss_pcm CPU/CUDA 最终 QoR 相同、8 个完成事件的时间范围和哈希有效。此前 64933/64934 失败目录保留，原因分别是测试夹具覆盖 unittest.run、错误地假设旧 dispatcher 必然非零退出，不能回写为 PASS。当前新增批量执行接口将复用一次原生 replay，并对每个完整成功 AIG 分别 CEC/mapping；尚待集成测试与搜索对照。
 
 后续依次以这些验证决定是否接入批量 replay，检查增益拒绝策略和重复失败成本，再实施独立消融与冻结面板比较；仍保留完整安装、CEC、真实面积约束和统一 Liberty timing。上述待办不是已经实现或获得优势的结论。

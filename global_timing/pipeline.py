@@ -157,7 +157,7 @@ class Experiment:
         return float(scalar_objective(po, area, reference['delay_ps'], reference['area'], mode,
                                       self.config.area_limit_ratio, area_weight=self.config.area_weight))
 
-    def gradient_search(self, baseline, mode, proposal_generator=None):
+    def gradient_search(self, baseline, mode, proposal_generator=None, choice_batch_evaluator=None):
         started = time.monotonic()
         method = 'gradient_' + mode
         model = TimingSurrogate(self.partition, self.catalogue, self.scores, baseline['metrics'])
@@ -189,23 +189,51 @@ class Experiment:
                     incumbent=best['choices'], steps=self.config.gradient_steps, restarts=self.config.gradient_restarts,
                     mode=mode, area_limit_ratio=self.config.area_limit_ratio, area_weight=self.config.area_weight, **context)
                 save_json(self.output / method / f'gradients_{iteration:04d}.json', trace)
-                candidates = [dict(p, source='joint_selection_gradient') for p in proposals[:min(remaining, self.config.feedback_batch)]]
+                candidates = [dict(p, source=p.get('source', 'joint_selection_gradient'))
+                              for p in proposals[:min(remaining, self.config.feedback_batch)]]
             if not candidates:
                 choices = self.fresh_random(rng, seen)
                 if choices is None:
                     stop_reason = 'no_unseen_feasible_point_found_by_sampling'
                     break
                 candidates = [{'choices': choices, 'source': 'exploration_after_duplicate_projection'}]
-            for candidate in candidates:
+            batched = None
+            if choice_batch_evaluator is not None:
+                unique, known = [], set(seen)
+                for candidate in candidates:
+                    key = tuple(candidate['choices'])
+                    if key not in known:
+                        unique.append(candidate)
+                        known.add(key)
+                candidates = unique
+                predictions = []
+                for candidate in candidates:
+                    with torch.no_grad():
+                        po, area = model(model.one_hot(candidate['choices']))
+                    predictions.append(dict(candidate, po_arrivals_ps=po.tolist(), area=float(area),
+                        delay_ps=float(po.max()), training_observations=len(fitted_indices),
+                        training_observation_indices=fitted_indices.copy()))
+                if candidates:
+                    batched = choice_batch_evaluator([c['choices'] for c in candidates], method,
+                                                    len(observations), predictions)
+                    if len(batched) != len(candidates):
+                        raise ValueError('Batch evaluator omitted requested observations.')
+            for candidate_index, candidate in enumerate(candidates):
                 choices = candidate['choices']
                 if tuple(choices) in seen:
                     continue
-                with torch.no_grad():
-                    po, area = model(model.one_hot(choices))
-                prediction = dict(candidate, po_arrivals_ps=po.tolist(), area=float(area),
-                                  delay_ps=float(po.max()), training_observations=len(fitted_indices),
-                                  training_observation_indices=fitted_indices.copy())
-                observation = self.evaluate_choice(choices, method, len(observations), prediction)
+                if batched is None:
+                    with torch.no_grad():
+                        po, area = model(model.one_hot(choices))
+                    prediction = dict(candidate, po_arrivals_ps=po.tolist(), area=float(area),
+                                      delay_ps=float(po.max()), training_observations=len(fitted_indices),
+                                      training_observation_indices=fitted_indices.copy())
+                    observation = self.evaluate_choice(choices, method, len(observations), prediction)
+                else:
+                    observation = batched[candidate_index]
+                    if (observation['choices'] != choices or observation['index'] != len(observations)
+                            or observation['status'] not in ('PASS', 'FAIL')):
+                        raise ValueError('Batch evaluator substituted or reordered a request.')
                 observations.append(observation)
                 seen.add(tuple(choices))
                 repaired = self.repair_choice(observation)

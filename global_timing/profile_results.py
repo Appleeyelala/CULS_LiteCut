@@ -215,6 +215,7 @@ def audit_profiles(profiles):
                 torch_version=detail.get('torch_version'),
                 python_cuda_device=detail.get('python_cuda_device'),
                 joint_proposal_config=detail.get('joint_proposal_config'),
+                ablation=detail.get('ablation'),
                 regions=detail.get('regions'), decisions=detail.get('decisions'), candidates=detail.get('candidates'),
                 input_sha256=detail['input_sha256'], domain_sha256=domain_hash,
                 baseline=baseline, points=points, requests=len(observations),

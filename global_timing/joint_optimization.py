@@ -122,7 +122,7 @@ class FrozenCriticalityObjective(nn.Module):
                     pair = (compressed[target], compressed[source])
                     value = log_adjoint[edge] * model.interaction_weights.detach()
                     pairs[pair] = pairs.get(pair, torch.zeros_like(value)) + value
-            self.structural_pairs = sorted(pairs)
+            self.structural_pairs = sorted(pairs) if getattr(model, 'explicit_interactions_enabled', True) else []
             self.register_buffer('feature_sizes', model.sizes.detach().clone() / max(model.partition.aig.and_count, 1))
             self.register_buffer('region_decision_counts', torch.bincount(inverse, minlength=len(active_regions)).to(torch.float64))
             # Zero interaction weights are common before calibration. Remove
@@ -386,6 +386,7 @@ def joint_proposals(model, seen, seed, incumbent=None, steps=40, restarts=2,
                'original_anchor_objective_gradient_norm': original_signal_norm,
                'feedback_fit': feedback_fit,
                'retained_interaction_pairs': int(cpu_objective.pair_target.numel()),
+               'ablation_mode': getattr(model, 'ablation_mode', None),
                'prepare_adjoint_s': prepared - started, 'total_proposal_s': elapsed,
                'transfer_and_initialize_s': initialized - prepared,
                'inner_optimization_s': optimized - initialized,

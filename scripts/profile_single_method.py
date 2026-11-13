@@ -22,6 +22,7 @@ PROFILE_VARIANTS = (
     'original', 'native_abc', 'native_culs', 'random_cpu', 'random_batch',
     'random_physical_batch', 'greedy_litecut', 'greedy_litecut_physical',
     'adaptive_no_inner_batch_auto',
+    'adaptive_no_score_batch_auto', 'adaptive_no_pairs_batch_auto', 'adaptive_no_repair_batch_auto',
 )
 
 
@@ -164,9 +165,21 @@ def run_case(args):
                 devices.update(r['device'] for r in trace if 'device' in r)
                 engines.update(r.get('proposal_engine', 'frozen_criticality') for r in trace)
                 return proposals, trace
+            ablation_options = {}
+            ablation_mode = next((m for m in ('no_score', 'no_pairs', 'no_repair') if ('_' + m + '_') in args.variant), None)
+            if ablation_mode is not None:
+                from global_timing.ablations import configure_model, no_repair
+                record['algorithm_sha256']['ablations'] = digest(Path(pipeline.__file__).with_name('ablations.py'))
+                record['ablation'] = {'mode': ablation_mode, 'student_preparation_retained': True,
+                                      'repair_enabled': ablation_mode != 'no_repair'}
+                if ablation_mode == 'no_repair':
+                    ablation_options['repairer'] = no_repair
+                else:
+                    ablation_options['model_transform'] = lambda model: configure_model(model, ablation_mode)
             search = experiment.gradient_search(baseline, 'area_constraint',
                 proposal_generator=propose,
-                choice_batch_evaluator=experiment.evaluate_many if '_batch_' in args.variant else None)
+                choice_batch_evaluator=experiment.evaluate_many if '_batch_' in args.variant else None,
+                **ablation_options)
             record.update(proposal_devices_used=sorted(devices), proposal_engines_used=sorted(engines))
         record.update(status='PASS', original=original, no_op=baseline,
                       selected=search['best'], preparation_runtime_s=experiment.preparation_runtime_s,

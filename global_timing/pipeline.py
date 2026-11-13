@@ -135,10 +135,14 @@ class Experiment:
         return float(scalar_objective(po, area, reference['delay_ps'], reference['area'], mode,
                                       self.config.area_limit_ratio, area_weight=self.config.area_weight))
 
-    def gradient_search(self, baseline, mode, proposal_generator=None, choice_batch_evaluator=None):
+    def gradient_search(self, baseline, mode, proposal_generator=None, choice_batch_evaluator=None,
+                        model_transform=None, repairer=None):
         started = time.monotonic()
         method = 'gradient_' + mode
         model = TimingSurrogate(self.partition, self.catalogue, self.scores, baseline['metrics'])
+        if model_transform is not None:
+            model_transform(model)
+        repair_function = self.repair_choice if repairer is None else repairer
         observations = [dict(baseline, method=method, baseline_reused=True)]
         seen = {tuple(self.noop)}
         rng = random.Random(self.config.seed)
@@ -214,7 +218,7 @@ class Experiment:
                         raise ValueError('Batch evaluator substituted or reordered a request.')
                 observations.append(observation)
                 seen.add(tuple(choices))
-                repaired = self.repair_choice(observation)
+                repaired = repair_function(observation)
                 if repaired is not None and tuple(repaired) not in seen:
                     repair_pending.append({'choices': repaired, 'source': 'explicit_feasibility_repair',
                                            'parent_index': observation['index'], 'parent_source': candidate['source']})

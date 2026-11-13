@@ -22,7 +22,7 @@
 - MFFC、Decision、cut-bounded removable region和library candidate不同；一MFFC可含多Decision。所有节点ID空间和映射后ID不强制对齐。
 - 梯度只经过可微代理/选择，不经过Student、CEC或ABC。no-inner控制不等于完全无梯度；训练残差下降、非零梯度或global预测下降不当作真实优化证据。
 - 面积以真实no-op的1.05倍为准；最终非劣门槛保持原48配对定义，缺项不得按有利子集判通过。相同时间的替代条件只作前瞻已指定口径的描述，不事后挑阈值。
-- 原生CUSL/GPU能力和新增GPU提案/复用分开归属；整个方法对旧版加速和相同算法CPU/CUDA纯贡献分开。
+- 原生CULS/GPU能力和新增GPU提案/复用分开归属；整个方法对旧版加速和相同算法CPU/CUDA纯贡献分开。
 - 真实结果、source快照、模型与原仓库保持不变；大数据/新输出均在`/data`。无发布、force-push或外部remote配置。
 - 正式作业64983与依赖后处理64984均需用sacct检查终态、退出码与原始日志。PENDING/RUNNING或旧run.json状态不证明完成，也不允许重复提交主实验。
 

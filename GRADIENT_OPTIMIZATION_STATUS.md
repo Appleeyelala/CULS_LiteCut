@@ -2,6 +2,8 @@
 
 整理日期：2026-11-13（北京时间）。本次核对的源码基线：`5025a6c863f0a7766c41707bcc1828723afce447`；全量 benchmark 源码：`160b2187eee3b47799e58b658e39f13d40064b61`。逐文件比较确认，两者的 pipeline、optimization、surrogate、arrival、LiteCut、candidate、evaluation 和 structure 实现字节相同；后续提交增加了分析、验证、诊断脚本和文档。本文只阅读源码、现有 JSON/CSV、日志和作业完成记录，没有运行模型、优化器、测试或新实验。第 4.5 节补入已经完成的单策略冷进程测量，不将其写成新算法结果。
 
+后续研究另见 [GPU 联合优化当前进度](docs/gpu_joint/STATUS.md)。本文保留上述旧版闭环与 905 主实验的阅读基线；其中“尚无新增 GPU 梯度选择”的判断限于该基线，不替代后来新增提案器的组件和开发验证结果。后续实验不并入本文的旧版统计。
+
 ## 0. 当前结论与阅读边界
 
 **已经实现并验证的是：用冻结 LiteCut 分数和结构特征构造一个可校准的全局时序代理，通过 Softmax + STE + Adam 联合提出多个 Decision 的离散选择，再以真实 rewrite、CEC 和 ABC Liberty timing 校验并反馈。尚未证明的是：这个代理的下降能够可靠引导映射后 critical delay 下降，或者梯度搜索稳定优于同预算随机搜索。**

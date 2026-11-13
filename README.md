@@ -1,6 +1,8 @@
 # CULS LiteCut research workspace
 
-这里集中管理梯度下降与 LiteCut 研究的源码、证据和项目历史，研究对象是 AIG rewriting、strict maximal MFFC、候选局部 delay 与映射后 timing。长期目标是形成论文。本轮完整优化框架的实现与全量验证已完成；[逐项验收](docs/global_timing/REQUIREMENTS_AUDIT.md)记录完成证据和明确遗漏，[运行记录](docs/global_timing/RUN_LOG.md)区分历史证据与新实验。工程完成不等于论文结论或算法优势已经确立。
+这里集中管理梯度下降与 LiteCut 研究的源码、证据和项目历史，研究对象是 AIG rewriting、strict maximal MFFC、候选局部 delay 与映射后 timing。长期目标是形成论文。此前完整优化框架的实现与全量验证已完成；[逐项验收](docs/global_timing/REQUIREMENTS_AUDIT.md)记录完成证据和明确遗漏，[运行记录](docs/global_timing/RUN_LOG.md)区分历史证据与新实验。工程完成不等于论文结论或算法优势已经确立。
+
+当前正在改进联合梯度选择与单电路 GPU 并行，见 [进度与验收边界](docs/gpu_joint/STATUS.md)。已有可关闭的新提案器、真实开发对照和同工作量 CPU/CUDA 组件证据；竞争性 QoR、稳定端到端加速和梯度独立贡献尚未建立，最终冻结面板比较尚未执行。原 905 结果保持原样。
 
 源码工作区是 `/home/wushangge/CULS_LiteCut`，运行与数据根目录是 `/data/wushangge/CULS_LiteCut`。
 

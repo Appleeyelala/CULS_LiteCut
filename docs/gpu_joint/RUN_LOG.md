@@ -89,6 +89,20 @@
 
 后续冷进程比较将 CUDA cache 放到各 child 独立的 `/data/.../cache/cuda_<variant>_<index>`，记录 LiteCut cache hit、Torch 线程数和实际 GPU；不清空共享文件系统页缓存。输入校验/复制计时单列，并给每个独立部署方法计入一份 staging 成本。旧对照可显式同时指定冻结源码和冻结 tool-run；CPU/CUDA 新方法与 batch 工程控制使用相同的新工具。这些约束用于后续比较，不回写此前诊断的缓存条件或时间。
 
+## 同分配、隔离缓存的自由搜索对照
+
+`20261113T043907Z-joint-batch-dev-controls-73353bd5`，Slurm **64945**，源码 **6504546**，COMPLETED/0:0，Elapsed 3m02s，12/12 PASS。旧算法使用冻结 5025a6c 源码和原 741990f3… 工具，新方法统一使用 b7fb8732… 工具；同一分配 2 CPU、16 GiB、1 GPU，顺序冷进程、各方法 8 请求，所有 LiteCut cache_hit=false，CUDA cache 每个 child 独立。
+
+| 输入 | 旧 CPU：delay ps / wall s | 反馈顺序 CPU | 反馈 batch CPU | 反馈 batch CUDA |
+|---|---|---|---|---|
+| DMA | 2380.250980 / 20.584 | 2301.566650 / 18.152 | 2301.566650 / 17.401 | 2301.566650 / 17.999 |
+| c1355 | 360.111877 / 13.641 | 360.111877 / 11.803 | 360.111877 / 10.989 | 360.111877 / 11.994 |
+| ss_pcm | 323.908447 / 12.292 | 328.026855 / 12.343 | 328.026855 / 18.623 | 328.026855 / 13.141 |
+
+`20261113T045111Z-batch-control-analysis-99c88f36`，Slurm **64951**，源码 **e43a3c8**，COMPLETED/0:0。只读核对全部 12 个最终原始 AIG、trace 精确安装、CEC 和 Liberty delay/area/全 PO 日志；6 个工程配对的**逐请求向量、PASS/FAIL、全部成功真实指标完全一致**，timeline 完整且范围正确。报告/CSV/哈希入口为 `output/profile_analysis/{REPORT.md,results.csv,summary.json,input_hashes.json}`。
+
+batch 将 DMA/c1355 的实际 replay 命令从 8 减至 5，ss_pcm 从 8 减至 7；配对的 CEC/mapping 次数不变，未省略验证。但单次端到端时间不稳定、ss_pcm batch CPU 还更慢，没有达到稳定的整体加速或更好梯度价值结论。DMA 四个直接提案仍全部 REVERTED，best 为修复；新增安装策略将按 [INSTALL_POLICY.md](INSTALL_POLICY.md) 单独控制检验，不与本表混为纯工程加速。
+
 ## 冻结评价面板
 
 [config/gpu_joint_panel.json](../../config/gpu_joint_panel.json) 固定 16 个输入与种子 20261111/12/13；生成器为 [freeze_joint_panel.py](../../scripts/freeze_joint_panel.py)。只使用冻结输入清单的 AND 规模、来源、文件名家族和 SHA，不查看候选数、delay 或运行时间。排除开发家族，四个区间各选 4 项：128–4095、4096–8191、8192–16383、16384–50000 AND。第一区间原拟分成 128–511 与 512–4095，但输入清单前者只有两个设计且一个属于开发集，因此在成功生成/冻结之前合并，仍未使用结果信息。

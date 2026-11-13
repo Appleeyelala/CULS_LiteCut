@@ -1079,6 +1079,9 @@ void CPUSolver::Reset(int nInputs, int nOutputs, int nTotal,
 void CPUSolver::Rewrite(bool fUseZeros, bool GPUReplace) {
     expected = 0;
     const PreparedReplayEnumeration *prepared = rewriteAuditOptions.preparedReplay;
+    const bool allowNonPositive = rewriteAuditOptions.allowNonPositiveReplayGain;
+    if (allowNonPositive && (!GPUReplace || fUseZeros || !rewriteAuditOptions.enabled || !rewriteAuditOptions.replayMode))
+        throw std::runtime_error("nonpositive gain policy is restricted to audited explicit positive-mask replay");
     if (prepared && (!GPUReplace || fUseZeros || !rewriteAuditOptions.replayMode))
         throw std::runtime_error("prepared enumeration is restricted to explicit positive-gain replay");
     if (prepared && (prepared->n != n || prepared->numInputs != numInputs ||
@@ -1174,7 +1177,7 @@ void CPUSolver::Rewrite(bool fUseZeros, bool GPUReplace) {
         };
 
         int replacedCount = 0, compromisedCount = 0, revertedCount = 0, preEvalRejectCount = 0, smallCutRejectCount = 0, newIdxRejectCount = 0;
-        int replacedPosCount = 0, replacedZeroCount = 0;
+        int replacedPosCount = 0, replacedZeroCount = 0, replacedNegativeCount = 0;
         std::vector<RewriteAuditRecord> auditRecords;
         std::vector<int> firstDeletedByInternalRoot;
         std::vector<int> firstDeletedByExecutionOrder;
@@ -1331,12 +1334,14 @@ void CPUSolver::Rewrite(bool fUseZeros, bool GPUReplace) {
                 auditRecord.added = added;
                 auditRecord.savedAddedEvaluated = true;
             }
-            if (saved - added > 0 || (saved == added && fUseZeros)) {
+            if (saved - added > 0 || (saved == added && fUseZeros) || allowNonPositive) {
                 replacedCount++;
                 if (saved - added > 0)
                     replacedPosCount++;
-                else
+                else if (saved == added)
                     replacedZeroCount++;
+                else
+                    replacedNegativeCount++;
 
                 expected += saved - added;
                 isDeleted[i] = 0;
@@ -1346,6 +1351,8 @@ void CPUSolver::Rewrite(bool fUseZeros, bool GPUReplace) {
                 ref[newIdx]++;
                 if (rewriteAuditOptions.enabled) {
                     auditRecord.status = "ACCEPTED";
+                    if (saved <= added && allowNonPositive)
+                        auditRecord.statusReason = "explicit_replay_nonpositive_gain_allowed";
                     for (int node = 0; node <= n; ++node) {
                         if (!deletedBeforeExecution[node] && isDeleted[node] && node != i) {
                             auditRecord.deletedNodesInternal.push_back(node);
@@ -1376,6 +1383,8 @@ void CPUSolver::Rewrite(bool fUseZeros, bool GPUReplace) {
             rewriteAuditWriteTrace(rewriteAuditOptions, auditRecords);
         free(replace);
         printf("transitive dependency cycle rejects: %d\n", cycleRejectCount);
+        if (allowNonPositive)
+            printf("explicit replay gain policy: allow_nonpositive; negative-gain accepts %d\n", replacedNegativeCount);
         CHOICE_TIME += clock() - choiceStartTime;
         printf("successfully replaced %d cones (pos %d, zero %d), reverted %d cones, compromised %d cones, pre-eval rejected %d cones, small cut reject %d cones, new idx reject %d cones\n", 
                replacedCount, replacedPosCount, replacedZeroCount, revertedCount, compromisedCount, preEvalRejectCount, smallCutRejectCount, newIdxRejectCount);
@@ -2465,6 +2474,16 @@ int gate3eExecutionReplay(const char * outputDir, const char * inputPath,
         rw::PreparedReplayEnumeration prepared;
         const char *prepareFlag = std::getenv("CULS_REPLAY_PREPARED");
         const bool usePrepared = prepareFlag && std::string(prepareFlag) == "1";
+        const char *gainFlag = std::getenv("CULS_REPLAY_ALLOW_NONPOSITIVE_GAIN");
+        const bool allowNonPositive = gainFlag && std::string(gainFlag) == "1";
+        if (allowNonPositive) {
+            std::ofstream policy(root / "replay_policy.json");
+            if (!policy)
+                throw std::runtime_error("cannot open replay installation policy provenance");
+            policy << "{\"installation_gain_policy\":\"allow_nonpositive\","
+                      "\"candidate_enumeration_zero_gain_enabled\":false,"
+                      "\"leaf_cycle_and_exact_acceptance_required\":true}\n";
+        }
         if (usePrepared) {
             prepared.n = n;
             prepared.numInputs = nPIs;
@@ -2488,7 +2507,8 @@ int gate3eExecutionReplay(const char * outputDir, const char * inputPath,
                 throw std::runtime_error("cannot open prepared replay provenance");
             preparation << "{\"enumeration_count\":1,\"configuration_count\":" << configs.size()
                 << ",\"graph_identity_check\":\"exact reordered fanins/refcounts/interface\","
-                   "\"zero_gain_enabled\":false,\"sequential_install_unchanged\":true}\n";
+                   "\"zero_gain_enabled\":false,\"execution_order_unchanged\":true,"
+                   "\"sequential_install_unchanged\":" << (allowNonPositive ? "false" : "true") << "}\n";
         }
 
         std::ofstream manifest(root / "replay_manifest.jsonl");
@@ -2504,6 +2524,7 @@ int gate3eExecutionReplay(const char * outputDir, const char * inputPath,
             options.enabled = true;
             options.replayMode = true;
             options.preparedReplay = usePrepared ? &prepared : nullptr;
+            options.allowNonPositiveReplayGain = allowNonPositive;
             options.internalToOriginal = graph.newToOld;
             options.originalToRegion = originalToRegion;
             std::vector<bool> selectedInternal(static_cast<size_t>(n + 1), false);

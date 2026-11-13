@@ -81,11 +81,12 @@ def run_case(args):
     for name, path in tools.items():
         if digest(path) != report['binaries'][name]['sha256']:
             raise ValueError('Frozen binary hash mismatch: ' + name)
+    config_extra = {} if args.variant == 'legacy_cpu' else {'allow_nonpositive_gain': 'physical' in args.variant}
     config = pipeline.SearchConfig(
         seed=args.seed, evaluation_budget=args.evaluations, warmup_evaluations=2,
         gradient_steps=20 if args.variant == 'legacy_cpu' else args.proposal_steps,
         gradient_restarts=2, calibration_steps=30,
-        feedback_batch=4, modes=('area_constraint',), timeout_s=args.tool_timeout)
+        feedback_batch=4, modes=('area_constraint',), timeout_s=args.tool_timeout, **config_extra)
     record = {'status': 'RUNNING', 'index': row['index'], 'input_name': row['relative_path'],
               'input_sha256': row['sha256'], 'strategy': args.variant,
               'source_root': str(Path(pipeline.__file__).resolve().parents[1]),
@@ -95,6 +96,7 @@ def run_case(args):
               'cuda_cache': str(cuda_cache), 'cuda_cache_regime': 'isolated_per_cold_child',
               'torch_version': str(pipeline.torch.__version__),
               'torch_num_threads': pipeline.torch.get_num_threads(),
+              'installation_gain_policy': 'allow_nonpositive' if 'physical' in args.variant else 'positive_gain',
               'scope': 'One cold child process, one circuit, one gradient strategy; '
                        'includes required preparation and original/noop measurements. '
                        'No execution of unrelated greedy/random/joint controls.'}
@@ -186,7 +188,8 @@ def main():
     parser.add_argument('--variants', default='legacy_cpu',
                         help='Sequential controls: legacy_cpu,criticality_cpu,criticality_cuda,feedback_cpu,feedback_cuda')
     parser.add_argument('--variant', choices=['legacy_cpu', 'criticality_cpu', 'criticality_cuda', 'feedback_cpu', 'feedback_cuda',
-                                            'feedback_batch_cpu', 'feedback_batch_cuda'], default='legacy_cpu')
+                                            'feedback_batch_cpu', 'feedback_batch_cuda', 'feedback_physical_cpu', 'feedback_physical_cuda',
+                                            'feedback_physical_batch_cpu', 'feedback_physical_batch_cuda'], default='legacy_cpu')
     parser.add_argument('--legacy-source', type=Path, help='Frozen old /data source for legacy control.')
     parser.add_argument('--legacy-tool-run', type=Path, help='Frozen original binaries for legacy_cpu only.')
     parser.add_argument('--source-root', type=Path, help=argparse.SUPPRESS)
@@ -205,7 +208,8 @@ def main():
         return
     variants = args.variants.split(',')
     if len(set(variants)) != len(variants) or not set(variants) <= {'legacy_cpu', 'criticality_cpu', 'criticality_cuda', 'feedback_cpu', 'feedback_cuda',
-                                                                'feedback_batch_cpu', 'feedback_batch_cuda'}:
+                                                                'feedback_batch_cpu', 'feedback_batch_cuda', 'feedback_physical_cpu', 'feedback_physical_cuda',
+                                                                'feedback_physical_batch_cpu', 'feedback_physical_batch_cuda'}:
         parser.error('Unknown or repeated variant.')
     if args.legacy_source is not None and (not args.legacy_source.resolve().is_relative_to('/data/wushangge')
                                           or not (args.legacy_source / 'global_timing/pipeline.py').is_file()):

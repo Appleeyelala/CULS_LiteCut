@@ -18,6 +18,7 @@ def main():
     parser.add_argument('--jobs', type=int, default=8)
     parser.add_argument('--reuse-compiled-run', type=Path,
                         help='Reuse a completed compile only after exact CULS source tree hash comparison.')
+    parser.add_argument('--probe-gain-case', type=Path, help='Optional controlled archived-proposal gain-policy experiment.')
     args = parser.parse_args()
     run = args.run.resolve()
     if not os.environ.get('SLURM_JOB_ID') or not run.is_relative_to('/data/wushangge'):
@@ -71,7 +72,14 @@ def main():
          '--test', 'test_prepared_replay', '--test', 'test_real_tools'],
         [sys.executable, '-B', str(run / 'src/scripts/run_tests.py'), '--output', str(run / 'output/prepared_regressions.json'),
          '--test', 'test_real_tools'],
+        [sys.executable, '-B', str(run / 'src/scripts/run_tests.py'), '--output', str(run / 'output/batch_regressions.json'),
+         '--test', 'test_batch_execution', '--test', 'test_pipeline'],
     ]
+    if args.probe_gain_case:
+        commands.append([sys.executable, '-B', str(run / 'src/scripts/probe_install_gain.py'),
+                         '--run', str(run), '--source-case', str(args.probe_gain_case),
+                         '--gpuls', str(gpuls), '--abc', old['binaries']['abc']['path'],
+                         '--library', str(run / 'input/asap7')])
     try:
         if args.reuse_compiled_run:
             reuse_compiled()
@@ -84,6 +92,7 @@ def main():
                        CULS_TEST_GPULS=str(gpuls), CULS_TEST_ABC=old['binaries']['abc']['path'],
                        CULS_TEST_LEGACY_GPULS=old['binaries']['gpuls']['path'], CULS_TEST_OLD_CASE=str(args.old_case))
             env.pop('CULS_REPLAY_PREPARED', None)
+            env.pop('CULS_REPLAY_ALLOW_NONPOSITIVE_GAIN', None)
             if index == 3:
                 env['CULS_REPLAY_PREPARED'] = '1'
             start = time.perf_counter()

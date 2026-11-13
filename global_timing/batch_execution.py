@@ -15,7 +15,7 @@ from .pipeline import Experiment
 
 
 def replay_many(gpuls, aig, owners, catalogue, choices, output, destinations,
-                timeout=300, prepared=True):
+                timeout=300, prepared=True, allow_nonpositive_gain=False):
     if not choices or len(choices) != len(destinations):
         raise ValueError('Nonempty batch with one output per request required.')
     if len(set(map(Path, destinations))) != len(destinations):
@@ -29,8 +29,11 @@ def replay_many(gpuls, aig, owners, catalogue, choices, output, destinations,
     raw = output / 'raw'
     env = dict(os.environ)
     env.pop('CULS_REPLAY_PREPARED', None)
+    env.pop('CULS_REPLAY_ALLOW_NONPOSITIVE_GAIN', None)
     if prepared:
         env['CULS_REPLAY_PREPARED'] = '1'
+    if allow_nonpositive_gain:
+        env['CULS_REPLAY_ALLOW_NONPOSITIVE_GAIN'] = '1'
     common_error = None
     try:
         run_tool([gpuls, '-c', f'read {tool_path(aig)}; gate3e_execution_replay -o {tool_path(raw)} '
@@ -42,6 +45,10 @@ def replay_many(gpuls, aig, owners, catalogue, choices, output, destinations,
             provenance = json.loads((raw / 'prepared_replay.json').read_text())
             if provenance['enumeration_count'] != 1 or provenance['configuration_count'] != len(choices):
                 raise ToolError('Prepared enumeration provenance is missing or inconsistent.')
+        if allow_nonpositive_gain:
+            policy = json.loads((raw / 'replay_policy.json').read_text())
+            if policy['installation_gain_policy'] != 'allow_nonpositive':
+                raise ToolError('Native batch installation policy did not match the request.')
     except Exception as exc:
         common_error = f'{type(exc).__name__}: {exc}'
     results = []
@@ -52,6 +59,7 @@ def replay_many(gpuls, aig, owners, catalogue, choices, output, destinations,
                                                 or 'choice -1 -1 -1\n')
         result = {'status': 'RUNNING', 'choices': vector, 'requested': items,
                   'order': 'ascending_original_root', 'prepared_enumeration': prepared,
+                  'installation_gain_policy': 'allow_nonpositive' if allow_nonpositive_gain else 'positive_gain',
                   'shared_command': str(output / 'rewrite.command.json'), 'native_config_id': name}
         try:
             if common_error:
@@ -113,7 +121,8 @@ class BatchedExperiment(Experiment):
             work.mkdir(parents=True, exist_ok=False)
         batch = self.output / method / f'_batch_{first_index:04d}'
         executions = replay_many(self.gpuls, self.aig, self.output / 'partition/owners.csv', self.catalogue,
-                                 choices, batch, [w / 'rewrite' for w in works], self.config.timeout_s)
+                                 choices, batch, [w / 'rewrite' for w in works], self.config.timeout_s,
+                                 allow_nonpositive_gain=getattr(self.config, 'allow_nonpositive_gain', False))
 
         def evaluate(index):
             result = {'method': method, 'index': first_index + index, 'choices': choices[index],

@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import json
+import os
 
 from .common import ToolError, legacy, read_jsonl, run_tool, save_json, tool_path
 
@@ -128,16 +130,26 @@ def enumerate_candidates(gpuls, aig, partition, output, timeout=300):
     return catalogue
 
 
-def replay(gpuls, aig, owner_csv, catalogue, choices, output, timeout=300):
+def replay(gpuls, aig, owner_csv, catalogue, choices, output, timeout=300, allow_nonpositive_gain=False):
     requested = catalogue.requested(choices)  # reject conflicts BEFORE calling GPU
     output.mkdir(parents=True, exist_ok=False)
     config = output / 'choices.txt'
     config.write_text(''.join(f'choice {r} {c} {s}\n' for r, c, s in requested) or 'choice -1 -1 -1\n')
-    result = {'choices': choices, 'requested': requested, 'status': 'RUNNING', 'order': 'ascending_original_root'}
+    policy = 'allow_nonpositive' if allow_nonpositive_gain else 'positive_gain'
+    result = {'choices': choices, 'requested': requested, 'status': 'RUNNING',
+              'order': 'ascending_original_root', 'installation_gain_policy': policy}
+    env = dict(os.environ)
+    env.pop('CULS_REPLAY_ALLOW_NONPOSITIVE_GAIN', None)
+    if allow_nonpositive_gain:
+        env['CULS_REPLAY_ALLOW_NONPOSITIVE_GAIN'] = '1'
     try:
         raw = output / 'raw'
         run_tool([gpuls, '-c', f'read {tool_path(aig)}; gate3e_execution_replay -o {tool_path(raw)} '
-                  f'--region-map {tool_path(owner_csv)} --config {tool_path(config)}'], output, 'rewrite', timeout)
+                  f'--region-map {tool_path(owner_csv)} --config {tool_path(config)}'], output, 'rewrite', timeout, env)
+        if allow_nonpositive_gain:
+            actual_policy = json.loads((raw / 'replay_policy.json').read_text())
+            if actual_policy['installation_gain_policy'] != policy:
+                raise ToolError('Native replay installation policy did not match the request.')
         trace = read_jsonl(raw / 'traces/choice.jsonl')
         selected = {(r['root'], r['cut_slot'], r['selected_subgraph']): r for r in trace if r['preselected']}
         if set(selected) != set(requested):
@@ -147,7 +159,7 @@ def replay(gpuls, aig, owner_csv, catalogue, choices, output, timeout=300):
                       rejected_requests=[{'root': key[0], 'cut_slot': key[1], 'subgraph_index': key[2],
                                           'status': row['final_status']}
                                          for key, row in selected.items() if row['final_status'] != 'ACCEPTED'])
-        if rejected:
+        if rejected or result['applied_rewrites'] != len(requested):
             raise ToolError('Candidate combination was not fully accepted; refusing a substituted result.')
         path = raw / 'aigs/choice.aig'
         if not path.is_file():

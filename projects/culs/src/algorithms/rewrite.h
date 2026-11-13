@@ -106,6 +106,7 @@ struct RewriteAuditOptions {
     // An explicit replay may intentionally select zero candidates (no-rewrite).
     bool replayMode = false;
     const PreparedReplayEnumeration *preparedReplay = nullptr;
+    bool allowNonPositiveReplayGain = false;
 };
 
 class CPUSolver {

@@ -32,8 +32,11 @@ class SearchConfig:
     area_weight: float = 0.5
     timeout_s: int = 300
     modes: tuple[str, ...] = ('area_constraint', 'joint')
+    allow_nonpositive_gain: bool = False
 
     def validate(self):
+        if type(self.allow_nonpositive_gain) is not bool:
+            raise ValueError('Installation gain policy must be explicitly boolean.')
         if self.evaluation_budget < 1 or self.feedback_batch < 1 or self.timeout_s < 1:
             raise ValueError('Evaluation budget, batch size and timeout must be positive.')
         if min(self.gradient_steps, self.gradient_restarts, self.calibration_steps) < 1:
@@ -75,7 +78,8 @@ class Experiment:
         result = {'method': method, 'index': index, 'choices': choices, 'status': 'RUNNING', 'prediction_before_evaluation': predicted}
         try:
             candidate, execution = replay(self.gpuls, self.aig, self.output / 'partition/owners.csv',
-                                           self.catalogue, choices, work / 'rewrite', self.config.timeout_s)
+                                           self.catalogue, choices, work / 'rewrite', self.config.timeout_s,
+                                           allow_nonpositive_gain=self.config.allow_nonpositive_gain)
             metrics = self.evaluator.evaluate(candidate, work / 'evaluation')
             result.update(status='PASS', metrics=metrics, applied_rewrites=execution['applied_rewrites'], aig=str(candidate))
         except Exception as exc:

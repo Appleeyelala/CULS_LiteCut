@@ -1,7 +1,7 @@
 """Delivery semantics for partial installations, missing clocks and grouping."""
 import unittest
 
-from global_timing.mffc_delivery import installation_details, named_tradeoffs, shape_summary
+from global_timing.mffc_delivery import installation_details, named_tradeoffs, shape_summary, tool_cost_summary
 
 
 class DeliveryTests(unittest.TestCase):
@@ -50,6 +50,26 @@ class DeliveryTests(unittest.TestCase):
         self.assertEqual(result['devices']['unknown']['method_points'], 1)
         self.assertEqual(result['devices']['none']['recorded']['native_kernel_ms']['n'], 0)
         self.assertEqual(result['cuda_shape_bands']['region_dag_layers']['32_512']['method_points'], 1)
+
+    def test_tool_costs_include_failed_methods_and_keep_missing_clocks_unknown(self):
+        rows = [
+            {'method': 'Ours', 'status': 'PASS', 'end_to_end_runtime_s': 10,
+             'mapping_commands': 2, 'cec_commands': 3,
+             'tool_seconds_inclusive': {'mapping': 4., 'cec': 1.}},
+            {'method': 'Ours', 'status': 'FAIL', 'end_to_end_runtime_s': 20,
+             'mapping_commands': 1, 'cec_commands': 2,
+             'tool_seconds_inclusive': {'mapping': 7., 'cec': 2.}},
+            {'method': 'Ours', 'status': 'TIMEOUT', 'end_to_end_runtime_s': None,
+             'mapping_commands': 1, 'unreadable_partial_command_files': ['unfinished.json']},
+        ]
+        data = tool_cost_summary(rows)['methods']
+        mapping = data['Ours']['tools']['mapping']
+        self.assertEqual(mapping['recorded_command_counts']['sum'], 4)
+        self.assertEqual(mapping['per_point_inclusive_s'], {'n': 2, 'median': 5.5, 'p90': 6.7, 'sum': 11.})
+        self.assertEqual(mapping['points_with_recorded_commands_but_no_clock'], 1)
+        self.assertEqual(data['Ours']['cold_wall_s']['sum'], 30)
+        self.assertEqual(data['Ours']['unreadable_command_files'], 1)
+        self.assertIsNone(data['A']['tools']['mapping']['per_point_inclusive_s']['sum'])
 
 
 if __name__ == '__main__':

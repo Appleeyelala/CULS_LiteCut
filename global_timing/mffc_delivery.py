@@ -88,3 +88,37 @@ def shape_summary(records):
             bands[field][str(low) + '_' + (str(high) if high is not None else 'plus')] = group(selected)
     return {'devices': devices, 'cuda_shape_bands': bands, 'observed_cuda_method_points': len(cuda),
             'scope': 'Descriptive structural groups, not controlled GPU/CPU experiments. Native CUDA event time excludes tensor aggregation/context/EDA, includes all saved forward/backward calls with possibly different batch sizes; cannot be a whole-method acceleration ratio.'}
+
+
+def tool_cost_summary(records):
+    """Account for saved real tool durations, including failed method points.
+
+    Missing command clocks are absent observations, never free computation.
+    Each duration is a per-method-point sum of that tool's recorded commands;
+    concurrent validations may overlap, so this is not an exclusive wall share.
+    """
+    categories = {'cec': 'cec_commands', 'mapping': 'mapping_commands',
+                  'rewrite': 'replay_commands', 'native_rewrite': 'abc_native_rewrite_commands'}
+    methods = {}
+    for method in ('A', 'B', 'Ours'):
+        rows = [r for r in records if r['method'] == method]
+        tools = {}
+        for category, count_field in categories.items():
+            counts = [r.get(count_field) for r in rows]
+            clocks = [r.get('tool_seconds_inclusive', {}).get(category) for r in rows]
+            tools[category] = {
+                'recorded_command_counts': describe(counts),
+                'per_point_inclusive_s': describe(clocks),
+                'points_with_recorded_commands_but_no_clock': sum(
+                    count is not None and count > 0 and clock is None
+                    for count, clock in zip(counts, clocks)),
+            }
+        methods[method] = {
+            'terminal_method_points': len(rows),
+            'status_counts': dict(Counter(r['status'] for r in rows)),
+            'cold_wall_s': describe([r.get('end_to_end_runtime_s') for r in rows]),
+            'unreadable_command_files': sum(len(r.get('unreadable_partial_command_files', [])) for r in rows),
+            'tools': tools,
+        }
+    return {'methods': methods,
+            'scope': 'Recorded real tool commands and per-point inclusive sums, including failed/timed-out methods. Missing clocks are excluded with n, not replaced by zero. Counts can be incomplete when command files are unreadable. Tool/stage sums may overlap and are not exclusive percentages of cold wall.'}

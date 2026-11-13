@@ -25,7 +25,7 @@ def main():
         parser.error('Use a committed /data Slurm analysis run.')
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     from global_timing.common import save_json
-    from global_timing.mffc_delivery import installation_details, named_tradeoffs, shape_summary
+    from global_timing.mffc_delivery import installation_details, named_tradeoffs, shape_summary, tool_cost_summary
     sha = lambda p: hashlib.sha256(Path(p).read_bytes()).hexdigest()
     old = args.delivery.resolve() if args.delivery else experiment / 'output/benchmark905_delivery'
     if not old.is_relative_to('/data/wushangge'):
@@ -112,7 +112,9 @@ def main():
     tradeoffs = {baseline: {'common_feasible_n': summary['comparisons'][baseline]['common_three_valid_feasible_pairs'],
                            **named_tradeoffs(summary['comparisons'][baseline]['common_feasible_relation_grid'])}
                 for baseline in ['A', 'B']}
+    tool_costs = tool_cost_summary(rows)
     summary.update(delivery_supplement={'installations': supplement, 'gpu_shape': shape, 'named_tradeoffs': tradeoffs,
+        'tool_costs': tool_costs,
         'experiment_accounting': accounting, 'analysis_source_commit': json.loads((run / 'run.json').read_text())['source_commit'],
         'original_delivery': str(old), 'scope': 'Read-only supplementary accounting; original comparisons/tolerances and original evidence remain unchanged.'})
     if not args.development:
@@ -154,6 +156,15 @@ def main():
             stats = values['recorded']
             supplement_text.append(f"| {field}/{label} | {values['method_points']} | {number(stats['regions']['median'])} | {number(stats['region_dag_layers']['median'])} | {number(stats['max_layer_width']['median'])} | {number(stats['native_kernel_ms']['median'])} | {number(stats['end_to_end_runtime_s']['median'])} |")
     supplement_text += ['', '原生事件不包括其他Torch聚合、上下文初始化、CPU特征/Student和EDA；不同调用的batch可不同。结构分组为描述性补充，来源/AND主分组与所有胜负/时间容差仍使用冻结协议。完整逐点安装明细见`installation_details.json`，完整设备/结构分组见SUMMARY的`delivery_supplement`。', '']
+    supplement_text += ['', '## CEC、Mapping与Replay的实际记录成本', '',
+        '包含成功、失败及超时方法点内已保存的命令。每点时间为该类命令的inclusive和；有并发验证时会重叠，不能相加当独占wall占比。时间n只统计有记录的点，未出现该工具或时钟缺失不补零。调用数为已保存命令数，损坏命令文件另列。', '',
+        '| 方法 / 工具 | 已记录调用数 | 有时间方法点 | 每点inclusive中位s | P90 s | 总inclusive s | 有调用但无时钟点 |',
+        '|---|---:|---:|---:|---:|---:|---:|']
+    for method, data in tool_costs['methods'].items():
+        for category, cost in data['tools'].items():
+            clock, count = cost['per_point_inclusive_s'], cost['recorded_command_counts']
+            supplement_text.append(f"| {method}/{category} | {number(count['sum'])} | {clock['n']} | {number(clock['median'])} | {number(clock['p90'])} | {number(clock['sum'])} | {cost['points_with_recorded_commands_but_no_clock']} |")
+    supplement_text += ['', '未读/损坏的命令文件数：' + str({method: data['unreadable_command_files'] for method, data in tool_costs['methods'].items()}) + '。完整冷wall使用主表，不以这些重叠分项代替。', '']
     text += '\n'.join(supplement_text)
     (output / (prefix + '_RESULTS.md')).write_text(text)
     save_json(output / 'delivery_completion.json', {'status': 'COMPLETE_AUDITED_DELIVERY', 'formal': not args.development,

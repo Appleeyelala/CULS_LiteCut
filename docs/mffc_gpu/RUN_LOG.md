@@ -43,3 +43,7 @@
 随后逐项审查发现：原始CSV已有每点CEC/Mapping/Replay时钟，但MD/JSON缺少这些工具各自的总体耗时表。源510ae7b补充`tool_cost_summary`，按每点已有命令inclusive时间求n/中位/P90/合计，保留FAIL/TIMEOUT和缺失时钟，不改变原始统计或冻结算法。65248（`20261113T200701Z-mffc-tool-cost-validation-31baef17`，eda2、2CPU/16GiB/0GPU）已COMPLETED/0:0、3s，5/5无SKIP；两开发批次各9点的原始统计保持不变，真实工具成本补充生成成功，没有重跑模型/EDA。选择eda2避免与正式eda上的计时工作共享CPU。
 
 新的开发补充在上述65248的`output/supplement_<开发实验名>/`。例如N的三个Ours点记录CEC15次/1.482559s、Mapping14次/19.377779s；H为CEC13次/34.490238s、Mapping12次/100.938567s。它们是已有命令的inclusive和，不是额外调用数或独占wall占比。当前工作区与正式/data快照的47个冻结运行源码再次逐字节一致；新增代码仅影响交付统计。最终正式交付需使用含该成本补充的验证版本，原65247产物保持为先前交付分析，不覆盖。
+
+含工具成本的正式交付65249已经排队，源b1afd34，目录`20261113T200926Z-mffc-final905-tool-cost-delivery-67ebf285`，`afterany:65247`、2CPU/16GiB/0GPU。顺序为65245正式运行/原始审计→65247首次补充→65249完整成本交付，分别保留产物。所有RUNNING/PENDING合计8CPU/96GiB/1GPU；这两项后处理不新增任何EDA方法点。最终优先核对65249的`output/final_mffc905_delivery/`，然后完成根目录文件、图表人工检查与逐项验收，不能仅凭排队或脚本状态宣布Goal完成。
+
+2026-11-14 04:11:22（北京时间）只读进度：65245实际RUNNING，已独占发布218/2715个方法终态，72个输入三方法齐全，当前保存点均PASS；`formal_completion.json`尚未形成，未对该部分样本计算总体性能结论。Slurm当时MaxRSS约4.88GiB，非显存指标；无资源阻断迹象。运行仍按冻结协议继续，不重新提交已完成点。

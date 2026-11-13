@@ -21,3 +21,5 @@
 失败/中断的缺失时钟、命令文件或观察保持显式N/A/UNKNOWN，不能填零。PASS replay与PASS CEC/mapping分别统计；failed部分接受数只说明真实工作量。具名取舍的前两项可能重叠，原九格矩阵仍是互斥完整划分。
 
 最终发布时，先核对正式/data交付的所有hash、精确905/2715及Slurm终态，再把小型CSV/JSON/中文报告复制到根目录规定名称，PNG/PDF置于`docs/mffc_gpu/figures/`并修正根报告图片链接。根报告首段需用一页以内回答真实Delay/Runtime/Area/CEC/GPU边界与已确认不足；原始/data报告保持原字节。另记录复制来源、源/目标hash和文稿呈现调整，人工检查全量图后才能判定完成。当前仍未满足正式全量终态，不能只因后处理已排队提前发布结果。
+
+最新完整成本交付安排为65249（源b1afd34），`/data/wushangge/CULS_LiteCut/runs/20261113T200926Z-mffc-final905-tool-cost-delivery-67ebf285/output/final_mffc905_delivery/`；依赖65247再依赖65245。这里是待形成的路径，不是已经完成的全量结果。65248的5项测试与开发数据验证只支持该后处理实现，不能代替正式2715点/原始审计和最终人工验收。

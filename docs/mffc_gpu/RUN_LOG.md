@@ -51,3 +51,5 @@
 2026-11-14 06:49:09只读检查：逐个读取当前终态JSON，933/2715个方法终态均为PASS，311个输入三方法齐全；与Slurm实时RUNNING及驱动日志一致，两个后处理仍PENDING/Dependency。完整运行和审计标记尚未形成，不计算该前缀的总体性能结论。工作区干净，/data仍约1.6TiB可用，Slurm MaxRSS约5.52GiB（非GPU显存）。检查没有重跑方法点或修改冻结源码/参数。
 
 监控期间确认的长耗时验证实例：index108 `forgeEDA/Back_End_With_Decode.aig`的B已PASS，cold E2E为622.795256s，其中`work/evaluation/cec.command.json`记录573.063254s；原始CEC文本明确等价。相应Ours的两轮CUDA梯度已写入`optimization/gradient_{00,01}.json`，随后真实验证完成。index147 `forgeEDA/Division.aig`的Ours前两组评估均PASS，inclusive请求分别237.568647/214.597248s，第三组已完整安装24个rewrite；该方法点随后也已终态PASS。上述两个case的全部终态保存在正式run的`output/records/`，请求证据在各`case_NNNN_METHOD/work/`。它们解释了阶段性终态数暂停，并非全905性能结论；内部请求与最终方法状态仍由正式审计分开统计。
+
+2026-11-14 07:28左右检查index375 `forgeEDA/cb_dct.aig`：Ours已PASS，cold E2E为172.311129s、CUDA后端，最终来自直接全局梯度，四个含no-op请求均PASS、无失败。`child_result.json:stages`记录LiteCut准备/推理70.841s、候选枚举17.341s、候选复用预检4.246s、模型准备4.381s；两轮全局梯度/联合块阶段0.529/0.572s，校准0.796s。此例表明剩余CPU特征/推理准备也可能明显影响总成本，不能把所有长耗时归因于CEC。LiteCut阶段包含物化、特征、加载和推理，并非单独Student前向；梯度阶段包含CPU投影/传输，不是纯GPU kernel。原始证据在`output/records/0375_Ours.json`、`output/case_0375_Ours/{child_result.json,work/summary.json}`。inclusive阶段有嵌套，不相加当wall；此例不替代全905分组统计，也不触发冻结算法/参数调整。

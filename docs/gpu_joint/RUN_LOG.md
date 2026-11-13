@@ -83,6 +83,12 @@
 
 `20261113T041347Z-joint-timeline-check-8ad162dc`，Slurm **64936**，源码 **85acd9f**，COMPLETED/0:0，Elapsed 33s。真实 ss_pcm 反馈 CPU/CUDA 均 PASS、最终 328.026855 ps；cold wall 13.402/16.574 s。每模式保存 8 个真实请求完成事件，时间均在父进程的启动/退出区间内，timeline 文件哈希匹配。该检查验证了稀疏版的真实安装与时间轴，仍没有使 ss_pcm 优于旧方法，也不是 GPU 冷进程加速结果。
 
+## 批量执行接口的集成验证
+
+`20261113T043158Z-joint-batch-validation-b62c7dd9`，Slurm **64939**，源码 **43f81b8**，COMPLETED/0:0，Elapsed 11s，**7/7 PASS**。3 项真实 batch fixture 与 4 项既有 pipeline 回归。混合批次的动态拒绝明确 FAIL、不送 CEC；另两个完整成功配置各自实际 CEC/Liberty mapping，与单独 replay 的 AIG 字节一致。另验证静态非法输入在启动原生工具前拒绝、预算/索引/预测训练历史保持，以及固定配置夹具不被误标为梯度来源。这里尚未运行自由搜索的端到端 batch 对照。
+
+后续冷进程比较将 CUDA cache 放到各 child 独立的 `/data/.../cache/cuda_<variant>_<index>`，记录 LiteCut cache hit、Torch 线程数和实际 GPU；不清空共享文件系统页缓存。输入校验/复制计时单列，并给每个独立部署方法计入一份 staging 成本。旧对照可显式同时指定冻结源码和冻结 tool-run；CPU/CUDA 新方法与 batch 工程控制使用相同的新工具。这些约束用于后续比较，不回写此前诊断的缓存条件或时间。
+
 ## 冻结评价面板
 
 [config/gpu_joint_panel.json](../../config/gpu_joint_panel.json) 固定 16 个输入与种子 20261111/12/13；生成器为 [freeze_joint_panel.py](../../scripts/freeze_joint_panel.py)。只使用冻结输入清单的 AND 规模、来源、文件名家族和 SHA，不查看候选数、delay 或运行时间。排除开发家族，四个区间各选 4 项：128–4095、4096–8191、8192–16383、16384–50000 AND。第一区间原拟分成 128–511 与 512–4095，但输入清单前者只有两个设计且一个属于开发集，因此在成功生成/冻结之前合并，仍未使用结果信息。

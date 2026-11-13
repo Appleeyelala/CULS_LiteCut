@@ -19,3 +19,5 @@
 `replay_many` 将同一反馈批次的独立配置交给一次原生命令。要求 manifest 完整、prepared provenance 匹配、每个请求精确 preselected 且全部 ACCEPTED；命令整体异常/不完整时所有计划请求失败，动态单配置拒绝则单独保留。各请求目录保存可单独回放的 choices、replay 摘要及指向共享原始 trace/AIG 的链接，共享命令只计一次，不复制为多次调用。
 
 `BatchedExperiment.evaluate_many` 在 replay 前保存预测，最多使用分配内的 CPU workers 对完整成功的 AIG 各自执行 CEC 和 mapping。失败组合不送入 evaluator。返回顺序固定为请求顺序，修复仍是新预算请求；各请求 wall 含共享/并发部分，不能相加当总时间。profile 入口 `feedback_batch_cpu/feedback_batch_cuda` 的时间轴在每个请求实际验证完成时记录，CPU/CUDA 使用相同的批量引擎和 worker 数。并行 ABC/枚举复用的工程贡献必须与新增 GPU 提案贡献分开比较。
+
+Slurm 64939 的 7 项集成/原有 pipeline 回归已通过，包括真实混合成功/拒绝批次、逐成功项 CEC/mapping、独立 replay 的 AIG 字节一致与预算/来源/预测保存；自由梯度搜索中的选择等价与 runtime 收益仍待端到端对照。

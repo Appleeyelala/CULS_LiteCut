@@ -17,6 +17,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 def run_case(args):
     # Import startup is part of this child's wall clock, not hidden setup.
+    run = args.run.resolve()
+    cuda_cache = run / 'cache' / f'cuda_{args.variant}_{args.case_index:04d}'
+    cuda_cache.mkdir(exist_ok=False)
+    os.environ['CUDA_CACHE_PATH'] = str(cuda_cache)
     if args.source_root is not None:
         if not args.source_root.resolve().is_relative_to('/data/wushangge'):
             raise ValueError('Source override must be an immutable /data snapshot.')
@@ -26,7 +30,6 @@ def run_case(args):
     from global_timing.evaluation import Evaluator
     from global_timing.surrogate import TimingSurrogate
     imported = time.perf_counter()
-    run = args.run.resolve()
     rows = json.loads((run / 'input/profile_cases.json').read_text())
     row = next(r for r in rows if r['index'] == args.case_index)
     output = args.output_base.resolve() if args.output_base else run / 'output'
@@ -89,6 +92,9 @@ def run_case(args):
               'algorithm_sha256': {name: digest(Path(pipeline.__file__).with_name(name + '.py'))
                                    for name in ['pipeline', 'optimization', 'surrogate', 'arrival', 'litecut', 'candidates']},
               'child_import_s': imported - ENTRY_TIME, 'stages': stages,
+              'cuda_cache': str(cuda_cache), 'cuda_cache_regime': 'isolated_per_cold_child',
+              'torch_version': str(pipeline.torch.__version__),
+              'torch_num_threads': pipeline.torch.get_num_threads(),
               'scope': 'One cold child process, one circuit, one gradient strategy; '
                        'includes required preparation and original/noop measurements. '
                        'No execution of unrelated greedy/random/joint controls.'}
@@ -143,7 +149,10 @@ def run_case(args):
                       failed_requests=sum(o['status'] != 'PASS' for o in search['observations']),
                       regions=len(experiment.partition.regions),
                       decisions=len(experiment.catalogue.decisions),
-                      candidates=sum(d['candidate_count'] for d in experiment.catalogue.decisions))
+                      candidates=sum(d['candidate_count'] for d in experiment.catalogue.decisions),
+                      litecut_cache_hit=experiment.cache['cache_hit'])
+        if args.variant.endswith('_cuda'):
+            record['python_cuda_device'] = pipeline.torch.cuda.get_device_name(0)
     except Exception as exc:
         record.update(status='FAIL', error=f'{type(exc).__name__}: {exc}')
         raise
@@ -179,6 +188,7 @@ def main():
     parser.add_argument('--variant', choices=['legacy_cpu', 'criticality_cpu', 'criticality_cuda', 'feedback_cpu', 'feedback_cuda',
                                             'feedback_batch_cpu', 'feedback_batch_cuda'], default='legacy_cpu')
     parser.add_argument('--legacy-source', type=Path, help='Frozen old /data source for legacy control.')
+    parser.add_argument('--legacy-tool-run', type=Path, help='Frozen original binaries for legacy_cpu only.')
     parser.add_argument('--source-root', type=Path, help=argparse.SUPPRESS)
     parser.add_argument('--output-base', type=Path, help=argparse.SUPPRESS)
     parser.add_argument('--proposal-steps', type=int, default=40)
@@ -211,6 +221,7 @@ def main():
     inputs = args.run / 'input/profile_designs'
     inputs.mkdir(exist_ok=False)
     for row in selected:
+        staging_started = time.perf_counter()
         source = Path(row['staged_path'])
         if digest(source) != row['sha256']:
             raise ValueError('Input inventory changed.')
@@ -220,6 +231,7 @@ def main():
         if digest(destination) != row['sha256']:
             raise ValueError('Staged input hash mismatch.')
         row['staged_path'] = str(destination)
+        row['staging_runtime_s'] = time.perf_counter() - staging_started
     save_json(args.run / 'input/profile_cases.json', selected)
     metadata_path = args.run / 'run.json'
     metadata = json.loads(metadata_path.read_text())
@@ -229,6 +241,7 @@ def main():
                     environment={'python': sys.version,
                                  'threads': {k: os.environ.get(k) for k in
                                              ['OMP_NUM_THREADS', 'OPENBLAS_NUM_THREADS', 'MKL_NUM_THREADS']},
+                                 'cuda_visibility': os.environ.get('CUDA_VISIBLE_DEVICES'),
                                  'slurm': {k: v for k, v in os.environ.items() if k.startswith('SLURM_')}})
     metadata_path.write_text(json.dumps(metadata, indent=2) + '\n')
     records = []
@@ -241,8 +254,9 @@ def main():
             base = args.run / 'output' if variants == ['legacy_cpu'] else args.run / 'output' / variant
             base.mkdir(exist_ok=True)
             source = args.legacy_source.resolve() if variant == 'legacy_cpu' and args.legacy_source else args.run / 'src'
+            tool_source = args.legacy_tool_run.resolve() if variant == 'legacy_cpu' and args.legacy_tool_run else args.tool_run
             command = [sys.executable, '-B', str(Path(__file__).resolve()),
-                       '--run', str(args.run), '--tool-run', str(args.tool_run),
+                       '--run', str(args.run), '--tool-run', str(tool_source),
                        '--case-index', str(row['index']), '--seed', str(args.seed),
                        '--evaluations', str(args.evaluations), '--tool-timeout', str(args.tool_timeout),
                        '--variant', variant, '--source-root', str(source), '--output-base', str(base),
@@ -263,6 +277,8 @@ def main():
                       'command': command, 'returncode': process.returncode,
                       'subprocess_started_monotonic': started,
                       'full_process_wall_s': time.perf_counter() - started, 'log': str(log)}
+            record['input_staging_s'] = row['staging_runtime_s']
+            record['end_to_end_with_input_staging_s'] = record['full_process_wall_s'] + row['staging_runtime_s']
             path = base / f'case_{row["index"]:04d}_profile.json'
             if path.exists():
                 detail = json.loads(path.read_text())
@@ -274,6 +290,7 @@ def main():
         summary = {'records': records, 'status': 'PASS' if all(
             r['status'] == 'PASS' and r['returncode'] == 0 for r in records) else 'PARTIAL',
             'source_commit': metadata['source_commit'],
+            'cache_policy': 'Isolated CUDA cache per child under /data; independent per-variant LiteCut directories; filesystem page cache not flushed.',
             'scope': 'Sequential per-circuit cold-process controls on a single allocation; '
                      'no cross-benchmark parallel throughput speedup claim.'}
         save_json(args.run / 'output/profile_summary.json', summary)

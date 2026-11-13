@@ -28,7 +28,9 @@ def main():
          '-gencode', 'arch=compute_80,code=compute_80', str(source), '-o', str(library),
          '-Xlinker', '-rpath', '-Xlinker', '/usr/local/cuda-11.8/lib64'],
         [sys.executable, '-B', str(run / 'src/scripts/run_tests.py'), '--output',
-         str(run / 'output/mffc_gpu_tests.json'), '--test', 'test_mffc_gpu'],
+         str(run / 'output/mffc_gpu_tests.json'), '--test', 'test_mffc_gpu',
+         '--test', 'test_mffc_model', '--test', 'test_mffc_search', '--test', 'test_feasibility',
+         '--test', 'test_surrogate', '--test', 'test_arrival', '--test', 'test_candidates'],
     ]
     report = {'status': 'RUNNING', 'source_sha256': sha(source), 'commands': [],
               'source_commit': json.loads((run / 'run.json').read_text())['source_commit'],

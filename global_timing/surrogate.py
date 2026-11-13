@@ -99,7 +99,7 @@ class _IndependentRegionState:
 
 class TimingSurrogate(nn.Module):
     def __init__(self, partition, catalogue, scores, baseline, temperature_ratio=0.005,
-                 propagation_backend='bounded_tape'):
+                 propagation_backend='bounded_tape', defer_baseline=False):
         super().__init__()
         if propagation_backend not in {'bounded_tape', 'reference'}:
             raise ValueError('Unknown arrival propagation backend.')
@@ -218,7 +218,13 @@ class TimingSurrogate(nn.Module):
         self.depth_to_ps = self.delay_reference / max(max_depth, 1)
         with torch.no_grad():
             zero = torch.zeros((1, self.n_decisions, 4), dtype=torch.float64)
-            baseline_dp, baseline_regions = self._propagate(zero)
+            # A device subclass builds its immutable native graph before doing
+            # this propagation. The existing default remains byte-for-value.
+            if defer_baseline:
+                baseline_dp = zero.new_zeros((1, len(self.output_regions)))
+                baseline_regions = zero.new_zeros((self.n_regions, 1))
+            else:
+                baseline_dp, baseline_regions = self._propagate(zero)
         self.register_buffer('baseline_dp', baseline_dp[0])
         self.register_buffer('baseline_region_arrivals', baseline_regions[:, 0])
 

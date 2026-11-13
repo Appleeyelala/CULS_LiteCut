@@ -1,0 +1,248 @@
+{
+  "schema": "gpu_joint_panel_v1",
+  "inventory": "/data/wushangge/CULS_LiteCut/runs/20261111T105821Z-benchmark-inventory-114a3573/output/benchmark_manifest.json",
+  "inventory_sha256": "e4211308a06fc5b2bb02614b965c4b93dcf08f6f7ea2a73af2f2e1405da1e167",
+  "seeds": [
+    20261111,
+    20261112,
+    20261113
+  ],
+  "selection": "Four input-scale bins, four designs per bin; least-used available dataset source then ascending input SHA256; unique normalized basename families and input hashes; no measured QoR, candidate availability or runtime used.",
+  "development_families_excluded": [
+    "back_end_with_decode",
+    "c1355",
+    "div",
+    "division",
+    "dma",
+    "hyp",
+    "ss_pcm",
+    "voter"
+  ],
+  "scope": "Frozen evaluation panel, not unseen data: the earlier 905 inputs were already analyzed. Scale cap bounds experiment cost; unrelated family aliases beyond basename normalization are not established.",
+  "rows": [
+    {
+      "index": 65,
+      "relative_path": "OpenABC/k2_orig.aig",
+      "sha256": "54e6c729e6c52801fc789373179a4f3f63cf6468981b85014acae8ac6e5f3f42",
+      "pi_count": 45,
+      "po_count": 43,
+      "and_count": 2289,
+      "staged_path": "/data/wushangge/CULS_LiteCut/runs/20261111T105821Z-benchmark-inventory-114a3573/input/benchmarks/0065.aig",
+      "family": "k2",
+      "and_bin": [
+        128,
+        4096
+      ]
+    },
+    {
+      "index": 73,
+      "relative_path": "OpenABC/sasc_orig.aig",
+      "sha256": "55493e61802cf2d24f3877fc9d91d84b5919c3ac1c0eeb72271c57bc75329023",
+      "pi_count": 135,
+      "po_count": 125,
+      "and_count": 613,
+      "staged_path": "/data/wushangge/CULS_LiteCut/runs/20261111T105821Z-benchmark-inventory-114a3573/input/benchmarks/0073.aig",
+      "family": "sasc",
+      "and_bin": [
+        128,
+        4096
+      ]
+    },
+    {
+      "index": 51,
+      "relative_path": "OpenABC/dalu_orig.aig",
+      "sha256": "5c7f98794af53a7c7c1e3122958774da361706c7c01404967f56ef4a212f04b0",
+      "pi_count": 75,
+      "po_count": 16,
+      "and_count": 1735,
+      "staged_path": "/data/wushangge/CULS_LiteCut/runs/20261111T105821Z-benchmark-inventory-114a3573/input/benchmarks/0051.aig",
+      "family": "dalu",
+      "and_bin": [
+        128,
+        4096
+      ]
+    },
+    {
+      "index": 68,
+      "relative_path": "OpenABC/max_orig.aig",
+      "sha256": "6ae8c03afe4e17b03898bb61b9b076d433cc23ec9b9b79a6874164193a40e635",
+      "pi_count": 512,
+      "po_count": 130,
+      "and_count": 2865,
+      "staged_path": "/data/wushangge/CULS_LiteCut/runs/20261111T105821Z-benchmark-inventory-114a3573/input/benchmarks/0068.aig",
+      "family": "max",
+      "and_bin": [
+        128,
+        4096
+      ]
+    },
+    {
+      "index": 96,
+      "relative_path": "forgeEDA/ALU_mod.aig",
+      "sha256": "0062d3d7a53cc77d4bbee2e9f2ec32530714f648d8960b88b4136b145a83c61a",
+      "pi_count": 67,
+      "po_count": 1851,
+      "and_count": 6605,
+      "staged_path": "/data/wushangge/CULS_LiteCut/runs/20261111T105821Z-benchmark-inventory-114a3573/input/benchmarks/0096.aig",
+      "family": "alu_mod",
+      "and_bin": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "index": 28,
+      "relative_path": "ACE/s35932_comb.aig",
+      "sha256": "03a7efbed87263d90f963c29750e9a859f152c1c5fe9cf2c5aa0854ca4cc2f06",
+      "pi_count": 1507,
+      "po_count": 1506,
+      "and_count": 7732,
+      "staged_path": "/data/wushangge/CULS_LiteCut/runs/20261111T105821Z-benchmark-inventory-114a3573/input/benchmarks/0028.aig",
+      "family": "s35932",
+      "and_bin": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "index": 904,
+      "relative_path": "iwls2024/ex96.aig",
+      "sha256": "2223939a478737c7abef4051fb08af4ee42e2dd9c89e313897f7952ded922a87",
+      "pi_count": 15,
+      "po_count": 17,
+      "and_count": 7816,
+      "staged_path": "/data/wushangge/CULS_LiteCut/runs/20261111T105821Z-benchmark-inventory-114a3573/input/benchmarks/0904.aig",
+      "family": "ex96",
+      "and_bin": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "index": 892,
+      "relative_path": "iwls2022/ex27.aig",
+      "sha256": "970c6340767a40b3ef353a19732352410be012b45e6a0ff97538a2c26e1e9940",
+      "pi_count": 16,
+      "po_count": 16,
+      "and_count": 7009,
+      "staged_path": "/data/wushangge/CULS_LiteCut/runs/20261111T105821Z-benchmark-inventory-114a3573/input/benchmarks/0892.aig",
+      "family": "ex27",
+      "and_bin": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "index": 625,
+      "relative_path": "forgeEDA/multiplier_33x33_partial.aig",
+      "sha256": "0044a1e27a45f9d6c84d54b89ae9ff646fd79912f5282b4977bed69670f87b42",
+      "pi_count": 99,
+      "po_count": 2969,
+      "and_count": 10265,
+      "staged_path": "/data/wushangge/CULS_LiteCut/runs/20261111T105821Z-benchmark-inventory-114a3573/input/benchmarks/0625.aig",
+      "family": "multiplier_33x33_partial",
+      "and_bin": [
+        8192,
+        16384
+      ]
+    },
+    {
+      "index": 36,
+      "relative_path": "ACE/usb_funct_comb.aig",
+      "sha256": "01e332a75554621c8cf2c948b6f1d667ff83d0e516010d37d4a48cf11ccdba48",
+      "pi_count": 1748,
+      "po_count": 1556,
+      "and_count": 14963,
+      "staged_path": "/data/wushangge/CULS_LiteCut/runs/20261111T105821Z-benchmark-inventory-114a3573/input/benchmarks/0036.aig",
+      "family": "usb_funct",
+      "and_bin": [
+        8192,
+        16384
+      ]
+    },
+    {
+      "index": 894,
+      "relative_path": "iwls2022/ex63.aig",
+      "sha256": "77d706828bbfbca3aef50c41bc836d144381a93822a6d5c80819ccca110c7a0b",
+      "pi_count": 16,
+      "po_count": 4,
+      "and_count": 8618,
+      "staged_path": "/data/wushangge/CULS_LiteCut/runs/20261111T105821Z-benchmark-inventory-114a3573/input/benchmarks/0894.aig",
+      "family": "ex63",
+      "and_bin": [
+        8192,
+        16384
+      ]
+    },
+    {
+      "index": 900,
+      "relative_path": "iwls2024/ex33.aig",
+      "sha256": "b4cc130200b672c106500e89ed32c3fe49a6a24bafe3dc22a2ee5fc28b61034c",
+      "pi_count": 16,
+      "po_count": 6,
+      "and_count": 15948,
+      "staged_path": "/data/wushangge/CULS_LiteCut/runs/20261111T105821Z-benchmark-inventory-114a3573/input/benchmarks/0900.aig",
+      "family": "ex33",
+      "and_bin": [
+        8192,
+        16384
+      ]
+    },
+    {
+      "index": 587,
+      "relative_path": "forgeEDA/mig_7series_v2_1_ecc_merge_enc.aig",
+      "sha256": "000bc18062e95d3d563de25a56bbe2df546d1bbb24417f70af75ce49bcb84e72",
+      "pi_count": 1617,
+      "po_count": 491,
+      "and_count": 17792,
+      "staged_path": "/data/wushangge/CULS_LiteCut/runs/20261111T105821Z-benchmark-inventory-114a3573/input/benchmarks/0587.aig",
+      "family": "mig_7series_v2_1_ecc_merge_enc",
+      "and_bin": [
+        16384,
+        50001
+      ]
+    },
+    {
+      "index": 1,
+      "relative_path": "ACE/DSP_comb.aig",
+      "sha256": "07d45ed7de7b17d862218c536fa56061a6dc1ffa096209b3e3d627f731fb09f6",
+      "pi_count": 4046,
+      "po_count": 3249,
+      "and_count": 41435,
+      "staged_path": "/data/wushangge/CULS_LiteCut/runs/20261111T105821Z-benchmark-inventory-114a3573/input/benchmarks/0001.aig",
+      "family": "dsp",
+      "and_bin": [
+        16384,
+        50001
+      ]
+    },
+    {
+      "index": 902,
+      "relative_path": "iwls2024/ex79.aig",
+      "sha256": "873111eff96990195a56bef2076f3a125ef06471f1bcaed9575295879cdee0c5",
+      "pi_count": 12,
+      "po_count": 115,
+      "and_count": 18511,
+      "staged_path": "/data/wushangge/CULS_LiteCut/runs/20261111T105821Z-benchmark-inventory-114a3573/input/benchmarks/0902.aig",
+      "family": "ex79",
+      "and_bin": [
+        16384,
+        50001
+      ]
+    },
+    {
+      "index": 592,
+      "relative_path": "forgeEDA/mig_7series_v4_0_ecc_dec_fix.aig",
+      "sha256": "07f1f7e9520af8d1928c1a9a8154971f8ed25ce59ba5dc09bf0cef6353ed9ecd",
+      "pi_count": 1731,
+      "po_count": 74,
+      "and_count": 18240,
+      "staged_path": "/data/wushangge/CULS_LiteCut/runs/20261111T105821Z-benchmark-inventory-114a3573/input/benchmarks/0592.aig",
+      "family": "mig_7series_v4_0_ecc_dec_fix",
+      "and_bin": [
+        16384,
+        50001
+      ]
+    }
+  ]
+}

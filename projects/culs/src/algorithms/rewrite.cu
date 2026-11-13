@@ -720,6 +720,18 @@ void GPUSolver::CopySelectedChoices(int n, const int *CPUbestSubgraph, const Cut
     cudaMemcpy(selectedCuts, CPUcuts, (n + 1) * sizeof(Cut), cudaMemcpyHostToDevice);
 }
 
+void GPUSolver::PrepareReplayGraph(int n, const int *CPUfanin0, const int *CPUfanin1) {
+    // The replacement builder needs the original structural hash and split
+    // literals, not a second enumeration of the exact same original graph.
+    gpuErrchk(cudaMemcpy(fanin0, CPUfanin0, (n + 1) * sizeof(int), cudaMemcpyHostToDevice));
+    gpuErrchk(cudaMemcpy(fanin1, CPUfanin1, (n + 1) * sizeof(int), cudaMemcpyHostToDevice));
+    gpuErrchk(cudaMemset(hashTable, -1, sizeof(TableNode) * (2 * n + 1 + P)));
+    Convert<<<BLOCK_NUMBER(n + 1, LARGE_BLOCK_SIZE), LARGE_BLOCK_SIZE>>>(fanin0, isComplement0, n + 1);
+    Convert<<<BLOCK_NUMBER(n + 1, LARGE_BLOCK_SIZE), LARGE_BLOCK_SIZE>>>(fanin1, isComplement1, n + 1);
+    BuildHashTable<<<BLOCK_NUMBER(n, LARGE_BLOCK_SIZE), LARGE_BLOCK_SIZE>>>(hashTable, n, fanin0, fanin1, isComplement0, isComplement1);
+    gpuErrchk(cudaDeviceSynchronize());
+}
+
 void GPUSolver::CopyLib(Library CPUlib) {
     cudaMemcpy(lib, &CPUlib, sizeof(Library), cudaMemcpyHostToDevice);
 }
@@ -1066,25 +1078,49 @@ void CPUSolver::Reset(int nInputs, int nOutputs, int nTotal,
 
 void CPUSolver::Rewrite(bool fUseZeros, bool GPUReplace) {
     expected = 0;
+    const PreparedReplayEnumeration *prepared = rewriteAuditOptions.preparedReplay;
+    if (prepared && (!GPUReplace || fUseZeros || !rewriteAuditOptions.replayMode))
+        throw std::runtime_error("prepared enumeration is restricted to explicit positive-gain replay");
+    if (prepared && (prepared->n != n || prepared->numInputs != numInputs ||
+        prepared->numOutputs != numOutputs ||
+        prepared->fanin0.size() != static_cast<size_t>(n + 1) ||
+        prepared->fanin1.size() != static_cast<size_t>(n + 1) ||
+        prepared->refs.size() != static_cast<size_t>(n + 1) ||
+        prepared->cuts.size() != static_cast<size_t>(n + 1) * CUT_SET_SIZE ||
+        prepared->candidateMasks.size() != static_cast<size_t>(n + 1) * CUT_SET_SIZE * MAX_REWRITE_SUBGR ||
+        !std::equal(prepared->fanin0.begin(), prepared->fanin0.end(), fanin0) ||
+        !std::equal(prepared->fanin1.begin(), prepared->fanin1.end(), fanin1) ||
+        !std::equal(prepared->refs.begin(), prepared->refs.end(), ref)))
+        throw std::runtime_error("prepared replay graph identity mismatch");
     gpuSolver = new GPUSolver(n);
 
     prt << "Rewrite Iteration" << endl;
     ReadLibrary();
     gpuSolver->CopyLib(lib);
     LevelCount();
-    gpuSolver->EnumerateAndPreEvaluate(level, levelCount, n, fanin0, fanin1, ref, fUseZeros);
-    prt << "Finished GPU enumeration and pre-evaluation" << endl;
+    if (prepared)
+        gpuSolver->PrepareReplayGraph(n, fanin0, fanin1);
+    else
+        gpuSolver->EnumerateAndPreEvaluate(level, levelCount, n, fanin0, fanin1, ref, fUseZeros);
+    prt << (prepared ? "Reused immutable enumeration; restored replacement graph"
+                     : "Finished GPU enumeration and pre-evaluation") << endl;
     auto startTime = clock();
     if (GPUReplace) {
-        gpuSolver->GetResults(n, bestOut, bestCut);
-        gpuSolver->GetSelectedCutSlots(n, bestCutSlot);
+        if (!prepared) {
+            gpuSolver->GetResults(n, bestOut, bestCut);
+            gpuSolver->GetSelectedCutSlots(n, bestCutSlot);
+        }
         if (rewriteAuditOptions.replayMode || !rewriteAuditOptions.replayChoices.empty()) {
-            std::vector<Cut> allCuts(static_cast<size_t>(n + 1) * CUT_SET_SIZE);
-            std::vector<unsigned char> candidateMasks(
-                static_cast<size_t>(n + 1) * CUT_SET_SIZE * MAX_REWRITE_SUBGR
-            );
-            gpuSolver->GetEnumeratedCuts(n, allCuts.data());
-            gpuSolver->GetCandidateMasks(n, candidateMasks.data());
+            std::vector<Cut> ownedCuts;
+            std::vector<unsigned char> ownedMasks;
+            if (!prepared) {
+                ownedCuts.resize(static_cast<size_t>(n + 1) * CUT_SET_SIZE);
+                ownedMasks.resize(static_cast<size_t>(n + 1) * CUT_SET_SIZE * MAX_REWRITE_SUBGR);
+                gpuSolver->GetEnumeratedCuts(n, ownedCuts.data());
+                gpuSolver->GetCandidateMasks(n, ownedMasks.data());
+            }
+            const std::vector<Cut> &allCuts = prepared ? prepared->cuts : ownedCuts;
+            const std::vector<unsigned char> &candidateMasks = prepared ? prepared->candidateMasks : ownedMasks;
 
             std::fill(bestOut, bestOut + n + 1, -1);
             std::fill(bestCutSlot, bestCutSlot + n + 1, -1);
@@ -2426,6 +2462,35 @@ int gate3eExecutionReplay(const char * outputDir, const char * inputPath,
         if (!gate3dReadRegionMap(regionMapPath, originalToRegion))
             throw std::runtime_error("cannot read Gate 3A region map: " + std::string(regionMapPath));
 
+        rw::PreparedReplayEnumeration prepared;
+        const char *prepareFlag = std::getenv("CULS_REPLAY_PREPARED");
+        const bool usePrepared = prepareFlag && std::string(prepareFlag) == "1";
+        if (usePrepared) {
+            prepared.n = n;
+            prepared.numInputs = nPIs;
+            prepared.numOutputs = nPOs;
+            prepared.fanin0 = graph.fanin0;
+            prepared.fanin1 = graph.fanin1;
+            prepared.refs = graph.refs;
+            prepared.cuts.resize(static_cast<size_t>(n + 1) * CUT_SET_SIZE);
+            prepared.candidateMasks.resize(static_cast<size_t>(n + 1) * CUT_SET_SIZE * rw::MAX_REWRITE_SUBGR);
+            rw::Library library{};
+            gate3cLoadLibrary(library);
+            rw::GPUSolver enumeration(n);
+            enumeration.CopyLib(library);
+            enumeration.EnumerateAndPreEvaluate(graph.levels.data(), graph.levelCount, n,
+                graph.fanin0.data(), graph.fanin1.data(), graph.refs.data(), false);
+            enumeration.GetEnumeratedCuts(n, prepared.cuts.data());
+            enumeration.GetCandidateMasks(n, prepared.candidateMasks.data());
+            printf("gate3e: prepared one immutable enumeration for %zu configurations\n", configs.size());
+            std::ofstream preparation(root / "prepared_replay.json");
+            if (!preparation)
+                throw std::runtime_error("cannot open prepared replay provenance");
+            preparation << "{\"enumeration_count\":1,\"configuration_count\":" << configs.size()
+                << ",\"graph_identity_check\":\"exact reordered fanins/refcounts/interface\","
+                   "\"zero_gain_enabled\":false,\"sequential_install_unchanged\":true}\n";
+        }
+
         std::ofstream manifest(root / "replay_manifest.jsonl");
         if (!manifest)
             throw std::runtime_error("cannot open Gate 3E replay manifest");
@@ -2438,6 +2503,7 @@ int gate3eExecutionReplay(const char * outputDir, const char * inputPath,
             rw::RewriteAuditOptions options;
             options.enabled = true;
             options.replayMode = true;
+            options.preparedReplay = usePrepared ? &prepared : nullptr;
             options.internalToOriginal = graph.newToOld;
             options.originalToRegion = originalToRegion;
             std::vector<bool> selectedInternal(static_cast<size_t>(n + 1), false);

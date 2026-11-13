@@ -60,6 +60,7 @@ public:
     void GetEnumeratedCuts(int n, Cut *CPUcuts);
     void GetCandidateMasks(int n, unsigned char *CPUcandidateMasks);
     void CopySelectedChoices(int n, const int *CPUbestSubgraph, const Cut *CPUcuts);
+    void PrepareReplayGraph(int n, const int *CPUfanin0, const int *CPUfanin1);
 
 private:
     int *fanin0, *fanin1, *isComplement0, *isComplement1, *nRef, *bestSubgraph, *selectedCutSlots;
@@ -82,6 +83,17 @@ struct RewriteReplayChoice {
     int subgraphIndex = -1;
 };
 
+// Immutable, command-local enumeration of the original reordered graph.
+// Optional replay reuse never changes CPU sequential install/rejection rules.
+struct PreparedReplayEnumeration {
+    int n = -1;
+    int numInputs = -1;
+    int numOutputs = -1;
+    std::vector<int> fanin0, fanin1, refs;
+    std::vector<Cut> cuts;
+    std::vector<unsigned char> candidateMasks;
+};
+
 struct RewriteAuditOptions {
     bool enabled = false;
     std::string tracePath;
@@ -93,6 +105,7 @@ struct RewriteAuditOptions {
     // Keep the legacy aggregate initializer field order unchanged.
     // An explicit replay may intentionally select zero candidates (no-rewrite).
     bool replayMode = false;
+    const PreparedReplayEnumeration *preparedReplay = nullptr;
 };
 
 class CPUSolver {

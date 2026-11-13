@@ -25,6 +25,7 @@ Q(v)=J(v_0)+\sum_i L_i^T(e_i(v)-e_i(v_0))
 - 内层使用 Softmax 连续松弛，**没有 STE 或逐步硬投影**。损失为 `Q + 0.05*trust + 0.1*conflict`。trust 是 soft Hamming edit 数超预算的归一化平方惩罚；conflict 沿用静态冲突对的激活概率乘积均值。
 - trajectories 在 1/2/4/8/16/32（不超过实际配置与变量数）的 edit 预算间循环。最终一次传回 CPU，以相对 anchor 的 logit 优势贪心投影；保留所有未编辑的 incumbent 选择，任何激活/停用/候选替换都占一个 edit。静态合法不保证动态安装成功。
 - 仅按局部二次目标排名 proposals；pipeline 在实际请求前仍用**完整原代理**记录 PO/area 预测。真实安装、失败、修复、CEC、mapping 与请求预算规则保持一致。返回的 best 仍只由真实成功测量决定。
+- 最终 argmax 和相对 incumbent 的 logit 优势在选定设备上批量计算，只传回有正优势的编辑；CPU 复用一份冲突索引。合法 hard 组合用其非 no-op 项直接打分，避免为每个组合再构建完整 one-hot。数学目标与投影规则保持一致，需要与此前大图保存的选择哈希再次核对；新增分阶段计时区分 adjoint、初始化/传输、内层、稀疏传回、合法投影和最终排名。
 - 新 trace 使用 `joint_criticality_v1`，保存原始目标在 anchor 的梯度范数和含 penalty 的迭代梯度，不能把后者全部解释为时序信号。它不同于旧逐 restart/step 的 trace schema。
 - CUDA 只并行内层多轨迹/多候选计算；初始 DAG adjoint、代理校准、最终投影仍在 CPU。传输、CUDA 初始化和这些 CPU 阶段都须计入冷进程时间。多 benchmark 并发不作为单电路 GPU 加速。
 

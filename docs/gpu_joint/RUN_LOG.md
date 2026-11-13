@@ -27,6 +27,32 @@
 
 新 CPU/CUDA 的最终离散选择和数值一致；DMA 的更少失败使更多请求继续做 CEC/mapping，因此较低 delay 不等于更低 runtime。ss_pcm 最终点来自 warmup，不能归因于梯度；CUDA 在小图上增加冷初始化成本。基础近似尚未达到总体目标。后续增加可关闭的八维成功反馈残差排序，是对这组失败证据的具体调整；尚不能预先声称有效。
 
+## 残差排序验证与真实对照
+
+`20261113T034339Z-joint-feedback-validation-cf6f9ad3`，Slurm **64928**，源码 **97d27f7**，COMPLETED/0:0，**26/26 PASS**；包括反馈只使用既往 PASS 标签、anchor 对齐、训练残差和反馈版 CPU/CUDA 选择一致性。fixture 的训练拟合下降不是验证集预测或 QoR 结果。
+
+`20261113T034453Z-joint-feedback-dev-3776f84d`，Slurm **64929**，源码 **97d27f7**，COMPLETED/0:0，Elapsed 3m26s，**9/9 PASS**。最终点均完整安装并 CEC PASS：
+
+| 输入 | 旧 CPU：delay ps / wall s / 失败数 | 反馈 CPU | 反馈 CUDA |
+|---|---|---|---|
+| DMA | 2380.250980 / 29.234 / 4 | 2301.566650 / 34.961 / 5 | 2301.566650 / 22.023 / 5 |
+| c1355 | 360.111877 / 17.147 / 1 | 360.111877 / 17.005 / 1 | 360.111877 / 21.663 / 1 |
+| ss_pcm | 323.908447 / 16.612 / 0 | 328.026855 / 22.067 / 0 | 328.026855 / 22.006 / 0 |
+
+反馈版 CPU/CUDA 的最终选择和 QoR 相同。DMA 最终来源为 **explicit_feasibility_repair**，不是直接梯度完整成功；ss_pcm 的最终点为直接梯度，比基础近似更好、仍劣于旧方法。DMA 的单次 CUDA/CPU wall 差异不构成稳定端到端加速证据：作业前段同时存在本用户另一 GPU 组件作业，共享节点资源会影响 CPU/内存/IO；本轮只作为诊断，最终公平计时需单独控制。没有因此宣称已达到 QoR 非劣或 runtime 总体目标。
+
+## 大图同工作量 CPU/CUDA 组件对照
+
+`20261113T034455Z-joint-large-cpu-cuda-85b293a7`，Slurm **64930**，源码 **97d27f7**，4 CPU、32 GiB、1 GPU，COMPLETED/0:0，Elapsed 4m39s，MaxRSS 约 2.90 GiB。只从保存的原输入、verified catalogue、LiteCut 分数和校准系数构建代理，没有执行新的 rewrite、CEC 或 mapping。32 trajectories × 40 步，CPU/CUDA 均 float64，两个 seed 对应 20261111/12，轮换设备顺序；每次调用包含一次新 adjoint 和传输，模型构建/导入另列。
+
+| 输入 | Decision 数 | repeat 0：CPU s / CUDA s / 比值 | repeat 1：CPU s / CUDA s / 比值 |
+|---|---:|---|---|
+| ACE/div | 51140 | 106.628 / 16.523 / 6.453 | 97.662 / 9.746 / 10.021 |
+| ACE/hyp | 2760 | 4.682 / 3.566 / 1.313 | 4.596 / 2.752 / 1.670 |
+| ACE/voter | 7007 | 5.505 / 1.204 / 4.572 | 5.085 / 1.178 / 4.318 |
+
+6 个配对的最终候选向量及排序均一致。该证据支持新近似提案器内的单电路 GPU 并行计算收益，**不支持整个优化闭环也快 6–10 倍**；CUDA context 在作业内共享，首次调用/缓存成本与后续调用不同，少量重复不是严谨分布估计。hyp 的一次 adjoint 约 2.45–3.26 s，占调用较多，说明剩余 CPU 部分限制加速。原始 JSON 入口为 `output/kernel_summary.json` 及各 `kernel_case_NNNN.json`；每项保留实际代理输入文件哈希，校准数据不能用作新方法的在线免费历史标签。
+
 ## 冻结评价面板
 
 [config/gpu_joint_panel.json](../../config/gpu_joint_panel.json) 固定 16 个输入与种子 20261111/12/13；生成器为 [freeze_joint_panel.py](../../scripts/freeze_joint_panel.py)。只使用冻结输入清单的 AND 规模、来源、文件名家族和 SHA，不查看候选数、delay 或运行时间。排除开发家族，四个区间各选 4 项：128–4095、4096–8191、8192–16383、16384–50000 AND。第一区间原拟分成 128–511 与 512–4095，但输入清单前者只有两个设计且一个属于开发集，因此在成功生成/冻结之前合并，仍未使用结果信息。

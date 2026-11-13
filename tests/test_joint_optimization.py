@@ -52,6 +52,18 @@ class JointOptimizationTests(unittest.TestCase):
         torch.testing.assert_close(torch.autograd.grad(batch.sum(), values)[0],
                                    torch.autograd.grad(individual.sum(), values)[0], atol=1e-13, rtol=1e-13)
 
+    def test_sparse_hard_scoring_matches_dense_one_hot(self):
+        model = model_fixture()
+        with torch.no_grad():
+            model.interaction_weights.fill_(0.11)
+        for anchor in ([0, 0], [1, 2]):
+            objective = FrozenCriticalityObjective(model, anchor, 'joint')
+            for left in range(3):
+                for right in range(3):
+                    choice = [left, right]
+                    torch.testing.assert_close(objective.hard_value(choice), objective(model.one_hot(choice)),
+                                               rtol=1e-12, atol=1e-12)
+
     def test_neighborhood_projection_preserves_incumbent_and_edit_budget(self):
         decisions = [{'candidate_count': 2} for _ in range(4)]
         catalogue = Catalogue(decisions, [(0, 1), (1, 2)], {0: [0, 1], 1: [2, 3]})

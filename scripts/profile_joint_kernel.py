@@ -20,6 +20,8 @@ def main():
     parser.add_argument('--diagnostic', type=Path, required=True)
     parser.add_argument('--indices', default='20,22,38')
     parser.add_argument('--repeats', type=int, default=2)
+    parser.add_argument('--reference-summary', type=Path,
+                        help='Optional saved same-input proposal hashes from an earlier implementation.')
     args = parser.parse_args()
     run = args.run.resolve()
     if not os.environ.get('SLURM_JOB_ID') or not run.is_relative_to('/data/wushangge'):
@@ -38,6 +40,11 @@ def main():
     rows = [r for r in json.loads(args.diagnostic.read_text())['cases'] if r['index'] in indices]
     if len(rows) != len(indices):
         parser.error('Missing diagnostic case.')
+    reference = {}
+    if args.reference_summary:
+        for case in json.loads(args.reference_summary.read_text())['results']:
+            for call in case['calls']:
+                reference[case['index'], call['repeat'], call['device']] = (case['inputs'], call['choices_sha256'])
     metadata_path = run / 'run.json'
     metadata = json.loads(metadata_path.read_text())
     metadata.update(state='RUNNING', slurm_job_id=os.environ['SLURM_JOB_ID'], experiment_executed=True,
@@ -90,6 +97,11 @@ def main():
                     measured = {'repeat': repeat, 'device': device, 'wall_s': elapsed,
                                 'proposal_count': len(proposals), 'choices_sha256': hashlib.sha256(choice_bytes).hexdigest(),
                                 'peak_cuda_allocated_bytes': torch.cuda.max_memory_allocated(), 'trace': trace}
+                    if args.reference_summary:
+                        old_inputs, old_choices = reference[row['index'], repeat, device]
+                        if old_inputs != item['inputs']:
+                            raise ValueError('Reference proxy inputs differ; comparison would be invalid.')
+                        measured['same_choices_as_reference'] = measured['choices_sha256'] == old_choices
                     item['calls'].append(measured)
                     by_device[device] = (proposals, elapsed)
                     print(json.dumps({'index': row['index'], 'repeat': repeat, 'device': device,
@@ -104,6 +116,9 @@ def main():
         save_json(run / 'output/kernel_summary.json', {
             'status': 'COMPLETED', 'source_commit': metadata['source_commit'],
             'results': results, 'scope': __doc__,
+            'all_cpu_cuda_selections_equal': all(p['same_choices_in_order'] for r in results for p in r['pairs']),
+            'all_reference_selection_hashes_equal': (all(c['same_choices_as_reference'] for r in results for c in r['calls'])
+                                                     if args.reference_summary else None),
             'no_eda_executed': True,
             'warning': 'Historical calibrated proxy inputs only; no mapping-delay or true-rewrite benefit is inferred. CUDA context is shared across calls; setup/import and model construction are reported separately.'})
         metadata.update(state='COMPLETED', outputs=str(run / 'output/kernel_summary.json'))

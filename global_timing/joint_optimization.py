@@ -18,15 +18,43 @@ from .arrival import reference_arrivals, smooth_arrivals
 from .surrogate import scalar_objective
 
 
+class _NeighborhoodProjector:
+    """Reuse the same conflict index across a circuit's trajectories."""
+
+    def __init__(self, catalogue, anchor):
+        catalogue.validate(anchor)
+        self.catalogue, self.anchor = catalogue, list(anchor)
+        self.neighbors = [set() for _ in anchor]
+        for left, right in catalogue.conflicts:
+            self.neighbors[left].add(right)
+            self.neighbors[right].add(left)
+        self.active = {i for i, choice in enumerate(anchor) if choice}
+
+    def project(self, edits, max_changes):
+        if type(max_changes) is not int or max_changes < 0:
+            raise ValueError('max_changes must be a nonnegative integer.')
+        result, active, changes = self.anchor.copy(), self.active.copy(), 0
+        for _, index, choice in sorted(edits, key=lambda r: (-r[0], r[1])):
+            if changes == max_changes:
+                break
+            if choice and (self.neighbors[index] & (active - {index})):
+                continue
+            result[index] = choice
+            active.discard(index)
+            if choice:
+                active.add(index)
+            changes += 1
+        self.catalogue.validate(result)
+        return result
+
+
 def project_neighborhood(catalogue, anchor, scores, max_changes):
     """Greedy compatible edits, preserving all unedited incumbent decisions.
 
     Distance counts candidate substitutions and activation/deactivation alike.
     This is a conservative projection, not an exact constrained optimizer.
     """
-    catalogue.validate(anchor)
-    if type(max_changes) is not int or max_changes < 0:
-        raise ValueError('max_changes must be a nonnegative integer.')
+    projector = _NeighborhoodProjector(catalogue, anchor)
     if len(scores) != len(anchor):
         raise ValueError('Neighborhood score shape mismatch.')
     proposals = []
@@ -36,25 +64,7 @@ def project_neighborhood(catalogue, anchor, scores, max_changes):
         choice = max(range(len(row)), key=lambda c: (row[c], -c))
         if choice != anchor[i] and row[choice] > row[anchor[i]]:
             proposals.append((row[choice] - row[anchor[i]], i, choice))
-    neighbors = [set() for _ in anchor]
-    for left, right in catalogue.conflicts:
-        neighbors[left].add(right)
-        neighbors[right].add(left)
-    result = list(anchor)
-    active = {i for i, choice in enumerate(result) if choice}
-    changes = 0
-    for _, index, choice in sorted(proposals, key=lambda r: (-r[0], r[1])):
-        if changes == max_changes:
-            break
-        if choice and (neighbors[index] & (active - {index})):
-            continue
-        result[index] = choice
-        active.discard(index)
-        if choice:
-            active.add(index)
-        changes += 1
-    catalogue.validate(result)
-    return result
+    return projector.project(proposals, max_changes)
 
 
 class FrozenCriticalityObjective(nn.Module):
@@ -220,6 +230,20 @@ class FrozenCriticalityObjective(nn.Module):
         result = self.offset + self._unshifted(values)
         return result[0] if values.ndim == 2 else result
 
+    def hard_value(self, choices):
+        """Score an already validated sparse hard choice without dense one-hot."""
+        indices = torch.tensor([i for i, c in enumerate(choices) if c], dtype=torch.long)
+        if not indices.numel():
+            return self.offset
+        selected = torch.tensor([choices[i] for i in indices.tolist()], dtype=torch.long)
+        linear = self.linear_candidates[indices, selected].sum()
+        if self.pair_target.numel() == 0:
+            return self.offset + linear
+        expected = self.features[indices, selected]
+        region = expected.new_zeros((self.n_active_regions, 4)).index_add(0, self.decision_region[indices], expected)
+        coupled = region[self.pair_target] * region[self.pair_source] * self.pair_weights
+        return self.offset + linear + coupled.sum()
+
 
 @dataclass(frozen=True)
 class JointProposalConfig:
@@ -283,6 +307,9 @@ def joint_proposals(model, seen, seed, incumbent=None, steps=40, restarts=2,
     logits = nn.Parameter(starting.to(device))
     budgets = budgets_cpu.to(device)
     optimizer = torch.optim.Adam([logits], lr=config.learning_rate, eps=1e-12)
+    if device.type == 'cuda':
+        torch.cuda.synchronize()
+    initialized = time.perf_counter()
     trace_tensors = []
     for step in range(steps):
         temperature = max(0.3, 1 - 0.7 * step / max(steps - 1, 1))
@@ -306,24 +333,37 @@ def joint_proposals(model, seen, seed, incumbent=None, steps=40, restarts=2,
         optimizer.step()
     if not torch.isfinite(logits).all() or not torch.isfinite(logits.grad).all():
         raise ValueError('Non-finite joint optimization state.')
-    # One transfer after all inner steps. Final legal projection is conservative
-    # and includes every unchanged incumbent decision when checking conflicts.
-    rows = logits.detach().cpu().tolist()
+    optimized = time.perf_counter()
+    # Argmax/margins are parallel on the selected device. Transfer only edits,
+    # rather than B*D*W Python float rows; CPU projection keeps exact tie policy.
+    scores = logits.detach().masked_fill(~objective.valid, -torch.inf)
+    preferred = scores.argmax(-1)
+    anchor_indices = objective.anchor_hot.argmax(-1)[None, :].expand(config.trajectories, -1)
+    advantage = scores.gather(-1, preferred.unsqueeze(-1)).squeeze(-1) - scores.gather(-1, anchor_indices.unsqueeze(-1)).squeeze(-1)
+    trajectory_indices, decision_indices = ((preferred != anchor_indices) & (advantage > 0)).nonzero(as_tuple=True)
+    sparse_positions = torch.stack((trajectory_indices, decision_indices), -1).cpu().tolist()
+    sparse_choices = preferred[trajectory_indices, decision_indices].cpu().tolist()
+    sparse_gains = advantage[trajectory_indices, decision_indices].cpu().tolist()
+    edits = [[] for _ in range(config.trajectories)]
+    for (trajectory, index), choice, gain in zip(sparse_positions, sparse_choices, sparse_gains):
+        edits[trajectory].append((gain, index, choice))
+    transferred = time.perf_counter()
+    projector = _NeighborhoodProjector(model.catalogue, anchor)
     proposals = {}
-    for trajectory, scores in enumerate(rows):
-        choice = project_neighborhood(model.catalogue, anchor,
-                                      [r[:n] for r, n in zip(scores, model.counts)], int(budgets_cpu[trajectory]))
+    for trajectory, changes in enumerate(edits):
+        choice = projector.project(changes, int(budgets_cpu[trajectory]))
         key = tuple(choice)
         if key not in seen:
             proposals.setdefault(key, {'choices': choice, 'trajectory': trajectory,
                                        'max_changes': int(budgets_cpu[trajectory]),
                                        'actual_changes': sum(a != b for a, b in zip(anchor, choice))})
+    projected = time.perf_counter()
     # Use CPU coefficients for reproducible final ranking and do not claim the
     # frozen objective to be a path/global delay prediction in picoseconds.
     cpu_objective = objective.cpu()
     with torch.no_grad():
         for proposal in proposals.values():
-            proposal['predicted_objective'] = float(cpu_objective(model.one_hot(proposal['choices'])))
+            proposal['predicted_objective'] = float(cpu_objective.hard_value(proposal['choices']))
             proposal['objective_kind'] = 'feedback_corrected_quadratic' if config.feedback else 'frozen_criticality_quadratic'
     trace_values = torch.stack(trace_tensors).cpu().tolist()
     elapsed = time.perf_counter() - started
@@ -336,6 +376,12 @@ def joint_proposals(model, seen, seed, incumbent=None, steps=40, restarts=2,
                'feedback_fit': feedback_fit,
                'retained_interaction_pairs': int(cpu_objective.pair_target.numel()),
                'prepare_adjoint_s': prepared - started, 'total_proposal_s': elapsed,
+               'transfer_and_initialize_s': initialized - prepared,
+               'inner_optimization_s': optimized - initialized,
+               'argmax_and_sparse_transfer_s': transferred - optimized,
+               'cpu_legal_projection_s': projected - transferred,
+               'cpu_final_ranking_and_trace_s': elapsed - (projected - started),
+               'transferred_edits': len(sparse_positions),
                'sampled_values': trace_values, 'trace_columns': ['local_objective', 'trust_penalty', 'conflict_penalty', 'total_gradient_norm', 'soft_edit_count'],
                'scope': 'Local surrogate approximation; soft inner optimization, hard legal final projection; no gradient through EDA or LiteCut.'}
     return sorted(proposals.values(), key=lambda p: (p['predicted_objective'], p['choices'])), [details]

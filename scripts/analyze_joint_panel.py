@@ -23,10 +23,12 @@ def comparisons(rows):
     for control in ('legacy_cpu', 'random_batch', 'adaptive_batch_cpu', 'adaptive_no_inner_batch_auto', 'greedy_litecut', 'native_abc', 'native_culs'):
         pairs = []
         for row in rows:
-            if row['variant'] != 'adaptive_batch_auto':
+            if row['variant'] not in ('adaptive_batch_auto', 'adaptive_batch_cuda'):
+                continue
+            if row['variant'] == 'adaptive_batch_cuda' and (row['index'], row['seed'], 'adaptive_batch_auto') in lookup:
                 continue
             other = lookup.get((row['index'], row['seed'], control))
-            pair = {'index': row['index'], 'seed': row['seed']}
+            pair = {'index': row['index'], 'seed': row['seed'], 'proposed_variant': row['variant']}
             if other is None or row['status'] != 'PASS' or other['status'] != 'PASS':
                 pair['status'] = 'MISSING_OR_FAILED'
             elif not row.get('area_feasible_1p05') or not other.get('area_feasible_1p05'):
@@ -47,6 +49,9 @@ def comparisons(rows):
         valid = [p for p in pairs if p['status'] == 'MEASURED']
         ratios = sorted(p['delay_ratio'] for p in valid if p['delay_ratio'] is not None and p['delay_ratio'] > 0)
         speed = [p['control_over_proposed_runtime'] for p in valid if p['control_over_proposed_runtime'] is not None]
+        cuda_pairs = [p for p in valid if control == 'adaptive_batch_cpu' and p['proposed_cuda_used']]
+        cuda_speed = [p['control_over_proposed_runtime'] for p in cuda_pairs
+                      if p['shared_allocation'] and p['same_request_sequence']]
         q90 = None
         if ratios:
             position = .9 * (len(ratios) - 1)
@@ -56,6 +61,9 @@ def comparisons(rows):
             'outcomes': {k: sum(p['outcome'] == k for p in valid) for k in ('win', 'tie', 'loss')},
             'geometric_mean_delay_ratio': math.exp(statistics.mean(map(math.log, ratios))) if ratios else None,
             'p90_delay_ratio': q90, 'median_shared_allocation_speed_ratio': statistics.median(speed) if speed else None,
+            'actual_cuda_pairs': len(cuda_pairs),
+            'actual_cuda_pairs_with_identical_request_sequence': sum(p['same_request_sequence'] for p in cuda_pairs),
+            'median_speed_ratio_actual_cuda_same_requests': statistics.median(cuda_speed) if cuda_speed else None,
             'pairs': pairs}
     return results
 

@@ -107,6 +107,21 @@ batch 将 DMA/c1355 的实际 replay 命令从 8 减至 5，ss_pcm 从 8 减至 
 
 ### 独立自然成本基线与回归
 
+后续审计 `20261113T060125Z-timing-curve-audit-validation-a1e40c0b`，Slurm **64979**，源码 **a6d7f84**，2 CPU/4GiB/无GPU，COMPLETED/0:0，7s。3/3 analytical反例与时间截点测试通过；原始审计覆盖64976/64978全部24个方法点、94次成功测量，错误0。所有成功点均核对AIG、精确请求全ACCEPTED、CEC、Liberty、mapped.v、资产/命令hash和完成事件。产物在 `output/panel_analysis/`，包括results.csv、audited_records.json、comparisons.json、evidence_hashes.json；没有新EDA或timing标签。
+
+### 真正端到端的单电路CPU/CUDA对照
+
+`20261113T060301Z-adaptive-large-e2e-pair-aa596854`，Slurm **64980**，源码 **a6d7f84**，2 CPU/32GiB/1 RTX4090，COMPLETED/0:0，8m21s，MaxRSS约2.65GiB。固定开发ACE/div（index20），每方法8请求，32×40/float64，CPU Torch线程1、验证workers2、同一新gpuls/ABC/ASAP7，顺序独立冷child及隔离CUDA/Student cache。
+
+| 方法 | cold wall s | 最终真实delay ps | 实际area | 最终rewrite | 请求/失败 | 首个已验证no-op完成 s |
+|---|---:|---:|---:|---:|---|---:|
+| adaptive_batch_cpu | 327.205694 | 76414.984400 | 12459.951200 | 0 | 8/1 | 64.434139 |
+| adaptive_batch_cuda | 169.601841 | 76414.984400 | 12459.951200 | 0 | 8/1 | 62.618616 |
+
+两个最终点CEC PASS；八个请求逐项choices、PASS/FAIL、所有成功delay/area/全部PO精确相同。CPU提案累计164.492s，CUDA两个提案调用约3.696+2.888s，其余准备/校准/真实EDA仍付费。因此该次完整成本约1.929倍差异，不再只是kernel或代理组件计时；但仅单个开发设计、一次配对，没有稳定分布证据。
+
+**两者均返回no-op，没有新的QoR改善。** 按预先质量阈值只需baseline，此时达标时间约64.43/62.62s，不能把完成全部搜索的1.929倍称为同倍更早找到改善点。原始证据在 `output/<variant>/case_0020/`、逐profile/timeline和父 `output/profile_summary.json`；完整raw逐点审计仍要单独落盘。该设计不在最终面板中。
+
 `20261113T055037Z-standalone-controls-validation-97d74575`，Slurm **64977**，源码 **dc95c8c**，2 CPU/12GiB/1GPU，COMPLETED/0:0，53s，`output/controls_tests.json` **51/51 PASS**。包括6项新control、3项真实batch、4项pipeline、14项joint、9项surrogate、3项arrival、12项真实工具。random/native导入路径不加载未使用的Torch/NumPy/NetworkX；共享Boolean parser与原canonical完整返回结构一致；实际random/greedy/native各自CEC+Liberty验证。新共享执行模块由原已验证函数提取，不改变默认安装政策。
 
 `20261113T055431Z-standalone-controls-dev-0e1ce7d6`，Slurm **64978**，同源码，2 CPU/16GiB/1GPU，COMPLETED/0:0，1m10s，15/15独立冷child PASS；seed20261111。

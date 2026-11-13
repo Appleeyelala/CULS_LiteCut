@@ -1,6 +1,6 @@
 # 当前梯度优化闭环：实现与实验状态
 
-整理日期：2026-11-13（北京时间）。源码阅读基线：`13e9e65910c1d3df980fb8bb7074181d70902696`；全量 benchmark 源码：`160b2187eee3b47799e58b658e39f13d40064b61`。两者的 pipeline、optimization、surrogate、arrival、LiteCut、candidate、evaluation 和 structure 实现没有差异；后来增加了失败分析、独立分区验证及相关测试。本文只阅读源码、现有 JSON/CSV 和日志，没有运行模型、优化器、测试或新实验。
+整理日期：2026-11-13（北京时间）。本次核对的源码基线：`5025a6c863f0a7766c41707bcc1828723afce447`；全量 benchmark 源码：`160b2187eee3b47799e58b658e39f13d40064b61`。逐文件比较确认，两者的 pipeline、optimization、surrogate、arrival、LiteCut、candidate、evaluation 和 structure 实现字节相同；后续提交增加了分析、验证、诊断脚本和文档。本文只阅读源码、现有 JSON/CSV、日志和作业完成记录，没有运行模型、优化器、测试或新实验。第 4.5 节补入已经完成的单策略冷进程测量，不将其写成新算法结果。
 
 ## 0. 当前结论与阅读边界
 
@@ -10,6 +10,7 @@
 - 两种梯度模式相对原图的 delay 改善中位数为 3.6586% / 3.8708%，但相对同预算随机搜索的胜/平/负为 179/464/262 和 252/379/274，中位目标改善均为 0%。
 - `c1355_orig` 的代理目标下降，但实际梯度请求的 mapped delay 变差，最终两模式都返回 no-op。
 - `ss_pcm_orig` 的两个 MFFC 联合替换得到真实 delay 改善，但代理的 global delay 预测仍等于 baseline；这验证了安装与测量闭环，不能单凭此例证明准确的 timing gradient。
+- 当前 Student 推理、代理校准和 logits 梯度优化均在 CPU 上执行。GPU 用于 CULS 原生候选枚举和 rewrite 的部分计算；尚无新增 GPU 梯度选择方法及其加速对照结果。
 
 本文的正式实验数值统一来自新框架的 `ABC_SCL_LIBERTY` 测量：相同 ABC 二进制、ASAP7、mapping 命令，同一 `SC_Man` 的 global delay、全部 PO rise/fall arrival 和 area。它们不是历史 Gate3F 的 MIO PO arrival，也不是 `print_pair_delay`、初始 mapper mode0 arrival 或已撤回的旧 PI→PO 标签。历史 Gate3F 的 interaction 只作为独立背景，未拼入本报告的梯度性能统计。
 
@@ -298,6 +299,8 @@ L_{\rm fit}=
 | P：最终 timing/路径分析，Slurm 64905 | `/data/wushangge/CULS_LiteCut/runs/20261112T122920Z-final905-path-analysis-61f92cbb` |
 | T：CPU 全程序矩阵与分区证书，Slurm 64395 | `/data/wushangge/CULS_LiteCut/runs/20261111T191749Z-full905-partition-certificates-f9e48d3a` |
 | R：c1355 独立同参数重复，Slurm 64397.0 | `/data/wushangge/CULS_LiteCut/runs/20261111T214331Z-consistent-c1355-exact-repeat-0e387139` |
+| B：单策略冷进程基线，Slurm 64921 | `/data/wushangge/CULS_LiteCut/runs/20261113T031523Z-gpu-joint-cold-baseline-934606e2` |
+| D：历史样例文件诊断，Slurm 64920 | `/data/wushangge/CULS_LiteCut/runs/20261113T031521Z-gpu-joint-saved-diagnostics-63af3c1f` |
 
 ### 4.2 分层测试结果
 
@@ -349,6 +352,24 @@ L_{\rm fit}=
 T 的 `output/repository_tests/matrix_summary.json` 记录 2,515 项源码/入口、177 个入口，1,618 语法 PASS、1,395 个编译 translation units、147 import PASS、17 FAIL、1 SKIP、59 CLI smoke PASS。2,456 项 runtime smoke 明确 SKIP；113 个文件有来源匹配的命名功能证据，2,402 项未测逐文件功能。这不是全仓库行覆盖率。
 
 17 项 import FAIL 包含：缺参数或相对输入的 6 个命令式入口、缺 DGL 的 8 项、缺 einops/DeepGate 的 2 项、原训练数据 PermissionError 的 1 项；部分命令式入口在指定真实参数后已有单独 CLI PASS。另 1 项 import SKIP 是阻止旧脚本向历史路径写入。Teacher 训练恢复和这些缺依赖入口的完整功能为**未验证**，没有用 Student 推理成功替代它们。
+
+### 4.5 已完成的单策略冷进程测量与文件诊断
+
+B 使用 `scripts/profile_single_method.py`，在同一次 `Compute/eda` 分配中顺序启动三个独立子进程。每例只执行现有面积约束梯度方法及其必需的 original/no-op 测量，不执行 native、greedy、random 或 joint 对照；核心算法没有改变。种子 20261111，每例 8 个请求、warmup 上限 2、20 步梯度、2 restarts、30 步校准、反馈批量 4，固定使用第 8.3 节的模型、工具和库。作业申请 4 CPU、32 GiB、1 GPU，OMP/OpenBLAS/MKL 各 1 线程；已完成，`COMPLETED / 0:0`。
+
+| 输入（索引） | 完整子进程 wall s | 梯度提案累计 s | 校准累计 s | CEC+mapping 累计 s（调用数） | 最终真实 delay ps | 实际 area | 接受 rewrite | 请求/失败 | 最终 CEC |
+|---|---:|---:|---:|---|---:|---:|---:|---|---|
+| DMA_comb（0） | 24.109 | 0.352 | 0.252 | 10.230（5） | 2380.250980 | 5196.078610 | 23 | 8/4 | PASS |
+| c1355_orig（47） | 14.457 | 0.139 | 0.115 | 7.072（8） | 360.111877 | 513.216003 | 0 | 8/1 | PASS |
+| ss_pcm_orig（80） | 12.641 | 0.202 | 0.181 | 7.257（9） | 323.908447 | 211.351685 | 2 | 8/0 | PASS |
+
+完整子进程 wall 包含解释器启动/退出、模块导入、分区/候选/特征准备、搜索、真实工具调用及保存记录；不含 Slurm 排队、外层运行目录准备和父进程的输入复制。各阶段为包含子调用的累计计时，**存在嵌套，不能相加**；CEC+mapping 列也包含 original/no-op。请求数包含复用 no-op 和失败，并不等于实际 CEC 或 mapping 次数。
+
+三个最终 delay、area 和离散选择与 E/O 的对应面积模式一致。该记录支持这三个小中型样例的冷进程成本分解；没有测量新的 CPU/GPU 方法对照、重复计时分布或公平端到端加速比。第 6 节的历史总时间包含所有 baseline，不能与这里单策略时间相除来声称加速，也不能把三个样例的瓶颈推广到所有深图或 CEC 困难图。
+
+证据为 `B/output/profile_summary.json`（SHA256 `a847fc085cef16d873bf249b4e71816145e9ff580eb8ab8178a2c1eb94dfbf02`）、`B/output/case_{0000,0047,0080}_profile.json`、各例 `gradient_area_constraint/summary.json`、原始 `evaluation/{cec.log,mapping.log,result.json}`、`B/job.slurm` 和 `B/run.json`。
+
+D 则只解析 12 个固定历史样例的保存文件，包括工具耗时、失败请求、重复 AIG 字节哈希及 trace 体积；没有执行新的搜索或 EDA。`D/output/gpu_joint_diagnostics/summary.json` 为 PASS，SHA256 `9839e543086462261e0ca33526fa3b4e2d0cae828a55134501d0e4d7d507e0bf`。这是历史证据诊断，不是新增优化效果或 GPU 加速验证。`docs/gpu_joint/PLAN_AND_EVALUATION.md` 中的比较方案与阈值属于计划，不能作为已经实现或达标的结果。
 
 ## 5. 全 905 设计真实实验与对照
 
@@ -609,6 +630,7 @@ P 的 `output/path_changes/summary.json` 是对现有数据的后验分析，不
 | [reporting.py](global_timing/reporting.py)、[search_analysis.py](global_timing/search_analysis.py)、[path_changes.py](global_timing/path_changes.py) | 比较表、预测/梯度/来源审计、后验端点变化分析 |
 | [scripts/run_benchmark_suite.py](scripts/run_benchmark_suite.py) | 冻结清单分片、逐例独立进程、时间限制、PASS/FAIL/PARTIAL 保存 |
 | [scripts/run_framework_experiment.py](scripts/run_framework_experiment.py)、[build_framework_tools.py](scripts/build_framework_tools.py)、[ci.py](scripts/ci.py) | 已有构建、单例运行和自动化验证入口；本次未调用 |
+| [scripts/profile_single_method.py](scripts/profile_single_method.py)、[diagnose_gpu_joint.py](scripts/diagnose_gpu_joint.py) | 已完成的现有方法冷进程测量与保存文件诊断；未改动梯度选择算法，结果见第 4.5 节 |
 
 ### 8.2 全量主实验的实际配置
 
@@ -646,6 +668,13 @@ INVENTORY=/data/wushangge/CULS_LiteCut/runs/20261111T105821Z-benchmark-inventory
 ```
 
 底层入口是 `python -B -m global_timing --input … --gpuls … --abc … --library … --checkpoint … --output … --mode both`。主分片实际调用命令逐例保存在 `records.jsonl` 和 `logs/case_NNNN.log`；Slurm 环境、线程变量与资源参数在 E/O 的 `job.slurm`。未来若复现，已有 [USAGE](docs/global_timing/USAGE.md) 要求新建 /data committed-source 快照并通过 Slurm；本报告不创建或提交该任务。
+
+B 已执行的命令记录为：下列 `RUN` 指第 4.1 节的 B，`TOOLS` 和 `INVENTORY` 与上例相同。未传入的参数由入口默认值和子进程记录确认，包括 `--seed 20261111 --evaluations 8 --tool-timeout 900`。该命令仅作现有记录说明，本次未执行。
+
+```bash
+/home/share/process/anaconda3/bin/python -B "$RUN/src/scripts/profile_single_method.py" \
+  --run "$RUN" --tool-run "$TOOLS" --manifest "$INVENTORY" --indices 0,47,80
+```
 
 ### 8.3 固定工具、库与日志
 
@@ -699,5 +728,6 @@ INVENTORY=/data/wushangge/CULS_LiteCut/runs/20261111T105821Z-benchmark-inventory
 | Teacher 训练与所有历史依赖 | **未完整恢复。** 17 import FAIL/1 SKIP 等仍有明确记录；不是所有历史程序功能 PASS |
 | 物理实现与 signoff STA | **未验证。** 当前为固定 ABC + ASAP7 的逻辑映射/Liberty timing，没有布局布线寄生或物理签核结论 |
 | 全 905 搜索轨迹独立重复 | **未验证。** c1355 完整搜索独立重复已做；全 905 的保存测量再 CEC/mapping 与证据审计另有完成证据，二者不是同一件事 |
+| 新增 GPU 梯度联合选择及加速 | **尚未实现/未验证。** 当前 logits 和代理为 CPU float64，Student 为 CPU 推理；B 是原有方法基线，D 是文件诊断。原生 CULS 使用 GPU 不等于梯度优化已 GPU 化，也没有新的同工作量加速证据 |
 
 因此，当前项目已经拥有可执行、可测量、可追溯的联合搜索平台，也确实找到部分映射后 delay 更低的跨 MFFC 组合。距离“LiteCut 局部信息能可靠指导跨 MFFC 全局时序梯度优化”的论文主张，缺口主要是预测联系与贡献证据，而不是再把工程闭环是否真实执行与算法优势混为一谈。

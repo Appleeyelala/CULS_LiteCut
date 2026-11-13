@@ -11,3 +11,5 @@
 - 此阶段只增加原生命令能力。梯度 pipeline 尚未批量调用该功能，不能据此声称其端到端时间已经减少。
 
 源码在 `projects/culs/src/algorithms/rewrite.{h,cu}`。`tests/test_prepared_replay.py` 比较 no-op 和 GG/GL/LG/LL 的全部 trace/AIG，与默认路径及冻结旧二进制逐项相等，并对新产物做 CEC/mapping；另检查非法候选拒绝和真实动态拒绝 fixture。`scripts/build_replay_tools.py` 只重建 CULS，继续使用冻结 ABC；默认路径与开启复用的已有真实工具回归分别执行。构建/运行结果必须以实际 Slurm 文件为准，本文件不把尚未执行的检查写成 PASS。
+
+注意历史 CULS script dispatcher 在部分命令失败时仍可能以进程状态 0 结束。本项没有改变该既有 CLI 语义。非法候选的验证必须同时检查明确错误及成功 AIG/trace 缺失；上层原有的文件、精确请求集合与全部 ACCEPTED 检查继续保留，不能只用进程 return code 判成功。

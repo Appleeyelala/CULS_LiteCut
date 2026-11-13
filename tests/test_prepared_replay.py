@@ -64,8 +64,17 @@ class PreparedReplayTests(unittest.TestCase):
         config = self.work / 'invalid_choices.txt'
         config.write_text('BAD 197 2 999\n')
         for mode in (False, True):
-            with self.assertRaises(ToolError):
-                self.replay(config, 'invalid_' + str(mode), mode)
+            label = 'invalid_' + str(mode)
+            try:
+                self.replay(config, label, mode)
+            except ToolError:
+                pass
+            # CULS's script dispatcher may exit 0 after a command error. A
+            # return code alone is never a successful replay certificate.
+            text = (self.work / (label + '.log')).read_text()
+            self.assertIn('Gate 3E replay choice is outside the reordered graph', text)
+            self.assertFalse((self.work / label / 'aigs/BAD.aig').exists())
+            self.assertFalse((self.work / label / 'traces/BAD.jsonl').exists())
 
     @unittest.skipUnless(os.environ.get('CULS_TEST_OLD_CASE'), 'Requires preserved dynamic-rejection fixture.')
     def test_dynamic_rejection_is_unchanged_and_not_treated_as_success(self):

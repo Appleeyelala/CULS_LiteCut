@@ -73,6 +73,8 @@
 
 已在后续源码中改为 `run_root`。重新验证使用新 committed-source 目录；构建入口允许在精确比较全部 CULS 源文件哈希后复用已编译二进制，明确只复用编译，不改变原作业失败状态。原生命令能力的契约见 [PREPARED_REPLAY.md](PREPARED_REPLAY.md)，尚不能据编译成功宣称执行语义或加速已验证。
 
+`20261113T040910Z-prepared-replay-validation-9244db37`，Slurm **64934**，源码 **6eed787**，失败保留：首组 **14 PASS/1 FAIL**，后续全量开启复用的回归因前组失败未执行。已通过的是 no-op/四组联合配置与当前默认路径、冻结旧二进制的全部 AIG/trace 精确一致，以及动态拒绝一致、12 项默认真实工具回归。失败项为负向夹具错误地期待 gpuls 必然非零退出；原 CLI 实际打印候选越界错误、没有成功 AIG/trace，却可能返回 0。后续修正检查明确错误与成功产物缺失，未修改原 dispatcher，也未把旧作业改成 PASS。复用编译前核对了 125 个 CULS 文件，源树 SHA256 `04d5f0135e5bd0c4d27fb49ecddc460b205d8bbfd338c5d9bea7d38c2eea20f4`，新 gpuls SHA256 `b7fb8732e3cc9a25a20176660e0ba48f365b21999f1acf1df41fb9e2a3fdcf5d`。
+
 ## 后续计时证据的格式
 
 `profile_single_method.py` 新增独立 `case_NNNN_timeline.json`，记录真实请求完成时的 monotonic 时间、来源和已验证 delay/area。父进程记录子进程启动时间，供相同时间截点与 time-to-quality 统计使用；不从文件 mtime 推断，也不回写上述旧 run。旧诊断 run 没有这些结构化时间戳，只能引用其总 wall 和工具计时，不能补造 30/120/600 秒处曲线。

@@ -10,6 +10,9 @@
 | 65239 / 544601b | `20261113T182919Z-mffc-native-loop-validation-d928356f` | COMPLETED/0:0，52s；原生sm80/86/89构建、32/32数值/回归及c1355/ss_pcm/DMA的9/9 A/B/Ours冷方法点通过。20份真实测量、11个成功replay观察的完整ACCEPTED/CEC/原始GT_META/网表hash审计通过，无失败请求 |
 | 65240 / 56b6afd | `20261113T183438Z-mffc-deep-empty-validation-0eb1e760` | COMPLETED/0:0，5m02s；div/hyp/mig三个输入9/9 A/B/Ours终态PASS。div/hyp使用全GPU DAG，mig无Decision/无代理；全部请求无失败，真实final均CEC/面积可行 |
 | 65241 / 914b29c | `20261113T184502Z-mffc-development-evidence-audit-b33d3b0f` | COMPLETED/0:0，17s；4/4统计测试；对65239/65240保存证据各自审计20/18份实际测量、11/9个成功replay观察，均PASS，三组PNG/PDF各自生成，无新EDA |
+| 65242 / bbc47e3 | `20261113T184743Z-mffc-complete905-input-freeze-3baac755` | COMPLETED/0:0，1m39s；全部905个staged AIG的SHA与头部接口/节点数核对通过；附既有strict partition/DAG/域元数据，没有重新运行模型/EDA。manifest SHA8c93bf79… |
+| 65243 / 68f3984 | `20261113T185837Z-mffc-final-preflight-ab0b62fa` | FAILED/1:0，7s；40项中新增两个控制fixture缺`structure_meta`而ERROR，其余通过；入口检查未执行，没有新方法点。保留失败证据，不归因于真实GPU/CEC错误 |
+| 65244 / e0f4ad4 | `20261113T190558Z-mffc-freeze-gate-validation-8e9a544c` | COMPLETED/0:0，9s；41/41无SKIP；完整905清单、工具hash、RTX4090/eda和线程/协议入口检查通过，`methods_launched=0`。修正fixture、独占原子终态写入、活作业拒绝恢复、丢失时钟N/A及预算/修复控制已验证 |
 
 65237 产物 `build/mffc_gpu/libmffc_region.so` 的 SHA256 为 `a11ba6d727cb8fa6aafe0dee511a81bbf74d5ce654a1263233ebf347e3767cd6`，源码 `framework/mffc_gpu/region_lse.cu` 的 SHA256 为 `5003ca9f7133f4d27f230f1421cd2bdbccede8c436f0862e6c698a15e434d588`。命令、编译器、GPU和逐项测试在对应 `build/mffc_gpu/build_report.json` 与 `output/mffc_gpu_tests.json`。
 
@@ -18,3 +21,5 @@
 `output/mffc_loop_validation.json`保留逐点/核验数值，完整请求在每例`work/optimization/`。一次准备的`20261113T182828Z-mffc-global-loop-smoke-71c0dff2`未提交，因后续删除GPU分支不需要的CPU层张量而使用544601b新快照；不是失败或漏计实验。大图/无候选检查已完成，正式协议待输入核验与最终冻结；尚无2715方法点终态。
 
 65240的真实A/B/Ours delay（ps）为：div `75831.0469/67247.3594/75760.1484`，hyp `1774327.75/1772861.75/1774327.75`，mig `688.224609/688.224609/688.224609`。Ours冷E2E为87.328/149.424/6.337s，来源为直接梯度/付费原图回退/no-op。div的B area25400.459超出no-op面积阈值，raw QoR照实保留。hyp没有delay收益；不得把运行成功称性能成功。完整逐点Area/时间/设备/来源及图在65241的两个`output/development_<实验名>/`中，均明确标为开发而非全905。
+
+正式源冻结门槛已满足：`provenance/mffc_gpu_freeze_audit.json`逐字节核对47个运行源码与65244通过快照相同；冻结后仅协议状态/身份和文档/来源变更。固定seed20261114、预算4含no-op/失败/repair、最多2轮×2提案、每轮16edits、12步校准、area≤1.05no-op、900/1800s时限。正式运行必须独立新目录、使用本地tag `mffc-gpu-905-freeze-20261114`，预检本身不是2715点实验结果。

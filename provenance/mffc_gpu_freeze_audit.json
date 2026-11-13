@@ -1,0 +1,228 @@
+{
+  "status": "PASS",
+  "validated_run": "/data/wushangge/CULS_LiteCut/runs/20261113T190558Z-mffc-freeze-gate-validation-8e9a544c",
+  "validation_source_commit": "e0f4ad4918e1b483d072a9cf44c274772981bd23",
+  "tests_run": 41,
+  "no_skips": true,
+  "complete905_check": {
+    "status": "CHECKED_NOT_EXECUTED",
+    "inputs": 905,
+    "methods_launched": 0,
+    "tools": {
+      "gpuls": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261113T050552Z-replay-gain-policy-probe-1d5e6f0a/build/framework_tools/culs/gpuls",
+        "sha256": "83d22440e2846054ea80e5c1cced97fefe8a25d51a499380d76225a9bb936776"
+      },
+      "abc": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc",
+        "sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb"
+      },
+      "library": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261113T190558Z-mffc-freeze-gate-validation-8e9a544c/input/asap7",
+        "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+      },
+      "checkpoint": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261113T190558Z-mffc-freeze-gate-validation-8e9a544c/input/student_checkpoint",
+        "sha256": "b3f499d2973bdb36fb42690794e9838d4c8359f05d6e141aa8cbe2b9fe3ae64d"
+      },
+      "native_library": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261113T182919Z-mffc-native-loop-validation-d928356f/build/mffc_gpu/libmffc_region.so",
+        "sha256": "0e53c03c0d473a2d083e3db6f3062e837b408c0991a6b992a63e004bc9a771fa"
+      }
+    },
+    "gpu": "GPU-92c3161f-c5bc-778e-18b7-5cf3b82e2032, NVIDIA GeForce RTX 4090, 550.100"
+  },
+  "identical_runtime_source_files": [
+    {
+      "path": "global_timing/__init__.py",
+      "sha256": "ef8d605468ecd81c0918fb2ce55d95469928f62c7f41384c6c583ccc83957aea"
+    },
+    {
+      "path": "global_timing/common.py",
+      "sha256": "c5c3a0bcdf4ea41b1843f1a8ce8039479d564bae97f0eb49b966a019fc843dd9"
+    },
+    {
+      "path": "global_timing/structure.py",
+      "sha256": "7581cf9e0835efa18db6ce1aef440604b3354f56928c687a5ff5561216845d4e"
+    },
+    {
+      "path": "global_timing/evaluation.py",
+      "sha256": "adbdc042db1f76bc9a82dfe1c2a87b65cfc99c897c4263e0206becb3274c4772"
+    },
+    {
+      "path": "global_timing/candidates.py",
+      "sha256": "3fb98bf72ade31a0e9791fa984fb41b21c9861e5a7a4de9bdb1ef476c1aab040"
+    },
+    {
+      "path": "global_timing/litecut.py",
+      "sha256": "167534964b0ceac0cb26509d8bd5600820970a0b3a4a2ee80f3e6963a483b649"
+    },
+    {
+      "path": "global_timing/surrogate.py",
+      "sha256": "817a38a0f7a6545c18938efd530545c9e14d7d31f05ed29169651bf6c14e8595"
+    },
+    {
+      "path": "global_timing/optimization.py",
+      "sha256": "8ac387cfffcab3e51cf96368e0d55612eff336f47b51670cdb0b6dae98f37c39"
+    },
+    {
+      "path": "global_timing/pipeline.py",
+      "sha256": "5fece8b0ca2081a1e70cf6a9975841a80be25ff4bb23564e59dc24df3d23477e"
+    },
+    {
+      "path": "global_timing/__main__.py",
+      "sha256": "9c504961490c44fc783f03a9b7b03001bec9f0d395a3e4dbf198d3b519ea7524"
+    },
+    {
+      "path": "global_timing/reporting.py",
+      "sha256": "2407fc477ae60f9723f2f26c0426b9f57b95c073693fc8393384ba7c88644094"
+    },
+    {
+      "path": "global_timing/processes.py",
+      "sha256": "849a438ac3d2d020e5c20fa0c96dba449502b02f49c43f501c36240fb8c24aec"
+    },
+    {
+      "path": "global_timing/truth.py",
+      "sha256": "99460f5c7c5015f393a571a6fb89e67605b553ca44f99c99b587861ed4314025"
+    },
+    {
+      "path": "global_timing/cut_validation.py",
+      "sha256": "03253a99b83125d760292b2e59a7adf73f2e65127518458a4556d311d8021cd1"
+    },
+    {
+      "path": "global_timing/path_analysis.py",
+      "sha256": "75672b5d819ca413edb3022d48cd079093b814601991ef1144da84ccee3ff3ba"
+    },
+    {
+      "path": "global_timing/search_analysis.py",
+      "sha256": "3bb78448253a1ada0679269b07dc2360f1c23f4f3684f3470c4b36f206a6093b"
+    },
+    {
+      "path": "global_timing/arrival.py",
+      "sha256": "d3df1a72997d5685249d0212eb7f7644a6c9ddfb4d7b388cfdbaec800497e8aa"
+    },
+    {
+      "path": "global_timing/cohort.py",
+      "sha256": "25a857127b966e8a7058a152f72c9685dd4c3208b5a0b87a8d3b607287bb2e3c"
+    },
+    {
+      "path": "global_timing/path_changes.py",
+      "sha256": "c0b7fc9aeb20f51b5b3e6c718fa455e8b5f0810d505d837e5ae9006cd44b6a01"
+    },
+    {
+      "path": "global_timing/failure_analysis.py",
+      "sha256": "d116c91ee515728120782bca63086f61285144f28105c78f623647b5a57dcd0b"
+    },
+    {
+      "path": "global_timing/partition_validation.py",
+      "sha256": "c3f0eccafe48f0facbb3ddf08519623af3fcd5b22af02544a52c2963a95c880c"
+    },
+    {
+      "path": "global_timing/joint_optimization.py",
+      "sha256": "583632cbc385371a3dbe972ab5195c71fcd2f77bd7e507b6b4bebb251ca18c5b"
+    },
+    {
+      "path": "global_timing/batch_execution.py",
+      "sha256": "6f26e5e2c06ce2d92166ef5d8801e5d0f08cc40a2aeafa43484e3b075977b853"
+    },
+    {
+      "path": "global_timing/boolean_candidates.py",
+      "sha256": "bcdd6277bdcdb10ffbd611bdeb94011f8e3d0bb5322faaa08c777f620b9dc717"
+    },
+    {
+      "path": "global_timing/execution.py",
+      "sha256": "a3ba5d4c57a0f159563f7aa4721fd58f36860288cf8eb92c0a1e5d7f40b3eb63"
+    },
+    {
+      "path": "global_timing/controls.py",
+      "sha256": "a8c77d9a87d3ebe3ab8ef542f90e825ba95720b136b3589ffe860bcce7e78913"
+    },
+    {
+      "path": "global_timing/control_profile.py",
+      "sha256": "b8b15e236f5384935c60e6c76382bc50de241dfc0f7c69f94cd0779406dc303f"
+    },
+    {
+      "path": "global_timing/profile_results.py",
+      "sha256": "9b0af52b8262ab23422de47d965da18247023bee43502f41517f654216e42a1a"
+    },
+    {
+      "path": "global_timing/joint_results.py",
+      "sha256": "d526012ac2842fe24f4b1f8962ffc27aa18d47734891fea04b14c295a0ca5858"
+    },
+    {
+      "path": "global_timing/joint_plots.py",
+      "sha256": "39ac44c966a46c2a08aa4f1fe88acc073bd15c45b340116800b21e0008a40dcb"
+    },
+    {
+      "path": "global_timing/ablations.py",
+      "sha256": "8e7e5624526ad5adfd80d502a6728cb0c537b5e8ac5cf2235dc4a95329173e2b"
+    },
+    {
+      "path": "global_timing/mffc_gpu.py",
+      "sha256": "460ea5e20ccdbc1515aaa793b578ba49f786a5f08d69155baeb61c4e80cb334e"
+    },
+    {
+      "path": "global_timing/mffc_model.py",
+      "sha256": "69a27a2b3a729e87842698a6b0f92d419ff5d2c037f374647a179ec08374e804"
+    },
+    {
+      "path": "global_timing/feasibility.py",
+      "sha256": "543804787bbadb90e0e31be7f0902d7813bbcea92f06e4424e368602f2f64663"
+    },
+    {
+      "path": "global_timing/mffc_search.py",
+      "sha256": "c51da93c1a6278d86749fb5294f69f6652f5b43af79c52ec8c0e71860b730fd8"
+    },
+    {
+      "path": "global_timing/mffc_experiment.py",
+      "sha256": "99a18327beb4980fe9db9284f37a0d9d1199647775ded6c7ce6e6697a3a244c6"
+    },
+    {
+      "path": "global_timing/mffc_results.py",
+      "sha256": "519c671424a31f9d78801674c3680cf753b2aa03123a99458cf3a3e644d247a1"
+    },
+    {
+      "path": "global_timing/mffc_report.py",
+      "sha256": "232069cc48c4338fa147c26e313ca4d7459e5fdcc74694d9b0b8c8f3ec658499"
+    },
+    {
+      "path": "framework/mffc_gpu/region_lse.cu",
+      "sha256": "5003ca9f7133f4d27f230f1421cd2bdbccede8c436f0862e6c698a15e434d588"
+    },
+    {
+      "path": "scripts/run_mffc905.py",
+      "sha256": "6c876c591cfda5a0fa40015cbd2fa946d7a61f09f18d63419318a3f1614f52fe"
+    },
+    {
+      "path": "scripts/build_mffc_gpu.py",
+      "sha256": "9097e92f0a013bcac75fa27139983734ab1553696541fd52769c712ae7e19b34"
+    },
+    {
+      "path": "scripts/analyze_mffc905.py",
+      "sha256": "a1facc52cf0951c234e6fd14db2a6095afc309eb9e2b848fbfebd089e70beb63"
+    },
+    {
+      "path": "projects/litecut/gate2a_candidate_inference.py",
+      "sha256": "5ebe661fc772265fcc96b02dab2a0c7666e3d9a5716868315580519bf0e96bbe"
+    },
+    {
+      "path": "projects/litecut/src/data_preprocess/feat_extraction_v3.py",
+      "sha256": "d63eaaf695555d88746b32d68caf817478e76c8e48f217ef5d3cea9554ade7fe"
+    },
+    {
+      "path": "projects/litecut/src/extract_cutlib_student/modeling.py",
+      "sha256": "3d94b2b8f869954c9fb4aaa6c0f318310e4d36101c4df312eea3595b14f033d1"
+    },
+    {
+      "path": "projects/culs/tools/gate3e_run.py",
+      "sha256": "ab536cb64fbb2a922795a519e2d29de41d868f214712cecb1f2003157804e280"
+    },
+    {
+      "path": "projects/culs/src/algorithms/rewrite_library.inc",
+      "sha256": "48864b4f297b3c667c3dd7ddfb7a5f6e1f287838374ed7be0afbe9254fae0884"
+    }
+  ],
+  "frozen_protocol_sha256": "aab7a47d935aad9183c4b8160c3c112b9ce41a494222b5d3d0ed77c284b80897",
+  "input_manifest_sha256": "8c93bf7988c1707efd4b392663062eef651e9e679329f0056e802250671cf935",
+  "scope": "Runtime/source files match the passed preflight snapshot; subsequent freeze changes protocol state, documentation and provenance only, not the algorithm."
+}

@@ -37,3 +37,9 @@
 65246（源adc877a，`20261113T193807Z-mffc-delivery-validation-906a915b`）已COMPLETED/0:0、3s。四项安装/部分工作/丢失时钟/取舍分母测试通过；分别对两批已审计开发9点生成补充CSV/JSON/中文报告，保留原始比较统计不变，并核对每例实际资产hash。没有启动新的EDA或模型。输出在`output/supplement_<开发实验名>/`，明确`formal=false`，不计入正式905。
 
 新增 `scripts/finalize_mffc905.py` / `global_timing/mffc_delivery.py` 只补全规定的安装成功/失败、修复成本、DAG形状与具名取舍，冻结算法/data源码不变。正式交付门槛和待核验项见 [DELIVERY_AUDIT.md](DELIVERY_AUDIT.md)。
+
+65247已排队为`afterany:65245`，源84ec94d，目录`20261113T194518Z-mffc-final905-delivery-d3bb36f0`，2CPU/16GiB/0GPU。它仅在原始正式审计形成后核对并补充文件，不运行EDA。提交时含原作业合计6CPU/80GiB/1GPU；不能把PENDING当成正式交付完成。
+
+随后逐项审查发现：原始CSV已有每点CEC/Mapping/Replay时钟，但MD/JSON缺少这些工具各自的总体耗时表。源510ae7b补充`tool_cost_summary`，按每点已有命令inclusive时间求n/中位/P90/合计，保留FAIL/TIMEOUT和缺失时钟，不改变原始统计或冻结算法。65248（`20261113T200701Z-mffc-tool-cost-validation-31baef17`，eda2、2CPU/16GiB/0GPU）已COMPLETED/0:0、3s，5/5无SKIP；两开发批次各9点的原始统计保持不变，真实工具成本补充生成成功，没有重跑模型/EDA。选择eda2避免与正式eda上的计时工作共享CPU。
+
+新的开发补充在上述65248的`output/supplement_<开发实验名>/`。例如N的三个Ours点记录CEC15次/1.482559s、Mapping14次/19.377779s；H为CEC13次/34.490238s、Mapping12次/100.938567s。它们是已有命令的inclusive和，不是额外调用数或独占wall占比。当前工作区与正式/data快照的47个冻结运行源码再次逐字节一致；新增代码仅影响交付统计。最终正式交付需使用含该成本补充的验证版本，原65247产物保持为先前交付分析，不覆盖。

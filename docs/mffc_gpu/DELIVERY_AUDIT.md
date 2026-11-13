@@ -12,9 +12,12 @@
 | 完整安装成功/失败、修复及部分工作量 | 补充`installation_details.json`与新增CSV列；四项`test_mffc_delivery`及65246验证 | 仅读原始小型replay/观察摘要；部分安装不给成功timing标签 |
 | 来源/AND与MFFC/DAG形状、四类取舍 | 原始summary分组保持原样；补充`delivery_supplement`；同一冻结九格关系派生具名统计 | 补充为描述性分析，不引入新对照或改门槛 |
 | 计时与GPU边界 | cold方法wall、inclusive阶段、原生CUDA事件、整作业accounting | 不用重叠分项相加，不把A/B相对速度说成GPU因果加速 |
+| CEC/Mapping/Replay各自的实际耗时 | CSV的`tool_seconds_inclusive`；补充SUMMARY的`delivery_supplement.tool_costs`和MD工具表 | 65248在eda2验证5/5及两开发批次；包含失败/超时点的已有时钟，缺项不补零 |
 | 三组图/导出 | 原始`figures/`的PNG/PDF及hash；最终交付逐字节复制 | 实际全量图需完成后人工检查 |
 | 六个命名交付与可复现版本 | 根目录方案/协议/manifest、最终CSV/JSON/MD；Git与/data完整运行索引 | 当前前三项已存在；最终三项待终态审计后保存 |
 
 补充入口为 `scripts/finalize_mffc905.py`，验证原始审计产物hash、实验COMPLETED/0:0与精确A/B/Ours覆盖，读取额外安装/时钟摘要，并保持原始比较统计逐项不变。正式运行时还核对47个冻结源码文件及每例Student/native库/gpuls/input实际hash。没有新增rewrite、mapping、模型推理或训练。
 
 失败/中断的缺失时钟、命令文件或观察保持显式N/A/UNKNOWN，不能填零。PASS replay与PASS CEC/mapping分别统计；failed部分接受数只说明真实工作量。具名取舍的前两项可能重叠，原九格矩阵仍是互斥完整划分。
+
+最终发布时，先核对正式/data交付的所有hash、精确905/2715及Slurm终态，再把小型CSV/JSON/中文报告复制到根目录规定名称，PNG/PDF置于`docs/mffc_gpu/figures/`并修正根报告图片链接。根报告首段需用一页以内回答真实Delay/Runtime/Area/CEC/GPU边界与已确认不足；原始/data报告保持原字节。另记录复制来源、源/目标hash和文稿呈现调整，人工检查全量图后才能判定完成。当前仍未满足正式全量终态，不能只因后处理已排队提前发布结果。

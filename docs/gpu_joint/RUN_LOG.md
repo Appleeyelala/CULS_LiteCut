@@ -109,6 +109,10 @@ batch 将 DMA/c1355 的实际 replay 命令从 8 减至 5，ss_pcm 从 8 减至 
 
 ### 最终面板提交与原始审计完成
 
+后处理已独立准备为 **`20261113T070050Z-frozen-joint-final-synthesis-f895a375`**，源码 **acdf988**，Slurm **64984**，2 CPU/8GiB/无GPU，有限45m，依赖 **afterany:64983**。提交时确认64983仍RUNNING、64984为PENDING/Dependency；累计RUNNING+PENDING请求4 CPU/40GiB/1GPU，未干扰主实验计时。此任务只做统计fixture、开发证据回归、正式原始证据复核、表格/中文报告与PNG/PDF图；不运行EDA或模型，且不改写正式快照。
+
+新分析工具区分外层运行commit与实际旧源码import commit，并核对原生ABC/CULS命令、工具与模型hash；严格记录相同工作量/请求的GPU配对，CPU分支不计GPU贡献。完整来源见[FINAL_ANALYSIS_CONTRACT.md](FINAL_ANALYSIS_CONTRACT.md)。测试和图表尚待任务实际执行，提交与语法检查不是PASS证据；若64983失败，afterany也不会伪造有效最终数据，而应停止并保留失败原因。逐项完成审查在[GOAL_DELIVERY_AUDIT.md](GOAL_DELIVERY_AUDIT.md)，当前仍未完成。
+
 `20261113T062030Z-complete-developer-audit-2d3f409e`，Slurm **64982**，源码 **2257998**，2 CPU/4GiB/无GPU，COMPLETED/0:0，24s。上述64976/64978/64980合计26方法点、108成功测量均通过完整原始审计。`output/panel_analysis/comparisons.json` 保存div实际CUDA/CPU全请求一致性和同分配E2E比值；未将它计作更好的QoR或稳定总体速度分布。
 
 最终运行 **`20261113T062048Z-frozen-joint-final-panel-b9c390b3`**，Slurm **64983**，已按前瞻协议提交，源码 **22579982d22d741d47600a6406b09f00f4a4b46b**，本地tag **gpu-joint-evaluation-freeze-20261113**。请求2 CPU、32GiB、1GPU、Compute、12h有限墙钟，提交时无其他本用户RUNNING/PENDING请求，总额仍在64 CPU/256GiB/2GPU内；任务为16输入×3种子×9方法共432冷child，顺序执行而非多benchmark吞吐。

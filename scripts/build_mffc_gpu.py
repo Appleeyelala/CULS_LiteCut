@@ -25,6 +25,7 @@ def main():
     commands = [
         ['/usr/local/cuda-11.8/bin/nvcc', '-O3', '-std=c++17', '-shared', '-Xcompiler', '-fPIC',
          '-ccbin', '/usr/local/bin/g++', '-gencode', 'arch=compute_80,code=sm_80',
+         '-gencode', 'arch=compute_86,code=sm_86', '-gencode', 'arch=compute_89,code=sm_89',
          '-gencode', 'arch=compute_80,code=compute_80', str(source), '-o', str(library),
          '-Xlinker', '-rpath', '-Xlinker', '/usr/local/cuda-11.8/lib64'],
         [sys.executable, '-B', str(run / 'src/scripts/run_tests.py'), '--output',

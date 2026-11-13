@@ -47,3 +47,7 @@
 含工具成本的正式交付65249已经排队，源b1afd34，目录`20261113T200926Z-mffc-final905-tool-cost-delivery-67ebf285`，`afterany:65247`、2CPU/16GiB/0GPU。顺序为65245正式运行/原始审计→65247首次补充→65249完整成本交付，分别保留产物。所有RUNNING/PENDING合计8CPU/96GiB/1GPU；这两项后处理不新增任何EDA方法点。最终优先核对65249的`output/final_mffc905_delivery/`，然后完成根目录文件、图表人工检查与逐项验收，不能仅凭排队或脚本状态宣布Goal完成。
 
 2026-11-14 04:11:22（北京时间）只读进度：65245实际RUNNING，已独占发布218/2715个方法终态，72个输入三方法齐全，当前保存点均PASS；`formal_completion.json`尚未形成，未对该部分样本计算总体性能结论。Slurm当时MaxRSS约4.88GiB，非显存指标；无资源阻断迹象。运行仍按冻结协议继续，不重新提交已完成点。
+
+2026-11-14 06:49:09只读检查：逐个读取当前终态JSON，933/2715个方法终态均为PASS，311个输入三方法齐全；与Slurm实时RUNNING及驱动日志一致，两个后处理仍PENDING/Dependency。完整运行和审计标记尚未形成，不计算该前缀的总体性能结论。工作区干净，/data仍约1.6TiB可用，Slurm MaxRSS约5.52GiB（非GPU显存）。检查没有重跑方法点或修改冻结源码/参数。
+
+监控期间确认的长耗时验证实例：index108 `forgeEDA/Back_End_With_Decode.aig`的B已PASS，cold E2E为622.795256s，其中`work/evaluation/cec.command.json`记录573.063254s；原始CEC文本明确等价。相应Ours的两轮CUDA梯度已写入`optimization/gradient_{00,01}.json`，随后真实验证完成。index147 `forgeEDA/Division.aig`的Ours前两组评估均PASS，inclusive请求分别237.568647/214.597248s，第三组已完整安装24个rewrite；该方法点随后也已终态PASS。上述两个case的全部终态保存在正式run的`output/records/`，请求证据在各`case_NNNN_METHOD/work/`。它们解释了阶段性终态数暂停，并非全905性能结论；内部请求与最终方法状态仍由正式审计分开统计。

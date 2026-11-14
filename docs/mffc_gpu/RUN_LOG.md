@@ -59,3 +59,11 @@
 09:23只读检查确认index562 `forgeEDA/loco_top.aig`的B为第二个方法级FAIL：同名`Abc_AigUpdateLevelR_int`断言，原生退出−6/0.214363001s，冷E2E 0.569874013s，没有进入CEC/mapping。相同输入A/Ours均PASS，Ours来源`mffc_global_gradient`；B缺失不作为质量胜出。原始`0562_B.json`、native命令与日志已读取，详情见FAILURE_NOTES；驱动继续后续输入，65245仍RUNNING，未更换工具/参数或重跑失败点。全量统计仍待905/2715终态与审计，不把当前两个失败当最终数量。
 
 09:49逐项核实index610/611的`mrc3/mrc4`：两例B均在原生rewrite触发同名断言，返回−6，调用0.164326474/0.164231263s，冷E2E 0.519633666/0.518854996s；未进入CEC/mapping，缺失指标保留。相同输入A/Ours均PASS，mrc3的Ours为直接梯度，mrc4为no-op；不把B缺失或no-op当作梯度收益。已读取两例实际record/native命令/断言和输入hash，完整证据在FAILURE_NOTES。四项已知方法失败均为B，尚非最终失败数；65245仍RUNNING并继续后续输入，冻结算法与工具不变，没有新增或重跑方法点。
+
+## 正式方法运行全部终态，原始证据审计进行中
+
+2026-11-14 12:33:43只读监测确认`output/formal_completion.json`已经形成：905个输入、2715个方法点，2711 PASS、4 FAIL、0 TIMEOUT，仅A/B/Ours。驱动记录单session elapsed为33434.40748606506s；这是整批driver elapsed，不是单方法latency。四个FAIL均为上述B原生rewrite断言；A与Ours分别905 PASS，B为901 PASS/4 FAIL，失败指标保持缺失。
+
+12:37:53另做轻量只读核对：2715个终态精确覆盖905×3且不重复，输入SHA/源码commit/Slurm ID均与冻结身份一致；全部905个成功Ours的`work/config.json`实际存在，input/gpuls/checkpoint/native_library四项身份与预检一致。核对没有执行模型、EDA、测试或重启方法点。
+
+65245在方法全部终态后继续运行同冻结快照的原始trace/CEC/Liberty/netlist审计；截至12:49:01，`analysis_completion.json`尚未形成、错误日志为空，65247/65249仍为PENDING/Dependency。全量审计和交付尚未完成，不能仅凭2715终态宣布Goal完成或发布未审计的总体性能结论。CPU/I/O累计量持续增长；继续等待原作业，不重新提交实验。

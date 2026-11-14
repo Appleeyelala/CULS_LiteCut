@@ -57,3 +57,5 @@
 约07:33，index392 `forgeEDA/codec.aig`的B在ABC原生Rewrite触发`Abc_AigUpdateLevelR_int`断言，退出−6，原生调用0.214344236s、冷E2E 0.518344442s；该方法未取得CEC/mapping指标，FAIL保留。相同输入A/Ours已PASS，Ours来源为付费`original_fallback`。驱动继续后续输入，没有替换B或重跑失败点；冻结ABC/参数保持不变。详见[正式失败记录](FAILURE_NOTES.md)。历史也记录过该输入的同名断言，不据此声称新运行的根因已完全定位；本轮只引用本次实际文件。
 
 09:23只读检查确认index562 `forgeEDA/loco_top.aig`的B为第二个方法级FAIL：同名`Abc_AigUpdateLevelR_int`断言，原生退出−6/0.214363001s，冷E2E 0.569874013s，没有进入CEC/mapping。相同输入A/Ours均PASS，Ours来源`mffc_global_gradient`；B缺失不作为质量胜出。原始`0562_B.json`、native命令与日志已读取，详情见FAILURE_NOTES；驱动继续后续输入，65245仍RUNNING，未更换工具/参数或重跑失败点。全量统计仍待905/2715终态与审计，不把当前两个失败当最终数量。
+
+09:49逐项核实index610/611的`mrc3/mrc4`：两例B均在原生rewrite触发同名断言，返回−6，调用0.164326474/0.164231263s，冷E2E 0.519633666/0.518854996s；未进入CEC/mapping，缺失指标保留。相同输入A/Ours均PASS，mrc3的Ours为直接梯度，mrc4为no-op；不把B缺失或no-op当作梯度收益。已读取两例实际record/native命令/断言和输入hash，完整证据在FAILURE_NOTES。四项已知方法失败均为B，尚非最终失败数；65245仍RUNNING并继续后续输入，冻结算法与工具不变，没有新增或重跑方法点。

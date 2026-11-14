@@ -43,4 +43,19 @@
 
 原始证据为正式目录下的`output/records/0562_{A,B,Ours}.json`、`output/case_0562_B/work/native_rewrite.{command.json,log}`和`output/case_0562_B/cold_method.{command.json,log}`。这与codec具有相同断言位置；旧版也有同名输入记录，但不能由此断言内部根因已经完全定位。
 
-读取时65245仍RUNNING，驱动已经继续后续输入，两个后处理仍PENDING/Dependency。本次只记录新观察，不修改冻结算法、ABC或参数，不重跑失败点；最终B的有效质量配对排除此缺失测量，全部终态时间保留失败成本。当前观察到的方法失败为codec/B和loco_top/B，尚非全905最终计数。
+该次读取时65245仍RUNNING，驱动已经继续后续输入，两个后处理仍PENDING/Dependency。本次只记录新观察，不修改冻结算法、ABC或参数，不重跑失败点；最终B的有效质量配对排除此缺失测量，全部终态时间保留失败成本。09:23观察到的方法失败为codec/B和loco_top/B，尚非全905最终计数。
+
+## index610/611：mrc3、mrc4的基线B原生Rewrite断言
+
+2026-11-14约09:49逐项读取两例B的终态、原生命令和日志，确认均为FAIL；仍使用冻结源码`ecc85e6`、相同ABC与单次原生rewrite流程。断言均为`src/base/abc/abcAig.c:1134: Abc_AigUpdateLevelR_int: Assertion Abc_ObjIsNode(pNode) failed`，native返回−6。未进入CEC/mapping，无相应日志，delay与area缺失，不补零或旧结果。
+
+| 输入 / index | 输入SHA256 | native调用s | B冷E2E s |
+|---|---|---:|---:|
+| `forgeEDA/mrc3.aig` / 610 | `dfbbab07cbddac9577af876a37c0c6a0ab5ce20c5345ffcb5927f84c42249ce6` | 0.164326474 | 0.519633666 |
+| `forgeEDA/mrc4.aig` / 611 | `894c573a03ba2fe416245f11cab49f26d28212bb2881ee4166ad0c5be044cb3b` | 0.164231263 | 0.518854996 |
+
+两例三个方法各自的输入hash一致。A/Ours均为PASS：mrc3冷E2E分别1.874341234/21.274892242s，Ours来源`mffc_global_gradient`；mrc4分别1.876943022/17.267691858s，Ours来源`replay_noop`，不计为梯度质量收益。B缺失不构成Ours相对B的性能胜出证据。
+
+证据相对正式目录：`output/records/0610_{A,B,Ours}.json`、`0611_{A,B,Ours}.json`；`output/case_0610_B/work/native_rewrite.{command.json,log}`及`case_0611_B`对应文件；两例外层`cold_method.{command.json,log}`保留失败传播。旧版同名输入曾出现该断言，仍不能据相同位置宣称内部根因已经完全定位。
+
+检查时65245实际RUNNING并继续后续输入，两个后处理仍PENDING。至此已观察到四项方法级失败：392/B、562/B、610/B、611/B；这仍是运行中的已知清单，不是全905最终成功率。没有重跑失败点、替换工具或修改参数；最终保留全部失败wall，涉及B的成功质量配对排除缺失测量，Ours内部请求失败另行统计。

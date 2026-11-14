@@ -1,0 +1,138 @@
+{
+  "generated_at": "2026-11-14T12:53:46+08:00",
+  "scope": "Publish saved audited results only; no new model/EDA/test execution",
+  "experiment_source_commit": "ecc85e6ac82571caf9f1a6004098dbe976536256",
+  "analysis_source_commit": "b1afd3480fedbd978203a73e3168ee1f61b4097b",
+  "documentation_base_commit": "e202951730d7a5273d1e5a1f21198e7108c7f690",
+  "experiment_run": "/data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db",
+  "analysis_run": "/data/wushangge/CULS_LiteCut/runs/20261113T200926Z-mffc-final905-tool-cost-delivery-67ebf285",
+  "raw_audit_completion": "/data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db/output/benchmark905_delivery/analysis_completion.json",
+  "delivery_completion": "/data/wushangge/CULS_LiteCut/runs/20261113T200926Z-mffc-final905-tool-cost-delivery-67ebf285/output/final_mffc905_delivery/delivery_completion.json",
+  "verified_artifact_count": 23,
+  "primary_statistics_and_all_original_csv_columns_unchanged": true,
+  "exact_coverage": {
+    "inputs": 905,
+    "points": 2715,
+    "methods": [
+      "A",
+      "B",
+      "Ours"
+    ]
+  },
+  "immutable_runtime_source_files_verified": 47,
+  "independent_config_presence_and_identity_check": {
+    "checked_at": "2026-11-14T12:37:53+08:00",
+    "successful_ours_config_files_verified": 905,
+    "input_source_job_identity_verified": true,
+    "identities": [
+      "input",
+      "gpuls",
+      "checkpoint",
+      "native_library"
+    ],
+    "full_per_file_hash_index": "/data/wushangge/CULS_LiteCut/runs/20261113T200926Z-mffc-final905-tool-cost-delivery-67ebf285/output/final_mffc905_delivery/supplementary_evidence_hashes.json"
+  },
+  "figure_review": {
+    "pngs_viewed": [
+      "delay_relative_A_B",
+      "runtime_relative_A_B",
+      "quality_runtime_by_size"
+    ],
+    "visual_result": "axes, labels, legends and nontruncated data tails readable; no redraw or selection",
+    "pdf_pages_each": 1,
+    "pdfinfo_readable": true
+  },
+  "artifacts": [
+    {
+      "source": "/data/wushangge/CULS_LiteCut/runs/20261113T200926Z-mffc-final905-tool-cost-delivery-67ebf285/output/final_mffc905_delivery/BENCHMARK905_RESULTS.csv",
+      "target": "BENCHMARK905_RESULTS.csv",
+      "sha256": "c83a7d12ed063244fbc1c9ae27ce59a3b71b5db315a7ff84e022f8c409dc6b15",
+      "size_bytes": 2286379,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "source": "/data/wushangge/CULS_LiteCut/runs/20261113T200926Z-mffc-final905-tool-cost-delivery-67ebf285/output/final_mffc905_delivery/BENCHMARK905_SUMMARY.json",
+      "target": "BENCHMARK905_SUMMARY.json",
+      "sha256": "a744e4ec3d96993eb5dde152fa8858b5f1f725f482080787188d0a7518f7dcc4",
+      "size_bytes": 2086525,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "source": "/data/wushangge/CULS_LiteCut/runs/20261113T200926Z-mffc-final905-tool-cost-delivery-67ebf285/output/final_mffc905_delivery/figures/delay_relative_A_B.pdf",
+      "target": "docs/mffc_gpu/figures/delay_relative_A_B.pdf",
+      "sha256": "5497fe5813a8050e856cea191100846db8e6a63f3d48978221e030d2f74824c8",
+      "size_bytes": 18659,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "source": "/data/wushangge/CULS_LiteCut/runs/20261113T200926Z-mffc-final905-tool-cost-delivery-67ebf285/output/final_mffc905_delivery/figures/delay_relative_A_B.png",
+      "target": "docs/mffc_gpu/figures/delay_relative_A_B.png",
+      "sha256": "572f91f1f4fac092a103a3c785ca6c1064ffc26befd19490a05968149297a076",
+      "size_bytes": 53906,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "source": "/data/wushangge/CULS_LiteCut/runs/20261113T200926Z-mffc-final905-tool-cost-delivery-67ebf285/output/final_mffc905_delivery/figures/quality_runtime_by_size.pdf",
+      "target": "docs/mffc_gpu/figures/quality_runtime_by_size.pdf",
+      "sha256": "81a868f8113441f4b882901dad34a1db4a9acc84d27897c178184843bb0a38e6",
+      "size_bytes": 45094,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "source": "/data/wushangge/CULS_LiteCut/runs/20261113T200926Z-mffc-final905-tool-cost-delivery-67ebf285/output/final_mffc905_delivery/figures/quality_runtime_by_size.png",
+      "target": "docs/mffc_gpu/figures/quality_runtime_by_size.png",
+      "sha256": "ae9889e2b668eda78f5471b9e2be0cfe46fc742f3d2320d44ac7fd18291320a4",
+      "size_bytes": 206191,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "source": "/data/wushangge/CULS_LiteCut/runs/20261113T200926Z-mffc-final905-tool-cost-delivery-67ebf285/output/final_mffc905_delivery/figures/runtime_relative_A_B.pdf",
+      "target": "docs/mffc_gpu/figures/runtime_relative_A_B.pdf",
+      "sha256": "03dd2ee46259d700e48153ba759ae299f891468f8d21079bbf01c4372ebc6246",
+      "size_bytes": 23927,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "source": "/data/wushangge/CULS_LiteCut/runs/20261113T200926Z-mffc-final905-tool-cost-delivery-67ebf285/output/final_mffc905_delivery/figures/runtime_relative_A_B.png",
+      "target": "docs/mffc_gpu/figures/runtime_relative_A_B.png",
+      "sha256": "6627062e663339b2e65f2869a69d62c45855f5cfe6f82464ca29aa864811bb53",
+      "size_bytes": 60847,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "source": "/data/wushangge/CULS_LiteCut/runs/20261113T200926Z-mffc-final905-tool-cost-delivery-67ebf285/output/final_mffc905_delivery/BENCHMARK905_RESULTS.md",
+      "source_sha256": "18ef9c00545905c00932b4c4221daea1c5adb53c1a38e4394cc5e46778a4214f",
+      "target": "BENCHMARK905_RESULTS.md",
+      "sha256": "5ce514c5f85af42276ed6c2a5f8e630c74e5dd4bced14f861b16920b618dfbdc",
+      "size_bytes": 16888,
+      "mode": "prose_enrichment_and_figure_link_relocation",
+      "transformations": [
+        "prepend Chinese core results within one page",
+        "remove original duplicate title",
+        "relocate figure links to docs/mffc_gpu/figures",
+        "append observed limitations and evidence/version index"
+      ],
+      "data_or_statistics_changed": false
+    }
+  ],
+  "final_presentation_checks": {
+    "checked_at": "2026-11-14T13:01:11+08:00",
+    "copied_or_presented_artifact_hashes_verified": 9,
+    "markdown_local_links_verified": 144,
+    "missing_links": 0,
+    "exact_unique_method_points": 2715,
+    "successful_CEC_and_ABC_SCL_LIBERTY_rows": 2711,
+    "failed_B_quality_fields_empty": 4,
+    "all_ours_actual_area_feasible": 905,
+    "all_terminal_cold_clocks_available": 2715,
+    "all_six_required_root_deliverables_present": true,
+    "eda_or_model_calls_for_final_checks": 0
+  },
+  "csv_serialization": {
+    "records_excluding_header": 2715,
+    "physical_lines": 2756,
+    "reason": "Original csv.writer CRLF and quoted multiline native failure logs are preserved; use a CSV parser, not wc -l, for records.",
+    "staged_blob_byte_identical_to_worktree_and_source": true,
+    "whitespace_check": "git -c core.whitespace=cr-at-eol diff --cached --check; no source or evidence normalization"
+  }
+}

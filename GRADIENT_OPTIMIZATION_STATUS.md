@@ -1,30 +1,30 @@
 # 梯度优化闭环：实现与实验状态
 
-审查日期：2026-11-14（北京时间）；进行中作业的数据读取截点为 **08:55:48 +08:00**。本次仅阅读源码、保存的配置、JSON/CSV、trace 和 CEC/mapping 日志，更新已有的本报告；没有运行优化器、测试、构建、训练或 ABC，也没有提交、取消或重启作业。文中“已验证”均指已有运行记录，不表示本次重新验证了全部测量。作业可能在截点后继续产生文件，以下进度是有时间戳的快照。
+审查日期：2026-11-14（北京时间）；**完成更新：约12:51，全905正式运行与原始审计、补充成本分析均已完成**。本报告的整理只阅读源码和已有结果，没有为报告执行模型、优化、测试或EDA。下文保留08:55:48的运行中快照，并明确标注其历史截点；当前完整状态见第6.1的完成更新和[正式905结果](BENCHMARK905_RESULTS.md)。不能将早期截点的1563点/1 FAIL当成最终计数。
 
-**当前已实现“冻结 LiteCut 特征 → 多 PO/面积可微代理 → 全局梯度指导离散联合候选 → 真实 Rewrite + CEC + ABC Liberty Timing → 成功测量反馈”的闭环。最新 MFFC 版本已接入完整 GPU DAG 前/反传播，并完成六个开发输入的十八个真实 A/B/Ours 方法点。** c1355 等例有实际改善；但代理下降不保证真实 delay 下降，尚无稳定算法优势或 LiteCut 独立收益的结论。新版完整 905 实验仍在运行，不能用旧版 905 或开发正例替代其全量结论。
+**当前已实现“冻结 LiteCut 特征 → 多 PO/面积可微代理 → 全局梯度指导离散联合候选 → 真实 Rewrite + CEC + ABC Liberty Timing → 成功测量反馈”的闭环。最新 MFFC 版本已接入完整 GPU DAG 前/反传播，并完成六个开发输入的十八个真实 A/B/Ours 方法点。** c1355 等例有实际改善；但代理下降不保证真实 delay 下降，尚无稳定算法优势或 LiteCut 独立收益的结论。新版完整905的2715点已经完成并审计：A/Ours各905 PASS，B为901 PASS/4 FAIL。相对A有质量收益，但相对B的稳定优势与整体Delay–Runtime目标未成立；不能用开发正例替代这一全量结论。
 
 | 先看这几个问题 | 当前答案 | 详细证据 |
 |---|---|---|
 | 实际优化谁？ | 每个 `(root, cut_slot)` Decision 的 candidate/no-op 选择；MFFC 是分组和传播单元 | 第3.1、3.4节 |
 | 梯度怎样选候选？ | 最新入口对当前 one-hot 求完整代理梯度，以方向导数排序、合法投影，再对联合块执行完整代理评分；没有候选 logits 的 Adam 内循环 | 第3.4节及 `mffc_search.gradient_blocks` |
 | LiteCut 做了什么？ | 冻结 Student 提供局部分数，作为四维相对特征之一；不直接预测整条路径，也不参与反传 | 第4节 |
-| 真实改善是否存在？ | 最新开发 c1355：360.111877→319.617096 ps，18个跨MFFC请求全部接受、CEC PASS；六例中也有回退和劣于B的结果 | 第6.1、7.5、7.6节 |
+| 真实改善是否存在？ | 最新开发 c1355：360.111877→319.617096 ps，18个rewrite、覆盖18个MFFC，全部接受、CEC PASS；六例中也有回退和劣于B的结果 | 第6.1、7.5、7.6节 |
 | 是否证明代理/梯度可靠？ | 没有。div第二轮代理J下降却真实delay上升；旧905和432点随机/关闭内层更新对照未支持稳定优势 | 第6.2～6.4、7.6节 |
-| 最新全量是否完成？ | 截点有1563/2715个方法终态、521个三方法齐全输入，1562 PASS、1 FAIL；完整运行与审计尚未完成 | 第6.1节；该FAIL为codec的B，不能混为Ours内部请求失败数 |
+| 最新全量是否完成？ | 905×3=2715终态已审计，2711 PASS/4 FAIL/0 TIMEOUT；5750份真实测量，3039成功replay、2个内部失败请求 | 第6.1完成更新；4项方法FAIL均为B，内部2失败为BRAM_SSP共享CUDA分配失败 |
 
 阅读顺序：第2～4节解释当前实现，第6.1及7.5～7.6节给出最新版本真实证据，第6.2～6.4节保存历史对照，第9节明确未实现和未验证项。
 
 ## 1. 版本范围与证据口径
 
-阅读时分支为 `work/mffc-gpu-905`，报告修改前 HEAD 为 `4def721b743d5356c3b93c9153808845c20b21ad`，工作区干净。最新正式实验使用冻结源码 `ecc85e6ac82571caf9f1a6004098dbe976536256`，tag 为 `mffc-gpu-905-freeze-20261114`；后续提交补充交付分析与文档，不是该实验运行源码。旧同名报告在 Git 中保留，本报告保留版本边界并更新现有证据，不改写原始实验目录。
+首次08:55审查时分支为 `work/mffc-gpu-905`，当次报告修改前 HEAD 为 `4def721b743d5356c3b93c9153808845c20b21ad`，工作区干净。最新正式实验使用冻结源码 `ecc85e6ac82571caf9f1a6004098dbe976536256`，tag 为 `mffc-gpu-905-freeze-20261114`；后续提交补充交付分析与文档，不是该实验运行源码。旧同名报告在 Git 中保留，本报告保留版本边界并更新现有证据，不改写原始实验目录。
 
 | 范围 | 实际源码 / 入口 | 已有证据与边界 |
 |---|---|---|
 | 旧版完整代理 STE | 主实验 `160b2187eee3b47799e58b658e39f13d40064b61`；后续冻结控制 `5025a6c863f0a7766c41707bcc1828723afce447` | 全 905 输入、两种目标；901 PASS、4 PARTIAL。控制的八个核心 Python 模块与主实验相同 |
 | 后续联合/自适应 CPU–CUDA | 正式快照 `22579982d22d741d47600a6406b09f00f4a4b46b` | 16 输入 × 3 seeds × 9 方法 = 432 个真实冷方法点；全部完成并审计 |
 | 通道与修复控制 | `db64308d53dcdd37b075d35b0da08f1f5cf9f458` | 4 输入 × 3 seeds × 4 配置 = 48 个真实方法点；全部完成，不与主面板混成独立 20 输入 |
-| 当前 MFFC 全局梯度版本 | `mffc_experiment.py`、`mffc_search.py`、`mffc_model.py`、`mffc_gpu.py`、`region_lse.cu`；正式快照 `ecc85e6` | 设备队列完整前/反传播已实现；32项模型/数值/回归与最终41项冻结门槛通过；六开发输入18点全部PASS。三方法905/2715点正式作业65245进行中，尚无全量审计终态 |
+| 当前 MFFC 全局梯度版本 | `mffc_experiment.py`、`mffc_search.py`、`mffc_model.py`、`mffc_gpu.py`、`region_lse.cu`；正式快照 `ecc85e6` | 设备队列完整前/反传播已实现；32项模型/数值/回归与最终41项冻结门槛通过；六开发输入18点全部PASS。三方法905/2715点已完成；65245/65247/65249均COMPLETED/0:0，最终CSV/JSON与原始审计已交付 |
 
 文档时效需注意：`docs/WORK_HISTORY.md` 末尾“未建立通用联合优化器”属于初始导入阶段，不能替代后来的框架/实验状态；旧同名报告中的正式面板 RUNNING/PENDING 与“消融尚无结果”已过时。这里根据终态文件更新解释，原文档和运行证据保持原样。
 
@@ -360,11 +360,36 @@ Area为实际库面积，记录未另标物理单位；时间来自外层冷方�
 
 ss_pcm第二轮有梯度但没有未见合法块，所以没有第四个请求；mig未使用任何梯度。div有多个Decision在同一MFFC中同时被接受。此处“梯度轮数”是选择变量的全局梯度调用次数，不包含反馈校准的12次反传；没有40步logits内循环。
 
-最新完整905作业65245的源码/工具/输入已冻结。**2026-11-14 08:55:48 +08:00只读截点**：逐个读取当时已发布的终态JSON，Slurm仍RUNNING，已保存1563/2715个终态（A/B/Ours各521），521个输入三方法齐全；1562 PASS、1 FAIL。这里“三方法齐全”包含失败终态，不等于三方法都成功。其余点没有用预测补齐。`output/formal_completion.json` 和 `output/benchmark905_delivery/analysis_completion.json`均不存在。**新版全905比较、最终成功率、总体质量和速度优势均未验证**，不能用部分PASS作总体结论。本次没有启动或干预这个已有作业，也不以预检通过宣告完成。
+以下三段保留首次报告的历史观察；最终状态以本节“完成更新”为准。最新完整905作业65245的源码/工具/输入已冻结。**2026-11-14 08:55:48 +08:00只读截点**：逐个读取当时已发布的终态JSON，Slurm仍RUNNING，已保存1563/2715个终态（A/B/Ours各521），521个输入三方法齐全；1562 PASS、1 FAIL。这里“三方法齐全”包含失败终态，不等于三方法都成功。其余点没有用预测补齐。`output/formal_completion.json` 和 `output/benchmark905_delivery/analysis_completion.json`均不存在。**在该历史截点，新版全905比较、最终成功率、总体质量和速度优势均未验证**，不能用部分PASS作总体结论。本次没有启动或干预这个已有作业，也不以预检通过宣告完成。
 
 已观察到的失败为index392 `forgeEDA/codec.aig` 的方法B：`Abc_AigUpdateLevelR_int` / `Abc_ObjIsNode(pNode)`断言，native rewrite退出−6，命令耗时0.214344236s、完整冷方法耗时0.518344442s。B未取得成功CEC/mapping，delay与area缺失，不填零、不用no-op代替。相同输入A/Ours为PASS；Ours为自己付费测量的 `original_fallback`，冷E2E 18.102447693s，不能称为梯度改善。直接证据在Z的 `output/records/0392_{A,B,Ours}.json`、`case_0392_B/work/native_rewrite.{command.json,log}`；说明见 [FAILURE_NOTES](docs/mffc_gpu/FAILURE_NOTES.md)。该方法FAIL与Ours内部候选请求的FAIL不同，当前前缀的内部失败尚未形成完整审计统计。
 
 两个已有后处理65247/65249在截点均为PENDING/Dependency；最新工具成本版本等待上游结果，仅做已有文件审计和汇总。排队不构成完成证据。本报告不等待其产生新的实验标签，也不为整理文档提交任务。
+
+#### 完成更新：当前版本正式905，约12:51 +08:00
+
+Z的`formal_completion.json`与`benchmark905_delivery/analysis_completion.json`已形成；65245为COMPLETED/0:0、34427s。原始审计核对5750份真实CEC/Liberty测量、3039个成功replay观察、2个失败请求。65247/65249补充后处理分别20/18s、COMPLETED/0:0，没有新增EDA；含工具成本的完整交付为65249的`output/final_mffc905_delivery/`。最终23个审计/交付产物hash核对通过、47个运行源码仍与冻结源一致，全部905个成功Ours配置实际存在且输入/模型/工具身份匹配。
+
+| 方法 | 尝试 / PASS / FAIL / TIMEOUT | 冷E2E中位 / P90 s | 全终态时间合计 s | final CEC PASS / 面积可行 |
+|---|---|---:|---:|---|
+| A 原图 | 905 / 905 / 0 / 0 | 2.322496 / 5.884742 | 3063.317070 | 905 / 898 |
+| B 单次ABC rewrite | 905 / 901 / 4 / 0 | 2.821493 / 7.683508 | 4646.054152 | 901 / 828 |
+| Ours | 905 / 905 / 0 / 0 | 18.766875 / 49.632672 | 25640.713938 | 905 / 905 |
+
+| Ours相对 | 有效配对 | Delay胜/平/负 | 改善中位% | Delay比几何均值 | 改善算术均值% | 配对baseline/Ours时间比中位 |
+|---|---:|---|---:|---:|---:|---:|
+| A | 905 | 544/360/1 | 0.355115 | 0.944392（905） | 4.579724 | 0.135011 |
+| B | 901 | 354/184/363 | 0 | 0.998084（901） | −2.457263 | 0.166129 |
+
+几何均值不是算术平均；相对B改善均值为负，且负例多于胜例。共同成功且均满足no-op1.05倍面积条件的826例中，相对A“delay更好且不更慢”0例，相对B为1例；相对A/B“更慢但delay改善”479/328例。**工程闭环与全量评价完成，当前整体Delay–Runtime性能目标未达到。** A/B的超面积原始结果未剔除；其余4项B断言保持空缺，不把缺失当胜出。
+
+905例Ours中94例无候选，0例候选数量未知；806例实际CUDA、5例CPU小图、94例不构造代理。final来源为直接梯度415、no-op359、付费original回退131；366例final同时选中多个MFFC，最终接受5872个rewrite，单例最多32个（两轮累积），不把联合安装自动解释为协同收益。总replay请求3041、完整安装3039 PASS/2 FAIL/0 UNKNOWN，其中2134个非空完整组合、0个部分失败接受、0次repair。
+
+2个内部失败均在index104 `forgeEDA/BRAM_SSP.aig`：两个选择向量共享一次gpuls batch调用，设置2GiB CUDA heap时报告out of memory/返回1；两请求metrics为空，没有CEC/mapping标签。inclusive请求为3.272750/3.272956s，共享实际命令3.269543s，不相加当独占wall。final回退no-op，4243.653320ps、area22461.130900、CEC PASS，完整cold25.109973s。这说明“905个final PASS”不等于所有候选请求可执行或资源零失败；分配失败深层原因未进一步验证。
+
+实际调用：Ours CEC4284、Mapping3944、replay命令2312（batch命令可对应多个请求）；A为905/905，B为901/901且native命令905。Ours每点Mapping inclusive中位7.942801s、总11307.993805s；CEC中位1.086510s、总2735.911334s；replay命令中位1.046844s、总1431.609777s。LiteCut准备/推理（811点）中位1.470547s、合计4388.534673s；梯度与联合块（811点）中位0.052158s。806个实际CUDA点的原生前/反向事件合计逐点中位70.086656ms，含校准和搜索调用；不含其他Torch聚合/传输/初始化，不能与完整wall等同。分项存在重叠，不能据此宣称独占占比或纯GPU因果加速。
+
+证据：[根报告](BENCHMARK905_RESULTS.md)、[完整2715点CSV](BENCHMARK905_RESULTS.csv)、[统计/分母JSON](BENCHMARK905_SUMMARY.json)、[复制来源/hash](provenance/mffc905_delivery.json)、[逐项验收](docs/mffc_gpu/DELIVERY_AUDIT.md)、[失败说明](docs/mffc_gpu/FAILURE_NOTES.md)。来源/AND/DAG分组、真实cold与3组PNG/PDF均见根报告；本轮没有额外跑random/greedy/旧版或独立CPU全量组，旧比较不冒充当前版本消融。
 
 ### 6.2 历史旧版：905 输入、两种目标
 
@@ -552,7 +577,7 @@ decision_index:choice_index =
 | 第1轮 eval2 | 8 | 347.709794 | 320.165070 | 1.067185055 → 1.032286322 |
 | 第2轮 eval3 | 18 | 317.036766 | 319.617096 | 0.970528291 → 0.957485565 |
 
-两轮梯度范数为0.055311159和0.318594856；每轮对417个有效候选/no-op坐标求导。第二轮之前，用已PASS观察 `[0,1,2]` 校准12步，训练loss为0.007359337→0.000982436。参数已变化，因此不同轮anchor J不可当作同一固定目标的连续收敛曲线。final的18个请求均精确ACCEPTED；CEC原文为 `Networks are equivalent.`，Liberty原始摘要为 `GT_META 520.214417 319.617096 32 398`。这是有真实收益的跨18个MFFC联合组合，不证明18者的协同收益大于分别优化之和，也没有本版本的去梯度对照。
+两轮梯度范数为0.055311159和0.318594856；每轮对417个有效候选/no-op坐标求导。第二轮之前，用已PASS观察 `[0,1,2]` 校准12步，训练loss为0.007359337→0.000982436。参数已变化，因此不同轮anchor J不可当作同一固定目标的连续收敛曲线。final的18个rewrite选择均精确ACCEPTED；CEC原文为 `Networks are equivalent.`，Liberty原始摘要为 `GT_META 520.214417 319.617096 32 398`。这是有真实收益的跨18个MFFC联合组合，不证明18者的协同收益大于分别优化之和，也没有本版本的去梯度对照。
 
 对应文件：`optimization/gradient_{00,01}.json`、`calibration_01.json`、`eval_0003/observation.json`、`eval_0003/rewrite/{choices.txt,replay.json,raw/traces/choice.jsonl}`、`eval_0003/evaluation/{cec.log,mapping.log}`。完整绝对run前缀见第8.3节N。
 
@@ -663,7 +688,7 @@ NATIVE=/data/wushangge/CULS_LiteCut/runs/20261113T182919Z-mffc-native-loop-valid
   --protocol "$RUN/src/config/mffc905_protocol.json" --case-timeout 1800
 ```
 
-最新正式完整展开命令保存在Z的 `input/formal-command.json` 与 `run.json:command`；同一作业在全部方法点后才调用 `analyze_mffc905.py`，当前没有该后处理完成证据。65239的开发命令为 `validate_mffc_loop.py --run N --tool-run NEWTOOLS --manifest I/output/benchmark_manifest.json`，内部限定indices47,80,0；65240使用相同runner加 `--indices 20,22,587`，native build引用N。两者实际argv在各自 `run.json:command`，本次没有执行这些命令。
+最新正式完整展开命令保存在Z的 `input/formal-command.json` 与 `run.json:command`；同一作业在全部方法点后才调用 `analyze_mffc905.py`，完成更新已核对该后处理终态与hash，详见第6.1。65239的开发命令为 `validate_mffc_loop.py --run N --tool-run NEWTOOLS --manifest I/output/benchmark_manifest.json`，内部限定indices47,80,0；65240使用相同runner加 `--indices 20,22,587`，native build引用N。两者实际argv在各自 `run.json:command`，本次没有执行这些命令。
 
 原生真实验证固定为 `cec -n original.aig candidate.aig`（PI/PO位置契约），再 `read_lib asap7.lib; read_aiger candidate.aig; map; topo; stime -p; write_verilog mapped.v`，启用 `CULS_GLOBAL_TIMING_REPORT=1`。完整 `mapping.command.json/cec.command.json`、运行时间、错误与hash随各请求保存。
 
@@ -691,11 +716,11 @@ NATIVE=/data/wushangge/CULS_LiteCut/runs/20261113T182919Z-mffc-native-loop-valid
 | H 最新深/宽/空域开发，65240 | `20261113T183438Z-mffc-deep-empty-validation-0eb1e760` | `output/records/`、`case_{0020,0022,0587}_Ours/work/{summary.json,optimization/}` |
 | V 最新开发独立审计，65241 | `20261113T184502Z-mffc-development-evidence-audit-b33d3b0f` | `output/result_tests.json`；两个 `development_<N或H目录名>/`，各有 `DEVELOPMENT_RESULTS.csv`、`DEVELOPMENT_SUMMARY.json`、`audited_records.json`、`analysis_completion.json`及PNG/PDF |
 | C 最新冻结门槛，65244 | `20261113T190558Z-mffc-freeze-gate-validation-8e9a544c` | `output/final_regressions.json`、`preflight_check.json`；41/41 PASS，905输入检查、methods_launched=0 |
-| Z 最新完整905，65245 | `20261113T191340Z-mffc-full905-frozen-6a45b8db` | `input/formal-command.json`、`run.json`、`logs/slurm-65245.{out,err}`、`output/records/`；**仍在运行，最终交付未形成** |
+| Z 最新完整905，65245 | `20261113T191340Z-mffc-full905-frozen-6a45b8db` | `input/formal-command.json`、`run.json`、`logs/slurm-65245.{out,err}`、`output/records/`；**COMPLETED/0:0；2715终态及5750测量原始审计完成** |
 | W 最新交付分析验证，65246 | `20261113T193807Z-mffc-delivery-validation-906a915b` | 4项统计测试及 `output/supplement_<N或H目录名>/delivery_completion.json`；formal=false，不是新EDA实验 |
 | W2 工具成本分析验证，65248 | `20261113T200701Z-mffc-tool-cost-validation-31baef17` | `output/tool_cost_tests.json`为5/5；`output/supplement_<N或H目录名>/`为已有开发数据补充，formal=false |
-| 首次正式后处理，65247 | `20261113T194518Z-mffc-final905-delivery-d3bb36f0` | 截点PENDING，依赖65245；没有完成结果，不计新方法点 |
-| 完整成本后处理，65249 | `20261113T200926Z-mffc-final905-tool-cost-delivery-67ebf285` | 截点PENDING，依赖65247；没有完成结果，不将预定输出当已有证据 |
+| 首次正式后处理，65247 | `20261113T194518Z-mffc-final905-delivery-d3bb36f0` | 最终COMPLETED/0:0、20s；`output/final_mffc905_delivery/delivery_completion.json`，不计新方法点 |
+| 完整成本后处理，65249 | `20261113T200926Z-mffc-final905-tool-cost-delivery-67ebf285` | 最终COMPLETED/0:0、18s；含工具成本的`output/final_mffc905_delivery/`，905/2715且原统计不变 |
 
 每个 `gradient_*/` 内：`calibration_*.json` 为训练loss，`gradients_*.json` 为优化轨迹，`summary.json`/`progress_*.json` 为真实best；`eval_NNNN/observation.json` 保留选择和评估前预测，`rewrite/choices.txt`/`replay.json`/`raw/traces/choice.jsonl` 保留精确安装证据，`evaluation/{cec.log,mapping.log,result.json,mapped.v}` 是真实标签。批量AIG/trace可能是指向同run共享原始输出的链接，不能删除共享目标。
 
@@ -703,7 +728,7 @@ NATIVE=/data/wushangge/CULS_LiteCut/runs/20261113T182919Z-mffc-native-loop-valid
 
 历史部分沿用同名报告已留证据的数值及Q/S/A/D审计；本次读取旧c1355、ss_pcm原始summary、Q配对统计、S正式统计以及F/S/A/D完成状态。第7节保留前次报告从旧梯度文件提取的采样值，没有把它们当成当前版本轨迹。全覆盖数量引用已保存的审计终态，并未本次重跑13981份映射。F completion 为 `EXECUTED_AND_AUDITED`，S为 `ANALYSIS_COMPLETE`，A为 `EXECUTED_AND_AUDITED`，D为完成交付。
 
-最新部分逐项读取N/H的18个终态和六份Ours summary/梯度/校准记录，并核对V、C、W2的既存测试/审计状态，抽查c1355最终逐项ACCEPTED trace、CEC与GT_META；没有重新执行这些测试或测量。正式Z的进度来自读取截点已有终态JSON和Slurm状态；codec失败与cb_dct成本另外读取对应原始记录。原有报告保留的历史抽查与最新直接读取分开解释，不能把本次生成文档当作再次全库复现实验。
+最新部分逐项读取N/H的18个终态和六份Ours summary/梯度/校准记录，并核对V、C、W2的既存测试/审计状态，抽查c1355最终逐项ACCEPTED trace、CEC与GT_META；没有重新执行这些测试或测量。正式Z保留08:55截点观察，完成更新另核对全2715覆盖、原始审计/交付hash及三作业终态；全部905个成功Ours配置实际存在且身份一致。B四项失败、BRAM_SSP内部CUDA失败与cb_dct成本分别读取原始记录。原有报告保留的历史抽查与最新直接读取分开解释，不能把本次生成文档当作再次全库复现实验。
 
 ### 8.4 输入、模型、库与二进制身份
 
@@ -729,16 +754,16 @@ NATIVE=/data/wushangge/CULS_LiteCut/runs/20261113T182919Z-mffc-native-loop-valid
 | 梯度能否正常计算、更新？ | **已实现且已验证**代理的一阶梯度与候选变化；最新CUDA队列有数值/参考证据，候选使用方向导数，Adam仅校准代理。无Decision输入不执行非平凡更新 |
 | 是否联合多个MFFC？ | **已验证**最新c1355跨18个、DMA跨16个，div同MFFC内有多个Decision；均完整ACCEPTED/CEC。不能由联合安装自动推出超加性协同收益 |
 | Loss下降是否对应真实delay下降？ | **未建立，已有明确反例**；最新div第二轮J下降而实际恶化，ss_pcm预测global不变而实际改善；旧905方向正确率约0.44–0.45。最新c1355正例不抵消反例 |
-| 梯度是否优于随机/贪心/native？ | **稳定优势未成立**；旧905和432点均保留较强random/native结果；最新六例有正负结果，最新905未完成、最新去梯度/random/greedy比较未验证 |
+| 梯度是否优于随机/贪心/native？ | **稳定优势未成立**；旧905和432点均保留较强random/native结果；最新905对B为354胜/184平/363负、整体明显慢于A/B；当前版本去梯度/random/greedy比较未验证 |
 | 跨MFFC交互是否被准确学到？ | 有结构耦合实现、历史Gate3F有真实interaction；**模型独立有效性未建立**。旧四设计去pair未支持默认收益，不能当最新版本的消融结果；初始交互权重为0，首次方向没有学得显式pair项 |
 | LiteCut是否确实提供收益？ | 推理接入与特征一致性已验证；旧四设计标量通道收益未成立，最新版本的独立贡献**未验证**。接入冻结模型不等于得到可靠global梯度 |
-| 修复有无作用？ | 旧四设计控制支持实际质量收益，且父请求并非全来自梯度。最新保留显式repair实现，六开发例无失败/修复，不能据这些例子证明新版修复贡献或通用零失败 |
-| GPU是否有效？ | 最新完整DAG前/反传播**已实现并验证可运行**，六开发例整体慢于A/B；最新同算法CPU/GPU完整因果加速**未验证**。旧432点的27个配对中位1.326246倍、相对旧STE整体1.0355倍，仅适用于其自身版本 |
+| 修复有无作用？ | 旧四设计控制支持实际质量收益，且父请求并非全来自梯度。最新保留显式repair实现，正式905记录2个内部CUDA启动失败、0 repair；不能据final全PASS证明新版修复贡献或通用零失败 |
+| GPU是否有效？ | 最新完整DAG前/反传播**已实现并验证可运行**，完整905配对A/Ours、B/Ours时间比中位为0.135011/0.166129，未实现整体成本优势；最新同算法CPU/GPU完整因果加速**未验证**。旧432点的27个配对中位1.326246倍、相对旧STE整体1.0355倍，仅适用于其自身版本 |
 | 是否收敛/泛化/论文性能已成立？ | **未验证**；best-so-far单调来自保留最优；不同轮代理参数会变化。单种子905/三seed16设计、相关输入和有限预算不足以证明这些主张 |
 
 **尚未实现**：精确可微mapper或对真实ABC链求导；每次实际改写后重建/更新代理DAG、端口与深度；全部独立PI→PO路径各自的优化目标；完整动态引用/顺序增益/新哈希冲突预测；跨网表唯一内部逻辑路径身份；AGD论文算法的严格复现。已实现的Smooth Tchebycheff是旧版delay–area标量化，最新实验使用面积约束模式，不能据此宣称全部研究路线均完成。
 
-**尚未验证或没有成立结论**：现有代理能可靠预测remapping后的全部PO/global及criticality变化；最新版本的全905三方法终态、稳定质量/时间取舍、梯度/LiteCut/显式交互的独立贡献；未见设计泛化。布局布线后signoff没有测量记录，不属于已实现的ABC验证闭环。上述是证据缺口，不是本次拟定的新框架或新实验计划。
+**尚未验证或没有成立结论**：现有代理能可靠预测remapping后的全部PO/global及criticality变化；最新版本稳定优于B的质量/时间取舍（本轮未成立）、梯度/LiteCut/显式交互的独立贡献；未见设计泛化。布局布线后signoff没有测量记录，不属于已实现的ABC验证闭环。上述是证据缺口，不是本次拟定的新框架或新实验计划。
 
 现有测量还显示序列化影响：旧905的original→no-op已有237设计改变代表PI/PO对，两种梯度final各430设计相对no-op改变代表对；这不等价于证明唯一逻辑critical path switching。Student精确历史训练数据/Teacher环境未恢复。正式整闭环GPU显存峰值未记录；K仅记录Torch组件活跃分配（例如div约1.10GB），Slurm MaxRSS不是显存，缺失不得填0。
 

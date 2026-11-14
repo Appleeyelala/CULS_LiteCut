@@ -6,9 +6,9 @@
 
 源码工作区是 `/home/wushangge/CULS_LiteCut`，运行与数据根目录是 `/data/wushangge/CULS_LiteCut`。
 
-当前新增MFFC级GPU改造位于 `work/mffc-gpu-905`：完整候选聚合/Region DAG设备队列前反传播、全局梯度联合块和候选复用预检已通过32项数值/回归及6开发输入的18个真实A/B/Ours方法点；这些不替代完整905。完整905输入与协议已通过41项回归和入口预检，并在正式运行前冻结；输入核验和执行进度见[MFFC运行记录](docs/mffc_gpu/RUN_LOG.md)、[实际实现](docs/mffc_gpu/IMPLEMENTATION.md)与[905协议](BENCHMARK905_PROTOCOL.md)。旧905和432/48结果保持原范围，不能作为新版全量性能结论。
+当前MFFC级GPU改造位于 `work/mffc-gpu-905`：完整候选聚合/Region DAG设备队列前反传播、全局梯度联合块和候选复用预检已实现；41项冻结检查及完整905×3=2715点正式评估、5750份真实测量审计和成本分析均完成。A/Ours各905 PASS，B为901 PASS/4 FAIL；Ours相对A/B的Delay比几何均值为0.944392/0.998084，胜平负544/360/1与354/184/363，配对基线/Ours时间比中位0.135011/0.166129。**工程交付完成，但整体Delay–Runtime优势未成立**；Ours内部2个CUDA失败请求也保留。见[全量结论与图表](BENCHMARK905_RESULTS.md)、[2715点CSV](BENCHMARK905_RESULTS.csv)、[统计JSON](BENCHMARK905_SUMMARY.json)、[逐项验收](docs/mffc_gpu/DELIVERY_AUDIT.md)、[实际实现](docs/mffc_gpu/IMPLEMENTATION.md)与[梯度闭环状态](GRADIENT_OPTIMIZATION_STATUS.md)。旧905和432/48结果保持原范围，不与新版正式结果混算。
 
-新增框架的构建与运行方法见 [使用说明](docs/global_timing/USAGE.md)，数学与真实执行边界见 [模型契约](docs/global_timing/MODEL_AND_EXECUTION.md)，源码与报告的对应关系见 [证据索引](docs/global_timing/EVIDENCE_INDEX.md)。统一版本905输入主实验为901 PASS、4项native对照缺失的PARTIAL；全部905设计的有效测量完成路径采集和原始证据复核，13981份映射、16696个成功引用、最终审计错误0。[全量结果](docs/global_timing/FULL905_SEARCH_RESULTS.md)包含各baseline与original/no-op对照，尚未建立稳定优于同预算随机搜索的优势。
+新增框架的构建与运行方法见 [使用说明](docs/global_timing/USAGE.md)，数学与真实执行边界见 [模型契约](docs/global_timing/MODEL_AND_EXECUTION.md)，源码与报告的对应关系见 [证据索引](docs/global_timing/EVIDENCE_INDEX.md)。此前完整框架的旧版905输入主实验为901 PASS、4项native对照缺失的PARTIAL；全部905设计的有效测量完成路径采集和原始证据复核，13981份映射、16696个成功引用、最终审计错误0。[全量结果](docs/global_timing/FULL905_SEARCH_RESULTS.md)包含各baseline与original/no-op对照，尚未建立稳定优于同预算随机搜索的优势。
 
 完整 AIG 数据集现位于本仓库的 [open-sourceDataset](open-sourceDataset/)，包含 938 个文件（905 个 AIG/AAG），不进入 Git。后续统一从此目录选择输入；默认设计为 `OpenABC/c1355_orig.aig`，路径配置在 `config/workspace.json`。原 `/home/wushangge/cutLibOrigin/open-sourceDataset` 保留指向新目录的兼容链接，迁移记录见 [dataset_migration.json](provenance/dataset_migration.json)。实际运行前，准备工具会把选定设计复制到 `/data` 的运行目录并记录 SHA256。
 

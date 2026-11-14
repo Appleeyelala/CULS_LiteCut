@@ -67,3 +67,18 @@
 12:37:53另做轻量只读核对：2715个终态精确覆盖905×3且不重复，输入SHA/源码commit/Slurm ID均与冻结身份一致；全部905个成功Ours的`work/config.json`实际存在，input/gpuls/checkpoint/native_library四项身份与预检一致。核对没有执行模型、EDA、测试或重启方法点。
 
 65245在方法全部终态后继续运行同冻结快照的原始trace/CEC/Liberty/netlist审计；截至12:49:01，`analysis_completion.json`尚未形成、错误日志为空，65247/65249仍为PENDING/Dependency。全量审计和交付尚未完成，不能仅凭2715终态宣布Goal完成或发布未审计的总体性能结论。CPU/I/O累计量持续增长；继续等待原作业，不重新提交实验。
+
+
+## 最终完成：905正式实验、原始审计与成本交付
+
+2026-11-14约12:50，65245最终COMPLETED/0:0，Slurm elapsed34427s（9:33:47），含方法运行和原始分析；driver elapsed33434.407486s。原始`output/benchmark905_delivery/analysis_completion.json`为AUDITED_AND_REPORTED/formal=true，精确905/2715、5750份真实测量、3039个成功replay观察、2个内部失败请求。原始审计hash索引包含61067项，成功观察全部精确ACCEPTED/CEC/同一Liberty/网表hash核对通过。
+
+后处理65247为COMPLETED/0:0、20s；含工具成本的最终65249为COMPLETED/0:0、18s，源b1afd3480fedbd978203a73e3168ee1f61b4097b，产物`output/final_mffc905_delivery/`的状态COMPLETE_AUDITED_DELIVERY/formal=true、905/2715，原统计不变。12:51:32再次核对23个原始/最终交付文件hash、全部原CSV字段不变、精确覆盖、47个冻结运行源码与/data及当前工作区字节一致。905个成功Ours配置的实际存在和四项身份已于12:37:53独立核对，不靠“文件存在时才核验”推断全部存在。
+
+最终A/Ours各905 PASS，B为901 PASS/4 FAIL，无方法TIMEOUT或丢失冷时钟；四项B缺失均保留。Ours有3041 replay请求，3039完整安装PASS/2 FAIL/0 UNKNOWN，2134非空完整组合；2 FAIL为BRAM_SSP同次gpuls batch设置2GiB CUDA heap失败，最终no-op成功、没有repair或部分接受。原始命令返回1、3.269543s，两请求inclusive重叠，详见FAILURE_NOTES；这不是两个独立失败工具调用。
+
+相对A：905对，Delay胜平负544/360/1，改善中位0.355115%，Delay比几何均值0.944392，配对baseline/Ours时间比中位0.135011。相对B：901对，354/184/363，中位0%，几何均值0.998084，配对时间比0.166129，改善算术均值−2.457263%。A/B/Ours冷E2E中位2.322496/2.821493/18.766875s。工程与完整评估交付完成，整体Delay–Runtime优势未成立。
+
+Ours全905 final CEC/面积可行，实际CUDA806、CPU5、无候选94；来源梯度415/no-op359/付费原图131。366个final跨多个MFFC，最终接受5872 rewrite，单例最多32个。实际CUDA事件合计逐点中位70.09ms，不是整个方法耗时或GPU因果加速。工具/阶段inclusive、来源/AND/DAG形状、826共同面积可行配对取舍均已交付，失败与重叠成本不删除。
+
+六个命名交付均在仓库根目录。CSV/JSON和三组PNG/PDF从65249逐字节复制；根Markdown增加中文核心结论、已确认限制和证据索引并迁移图片链接，/data原文不改。三PNG逐张目视检查，三PDF各1页可读取。来源/hash见`provenance/mffc905_delivery.json`；逐项验收见DELIVERY_AUDIT。最终整理没有新增EDA、训练、方法组、按结果重试或改变冻结参数。

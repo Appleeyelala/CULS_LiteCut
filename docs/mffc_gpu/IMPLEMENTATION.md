@@ -1,6 +1,6 @@
 # MFFC GPU 修订实现与边界
 
-本版目标是完整全局代理的GPU梯度与稀疏联合改动，不再以32条轨迹或冻结CPU adjoint作为主要GPU工作。源码入口是 `global_timing/mffc_experiment.py`，运行入口是 `scripts/run_mffc905.py`。真实工具、Student权重、原始/历史结果保留不改；完整905尚以运行终态为准。
+本版实现完整全局代理的GPU梯度与稀疏联合改动。源码入口是 `global_timing/mffc_experiment.py`，运行入口是 `scripts/run_mffc905.py`。真实工具、Student权重、原始/历史结果保留不改；完整905×3正式运行及审计已完成，见[最终结果](../../BENCHMARK905_RESULTS.md)。
 
 ## 变量、目标与GPU任务
 
@@ -38,4 +38,6 @@ original与serialized no-op分别测量、计入Ours成本；只把no-op作为ze
 - c1355/DMA/div/hyp均有完整GPU DAG前反传播；hyp有117509个MFFC、16269层、最大同层12991个，验证设备队列实际处理此类形状。无候选mig实例保留，没有强造梯度贡献。
 - 开发数据包含正负结果：c1355改善、hyp返回原图、ss_pcm劣于原生B，整体比baseline耗时更多。它们只用于实现检查，不作为905性能结论。
 
-新方法的真实全量竞争力、全部905成功率/时间取舍仍待正式2715终态及审计。没有声称精确局部到全局预测、AGD严格复现、独立梯度/GPU因果贡献、所有候选组合可执行、布线后signoff或未见集泛化。
+正式905/2715终态和5750份真实测量已审计：A/Ours各905 PASS，B为901 PASS/4 FAIL；Ours含806 CUDA、5 CPU、94无候选。对A/B的Delay比几何均值0.944392/0.998084，配对baseline/Ours时间比中位0.135011/0.166129，整体Delay–Runtime目标未达到。完整安装3039 PASS/2 FAIL，两个失败是BRAM_SSP同次gpuls batch设置CUDA heap时报OOM，最终no-op成功；不能把final全PASS当所有请求都成功。
+
+正式806个CUDA点原生事件合计逐点中位70.09ms，仅覆盖原生前/反向，不含完整Torch/CPU/EDA成本。本轮未独立验证同算法CPU/GPU因果加速或梯度消融，没有声称精确局部到全局预测、AGD严格复现、所有候选组合可执行、布线后signoff或未见集泛化。

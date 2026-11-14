@@ -1,6 +1,6 @@
 # 正式905：失败与缺失测量记录
 
-本页记录已观察到的失败，最终数量以全905终态与原始审计为准。冻结实验源为`ecc85e6`，Slurm65245，正式目录为`/data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db`。不重跑失败点、不替换输入或工具、不用其他方法的delay填补缺项。
+最终全905/2715已完成并审计：A/Ours各905 PASS，B为901 PASS/4 FAIL，方法级TIMEOUT为0；另有Ours内部2个失败请求，均发生于同一次BRAM_SSP CUDA分配失败，最终回退成功。下文保留运行时观察的时间顺序，早期“尚非最终”指当时截点；最终数量以此段及[全量结果](../../BENCHMARK905_RESULTS.md)为准。冻结实验源为`ecc85e6`，Slurm65245，正式目录为`/data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db`。不重跑失败点、不替换输入或工具、不用其他方法的delay填补缺项。
 
 ## index392：codec的基线B原生Rewrite断言
 
@@ -59,3 +59,13 @@
 证据相对正式目录：`output/records/0610_{A,B,Ours}.json`、`0611_{A,B,Ours}.json`；`output/case_0610_B/work/native_rewrite.{command.json,log}`及`case_0611_B`对应文件；两例外层`cold_method.{command.json,log}`保留失败传播。旧版同名输入曾出现该断言，仍不能据相同位置宣称内部根因已经完全定位。
 
 检查时65245实际RUNNING并继续后续输入，两个后处理仍PENDING。至此已观察到四项方法级失败：392/B、562/B、610/B、611/B；这仍是运行中的已知清单，不是全905最终成功率。没有重跑失败点、替换工具或修改参数；最终保留全部失败wall，涉及B的成功质量配对排除缺失测量，Ours内部请求失败另行统计。
+
+## index104：BRAM_SSP的两个内部请求共享CUDA分配失败
+
+全量审计确认`forgeEDA/BRAM_SSP.aig`的Ours最终PASS，但`optimization/eval_0001`和`eval_0002`均FAIL、metrics为空。两者共享`optimization/_batch_0001/rewrite.command.json`同一次gpuls调用：返回1，3.269543231930584s；原始`rewrite.log`明确为`aig_manager.cu:29`的`cudaDeviceSetLimit(cudaLimitMallocHeapSize, (size_t)2048 * 1024 * 1024)`报告out of memory。两个配置分别请求`(26397,3,2)`及`(8319,3,2)+(26397,3,2)`。
+
+两份`observation.json`的inclusive时间为3.272750240052119/3.272956053027883s。它们包含同一批次调用，合计6.545706293080002s只作请求inclusive统计，不等于两次独立失败调用或独占wall。没有成功安装、CEC或mapping标签；失败部分接受计数为0、没有repair。更深分配原因与显存峰值未核实，不能用Slurm CPU MaxRSS代替显存证据。
+
+最终选择已付费且成功的replay no-op：4243.653320ps、area22461.130900、CEC PASS；整个Ours冷E2E为25.109973201993853s。相同输入A为4243.653320ps/area22462.531200，B为4268.202150ps/area22584.070300。回退使方法终态成功，但不能声称这两个梯度组合已验证或取得质量收益。没有重跑或更换工具来填补失败。
+
+证据：正式目录的`output/records/0104_Ours.json`、`output/case_0104_Ours/child_result.json`与`work/optimization/{eval_0001,eval_0002}/observation.json`、`rewrite/replay.json`，共享`work/optimization/_batch_0001/rewrite.{command.json,log}`。全量3039个完整安装PASS、2 FAIL、0 UNKNOWN；2134个非空完整组合，2个失败都在该共享调用，不能把最终905 PASS解释为请求零失败。

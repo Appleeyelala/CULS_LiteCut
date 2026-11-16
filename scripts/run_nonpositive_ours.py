@@ -150,6 +150,21 @@ def main():
             'mapping_calls':len(list(work.rglob('mapping.command.json'))),
             'mapping_calls_with_missing_clock':sum(not p.with_name('mapping.command.json').exists() for p in work.rglob('mapping.log')),
             'candidate_counts':candidate_counts(work)}
+        # Preserve completed boundaries even if a later stage failed/timed out.
+        original_path=work/'original/result.json'
+        if original_path.exists():
+            record['original']=json.loads(original_path.read_text())
+        replay_path=work/'final/eval_0000/rewrite/replay.json'
+        record['replay_status']=json.loads(replay_path.read_text())['status'] if replay_path.exists() else 'NOT_REQUESTED_OR_NOT_COMPLETED'
+        evaluation_path=work/'final/eval_0000/evaluation/result.json'
+        evaluation=json.loads(evaluation_path.read_text()) if evaluation_path.exists() else {}
+        record['candidate_cec']=evaluation.get('cec','NOT_PROVEN' if evaluation else 'NOT_REQUESTED_OR_NOT_COMPLETED')
+        best_path=work/'optimization/proxy_best.json'
+        if best_path.exists():
+            record['optimizer_selected_nonempty']=any(json.loads(best_path.read_text())['choices'])
+        observation_path=work/'final/eval_0000/observation.json'
+        if observation_path.exists():
+            record['final_candidate']=json.loads(observation_path.read_text())
         if result:
             record.update(original=result['original'],selected=result['selected'],final_candidate=result['final_candidate'],
                 optimizer_selected_nonempty=bool(result['proxy_best'] and any(result['proxy_best']['choices'])),

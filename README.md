@@ -1,5 +1,7 @@
 # CULS LiteCut research workspace
 
+**新对话先读：[对话交接报告](HANDOFF.md)。** 最新100电路可读数据在 [analysis/ste100](https://github.com/Appleeyelala/CULS_LiteCut/tree/main/analysis/ste100)。
+
 最新固定随机100电路已完成 **Softmax＋STE＋Adam**（40步）评估：A/B/Ours共300点全部成功；Ours/A、Ours/B配对Delay几何平均比为0.959272/1.001070，Runtime配对比中位数为5.281315/4.045126。相对原图有改善，但尚未优于B且仍更慢。新版仅付费原图Mapping＋至多一次最终候选Mapping，无中间反馈校准；见[100电路真实结果](docs/mffc_gpu/STE100_RESULTS.md)及[实现说明](docs/mffc_gpu/STE_ADAM_IMPLEMENTATION.md)。以下905和更早记录保留各自算法与实验范围。
 
 这里集中管理梯度下降与 LiteCut 研究的源码、证据和项目历史，研究对象是 AIG rewriting、strict maximal MFFC、候选局部 delay 与映射后 timing。长期目标是形成论文。此前完整优化框架的实现与全量验证已完成；[逐项验收](docs/global_timing/REQUIREMENTS_AUDIT.md)记录完成证据和明确遗漏，[运行记录](docs/global_timing/RUN_LOG.md)区分历史证据与新实验。工程完成不等于论文结论或算法优势已经确立。

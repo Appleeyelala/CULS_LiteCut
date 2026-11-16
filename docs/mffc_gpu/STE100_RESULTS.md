@@ -46,9 +46,9 @@ Ours 原图 Mapping 成本计入自身 Runtime；内循环无 ABC/CEC/Mapping、
 正式结果目录：
 `/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/`
 
-- [100电路逐电路CSV](/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/STE100_RESULTS.csv)
-- [固定抽样与输入哈希](/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/STE100_SAMPLE_MANIFEST.json)
-- [300终态、工具、参数及Mapping次数](/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/STE100_STATUS.json)
-- [交付一致性核验](/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/DELIVERY_CHECK.json)
+- [100电路逐电路CSV](https://github.com/Appleeyelala/CULS_LiteCut/blob/main/analysis/ste100/STE100_RESULTS.csv)
+- [固定抽样与输入哈希](https://github.com/Appleeyelala/CULS_LiteCut/blob/main/analysis/ste100/STE100_SAMPLE_MANIFEST.json)
+- [300终态、工具、参数及Mapping次数](https://github.com/Appleeyelala/CULS_LiteCut/blob/main/analysis/ste100/STE100_STATUS.json)
+- [交付一致性核验](https://github.com/Appleeyelala/CULS_LiteCut/blob/main/analysis/ste100/DELIVERY_CHECK.json)
 
 复现实际命令见 `/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/input/command.json`；环境及GPU信息见 `input/session_65534.json`，资源与进程环境见 `run.json`。所有候选原始报告和轨迹留在该run中。

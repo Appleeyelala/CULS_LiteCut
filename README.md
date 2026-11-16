@@ -6,6 +6,8 @@
 
 源码工作区是 `/home/wushangge/CULS_LiteCut`，运行与数据根目录是 `/data/wushangge/CULS_LiteCut`。
 
+GitHub 项目与最新正式 905 数据目录见[阅读索引](docs/GITHUB_DATA_INDEX.md)。线上 `main` 包含 `analysis/benchmark905/` 的可读实验明细；本地源码工作区的大型数据仍留在 `/data`，原始实验文件不变。
+
 当前MFFC级GPU改造位于 `work/mffc-gpu-905`：完整候选聚合/Region DAG设备队列前反传播、全局梯度联合块和候选复用预检已实现；41项冻结检查及完整905×3=2715点正式评估、5750份真实测量审计和成本分析均完成。A/Ours各905 PASS，B为901 PASS/4 FAIL；Ours相对A/B的Delay比几何均值为0.944392/0.998084，胜平负544/360/1与354/184/363，配对基线/Ours时间比中位0.135011/0.166129。**工程交付完成，但整体Delay–Runtime优势未成立**；Ours内部2个CUDA失败请求也保留。见[全量结论与图表](BENCHMARK905_RESULTS.md)、[2715点CSV](BENCHMARK905_RESULTS.csv)、[统计JSON](BENCHMARK905_SUMMARY.json)、[逐项验收](docs/mffc_gpu/DELIVERY_AUDIT.md)、[实际实现](docs/mffc_gpu/IMPLEMENTATION.md)与[梯度闭环状态](GRADIENT_OPTIMIZATION_STATUS.md)。旧905和432/48结果保持原范围，不与新版正式结果混算。
 
 新增框架的构建与运行方法见 [使用说明](docs/global_timing/USAGE.md)，数学与真实执行边界见 [模型契约](docs/global_timing/MODEL_AND_EXECUTION.md)，源码与报告的对应关系见 [证据索引](docs/global_timing/EVIDENCE_INDEX.md)。此前完整框架的旧版905输入主实验为901 PASS、4项native对照缺失的PARTIAL；全部905设计的有效测量完成路径采集和原始证据复核，13981份映射、16696个成功引用、最终审计错误0。[全量结果](docs/global_timing/FULL905_SEARCH_RESULTS.md)包含各baseline与original/no-op对照，尚未建立稳定优于同预算随机搜索的优势。

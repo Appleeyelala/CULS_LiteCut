@@ -66,11 +66,15 @@ def main():
     def evidence_file(path,role):
         if path.is_file():
             evidence[str(path)]={'sha256':digest(path),'bytes':path.stat().st_size,'role':role}
-    rows=[];probes=[]
+    rows=[];probes=[];old_complete=0;old_area_ok=0
     for r in sorted(state['records'],key=lambda r:r['index']):
         i=r['index']; work=Path(r['evidence'])/'work'
         oldwork=reference/'output'/f'case_{i:04d}_Ours/work'
         oldsum=read(oldwork/'summary.json')
+        old_final=oldsum.get('final_candidate') or {}
+        if old_final.get('status')=='PASS' and old_final.get('metrics',{}).get('cec')=='PASS':
+            old_complete+=1
+            old_area_ok+=old_final['metrics']['area']<=1.05*oldsum['original']['area']
         oldraw=read(oldwork/'candidates/raw/gate3c_raw_manifest.json')
         olddec=read(oldwork/'cut_validation/verified_catalogue.json')['decisions']
         blocked=read(oldwork/'candidate_feasibility.json')['blocked_choices'] if (oldwork/'candidate_feasibility.json').exists() else []
@@ -105,7 +109,7 @@ def main():
     gate=len(resolved)==17
     assert gate==state['gate17_passed']
     counts={k:sum(r[k] or 0 for r in rows) for k in rows[0] if k.startswith(('old_','new_')) and k!='new_eligible_cut_count'}
-    stats={'fixed100_records':len(rows),'states':dict(Counter(r['status'] for r in rows)),
+    stats={'fixed100_records':len(rows),'old_ste100_complete_candidates':old_complete,'old_ste100_area_compliant_candidates':old_area_ok,'states':dict(Counter(r['status'] for r in rows)),
         'legal_candidate_circuits':sum(r['reason']=='LEGAL_NONZERO_DOMAIN_EXISTS' for r in rows),
         'original17_resolved':len(resolved),'unresolved17':[r['circuit_id'] for r in unresolved],
         'GO_905':state['GO_905'],'candidate_totals':counts,
@@ -230,8 +234,8 @@ def full_reports(args,out,evidence_file):
             'cec':r.get('candidate_cec'),'original_cec':original.get('cec'),
             'original_delay_ps':original.get('delay_ps'),'original_area':original.get('area'),
             'candidate_delay_ps':fm.get('delay_ps') if valid else None,'candidate_area':fm.get('area') if valid else None,
-            'selected_delay_ps':metrics.get('delay_ps') if metrics.get('cec')=='PASS' else None,
-            'selected_area':metrics.get('area') if metrics.get('cec')=='PASS' else None,
+            'selected_delay_ps':metrics.get('delay_ps') if r.get('status')=='PASS' and metrics.get('cec')=='PASS' else None,
+            'selected_area':metrics.get('area') if r.get('status')=='PASS' and metrics.get('cec')=='PASS' else None,
             'selected_source':selected.get('source'),'mapping_calls':r.get('mapping_calls'),
             'mapping_calls_with_missing_clock':r.get('mapping_calls_with_missing_clock'),
             'measured_full_runtime_s':r.get('measured_full_runtime_s'),
@@ -258,7 +262,11 @@ def full_reports(args,out,evidence_file):
         'nonempty_cec_mapping_pass':len(quality),'candidate_delay_win_tie_loss_vs_own_original':[win,tie,lose],
         'candidate_delay_ratio_geomean':math.exp(sum(map(math.log,ratios))/len(ratios)) if ratios else None,
         'candidate_area_limit_exceeded':sum(not feasible for _,_,_,feasible in quality),
-        'optimizer_noop_ids':noop,'runtime_medians':{k:med([r[k] for r in result_rows]) for k in ('measured_full_runtime_s','second_mapping_abc_time_s','optimization_runtime_s')},
+        'optimizer_noop_ids':noop,
+        'optimizer_selected_nonempty_count':sum(r.get('optimizer_selected_nonempty') is True for r in records.values()),
+        'replay_pass_count':sum(r.get('replay_status')=='PASS' for r in records.values()),
+        'candidate_cec_pass_count':sum(r.get('candidate_cec')=='PASS' for r in records.values()),
+        'runtime_medians':{k:med([r[k] for r in result_rows]) for k in ('measured_full_runtime_s','second_mapping_abc_time_s','optimization_runtime_s')},
         'runtime_available':{k:sum(r[k] is not None for r in result_rows) for k in ('measured_full_runtime_s','second_mapping_abc_time_s','optimization_runtime_s')},
         'sessions':sessions,'run':str(run),'run_metadata':read(run/'run.json')}
     write_json(dest/'FULL905_RUN_STATUS.json',runstatus)
@@ -278,13 +286,33 @@ def full_reports(args,out,evidence_file):
         old=historical[r['circuit_id']]
         sample.append(dict(r,**{f'historical_{m}_{k}':old[f'{m}_{k}'] for m in ('A','B') for k in ('delay_ps','runtime_s','status')}))
     table(out/'STE_ADAM_100_NONGAIN_RESULTS.csv',sample)
+    sample_candidates=[r for r in sample if r['candidate_delay_ps'] is not None]
+    sample_area_ok=[r for r in sample_candidates if r['candidate_area']<=1.05*r['original_area']]
+    old_counts=read(out/'COVERAGE_STATS.json')
+    subset={'terminal_count':sum(r['status']!='NOT_COMPLETED' for r in sample),
+        'states':dict(Counter(r['status'] for r in sample)),
+        'nonempty_selections':sum(r['optimizer_selected_nonempty'] is True for r in sample),
+        'replay_pass':sum(r['replay_status']=='PASS' for r in sample),
+        'complete_candidates':len(sample_candidates),'area_compliant_candidates':len(sample_area_ok),
+        'old_complete_candidates':old_counts['old_ste100_complete_candidates'],
+        'old_area_compliant_candidates':old_counts['old_ste100_area_compliant_candidates'],
+        'raw_candidate_win_tie_loss':[sum(r['candidate_delay_ps']<r['original_delay_ps'] for r in sample_candidates),
+            sum(r['candidate_delay_ps']==r['original_delay_ps'] for r in sample_candidates),
+            sum(r['candidate_delay_ps']>r['original_delay_ps'] for r in sample_candidates)],
+        'runtime_medians':{k:med([r[k] for r in sample]) for k in ('measured_full_runtime_s','second_mapping_abc_time_s','optimization_runtime_s')}}
+    runstatus['fixed100_subset']=subset
+    selected_count=runstatus['optimizer_selected_nonempty_count']
+    runstatus['replay_pass_fraction_of_nonempty_selections']=runstatus['replay_pass_count']/selected_count if selected_count else None
+    write_json(dest/'FULL905_RUN_STATUS.json',runstatus)
     for path in [run/'run.json',run/'input/full905_manifest.json']+list((run/'input').glob('full905_session_*.json')):
         evidence_file(path,'new full905 provenance')
     return f"""新版905实际终态 {len(records)}/905，{states}。确认零候选 {len(zero)}，候选域不可判定 {len(unknown)}。旧94变化见 full905/FULL905_ZERO_CANDIDATES.md。
 
-完整安装、CEC及Mapping成功的非空候选 {len(quality)} 个，相对自己付费原图真实Delay胜/平/负 {win}/{tie}/{lose}；候选/原图Delay比几何均值 {runstatus['candidate_delay_ratio_geomean']}。真实Area超1.05的数量 {runstatus['candidate_area_limit_exceeded']}，单列不伪装可行改善；没有按真实Delay回退。
+选择非空组合 {selected_count} 个，完整Replay接受 {runstatus['replay_pass_count']} 个（以非空选择为分母的比例 {runstatus['replay_pass_fraction_of_nonempty_selections']}）。完整安装、CEC及Mapping成功的非空候选 {len(quality)} 个，相对自己付费原图真实Delay胜/平/负 {win}/{tie}/{lose}；候选/原图Delay比几何均值 {runstatus['candidate_delay_ratio_geomean']}。真实Area超1.05的数量 {runstatus['candidate_area_limit_exceeded']}，单列不伪装可行改善；没有按真实Delay回退。
 
 Runtime中位数（有值分母见JSON）：{runstatus['runtime_medians']}。optimization_runtime_s = measured_full_runtime_s - second_mapping_abc_time_s；无第二次Mapping扣0，缺失实际命令时钟时不估算。此为研究记账指标，不是已测一次Mapping部署性能。905按独立冷进程分片执行，A/B为历史测量，没有重跑，也不作严格同负载Runtime配对。
+
+固定100子集：终态 {subset['terminal_count']}/100，状态 {subset['states']}；非空选择 {subset['nonempty_selections']}，完整Replay {subset['replay_pass']}，完整CEC/Mapping候选 {subset['complete_candidates']}，其中面积合规 {subset['area_compliant_candidates']}。旧STE100原始候选（回退前）为 {subset['old_complete_candidates']} 个，面积合规 {subset['old_area_compliant_candidates']} 个；用相同的原始候选口径比较，不与旧版按Delay采用的31个混算。新100原始候选相对自付原图真实Delay胜/平/负 {subset['raw_candidate_win_tie_loss']}；Runtime三项中位数 {subset['runtime_medians']}。
 
 100子集结果直接来自本次905同ID的实际Ours运行（不是另起100次重复实验），附历史A/B参考。失败/超时及缺失均保留，见CSV与运行状态JSON。
 """

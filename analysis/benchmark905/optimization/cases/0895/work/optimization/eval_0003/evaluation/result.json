@@ -1,0 +1,78 @@
+{
+  "abc_native_trace_endpoints": [
+    0,
+    3
+  ],
+  "abc_native_trace_lines": [
+    "Path  0 --       1 : 0  673 pi                      A =   0.00  Df =   0.0   -0.0 ps  S =   0.0 ps  Cin =  0.0 ff  Cout = 234.4 ff  Cmax =   0.0 ff  G =    0  ",
+    "Path  1 --    6342 : 4    1 O2A1O1Ixp33_ASAP7_75t_L A =   0.00  Df =1999.6 -323.0 ps  S = 220.9 ps  Cin =  0.4 ff  Cout =   0.4 ff  Cmax =  11.5 ff  G =   95  ",
+    "Path  2 --    6343 : 2    1 AND2x2_ASAP7_75t_L      A =   1.40  Df =2027.3 -306.9 ps  S =  40.7 ps  Cin =  0.4 ff  Cout =   0.4 ff  Cmax =  92.2 ff  G =  115  ",
+    "Path  3 --    6344 : 3    2 OR3x1_ASAP7_75t_L       A =   1.40  Df =2045.6 -156.0 ps  S =  17.2 ps  Cin =  0.4 ff  Cout =   0.8 ff  Cmax =  46.1 ff  G =  184  ",
+    "Path  4 --    6358 : 3    1 NOR3xp33_ASAP7_75t_L    A =   1.17  Df =2053.1 -151.2 ps  S =  64.7 ps  Cin =  0.4 ff  Cout =   0.3 ff  Cmax =  11.5 ff  G =   96  ",
+    "Path  5 --    6368 : 4    1 OAI211xp5_ASAP7_75t_L   A =   1.40  Df =2071.4 -102.1 ps  S =  72.1 ps  Cin =  0.3 ff  Cout =   0.4 ff  Cmax =  23.0 ff  G =  116  ",
+    "Path  6 --    6370 : 4    1 A2O1A1Ixp33_ASAP7_75t_L A =   0.00  Df =2087.7 -103.4 ps  S = 135.5 ps  Cin =  0.4 ff  Cout =   0.3 ff  Cmax =  11.5 ff  G =   68  ",
+    "Path  7 --    6535 : 2    1 NAND2xp33_ASAP7_75t_L   A =   0.93  Df =2124.3  -45.7 ps  S =  45.5 ps  Cin =  0.3 ff  Cout =   0.4 ff  Cmax =  11.5 ff  G =  156  ",
+    "Path  8 --    6690 : 4    1 A2O1A1Ixp33_ASAP7_75t_L A =   0.00  Df =2139.7  -46.8 ps  S = 177.6 ps  Cin =  0.4 ff  Cout =   0.3 ff  Cmax =  11.5 ff  G =   91  ",
+    "Path  9 --    6853 : 5    1 NAND5xp2_ASAP7_75t_L    A =   1.63  Df =2167.6  -47.2 ps  S =  65.4 ps  Cin =  0.3 ff  Cout =   0.4 ff  Cmax =  11.5 ff  G =  115  ",
+    "Path 10 --    7200 : 4    1 A2O1A1Ixp33_ASAP7_75t_L A =   0.00  Df =2184.7  -47.2 ps  S = 172.1 ps  Cin =  0.4 ff  Cout =   0.3 ff  Cmax =  11.5 ff  G =   90  ",
+    "Path 11 --    7201 : 4    1 OAI211xp5_ASAP7_75t_L   A =   1.40  Df =2214.7  -24.8 ps  S =  45.0 ps  Cin =  0.3 ff  Cout =   0.0 ff  Cmax =  23.0 ff  G =    0  "
+  ],
+  "adp": 10641263.867282536,
+  "area": 4804.86816,
+  "cec": "PASS",
+  "cec_interface": "AIGER_PI_PO_POSITIONAL_ORDER; symbol names may be absent after replay",
+  "critical_po_indices": [
+    3
+  ],
+  "delay_ps": 2214.68384,
+  "input_sha256": "cf9905cc8f29c084fe099a7e4e3dfe12c04fd21c86224d5351f74b0e4a60a08a",
+  "input_structure_sha256": "0fd5c5af296fa51fa81e7cbe564bbdb80820cc0e5c32e0d18058a3bec5ba6cbf",
+  "mapped_gates": 7181,
+  "mapped_sha256": "54baf757486fb65864851bfca103b594a47ad4520aa0f180d98d72b0471015c5",
+  "po_arrivals_ps": [
+    2206.45337,
+    2191.84497,
+    1292.69043,
+    2214.68384
+  ],
+  "po_rise_fall": [
+    {
+      "arrival_ps": 2206.45337,
+      "fall_ps": 2140.88086,
+      "rise_ps": 2206.45337
+    },
+    {
+      "arrival_ps": 2191.84497,
+      "fall_ps": 2086.15894,
+      "rise_ps": 2191.84497
+    },
+    {
+      "arrival_ps": 1292.69043,
+      "fall_ps": 973.704407,
+      "rise_ps": 1292.69043
+    },
+    {
+      "arrival_ps": 2214.68384,
+      "fall_ps": 2189.91504,
+      "rise_ps": 2214.68384
+    }
+  ],
+  "provenance": {
+    "abc": {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc",
+      "sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb"
+    },
+    "library": {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db/input/asap7",
+      "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+    },
+    "original": {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db/output/case_0895_Ours/input.aig",
+      "sha256": "84e427197818d38619d901f59d180eb35e162f8d707da90bd219b411f2343d25"
+    }
+  },
+  "runtime_s": 2.157025621039793,
+  "status": "PASS",
+  "timing_model": "ABC_SCL_LIBERTY",
+  "trace_semantics": "Native ABC min-slack traceback; mapped IDs are local to this mapping."
+}

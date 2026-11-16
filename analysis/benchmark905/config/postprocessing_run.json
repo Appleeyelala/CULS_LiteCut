@@ -1,0 +1,113 @@
+{
+  "name": "20261113T200926Z-mffc-final905-tool-cost-delivery-67ebf285",
+  "purpose": "After existing formal audit and first delivery finish, produce complete905 final delivery with validated per-tool CEC mapping replay costs, installation counts, shape and frozen tradeoffs; preserve original statistics, no new methods, model or EDA.",
+  "created_at": "2026-11-13T20:09:26.537737+00:00",
+  "source_commit": "b1afd3480fedbd978203a73e3168ee1f61b4097b",
+  "source_repository": "/home/wushangge/CULS_LiteCut",
+  "source_snapshot": "/data/wushangge/CULS_LiteCut/runs/20261113T200926Z-mffc-final905-tool-cost-delivery-67ebf285/src",
+  "state": "COMPLETED",
+  "slurm_job_id": "65249",
+  "command": [
+    "/home/share/process/anaconda3/bin/python",
+    "-B",
+    "/data/wushangge/CULS_LiteCut/runs/20261113T200926Z-mffc-final905-tool-cost-delivery-67ebf285/src/scripts/finalize_mffc905.py",
+    "--run",
+    "/data/wushangge/CULS_LiteCut/runs/20261113T200926Z-mffc-final905-tool-cost-delivery-67ebf285",
+    "--experiment",
+    "/data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db"
+  ],
+  "resources": {
+    "partition": "Compute",
+    "cpus_per_task": 2,
+    "memory_gib": 16,
+    "gpus": 0,
+    "walltime": "01:00:00",
+    "nodelist": null
+  },
+  "environment": {
+    "python": "3.11.5 (main, Sep 11 2023, 13:54:46) [GCC 11.2.0]",
+    "slurm": {
+      "SLURM_JOB_START_TIME": "1794631826",
+      "SLURM_NODELIST": "eda",
+      "SLURM_JOB_NAME": "cl-mffc-final-cost",
+      "SLURM_TOPOLOGY_ADDR": "eda",
+      "SLURM_PRIO_PROCESS": "0",
+      "SLURM_EXPORT_ENV": "NONE",
+      "SLURM_JOB_QOS": "eda_limit",
+      "SLURM_TOPOLOGY_ADDR_PATTERN": "node",
+      "SLURM_JOB_DEPENDENCY": "afterany:65247",
+      "SLURM_JOB_END_TIME": "1794635426",
+      "SLURM_NNODES": "1",
+      "SLURM_TRES_PER_TASK": "cpu:2",
+      "SLURM_JOBID": "65249",
+      "SLURM_TASKS_PER_NODE": "1",
+      "SLURM_CONF": "/etc/slurm/slurm.conf",
+      "SLURM_JOB_ID": "65249",
+      "SLURM_CPUS_PER_TASK": "2",
+      "SLURM_JOB_USER": "wushangge",
+      "SLURM_JOB_UID": "1028",
+      "SLURM_NODEID": "0",
+      "SLURM_SUBMIT_DIR": "/home/wushangge/CULS_LiteCut",
+      "SLURM_TASK_PID": "46307",
+      "SLURM_CPUS_ON_NODE": "2",
+      "SLURM_PROCID": "0",
+      "SLURM_JOB_NODELIST": "eda",
+      "SLURM_LOCALID": "0",
+      "SLURM_GET_USER_ENV": "1",
+      "SLURM_JOB_GID": "1001",
+      "SLURM_JOB_CPUS_PER_NODE": "2",
+      "SLURM_CLUSTER_NAME": "edacluster",
+      "SLURM_GTIDS": "0",
+      "SLURM_SUBMIT_HOST": "eda",
+      "SLURM_JOB_PARTITION": "Compute",
+      "SLURM_JOB_ACCOUNT": "edauser",
+      "SLURM_JOB_NUM_NODES": "1",
+      "SLURM_MEM_PER_NODE": "16384"
+    }
+  },
+  "assets": [
+    {
+      "name": "student_checkpoint",
+      "source": "/home/wushangge/cutLibOrigin/best.pt",
+      "path": "/data/wushangge/CULS_LiteCut/assets/models/litecut_student_best.pt",
+      "sha256": "b3f499d2973bdb36fb42690794e9838d4c8359f05d6e141aa8cbe2b9fe3ae64d"
+    },
+    {
+      "name": "asap7",
+      "source": "/data/wushangge/runs/CULS-gate3f-20260922-gate2babc/input/asap7.lib",
+      "path": "/data/wushangge/CULS_LiteCut/assets/libraries/asap7.lib",
+      "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+    },
+    {
+      "name": "abc_gate3f",
+      "source": "/data/wushangge/runs/CULS-gate3f-20260922-gate2babc/bin/abc",
+      "path": "/data/wushangge/CULS_LiteCut/assets/bin/abc_gate3f",
+      "sha256": "9b64d35ba403df4b1a2474c4591abdfd298e9a2fe1411f6ba16ae9096b6e2b2f"
+    },
+    {
+      "name": "gpuls_gate3f",
+      "source": "/data/wushangge/runs/CULS-gate3f-20260922-gate2babc/bin/gpuls",
+      "path": "/data/wushangge/CULS_LiteCut/assets/bin/gpuls_gate3f",
+      "sha256": "6de7b007a7891c5de410acb6d3419885af77a3012e8c4f36103ccd861a52a111"
+    }
+  ],
+  "dataset": {
+    "root": "/home/wushangge/CULS_LiteCut/open-sourceDataset",
+    "source": "/home/wushangge/CULS_LiteCut/open-sourceDataset/OpenABC/c1355_orig.aig",
+    "relative_path": "OpenABC/c1355_orig.aig",
+    "sha256": "2602b10f131a6ba5996521036ba130aab128a4aa15e3ab49ce44f2f02047f0b0",
+    "staged_path": "/data/wushangge/CULS_LiteCut/runs/20261113T200926Z-mffc-final905-tool-cost-delivery-67ebf285/input/design.aig"
+  },
+  "resource_budget": {
+    "aggregate_cpus": 64,
+    "aggregate_memory_gib": 256,
+    "aggregate_gpus": 2,
+    "include_pending_jobs": true
+  },
+  "experiment_executed": true,
+  "slurm_dependency": {
+    "type": "afterany",
+    "job_id": "65247"
+  },
+  "exit_code": 0
+}

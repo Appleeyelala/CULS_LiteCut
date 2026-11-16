@@ -1,0 +1,197 @@
+{
+  "anchor": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    2,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    4,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    4,
+    0,
+    0,
+    4,
+    4,
+    1,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    4,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    2,
+    0,
+    4,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    3,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "candidate_gradient_entries": 260,
+  "device": "cuda:0",
+  "gradient_norm": 0.00015636392917966642,
+  "legal_distinct_blocks": 5,
+  "objective": 1.0296780454213834,
+  "ranked_edits": [
+    {
+      "choice_index": 0,
+      "decision_index": 32,
+      "directional_gain": 0.00013951994153312968
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 9,
+      "directional_gain": 2.33478401181379e-06
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 8,
+      "directional_gain": 1.018198702650317e-06
+    },
+    {
+      "choice_index": 2,
+      "decision_index": 6,
+      "directional_gain": 6.363503678858042e-08
+    },
+    {
+      "choice_index": 3,
+      "decision_index": 22,
+      "directional_gain": 8.081300088270059e-09
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 34,
+      "directional_gain": 3.096202173774568e-09
+    },
+    {
+      "choice_index": 0,
+      "decision_index": 30,
+      "directional_gain": 2.343146696657145e-09
+    },
+    {
+      "choice_index": 3,
+      "decision_index": 26,
+      "directional_gain": 1.1348739984412438e-09
+    },
+    {
+      "choice_index": 3,
+      "decision_index": 25,
+      "directional_gain": 3.0487253874932457e-10
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 13,
+      "directional_gain": 4.944682417066223e-12
+    },
+    {
+      "choice_index": 0,
+      "decision_index": 48,
+      "directional_gain": 2.3657691948018887e-12
+    },
+    {
+      "choice_index": 0,
+      "decision_index": 55,
+      "directional_gain": 1.4240351953988475e-12
+    },
+    {
+      "choice_index": 0,
+      "decision_index": 44,
+      "directional_gain": 1.2837488142404698e-12
+    },
+    {
+      "choice_index": 0,
+      "decision_index": 68,
+      "directional_gain": 4.2070799226136015e-14
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 53,
+      "directional_gain": 2.497574693223435e-14
+    },
+    {
+      "choice_index": 0,
+      "decision_index": 46,
+      "directional_gain": 3.678689123033583e-15
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 59,
+      "directional_gain": 3.183822135044443e-16
+    },
+    {
+      "choice_index": 4,
+      "decision_index": 39,
+      "directional_gain": 1.653661134731e-16
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 58,
+      "directional_gain": 1.4544015120970733e-16
+    },
+    {
+      "choice_index": 2,
+      "decision_index": 57,
+      "directional_gain": 3.6127726173462907e-17
+    },
+    {
+      "choice_index": 2,
+      "decision_index": 0,
+      "directional_gain": 9.464799119968489e-18
+    }
+  ],
+  "round": 1,
+  "schema": "mffc_full_global_direction_v1",
+  "scope": "Gradient of the complete fixed-topology all-PO/area proxy; no differentiation through Student, projection, rewrite or ABC.",
+  "seed": 20261114,
+  "training_observation_indices": [
+    0,
+    1,
+    2
+  ],
+  "transferred_edits": 71
+}

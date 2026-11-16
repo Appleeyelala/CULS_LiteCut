@@ -1,0 +1,6 @@
+circuit_id,decision_index,decision_id,root,cut_slot,region_id,truth,truth_class,candidate_domain_id,cut_leaves_json,removable_node_count,saved_count,classification
+192,0,d0,2110,2,13,32896,2,0,"[1,2,3]",2,2,INTRA_REGION
+192,1,d1,2111,3,13,32768,1,39,"[1,2,3,4]",3,3,INTRA_REGION
+192,2,d2,2113,2,14,32896,2,1,"[5,6,2111]",2,2,INTRA_REGION
+192,3,d3,2113,3,14,32768,1,5,"[4,5,6,2110]",2,2,INTRA_REGION
+192,4,d4,8588,2,2377,32895,80,1,"[1685,1686,1687,1688]",3,3,INTRA_REGION

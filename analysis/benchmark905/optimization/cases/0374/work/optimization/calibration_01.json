@@ -1,0 +1,40 @@
+{
+  "arrival_propagation_backend": "bounded_tape",
+  "losses": [
+    6.522759639127271e-06,
+    7.031291491676755e-06,
+    6.551316550725475e-06,
+    6.633750501836777e-06,
+    6.808536391817402e-06,
+    6.712870693488082e-06,
+    6.557055521341711e-06,
+    6.584734146026701e-06,
+    6.611059639314644e-06,
+    6.712924225830333e-06,
+    6.661657288504129e-06,
+    6.552236425472338e-06
+  ],
+  "parameters": {
+    "area_weights": [
+      0.0022061634687111486,
+      0.0,
+      1.0,
+      -0.001972338357274431
+    ],
+    "interaction_weights": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "local_weights": [
+      0.08,
+      0.15,
+      0.0,
+      0.00589498547320475
+    ]
+  },
+  "samples": 2,
+  "scope": "Training fit only; new evaluations must be predicted before their labels are observed.",
+  "supported_derivative_order": 1
+}

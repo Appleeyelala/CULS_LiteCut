@@ -1,0 +1,100 @@
+{
+  "anchor": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "candidate_gradient_entries": 54,
+  "device": "cuda:0",
+  "gradient_norm": 0.0009338259220308266,
+  "legal_distinct_blocks": 4,
+  "objective": 1.1142650880833127,
+  "ranked_edits": [
+    {
+      "choice_index": 1,
+      "decision_index": 1,
+      "directional_gain": 0.0004032018654427113
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 20,
+      "directional_gain": 0.0004032018654427113
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 0,
+      "directional_gain": 0.00014527328525298992
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 19,
+      "directional_gain": 0.00014527328525298992
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 2,
+      "directional_gain": 1.5915808737663057e-05
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 7,
+      "directional_gain": 1.8952872778579e-07
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 5,
+      "directional_gain": 1.214536039645832e-07
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 9,
+      "directional_gain": 3.718590810500027e-08
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 13,
+      "directional_gain": 6.401094457695037e-11
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 14,
+      "directional_gain": 6.241041283945926e-11
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 17,
+      "directional_gain": 5.956350444823504e-11
+    }
+  ],
+  "round": 0,
+  "schema": "mffc_full_global_direction_v1",
+  "scope": "Gradient of the complete fixed-topology all-PO/area proxy; no differentiation through Student, projection, rewrite or ABC.",
+  "seed": 20261114,
+  "training_observation_indices": [
+    0
+  ],
+  "transferred_edits": 26
+}

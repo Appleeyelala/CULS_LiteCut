@@ -1,0 +1,511 @@
+{
+  "abc_native_trace_endpoints": [
+    63,
+    63
+  ],
+  "abc_native_trace_lines": [
+    "Path  0 --      64 : 0  731 pi                      A =   0.00  Df =   0.0   -0.0 ps  S =   0.0 ps  Cin =  0.0 ff  Cout = 280.8 ff  Cmax =   0.0 ff  G =    0  ",
+    "Path  1 --     193 : 1  187 INVx1_ASAP7_75t_L       A =   0.70  Df = 336.8  -79.8 ps  S = 755.3 ps  Cin =  0.4 ff  Cout =  65.9 ff  Cmax =  46.1 ff  G =15785  ",
+    "Path  2 --     307 : 2    8 NOR2xp33_ASAP7_75t_L    A =   0.93  Df = 510.5 -119.4 ps  S = 245.7 ps  Cin =  0.3 ff  Cout =   3.0 ff  Cmax =  11.5 ff  G = 1146  ",
+    "Path  3 --     308 : 2   37 NOR2xp33_ASAP7_75t_L    A =   0.93  Df = 760.3 -156.7 ps  S = 454.8 ps  Cin =  0.3 ff  Cout =  13.1 ff  Cmax =  11.5 ff  G = 5098  ",
+    "Path  4 --     309 : 1   48 INVx1_ASAP7_75t_L       A =   0.70  Df = 932.1 -153.5 ps  S = 254.5 ps  Cin =  0.4 ff  Cout =  17.4 ff  Cmax =  46.1 ff  G = 4173  ",
+    "Path  5 --     661 : 4    4 NAND4xp25_ASAP7_75t_L   A =   1.40  Df = 989.1 -153.2 ps  S = 108.4 ps  Cin =  0.3 ff  Cout =   1.8 ff  Cmax =  11.5 ff  G =  523  ",
+    "Path  6 --     688 : 3    4 NAND3xp33_ASAP7_75t_L   A =   1.17  Df =1046.7  -23.6 ps  S =  57.5 ps  Cin =  0.3 ff  Cout =   1.5 ff  Cmax =  11.5 ff  G =  415  ",
+    "Path  7 --     971 : 3    3 AOI21xp33_ASAP7_75t_L   A =   1.17  Df =1072.1  -21.2 ps  S =  71.0 ps  Cin =  0.3 ff  Cout =   1.0 ff  Cmax =  11.5 ff  G =  329  ",
+    "Path  8 --     977 : 3    4 OAI21xp33_ASAP7_75t_L   A =   1.17  Df =1103.7  -21.3 ps  S =  53.0 ps  Cin =  0.3 ff  Cout =   1.3 ff  Cmax =  11.5 ff  G =  434  ",
+    "Path  9 --     982 : 4    7 AOI22xp33_ASAP7_75t_L   A =   1.40  Df =1140.1   -5.9 ps  S =  91.9 ps  Cin =  0.3 ff  Cout =   2.4 ff  Cmax =  11.5 ff  G =  805  ",
+    "Path 10 --     983 : 3    3 AOI21xp33_ASAP7_75t_L   A =   1.17  Df =1171.0  -17.3 ps  S =  51.9 ps  Cin =  0.3 ff  Cout =   0.8 ff  Cmax =  11.5 ff  G =  270  ",
+    "Path 11 --     987 : 2    5 NOR2xp33_ASAP7_75t_L    A =   0.93  Df =1207.2  -17.2 ps  S =  64.4 ps  Cin =  0.3 ff  Cout =   1.7 ff  Cmax =  11.5 ff  G =  660  ",
+    "Path 12 --    1286 : 3    3 OAI21xp33_ASAP7_75t_L   A =   1.17  Df =1234.7  -18.3 ps  S =  47.3 ps  Cin =  0.3 ff  Cout =   1.0 ff  Cmax =  11.5 ff  G =  331  ",
+    "Path 13 --    1293 : 3    4 AOI21xp33_ASAP7_75t_L   A =   1.17  Df =1259.3  -10.0 ps  S =  56.0 ps  Cin =  0.3 ff  Cout =   1.3 ff  Cmax =  11.5 ff  G =  434  ",
+    "Path 14 --    1549 : 3    4 OAI21xp33_ASAP7_75t_L   A =   1.17  Df =1288.9  -11.4 ps  S =  50.0 ps  Cin =  0.3 ff  Cout =   1.2 ff  Cmax =  11.5 ff  G =  416  ",
+    "Path 15 --    1884 : 3    4 AOI21xp33_ASAP7_75t_L   A =   1.17  Df =1313.6   -3.2 ps  S =  55.6 ps  Cin =  0.3 ff  Cout =   1.3 ff  Cmax =  11.5 ff  G =  429  ",
+    "Path 16 --    2043 : 3    4 OAI21xp33_ASAP7_75t_L   A =   1.17  Df =1343.2   -4.7 ps  S =  54.4 ps  Cin =  0.3 ff  Cout =   1.2 ff  Cmax =  11.5 ff  G =  417  ",
+    "Path 17 --    2068 : 3    4 AOI21xp33_ASAP7_75t_L   A =   1.17  Df =1371.6   -0.3 ps  S =  55.3 ps  Cin =  0.3 ff  Cout =   1.3 ff  Cmax =  11.5 ff  G =  435  ",
+    "Path 18 --    2081 : 3    4 OAI21xp33_ASAP7_75t_L   A =   1.17  Df =1401.6   -2.3 ps  S =  52.1 ps  Cin =  0.3 ff  Cout =   1.2 ff  Cmax =  11.5 ff  G =  417  ",
+    "Path 19 --    2303 : 3    4 AOI21xp33_ASAP7_75t_L   A =   1.17  Df =1431.8   -2.1 ps  S =  54.0 ps  Cin =  0.3 ff  Cout =   1.3 ff  Cmax =  11.5 ff  G =  435  ",
+    "Path 20 --    2418 : 3    4 OAI21xp33_ASAP7_75t_L   A =   1.17  Df =1459.7   -0.1 ps  S =  50.4 ps  Cin =  0.3 ff  Cout =   1.2 ff  Cmax =  11.5 ff  G =  417  ",
+    "Path 21 --    2506 : 3    4 AOI21xp33_ASAP7_75t_L   A =   1.17  Df =1491.2   -3.8 ps  S =  54.0 ps  Cin =  0.3 ff  Cout =   1.3 ff  Cmax =  11.5 ff  G =  429  ",
+    "Path 22 --    2519 : 3    4 OAI21xp33_ASAP7_75t_L   A =   1.17  Df =1519.0   -1.6 ps  S =  50.7 ps  Cin =  0.3 ff  Cout =   1.2 ff  Cmax =  11.5 ff  G =  417  ",
+    "Path 23 --    2754 : 3    4 AOI21xp33_ASAP7_75t_L   A =   1.17  Df =1551.0   -5.9 ps  S =  53.3 ps  Cin =  0.3 ff  Cout =   1.3 ff  Cmax =  11.5 ff  G =  429  ",
+    "Path 24 --    2900 : 3    4 OAI21xp33_ASAP7_75t_L   A =   1.17  Df =1578.7   -3.6 ps  S =  50.3 ps  Cin =  0.3 ff  Cout =   1.2 ff  Cmax =  11.5 ff  G =  417  ",
+    "Path 25 --    3003 : 3    4 AOI21xp33_ASAP7_75t_L   A =   1.17  Df =1610.7   -7.7 ps  S =  54.3 ps  Cin =  0.3 ff  Cout =   1.3 ff  Cmax =  11.5 ff  G =  433  ",
+    "Path 26 --    3131 : 3    3 OAI21xp33_ASAP7_75t_L   A =   1.17  Df =1635.6   -6.4 ps  S =  45.9 ps  Cin =  0.3 ff  Cout =   1.0 ff  Cmax =  11.5 ff  G =  334  ",
+    "Path 27 --    3136 : 3    5 AOI21xp33_ASAP7_75t_L   A =   1.17  Df =1671.6  -12.4 ps  S =  63.5 ps  Cin =  0.3 ff  Cout =   1.6 ff  Cmax =  11.5 ff  G =  533  ",
+    "Path 28 --    3440 : 3    3 OAI21xp33_ASAP7_75t_L   A =   1.17  Df =1698.0  -12.0 ps  S =  43.7 ps  Cin =  0.3 ff  Cout =   1.0 ff  Cmax =  11.5 ff  G =  334  ",
+    "Path 29 --    3443 : 3    5 AOI21xp33_ASAP7_75t_L   A =   1.17  Df =1733.5  -17.6 ps  S =  63.6 ps  Cin =  0.3 ff  Cout =   1.6 ff  Cmax =  11.5 ff  G =  533  ",
+    "Path 30 --    3534 : 3    3 OAI21xp33_ASAP7_75t_L   A =   1.17  Df =1759.9  -17.2 ps  S =  43.6 ps  Cin =  0.3 ff  Cout =   1.0 ff  Cmax =  11.5 ff  G =  334  ",
+    "Path 31 --    3695 : 3    5 AOI21xp33_ASAP7_75t_L   A =   1.17  Df =1794.7  -22.6 ps  S =  61.8 ps  Cin =  0.3 ff  Cout =   1.6 ff  Cmax =  11.5 ff  G =  518  ",
+    "Path 32 --    4108 : 3    3 OAI21xp33_ASAP7_75t_L   A =   1.17  Df =1821.0  -22.1 ps  S =  43.5 ps  Cin =  0.3 ff  Cout =   1.0 ff  Cmax =  11.5 ff  G =  335  ",
+    "Path 33 --    4115 : 3    5 AOI21xp33_ASAP7_75t_L   A =   1.17  Df =1855.2  -26.9 ps  S =  62.2 ps  Cin =  0.3 ff  Cout =   1.6 ff  Cmax =  11.5 ff  G =  519  ",
+    "Path 34 --    4219 : 3    4 NOR3xp33_ASAP7_75t_L    A =   1.17  Df =1879.3  -18.3 ps  S =  61.4 ps  Cin =  0.4 ff  Cout =   1.4 ff  Cmax =  11.5 ff  G =  391  ",
+    "Path 35 --    4497 : 3    5 OAI21xp33_ASAP7_75t_L   A =   1.17  Df =1915.5  -22.4 ps  S =  61.0 ps  Cin =  0.3 ff  Cout =   1.6 ff  Cmax =  11.5 ff  G =  527  ",
+    "Path 36 --    4758 : 3    2 NAND3xp33_ASAP7_75t_L   A =   1.17  Df =1934.2  -23.5 ps  S =  30.6 ps  Cin =  0.3 ff  Cout =   0.7 ff  Cmax =  11.5 ff  G =  186  ",
+    "Path 37 --    4760 : 3    3 AOI21xp33_ASAP7_75t_L   A =   1.17  Df =1959.3  -31.0 ps  S =  44.5 ps  Cin =  0.3 ff  Cout =   1.0 ff  Cmax =  11.5 ff  G =  318  ",
+    "Path 38 --    4761 : 3    3 AOI21xp33_ASAP7_75t_L   A =   1.17  Df =1979.9  -18.6 ps  S =  65.3 ps  Cin =  0.3 ff  Cout =   1.4 ff  Cmax =  11.5 ff  G =  475  ",
+    "Path 39 --    5002 : 3    2 AOI21xp33_ASAP7_75t_L   A =   1.17  Df =2005.5  -21.6 ps  S =  36.8 ps  Cin =  0.3 ff  Cout =   0.7 ff  Cmax =  11.5 ff  G =  218  ",
+    "Path 40 --    5328 : 3    3 OAI21xp33_ASAP7_75t_L   A =   1.17  Df =2026.5  -20.3 ps  S =  42.2 ps  Cin =  0.3 ff  Cout =   0.9 ff  Cmax =  11.5 ff  G =  304  ",
+    "Path 41 --    5329 : 2    1 NAND2xp33_ASAP7_75t_L   A =   0.93  Df =2045.6  -26.8 ps  S =  24.3 ps  Cin =  0.3 ff  Cout =   0.4 ff  Cmax =  11.5 ff  G =  154  ",
+    "Path 42 --    5335 : 3    3 MAJIxp5_ASAP7_75t_L     A =   1.63  Df =2061.4  -23.4 ps  S =  48.6 ps  Cin =  0.6 ff  Cout =   1.0 ff  Cmax =  23.0 ff  G =  158  ",
+    "Path 43 --    5340 : 3    4 AOI21xp33_ASAP7_75t_L   A =   1.17  Df =2095.5   -6.2 ps  S =  54.8 ps  Cin =  0.3 ff  Cout =   1.3 ff  Cmax =  11.5 ff  G =  433  ",
+    "Path 44 --    5371 : 3    3 OAI21xp33_ASAP7_75t_L   A =   1.17  Df =2120.5   -5.2 ps  S =  43.6 ps  Cin =  0.3 ff  Cout =   1.0 ff  Cmax =  11.5 ff  G =  334  ",
+    "Path 45 --    5615 : 3    4 AOI21xp33_ASAP7_75t_L   A =   1.17  Df =2151.4   -9.6 ps  S =  52.9 ps  Cin =  0.3 ff  Cout =   1.3 ff  Cmax =  11.5 ff  G =  429  ",
+    "Path 46 --    6071 : 3    3 OAI21xp33_ASAP7_75t_L   A =   1.17  Df =2176.1   -8.2 ps  S =  42.4 ps  Cin =  0.3 ff  Cout =   1.0 ff  Cmax =  11.5 ff  G =  334  ",
+    "Path 47 --    6082 : 3    5 AOI21xp33_ASAP7_75t_L   A =   1.17  Df =2210.0  -13.1 ps  S =  60.9 ps  Cin =  0.3 ff  Cout =   1.6 ff  Cmax =  11.5 ff  G =  514  ",
+    "Path 48 --    6384 : 3    3 NOR3xp33_ASAP7_75t_L    A =   1.17  Df =2230.3   -6.6 ps  S =  49.9 ps  Cin =  0.4 ff  Cout =   1.0 ff  Cmax =  11.5 ff  G =  280  ",
+    "Path 49 --    6395 : 3    4 OAI21xp33_ASAP7_75t_L   A =   1.17  Df =2261.0  -10.5 ps  S =  51.5 ps  Cin =  0.3 ff  Cout =   1.3 ff  Cmax =  11.5 ff  G =  436  ",
+    "Path 50 --    6642 : 3    4 AOI21xp33_ASAP7_75t_L   A =   1.17  Df =2290.0   -7.9 ps  S =  54.1 ps  Cin =  0.3 ff  Cout =   1.4 ff  Cmax =  11.5 ff  G =  457  ",
+    "Path 51 --    6928 : 3    4 OAI21xp33_ASAP7_75t_L   A =   1.17  Df =2321.0  -10.3 ps  S =  52.5 ps  Cin =  0.3 ff  Cout =   1.3 ff  Cmax =  11.5 ff  G =  436  ",
+    "Path 52 --    7039 : 3    3 AOI21xp33_ASAP7_75t_L   A =   1.17  Df =2345.6   -8.7 ps  S =  42.6 ps  Cin =  0.3 ff  Cout =   1.0 ff  Cmax =  11.5 ff  G =  329  ",
+    "Path 53 --    7329 : 3    4 OAI21xp33_ASAP7_75t_L   A =   1.17  Df =2375.5  -12.3 ps  S =  52.4 ps  Cin =  0.3 ff  Cout =   1.3 ff  Cmax =  11.5 ff  G =  436  ",
+    "Path 54 --    7332 : 4    3 NAND4xp25_ASAP7_75t_L   A =   1.40  Df =2398.7  -13.6 ps  S =  39.2 ps  Cin =  0.3 ff  Cout =   0.9 ff  Cmax =  11.5 ff  G =  259  ",
+    "Path 55 --    7333 : 2    4 NAND2xp33_ASAP7_75t_L   A =   0.93  Df =2432.4  -25.1 ps  S =  62.3 ps  Cin =  0.3 ff  Cout =   1.3 ff  Cmax =  11.5 ff  G =  521  ",
+    "Path 56 --    7348 : 4    3 AOI22xp33_ASAP7_75t_L   A =   1.40  Df =2459.6  -16.7 ps  S =  48.3 ps  Cin =  0.3 ff  Cout =   1.0 ff  Cmax =  11.5 ff  G =  325  ",
+    "Path 57 --    7349 : 3    4 AOI21xp33_ASAP7_75t_L   A =   1.17  Df =2494.7  -30.9 ps  S =  61.1 ps  Cin =  0.3 ff  Cout =   1.4 ff  Cmax =  11.5 ff  G =  463  ",
+    "Path 58 --   10547 : 1    2 INVx1_ASAP7_75t_L       A =   0.70  Df =2505.9  -28.6 ps  S =  19.4 ps  Cin =  0.4 ff  Cout =   0.6 ff  Cmax =  46.1 ff  G =  150  ",
+    "Path 59 --   10548 : 3    5 OAI21xp33_ASAP7_75t_L   A =   1.17  Df =2527.0  -24.9 ps  S =  64.1 ps  Cin =  0.3 ff  Cout =   1.7 ff  Cmax =  11.5 ff  G =  569  ",
+    "Path 60 --   10550 : 3    4 NAND3xp33_ASAP7_75t_L   A =   1.17  Df =2555.9  -18.5 ps  S =  45.7 ps  Cin =  0.3 ff  Cout =   1.4 ff  Cmax =  11.5 ff  G =  403  ",
+    "Path 61 --   10551 : 1    4 INVx1_ASAP7_75t_L       A =   0.70  Df =2574.8  -23.4 ps  S =  26.0 ps  Cin =  0.4 ff  Cout =   1.4 ff  Cmax =  46.1 ff  G =  329  ",
+    "Path 62 --   10562 : 3    4 OAI21xp33_ASAP7_75t_L   A =   1.17  Df =2596.6   -6.7 ps  S =  52.7 ps  Cin =  0.3 ff  Cout =   1.3 ff  Cmax =  11.5 ff  G =  434  ",
+    "Path 63 --   10565 : 3    3 AOI21xp33_ASAP7_75t_L   A =   1.17  Df =2623.0   -8.4 ps  S =  44.3 ps  Cin =  0.3 ff  Cout =   1.0 ff  Cmax =  11.5 ff  G =  332  ",
+    "Path 64 --   10572 : 3    3 OAI21xp33_ASAP7_75t_L   A =   1.17  Df =2646.8   -6.0 ps  S =  47.4 ps  Cin =  0.3 ff  Cout =   1.0 ff  Cmax =  11.5 ff  G =  351  ",
+    "Path 65 --   10592 : 4    4 AOI22xp33_ASAP7_75t_L   A =   1.40  Df =2679.8  -10.1 ps  S =  56.7 ps  Cin =  0.3 ff  Cout =   1.3 ff  Cmax =  11.5 ff  G =  452  ",
+    "Path 66 --   10632 : 2    4 NOR2xp33_ASAP7_75t_L    A =   0.93  Df =2714.0  -12.8 ps  S =  54.8 ps  Cin =  0.3 ff  Cout =   1.4 ff  Cmax =  11.5 ff  G =  553  ",
+    "Path 67 --   10633 : 4    1 A2O1A1Ixp33_ASAP7_75t_L A =   0.00  Df =2729.6  -10.8 ps  S =  27.4 ps  Cin =  0.4 ff  Cout =   0.4 ff  Cmax =  11.5 ff  G =  105  ",
+    "Path 68 --   10636 : 4    3 A2O1A1Ixp33_ASAP7_75t_L A =   0.00  Df =2752.2  -10.0 ps  S =  41.6 ps  Cin =  0.4 ff  Cout =   1.3 ff  Cmax =  11.5 ff  G =  331  ",
+    "Path 69 --   11605 : 4    2 A2O1A1Ixp33_ASAP7_75t_L A =   0.00  Df =2776.8   -3.2 ps  S =  34.2 ps  Cin =  0.4 ff  Cout =   0.7 ff  Cmax =  11.5 ff  G =  198  ",
+    "Path 70 --   11607 : 4    2 A2O1A1Ixp33_ASAP7_75t_L A =   0.00  Df =2796.7   -4.2 ps  S =  30.2 ps  Cin =  0.4 ff  Cout =   0.8 ff  Cmax =  11.5 ff  G =  216  ",
+    "Path 71 --   11609 : 4    1 A2O1A1Ixp33_ASAP7_75t_L A =   0.00  Df =2811.1   -3.7 ps  S =  27.1 ps  Cin =  0.4 ff  Cout =   0.4 ff  Cmax =  11.5 ff  G =  105  ",
+    "Path 72 --   11611 : 4    3 A2O1A1Ixp33_ASAP7_75t_L A =   0.00  Df =2833.4   -4.9 ps  S =  35.3 ps  Cin =  0.4 ff  Cout =   1.2 ff  Cmax =  11.5 ff  G =  305  ",
+    "Path 73 --   11613 : 4    2 A2O1A1Ixp33_ASAP7_75t_L A =   0.00  Df =2852.7   -4.5 ps  S =  30.4 ps  Cin =  0.4 ff  Cout =   0.8 ff  Cmax =  11.5 ff  G =  210  ",
+    "Path 74 --   11614 : 4    3 A2O1A1Ixp33_ASAP7_75t_L A =   0.00  Df =2875.4   -5.0 ps  S =  43.5 ps  Cin =  0.4 ff  Cout =   1.2 ff  Cmax =  11.5 ff  G =  305  ",
+    "Path 75 --   11616 : 4    2 A2O1A1Ixp33_ASAP7_75t_L A =   0.00  Df =2895.8   -5.2 ps  S =  30.9 ps  Cin =  0.4 ff  Cout =   0.8 ff  Cmax =  11.5 ff  G =  210  ",
+    "Path 76 --   11618 : 4    3 A2O1A1Ixp33_ASAP7_75t_L A =   0.00  Df =2918.7   -6.1 ps  S =  47.8 ps  Cin =  0.4 ff  Cout =   1.2 ff  Cmax =  11.5 ff  G =  305  ",
+    "Path 77 --   11619 : 4    2 A2O1A1Ixp33_ASAP7_75t_L A =   0.00  Df =2939.5   -6.6 ps  S =  37.5 ps  Cin =  0.4 ff  Cout =   0.8 ff  Cmax =  11.5 ff  G =  210  ",
+    "Path 78 --   11620 : 4    4 A2O1A1Ixp33_ASAP7_75t_L A =   0.00  Df =2967.0   -6.9 ps  S =  49.6 ps  Cin =  0.4 ff  Cout =   1.5 ff  Cmax =  11.5 ff  G =  410  ",
+    "Path 79 --   11684 : 3    1 NOR3xp33_ASAP7_75t_L    A =   1.17  Df =2976.8   -1.6 ps  S =  27.8 ps  Cin =  0.4 ff  Cout =   0.3 ff  Cmax =  11.5 ff  G =   72  ",
+    "Path 80 --   11685 : 2    5 NOR2xp33_ASAP7_75t_L    A =   0.93  Df =3015.8   -6.0 ps  S =  74.4 ps  Cin =  0.3 ff  Cout =   2.1 ff  Cmax =  11.5 ff  G =  825  ",
+    "Path 81 --   11701 : 5    2 NAND5xp2_ASAP7_75t_L    A =   1.63  Df =3045.2  -12.7 ps  S =  51.2 ps  Cin =  0.3 ff  Cout =   0.8 ff  Cmax =  11.5 ff  G =  225  ",
+    "Path 82 --   11702 : 4    1 NOR4xp25_ASAP7_75t_L    A =   1.40  Df =3066.5  -21.7 ps  S =  33.6 ps  Cin =  0.4 ff  Cout =   0.3 ff  Cmax =  11.5 ff  G =   97  ",
+    "Path 83 --   11949 : 4   63 AOI31xp33_ASAP7_75t_L   A =   1.40  Df =3416.0 -106.2 ps  S = 832.4 ps  Cin =  0.3 ff  Cout =  24.9 ff  Cmax =  11.5 ff  G = 7513  ",
+    "Path 84 --   21974 : 3    1 AO21x2_ASAP7_75t_L      A =   1.63  Df =3470.3  -89.6 ps  S =  26.2 ps  Cin =  0.4 ff  Cout =   0.0 ff  Cmax =  92.2 ff  G =    0  "
+  ],
+  "adp": 79339970.78031184,
+  "area": 22862.8398,
+  "cec": "PASS",
+  "cec_interface": "AIGER_PI_PO_POSITIONAL_ORDER; symbol names may be absent after replay",
+  "critical_po_indices": [
+    63
+  ],
+  "delay_ps": 3470.25879,
+  "input_sha256": "a34e4006651db30544f3cd785bf8943b431276c7cfd79b49788a4f09b5204f67",
+  "input_structure_sha256": "d5047a0199a9531e991975c5e7348e41b32138027b92ebfe9aa6911027a371ea",
+  "mapped_gates": 21844,
+  "mapped_sha256": "edee15963160e05ea7301168c723b5c60975ac717b9aae227ff3b9c30a8e9607",
+  "po_arrivals_ps": [
+    76.5661163,
+    3463.71362,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3466.76904,
+    3470.25879
+  ],
+  "po_rise_fall": [
+    {
+      "arrival_ps": 76.5661163,
+      "fall_ps": 76.5661163,
+      "rise_ps": 53.3073578
+    },
+    {
+      "arrival_ps": 3463.71362,
+      "fall_ps": 3463.71362,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3466.76904,
+      "fall_ps": 3466.76904,
+      "rise_ps": 3380.38379
+    },
+    {
+      "arrival_ps": 3470.25879,
+      "fall_ps": 3380.6333,
+      "rise_ps": 3470.25879
+    }
+  ],
+  "provenance": {
+    "abc": {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc",
+      "sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb"
+    },
+    "library": {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db/input/asap7",
+      "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+    },
+    "original": {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db/output/case_0131_B/input.aig",
+      "sha256": "52be2c94180f7a55aaada4f0f5b1d09f3ef40f0a72cfb369615fd5c2760239b4"
+    }
+  },
+  "runtime_s": 2.4784566638991237,
+  "status": "PASS",
+  "timing_model": "ABC_SCL_LIBERTY",
+  "trace_semantics": "Native ABC min-slack traceback; mapped IDs are local to this mapping."
+}

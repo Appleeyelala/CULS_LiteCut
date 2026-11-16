@@ -1,0 +1,225 @@
+{
+  "anchor": [
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    3,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "candidate_gradient_entries": 90,
+  "device": "cuda:0",
+  "gradient_norm": 0.006546372150703771,
+  "legal_distinct_blocks": 4,
+  "objective": 1.105014082894388,
+  "ranked_edits": [
+    {
+      "choice_index": 1,
+      "decision_index": 28,
+      "directional_gain": 0.003997741608270881
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 30,
+      "directional_gain": 0.003997741608270881
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 31,
+      "directional_gain": 0.002544643360088747
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 29,
+      "directional_gain": 0.0020878225782001818
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 10,
+      "directional_gain": 9.966716023902448e-05
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 33,
+      "directional_gain": 9.966716023902448e-05
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 11,
+      "directional_gain": 9.897729408191363e-05
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 34,
+      "directional_gain": 9.890443327239049e-05
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 32,
+      "directional_gain": 9.149340872928734e-05
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 9,
+      "directional_gain": 9.146685511114846e-05
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 5,
+      "directional_gain": 1.2775019286205408e-05
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 7,
+      "directional_gain": 1.2775019286205408e-05
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 6,
+      "directional_gain": 8.262852083309187e-06
+    },
+    {
+      "choice_index": 3,
+      "decision_index": 14,
+      "directional_gain": 6.78467954700322e-06
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 22,
+      "directional_gain": 5.328384566232929e-06
+    },
+    {
+      "choice_index": 3,
+      "decision_index": 3,
+      "directional_gain": 5.053697306480172e-06
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 8,
+      "directional_gain": 4.258113274508558e-06
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 15,
+      "directional_gain": 3.7889368675031904e-06
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 21,
+      "directional_gain": 2.9071909850454604e-06
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 2,
+      "directional_gain": 2.822261524522848e-06
+    },
+    {
+      "choice_index": 3,
+      "decision_index": 26,
+      "directional_gain": 1.8760787783217222e-15
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 25,
+      "directional_gain": 1.047705201148853e-15
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 35,
+      "directional_gain": 8.28976680870856e-16
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 37,
+      "directional_gain": 8.28976680870856e-16
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 17,
+      "directional_gain": 5.781296758424008e-19
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 13,
+      "directional_gain": 4.157291754541112e-30
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 1,
+      "directional_gain": 3.096637652025376e-30
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 12,
+      "directional_gain": 1.9341851372633534e-30
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 0,
+      "directional_gain": 1.4407145025352441e-30
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 19,
+      "directional_gain": 1.619778168641712e-34
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 18,
+      "directional_gain": 7.536037989222799e-35
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 24,
+      "directional_gain": 7.663569818960473e-40
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 23,
+      "directional_gain": 3.565485348970778e-40
+    }
+  ],
+  "round": 1,
+  "schema": "mffc_full_global_direction_v1",
+  "scope": "Gradient of the complete fixed-topology all-PO/area proxy; no differentiation through Student, projection, rewrite or ABC.",
+  "seed": 20261114,
+  "training_observation_indices": [
+    0,
+    1,
+    2
+  ],
+  "transferred_edits": 39
+}

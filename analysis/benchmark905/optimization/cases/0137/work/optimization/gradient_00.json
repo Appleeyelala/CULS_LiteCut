@@ -1,0 +1,105 @@
+{
+  "anchor": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "candidate_gradient_entries": 68,
+  "device": "cuda:0",
+  "gradient_norm": 8.947498104374503e-13,
+  "legal_distinct_blocks": 5,
+  "objective": 1.0823175425130713,
+  "ranked_edits": [
+    {
+      "choice_index": 1,
+      "decision_index": 25,
+      "directional_gain": 4.3669211625674146e-13
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 8,
+      "directional_gain": 1.129420437288537e-18
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 7,
+      "directional_gain": 1.027374391925546e-18
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 13,
+      "directional_gain": 1.124381150954211e-19
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 22,
+      "directional_gain": 5.555503069741174e-20
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 29,
+      "directional_gain": 5.4199107258648976e-24
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 18,
+      "directional_gain": 3.6698460832046064e-39
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 16,
+      "directional_gain": 2.595444448652476e-39
+    },
+    {
+      "choice_index": 2,
+      "decision_index": 1,
+      "directional_gain": 1.2083155402601972e-55
+    },
+    {
+      "choice_index": 2,
+      "decision_index": 3,
+      "directional_gain": 1.2083155402601972e-55
+    },
+    {
+      "choice_index": 2,
+      "decision_index": 5,
+      "directional_gain": 1.2083155402601972e-55
+    }
+  ],
+  "round": 0,
+  "schema": "mffc_full_global_direction_v1",
+  "scope": "Gradient of the complete fixed-topology all-PO/area proxy; no differentiation through Student, projection, rewrite or ABC.",
+  "seed": 20261114,
+  "training_observation_indices": [
+    0
+  ],
+  "transferred_edits": 31
+}

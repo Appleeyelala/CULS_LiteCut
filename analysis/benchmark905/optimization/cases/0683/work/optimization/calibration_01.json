@@ -1,0 +1,44 @@
+{
+  "arrival_propagation_backend": "mffc_ready_queue_cuda",
+  "losses": [
+    1.1627556897772372e-06,
+    1.3917234125601206e-06,
+    1.0624680018483296e-06,
+    9.777619973998522e-07,
+    1.0747998418161122e-06,
+    1.0004548958573142e-06,
+    8.108896984160194e-07,
+    7.167445313757959e-07,
+    7.538039242683686e-07,
+    8.115874543484205e-07,
+    8.030418642872222e-07,
+    7.337258436670855e-07
+  ],
+  "parameters": {
+    "area_weights": [
+      -0.0049940508269380075,
+      -0.008154255663252626,
+      1.0,
+      0.0031605073052885387
+    ],
+    "interaction_weights": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "local_weights": [
+      0.08393177895778545,
+      0.1330186209162308,
+      0.0,
+      0.02479819549638873
+    ]
+  },
+  "samples": 2,
+  "scope": "Existing twelve coefficients only; earlier PASS labels, no Student training.",
+  "supported_derivative_order": 1,
+  "training_observation_indices": [
+    0,
+    1
+  ]
+}

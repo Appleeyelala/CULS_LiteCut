@@ -1,0 +1,151 @@
+{
+  "abc_native_trace_endpoints": [
+    3,
+    3
+  ],
+  "abc_native_trace_lines": [
+    "Path  0 --       4 : 0  154 pi                      A =   0.00  Df =   0.0   -0.0 ps  S =   0.0 ps  Cin =  0.0 ff  Cout =  55.0 ff  Cmax =   0.0 ff  G =    0  ",
+    "Path  1 --     104 : 1  117 INVx1_ASAP7_75t_L       A =   0.70  Df = 214.6  -51.0 ps  S = 482.9 ps  Cin =  0.4 ff  Cout =  41.9 ff  Cmax =  46.1 ff  G =10035  ",
+    "Path  2 --     134 : 2    9 NAND2xp33_ASAP7_75t_L   A =   0.93  Df = 315.7  -16.2 ps  S = 180.8 ps  Cin =  0.3 ff  Cout =   3.3 ff  Cmax =  11.5 ff  G = 1286  ",
+    "Path  3 --     206 : 2   97 NAND2xp33_ASAP7_75t_L   A =   0.93  Df = 917.6 -218.2 ps  S =1227.9 ps  Cin =  0.3 ff  Cout =  36.6 ff  Cmax =  11.5 ff  G =14336  ",
+    "Path  4 --     220 : 4    4 A2O1A1Ixp33_ASAP7_75t_L A =   0.00  Df =1043.2 -233.3 ps  S = 284.5 ps  Cin =  0.4 ff  Cout =   1.5 ff  Cmax =  11.5 ff  G =  409  ",
+    "Path  5 --     222 : 5    3 AOI311xp33_ASAP7_75t_L  A =   1.63  Df =1090.7 -244.2 ps  S = 112.3 ps  Cin =  0.4 ff  Cout =   1.0 ff  Cmax =  11.5 ff  G =  277  ",
+    "Path  6 --     223 : 5    5 OAI311xp33_ASAP7_75t_L  A =   1.63  Df =1122.8  -62.3 ps  S = 104.8 ps  Cin =  0.4 ff  Cout =   1.7 ff  Cmax =  11.5 ff  G =  441  ",
+    "Path  7 --     334 : 2    4 NAND2xp33_ASAP7_75t_L   A =   0.93  Df =1164.0  -68.6 ps  S =  59.8 ps  Cin =  0.3 ff  Cout =   1.4 ff  Cmax =  11.5 ff  G =  562  ",
+    "Path  8 --     335 : 4    2 OAI211xp5_ASAP7_75t_L   A =   1.40  Df =1184.5  -60.7 ps  S =  48.8 ps  Cin =  0.3 ff  Cout =   0.7 ff  Cmax =  23.0 ff  G =  215  ",
+    "Path  9 --     337 : 5    1 AOI311xp33_ASAP7_75t_L  A =   1.63  Df =1201.7  -60.4 ps  S =  82.8 ps  Cin =  0.4 ff  Cout =   0.3 ff  Cmax =  11.5 ff  G =   91  ",
+    "Path 10 --     338 : 4    1 OAI31xp33_ASAP7_75t_L   A =   1.40  Df =1218.4  -54.2 ps  S =  56.0 ps  Cin =  0.3 ff  Cout =   0.4 ff  Cmax =  11.5 ff  G =  123  ",
+    "Path 11 --     417 : 4    1 AND4x1_ASAP7_75t_L      A =   1.63  Df =1233.6  -43.1 ps  S =  10.6 ps  Cin =  0.4 ff  Cout =   0.3 ff  Cmax =  46.1 ff  G =   73  ",
+    "Path 12 --     529 : 3    1 OAI21xp33_ASAP7_75t_L   A =   1.17  Df =1238.8  -43.2 ps  S =  14.9 ps  Cin =  0.3 ff  Cout =   0.0 ff  Cmax =  11.5 ff  G =    0  "
+  ],
+  "adp": 3413131.1019807933,
+  "area": 2755.27002,
+  "cec": "PASS",
+  "cec_interface": "AIGER_PI_PO_POSITIONAL_ORDER; symbol names may be absent after replay",
+  "critical_po_indices": [
+    3
+  ],
+  "delay_ps": 1238.76465,
+  "input_sha256": "5a814bc8bbe242b8c6d3211642cf09d4e978a7561dc7694e56b0b4f236184fc0",
+  "input_structure_sha256": "575a6f7b9c93149b538fd3fdbb37662ae2dc522e5c218fd08acd091391d739b5",
+  "mapped_gates": 4070,
+  "mapped_sha256": "b195bc743e923c15344358d2d3fcf9263109e528d19ab633fbb391e283ac5bac",
+  "po_arrivals_ps": [
+    246.169632,
+    519.636108,
+    1205.97205,
+    1238.76465,
+    1224.29761,
+    1223.91394,
+    1227.1001,
+    1223.97742,
+    1217.28101,
+    1209.03027,
+    1193.24609,
+    1200.43933,
+    1196.21094,
+    871.491516,
+    947.562134,
+    632.28064
+  ],
+  "po_rise_fall": [
+    {
+      "arrival_ps": 246.169632,
+      "fall_ps": 246.169632,
+      "rise_ps": 223.498703
+    },
+    {
+      "arrival_ps": 519.636108,
+      "fall_ps": 519.636108,
+      "rise_ps": 419.075256
+    },
+    {
+      "arrival_ps": 1205.97205,
+      "fall_ps": 1156.19116,
+      "rise_ps": 1205.97205
+    },
+    {
+      "arrival_ps": 1238.76465,
+      "fall_ps": 1195.54004,
+      "rise_ps": 1238.76465
+    },
+    {
+      "arrival_ps": 1224.29761,
+      "fall_ps": 1189.34814,
+      "rise_ps": 1224.29761
+    },
+    {
+      "arrival_ps": 1223.91394,
+      "fall_ps": 1196.02588,
+      "rise_ps": 1223.91394
+    },
+    {
+      "arrival_ps": 1227.1001,
+      "fall_ps": 1172.88818,
+      "rise_ps": 1227.1001
+    },
+    {
+      "arrival_ps": 1223.97742,
+      "fall_ps": 1177.30359,
+      "rise_ps": 1223.97742
+    },
+    {
+      "arrival_ps": 1217.28101,
+      "fall_ps": 1211.88147,
+      "rise_ps": 1217.28101
+    },
+    {
+      "arrival_ps": 1209.03027,
+      "fall_ps": 1209.03027,
+      "rise_ps": 1159.83398
+    },
+    {
+      "arrival_ps": 1193.24609,
+      "fall_ps": 1193.24609,
+      "rise_ps": 1178.63928
+    },
+    {
+      "arrival_ps": 1200.43933,
+      "fall_ps": 1171.60095,
+      "rise_ps": 1200.43933
+    },
+    {
+      "arrival_ps": 1196.21094,
+      "fall_ps": 1179.62561,
+      "rise_ps": 1196.21094
+    },
+    {
+      "arrival_ps": 871.491516,
+      "fall_ps": 871.491516,
+      "rise_ps": 750.179016
+    },
+    {
+      "arrival_ps": 947.562134,
+      "fall_ps": 829.418579,
+      "rise_ps": 947.562134
+    },
+    {
+      "arrival_ps": 632.28064,
+      "fall_ps": 632.28064,
+      "rise_ps": 582.9953
+    }
+  ],
+  "provenance": {
+    "abc": {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc",
+      "sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb"
+    },
+    "library": {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db/input/asap7",
+      "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+    },
+    "original": {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db/output/case_0892_Ours/input.aig",
+      "sha256": "970c6340767a40b3ef353a19732352410be012b45e6a0ff97538a2c26e1e9940"
+    }
+  },
+  "runtime_s": 1.8028251638170332,
+  "status": "PASS",
+  "timing_model": "ABC_SCL_LIBERTY",
+  "trace_semantics": "Native ABC min-slack traceback; mapped IDs are local to this mapping."
+}

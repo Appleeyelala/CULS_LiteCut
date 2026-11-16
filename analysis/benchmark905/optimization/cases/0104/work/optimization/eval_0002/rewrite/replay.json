@@ -1,0 +1,35 @@
+{
+  "choices": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "error": "ToolError: ToolError: rewrite failed: {'argv': ['/data/wushangge/CULS_LiteCut/runs/20261113T050552Z-replay-gain-policy-probe-1d5e6f0a/build/framework_tools/culs/gpuls', '-c', 'read /data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db/output/case_0104_Ours/input.aig; gate3e_execution_replay -o /data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db/output/case_0104_Ours/work/optimization/_batch_0001/raw --region-map /data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db/output/case_0104_Ours/work/partition/owners.csv --config /data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db/output/case_0104_Ours/work/optimization/_batch_0001/choices.txt'], 'cwd': '/data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db/output/case_0104_Ours/work/optimization/_batch_0001', 'timeout_s': 900, 'returncode': 1, 'elapsed_s': 3.2695432319305837, 'log': '/data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db/output/case_0104_Ours/work/optimization/_batch_0001/rewrite.log'}; CUDA Runtime Error at: /data/wushangge/CULS_LiteCut/runs/20261113T050552Z-replay-gain-policy-probe-1d5e6f0a/src/projects/culs/src/aig_manager.cu:29\nout of memory cudaDeviceSetLimit(cudaLimitMallocHeapSize, (size_t)2048 * 1024 * 1024)\n",
+  "installation_gain_policy": "positive_gain",
+  "native_config_id": "choice_0001",
+  "order": "ascending_original_root",
+  "prepared_enumeration": true,
+  "requested": [
+    [
+      8319,
+      3,
+      2
+    ],
+    [
+      26397,
+      3,
+      2
+    ]
+  ],
+  "shared_command": "/data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db/output/case_0104_Ours/work/optimization/_batch_0001/rewrite.command.json",
+  "status": "FAIL"
+}

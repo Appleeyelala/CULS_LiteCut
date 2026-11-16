@@ -1,0 +1,91 @@
+{
+  "schema": "mffc_gpu_complete905_v1",
+  "state": "FROZEN",
+  "methods": [
+    "A",
+    "B",
+    "Ours"
+  ],
+  "input_inventory_sha256": "8c93bf7988c1707efd4b392663062eef651e9e679329f0056e802250671cf935",
+  "search": {
+    "seed": 20261114,
+    "evaluation_budget": 4,
+    "gradient_rounds": 2,
+    "proposals_per_round": 2,
+    "maximum_edits": 16,
+    "calibration_steps": 12,
+    "area_limit_ratio": 1.05,
+    "timeout_s": 900,
+    "allow_nonpositive_gain": false,
+    "cpu_small_decisions": 32,
+    "cpu_small_regions": 1024
+  },
+  "validation_workers": 2,
+  "cold_method_timeout_s": 1800,
+  "required_node": "eda",
+  "required_gpu_name": "NVIDIA GeForce RTX 4090",
+  "precision": "float64 proxy and directional gradients; frozen float32 Student",
+  "threads": {
+    "torch": 1,
+    "OMP_NUM_THREADS": 1,
+    "OPENBLAS_NUM_THREADS": 1,
+    "MKL_NUM_THREADS": 1
+  },
+  "delay_comparison": {
+    "absolute_tolerance_ps": 2e-05,
+    "relative_tolerance": 2e-06
+  },
+  "runtime_comparison": {
+    "absolute_tolerance_s": 0.01,
+    "relative_tolerance": 0.01
+  },
+  "area_feasibility_absolute_tolerance": 1e-08,
+  "and_size_bins": [
+    0,
+    128,
+    4096,
+    8192,
+    16384,
+    65536
+  ],
+  "runtime_scope": "Cold independent child plus method-specific staging, input reads/hash checks, initialization, all required preparation, inference, transfers, full global forward/backward, projection, calibration, every failed/repair replay, CEC/mapping and persistence. Excludes queue, one-time build/source staging and analysis; no system page-cache flush.",
+  "budget_scope": "Four replay requests including measured no-op, failures and explicit repairs. Original is an additional paid measurement, never a second zero-choice fit label. At most five ordinary mapping calls; extra cut-context CEC counted separately.",
+  "baseline_B_recipe": "read_aiger original; strash; rewrite; write_aiger candidate; reload candidate with the common Evaluator",
+  "measurement": "cec -n original candidate; read_lib ASAP7; read_aiger candidate; map; topo; stime -p; write_verilog mapped.v; ABC_SCL_LIBERTY from same SC_Man for global and every PO",
+  "original_fallback": "Ours may return only its own paid original measurement if actual area is feasible and delay is lower than its successful search best. Never use externally measured A/B results for free.",
+  "undefined_ratios": "Missing, failed, timed out or zero denominator => null/N/A. Log geometric mean includes only strictly positive defined ratios and reports its own denominator.",
+  "tradeoff_scope": "All three methods successful and area feasible under Ours paid no-op reference; use predeclared delay/runtime tolerances and report a full delay-by-time relation grid.",
+  "resume": "Keep completed terminal method records unchanged; resume missing points with the same source/tools/config/input/hardware, never select best repeat.",
+  "scope": "Development-checked revision; source/tools/input/config must be frozen before this state can change to FROZEN. Exactly 905 inputs and 2715 terminal method points required; no random/greedy/legacy/native-CULS or joint comparison. A/B relative speed is not independent GPU causal acceleration.",
+  "upstream_inventory_sha256": "e4211308a06fc5b2bb02614b965c4b93dcf08f6f7ea2a73af2f2e1405da1e167",
+  "frozen_tool_sha256": {
+    "abc": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb",
+    "gpuls": "83d22440e2846054ea80e5c1cced97fefe8a25d51a499380d76225a9bb936776",
+    "library": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55",
+    "checkpoint": "b3f499d2973bdb36fb42690794e9838d4c8359f05d6e141aa8cbe2b9fe3ae64d",
+    "native_library": "0e53c03c0d473a2d083e3db6f3062e837b408c0991a6b992a63e004bc9a771fa"
+  },
+  "source_freeze_tag": "mffc-gpu-905-freeze-20261114",
+  "abc_build_provenance": {
+    "upstream_commit": "c738ed6e86e6ca10bcef0d4c649cc07d925b4be8",
+    "project_build_commit": "d2065ab5b57c812cc569eebe88cd807455de3f43",
+    "build_run": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e",
+    "build_report_sha256": "1da196d50d45d614fdd1e946c25f613da22e10f31a6c361a0bc484ffca7cc757",
+    "build_script_sha256": "2049dc62df47c35a010edea4a069b11ff3c1008bd7ef5a0be47168526e9fafaf",
+    "make_command": [
+      "make",
+      "-C",
+      "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc",
+      "-j",
+      "8",
+      "ABC_USE_NO_READLINE=1",
+      "CC=/usr/local/bin/gcc",
+      "CXX=/usr/local/bin/g++",
+      "LD=/usr/local/bin/g++"
+    ],
+    "makefile_default_OPTFLAGS": "-g -O",
+    "compiler": "GCC/G++ 11.4.0",
+    "features": "CUDD and pthreads; no readline; endpoint/path observers from build source snapshot",
+    "scope": "Reuse the verified binary and original build evidence; no rebuild or ABC upgrade."
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "status": "PASS",
+  "source_sha256": "5003ca9f7133f4d27f230f1421cd2bdbccede8c436f0862e6c698a15e434d588",
+  "commands": [
+    {
+      "argv": [
+        "/usr/local/cuda-11.8/bin/nvcc",
+        "-O3",
+        "-std=c++17",
+        "-shared",
+        "-Xcompiler",
+        "-fPIC",
+        "-ccbin",
+        "/usr/local/bin/g++",
+        "-gencode",
+        "arch=compute_80,code=sm_80",
+        "-gencode",
+        "arch=compute_86,code=sm_86",
+        "-gencode",
+        "arch=compute_89,code=sm_89",
+        "-gencode",
+        "arch=compute_80,code=compute_80",
+        "/data/wushangge/CULS_LiteCut/runs/20261113T182919Z-mffc-native-loop-validation-d928356f/src/framework/mffc_gpu/region_lse.cu",
+        "-o",
+        "/data/wushangge/CULS_LiteCut/runs/20261113T182919Z-mffc-native-loop-validation-d928356f/build/mffc_gpu/libmffc_region.so",
+        "-Xlinker",
+        "-rpath",
+        "-Xlinker",
+        "/usr/local/cuda-11.8/lib64"
+      ],
+      "elapsed_s": 4.218839681940153,
+      "returncode": 0,
+      "log": "/data/wushangge/CULS_LiteCut/runs/20261113T182919Z-mffc-native-loop-validation-d928356f/logs/mffc_gpu_build_0.log"
+    },
+    {
+      "argv": [
+        "/home/share/process/anaconda3/bin/python",
+        "-B",
+        "/data/wushangge/CULS_LiteCut/runs/20261113T182919Z-mffc-native-loop-validation-d928356f/src/scripts/run_tests.py",
+        "--output",
+        "/data/wushangge/CULS_LiteCut/runs/20261113T182919Z-mffc-native-loop-validation-d928356f/output/mffc_gpu_tests.json",
+        "--test",
+        "test_mffc_gpu",
+        "--test",
+        "test_mffc_model",
+        "--test",
+        "test_mffc_search",
+        "--test",
+        "test_feasibility",
+        "--test",
+        "test_surrogate",
+        "--test",
+        "test_arrival",
+        "--test",
+        "test_candidates"
+      ],
+      "elapsed_s": 4.08397552696988,
+      "returncode": 0,
+      "log": "/data/wushangge/CULS_LiteCut/runs/20261113T182919Z-mffc-native-loop-validation-d928356f/logs/mffc_gpu_build_1.log"
+    }
+  ],
+  "source_commit": "544601b26eda6ea488833f6739ddac5933a14a37",
+  "job_id": "65239",
+  "library": "/data/wushangge/CULS_LiteCut/runs/20261113T182919Z-mffc-native-loop-validation-d928356f/build/mffc_gpu/libmffc_region.so",
+  "library_sha256": "0e53c03c0d473a2d083e3db6f3062e837b408c0991a6b992a63e004bc9a771fa",
+  "tests": 32,
+  "compiler": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2022 NVIDIA Corporation\nBuilt on Wed_Sep_21_10:33:58_PDT_2022\nCuda compilation tools, release 11.8, V11.8.89\nBuild cuda_11.8.r11.8/compiler.31833905_0\n",
+  "gpu": "NVIDIA GeForce RTX 4090, 550.100\n"
+}

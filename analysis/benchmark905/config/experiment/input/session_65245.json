@@ -1,0 +1,27 @@
+{
+  "job_id": "65245",
+  "node": "eda",
+  "gpu": "GPU-92c3161f-c5bc-778e-18b7-5cf3b82e2032, NVIDIA GeForce RTX 4090, 550.100",
+  "driver_argv": [
+    "/data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db/src/scripts/run_mffc905.py",
+    "--run",
+    "/data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db",
+    "--manifest",
+    "/data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db/src/benchmark905_manifest.json",
+    "--tool-run",
+    "/data/wushangge/CULS_LiteCut/runs/20261113T050552Z-replay-gain-policy-probe-1d5e6f0a",
+    "--native-build-run",
+    "/data/wushangge/CULS_LiteCut/runs/20261113T182919Z-mffc-native-loop-validation-d928356f",
+    "--protocol",
+    "/data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db/src/config/mffc905_protocol.json",
+    "--case-timeout",
+    "1800"
+  ],
+  "slurm_cpus": "4",
+  "environment": {
+    "CUDA_VISIBLE_DEVICES": "0",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1"
+  }
+}

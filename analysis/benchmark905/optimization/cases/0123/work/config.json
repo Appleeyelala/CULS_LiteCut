@@ -1,0 +1,35 @@
+{
+  "checkpoint_sha256": "b3f499d2973bdb36fb42690794e9838d4c8359f05d6e141aa8cbe2b9fe3ae64d",
+  "config": {
+    "allow_nonpositive_gain": false,
+    "area_limit_ratio": 1.05,
+    "calibration_steps": 12,
+    "cpu_small_decisions": 32,
+    "cpu_small_regions": 1024,
+    "evaluation_budget": 4,
+    "gradient_rounds": 2,
+    "maximum_edits": 16,
+    "proposals_per_round": 2,
+    "seed": 20261114,
+    "timeout_s": 900
+  },
+  "gpuls_sha256": "83d22440e2846054ea80e5c1cced97fefe8a25d51a499380d76225a9bb936776",
+  "input": "/data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db/output/case_0123_Ours/input.aig",
+  "input_sha256": "4d28701245577e24253313808a48968795cb5f6f1dc41b45cd709246e915fb17",
+  "native_library": "/data/wushangge/CULS_LiteCut/runs/20261113T182919Z-mffc-native-loop-validation-d928356f/build/mffc_gpu/libmffc_region.so",
+  "native_library_sha256": "0e53c03c0d473a2d083e3db6f3062e837b408c0991a6b992a63e004bc9a771fa",
+  "toolchain": {
+    "abc": {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc",
+      "sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb"
+    },
+    "library": {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db/input/asap7",
+      "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+    },
+    "original": {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db/output/case_0123_Ours/input.aig",
+      "sha256": "4d28701245577e24253313808a48968795cb5f6f1dc41b45cd709246e915fb17"
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "anchor": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "candidate_gradient_entries": 19,
+  "device": "cuda:0",
+  "gradient_norm": 2.9688847770235872e-24,
+  "legal_distinct_blocks": 2,
+  "objective": 1.0874069644173485,
+  "ranked_edits": [
+    {
+      "choice_index": 1,
+      "decision_index": 1,
+      "directional_gain": 9.485826244469994e-25
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 6,
+      "directional_gain": 7.489449923975532e-25
+    },
+    {
+      "choice_index": 2,
+      "decision_index": 0,
+      "directional_gain": 6.853948427479669e-25
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 2,
+      "directional_gain": 3.8810005025750563e-25
+    }
+  ],
+  "round": 1,
+  "schema": "mffc_full_global_direction_v1",
+  "scope": "Gradient of the complete fixed-topology all-PO/area proxy; no differentiation through Student, projection, rewrite or ABC.",
+  "seed": 20261114,
+  "training_observation_indices": [
+    0,
+    1,
+    2
+  ],
+  "transferred_edits": 7
+}

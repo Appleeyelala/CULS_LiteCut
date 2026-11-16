@@ -1,0 +1,112 @@
+{
+  "anchor": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "candidate_gradient_entries": 72,
+  "device": "cuda:0",
+  "gradient_norm": 0.00019123165331539035,
+  "legal_distinct_blocks": 5,
+  "objective": 1.049894350492243,
+  "ranked_edits": [
+    {
+      "choice_index": 1,
+      "decision_index": 3,
+      "directional_gain": 3.689450240564865e-05
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 17,
+      "directional_gain": 2.0929182089209027e-12
+    },
+    {
+      "choice_index": 2,
+      "decision_index": 27,
+      "directional_gain": 1.337965685847063e-12
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 15,
+      "directional_gain": 1.0302359019046586e-12
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 10,
+      "directional_gain": 5.225283784364381e-13
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 16,
+      "directional_gain": 4.650512307758555e-13
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 7,
+      "directional_gain": 1.950053617809767e-13
+    },
+    {
+      "choice_index": 2,
+      "decision_index": 23,
+      "directional_gain": 8.529807766156593e-14
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 21,
+      "directional_gain": 6.916306209543691e-14
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 13,
+      "directional_gain": 1.504030429053906e-14
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 26,
+      "directional_gain": 3.581437635029583e-25
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 18,
+      "directional_gain": 6.847981433093864e-26
+    },
+    {
+      "choice_index": 2,
+      "decision_index": 25,
+      "directional_gain": 1.5307699151748428e-44
+    }
+  ],
+  "round": 0,
+  "schema": "mffc_full_global_direction_v1",
+  "scope": "Gradient of the complete fixed-topology all-PO/area proxy; no differentiation through Student, projection, rewrite or ABC.",
+  "seed": 20261114,
+  "training_observation_indices": [
+    0
+  ],
+  "transferred_edits": 28
+}

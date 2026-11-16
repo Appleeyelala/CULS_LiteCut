@@ -1,0 +1,96 @@
+{
+  "anchor": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "candidate_gradient_entries": 54,
+  "device": "cuda:0",
+  "gradient_norm": 1.1785132685431873e-06,
+  "legal_distinct_blocks": 4,
+  "objective": 1.113562701929163,
+  "ranked_edits": [
+    {
+      "choice_index": 2,
+      "decision_index": 9,
+      "directional_gain": 1.3936556179804212e-07
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 11,
+      "directional_gain": 9.625846009405222e-08
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 8,
+      "directional_gain": 2.324590735214762e-17
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 5,
+      "directional_gain": 6.43415597532685e-18
+    },
+    {
+      "choice_index": 2,
+      "decision_index": 14,
+      "directional_gain": 3.723730453150794e-25
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 17,
+      "directional_gain": 2.100164367631038e-25
+    },
+    {
+      "choice_index": 3,
+      "decision_index": 16,
+      "directional_gain": 1.8438241468450173e-25
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 12,
+      "directional_gain": 5.728375757462264e-26
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 18,
+      "directional_gain": 1.697845400210521e-26
+    },
+    {
+      "choice_index": 2,
+      "decision_index": 15,
+      "directional_gain": 2.098249768337833e-27
+    },
+    {
+      "choice_index": 1,
+      "decision_index": 1,
+      "directional_gain": 8.743110562329304e-28
+    }
+  ],
+  "round": 0,
+  "schema": "mffc_full_global_direction_v1",
+  "scope": "Gradient of the complete fixed-topology all-PO/area proxy; no differentiation through Student, projection, rewrite or ABC.",
+  "seed": 20261114,
+  "training_observation_indices": [
+    0
+  ],
+  "transferred_edits": 22
+}

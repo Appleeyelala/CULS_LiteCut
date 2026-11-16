@@ -1,0 +1,512 @@
+{
+  "abc_native_trace_endpoints": [
+    0,
+    53
+  ],
+  "abc_native_trace_lines": [
+    "Path  0 --       1 : 0  716 pi                        A =   0.00  Df =   0.0   -0.0 ps  S =   0.0 ps  Cin =  0.0 ff  Cout = 252.5 ff  Cmax =   0.0 ff  G =    0  ",
+    "Path  1 --     105 : 1  709 INVx1_ASAP7_75t_L         A =   0.70  Df =1276.2 -300.5 ps  S =2849.3 ps  Cin =  0.4 ff  Cout = 250.6 ff  Cmax =  46.1 ff  G =59998  ",
+    "Path  2 --    4676 : 4    1 A2O1A1Ixp33_ASAP7_75t_L   A =   0.00  Df =2259.8 -601.3 ps  S = 528.8 ps  Cin =  0.4 ff  Cout =   0.3 ff  Cmax =  11.5 ff  G =   68  ",
+    "Path  3 --    4677 : 2    1 NOR2xp33_ASAP7_75t_L      A =   0.93  Df =2299.3 -603.1 ps  S = 370.8 ps  Cin =  0.3 ff  Cout =   0.3 ff  Cmax =  11.5 ff  G =  134  ",
+    "Path  4 --    4678 : 4    1 OAI211xp5_ASAP7_75t_L     A =   1.40  Df =2356.2 -640.7 ps  S = 198.8 ps  Cin =  0.3 ff  Cout =   0.4 ff  Cmax =  23.0 ff  G =  113  ",
+    "Path  5 --    4679 : 5    1 A2O1A1O1Ixp25_ASAP7_75t_L A =   0.00  Df =2385.5 -646.8 ps  S = 323.8 ps  Cin =  0.4 ff  Cout =   0.4 ff  Cmax =  11.5 ff  G =   90  ",
+    "Path  6 --    4680 : 5    1 AOI311xp33_ASAP7_75t_L    A =   1.63  Df =2437.3 -328.4 ps  S = 392.5 ps  Cin =  0.4 ff  Cout =   0.3 ff  Cmax =  11.5 ff  G =   90  ",
+    "Path  7 --    4722 : 4    1 OAI211xp5_ASAP7_75t_L     A =   1.40  Df =2450.7 -300.7 ps  S =  78.3 ps  Cin =  0.3 ff  Cout =   0.0 ff  Cmax =  23.0 ff  G =    0  "
+  ],
+  "adp": 8349633.223447267,
+  "area": 3407.05444,
+  "cec": "PASS",
+  "cec_interface": "AIGER_PI_PO_POSITIONAL_ORDER; symbol names may be absent after replay",
+  "critical_po_indices": [
+    53
+  ],
+  "delay_ps": 2450.6897,
+  "input_sha256": "25b78153ea90636b40a3bb3b7ace68b3752eb025649172a2c0660e26d63ca145",
+  "input_structure_sha256": "2c058e398c6d5edb74f5130a7e5e987ea1ff84a02c7e44a7bb63c84b6a12b3e5",
+  "mapped_gates": 6414,
+  "mapped_sha256": "a1b2ee4b102ecf1884bf4ee229b22d4d7e84deefb076f73d21085c605f827392",
+  "po_arrivals_ps": [
+    2301.35132,
+    2196.62329,
+    2355.63037,
+    2300.23218,
+    1560.5553,
+    2424.03882,
+    2336.06128,
+    1602.40332,
+    2309.34595,
+    1444.79565,
+    2418.229,
+    2414.64771,
+    2021.10608,
+    2206.10547,
+    2335.77295,
+    1444.79565,
+    1530.88757,
+    2417.35596,
+    2163.25537,
+    2377.13647,
+    2374.81763,
+    2308.67798,
+    2092.44849,
+    2291.75537,
+    2398.69556,
+    2250.98193,
+    2322.34692,
+    2411.34961,
+    2318.03711,
+    1878.90344,
+    1256.36511,
+    2289.51611,
+    2416.95166,
+    726.596375,
+    2294.43311,
+    2313.88452,
+    1421.11865,
+    2376.0564,
+    1477.23047,
+    1502.03906,
+    2096.12573,
+    1387.87085,
+    2198.37402,
+    2097.125,
+    2422.00317,
+    2319.32104,
+    2440.7522,
+    2234.24316,
+    2266.32349,
+    2282.54102,
+    1991.05176,
+    2259.85864,
+    1404.67224,
+    2450.6897,
+    2263.6106,
+    2167.13672,
+    2021.10608,
+    2408.09448,
+    2415.20508,
+    1546.83618,
+    2425.40552,
+    2311.7168,
+    1559.47192,
+    2330.70728,
+    2237.21094,
+    2410.17505,
+    2174.09424,
+    2040.22253,
+    2365.16772,
+    2188.98145,
+    1449.94507,
+    2149.68896,
+    2381.43652,
+    2406.67627,
+    2373.00146,
+    1950.60278,
+    2116.70435
+  ],
+  "po_rise_fall": [
+    {
+      "arrival_ps": 2301.35132,
+      "fall_ps": 2301.35132,
+      "rise_ps": 2143.58862
+    },
+    {
+      "arrival_ps": 2196.62329,
+      "fall_ps": 2196.62329,
+      "rise_ps": 2116.41797
+    },
+    {
+      "arrival_ps": 2355.63037,
+      "fall_ps": 2355.63037,
+      "rise_ps": 1750.07214
+    },
+    {
+      "arrival_ps": 2300.23218,
+      "fall_ps": 2300.23218,
+      "rise_ps": 1958.94592
+    },
+    {
+      "arrival_ps": 1560.5553,
+      "fall_ps": 1560.5553,
+      "rise_ps": 1381.34595
+    },
+    {
+      "arrival_ps": 2424.03882,
+      "fall_ps": 2424.03882,
+      "rise_ps": 2188.79614
+    },
+    {
+      "arrival_ps": 2336.06128,
+      "fall_ps": 2336.06128,
+      "rise_ps": 2202.30127
+    },
+    {
+      "arrival_ps": 1602.40332,
+      "fall_ps": 1464.48669,
+      "rise_ps": 1602.40332
+    },
+    {
+      "arrival_ps": 2309.34595,
+      "fall_ps": 2309.34595,
+      "rise_ps": 2150.77393
+    },
+    {
+      "arrival_ps": 1444.79565,
+      "fall_ps": 1444.79565,
+      "rise_ps": 1179.01831
+    },
+    {
+      "arrival_ps": 2418.229,
+      "fall_ps": 2418.229,
+      "rise_ps": 1794.90369
+    },
+    {
+      "arrival_ps": 2414.64771,
+      "fall_ps": 2414.64771,
+      "rise_ps": 2119.10669
+    },
+    {
+      "arrival_ps": 2021.10608,
+      "fall_ps": 2021.10608,
+      "rise_ps": 1393.72156
+    },
+    {
+      "arrival_ps": 2206.10547,
+      "fall_ps": 2206.10547,
+      "rise_ps": 1699.35229
+    },
+    {
+      "arrival_ps": 2335.77295,
+      "fall_ps": 2335.77295,
+      "rise_ps": 2167.2478
+    },
+    {
+      "arrival_ps": 1444.79565,
+      "fall_ps": 1444.79565,
+      "rise_ps": 1067.22144
+    },
+    {
+      "arrival_ps": 1530.88757,
+      "fall_ps": 1530.88757,
+      "rise_ps": 1477.32422
+    },
+    {
+      "arrival_ps": 2417.35596,
+      "fall_ps": 2417.35596,
+      "rise_ps": 2110.19556
+    },
+    {
+      "arrival_ps": 2163.25537,
+      "fall_ps": 2163.25537,
+      "rise_ps": 2099.36841
+    },
+    {
+      "arrival_ps": 2377.13647,
+      "fall_ps": 2377.13647,
+      "rise_ps": 2171.49634
+    },
+    {
+      "arrival_ps": 2374.81763,
+      "fall_ps": 2374.81763,
+      "rise_ps": 2160.78198
+    },
+    {
+      "arrival_ps": 2308.67798,
+      "fall_ps": 2308.67798,
+      "rise_ps": 2151.91333
+    },
+    {
+      "arrival_ps": 2092.44849,
+      "fall_ps": 2092.44849,
+      "rise_ps": 1640.1366
+    },
+    {
+      "arrival_ps": 2291.75537,
+      "fall_ps": 2291.75537,
+      "rise_ps": 2215.50049
+    },
+    {
+      "arrival_ps": 2398.69556,
+      "fall_ps": 2398.69556,
+      "rise_ps": 2145.7749
+    },
+    {
+      "arrival_ps": 2250.98193,
+      "fall_ps": 2250.98193,
+      "rise_ps": 2228.88965
+    },
+    {
+      "arrival_ps": 2322.34692,
+      "fall_ps": 2322.34692,
+      "rise_ps": 1647.93884
+    },
+    {
+      "arrival_ps": 2411.34961,
+      "fall_ps": 2411.34961,
+      "rise_ps": 2146.7229
+    },
+    {
+      "arrival_ps": 2318.03711,
+      "fall_ps": 2318.03711,
+      "rise_ps": 1752.97278
+    },
+    {
+      "arrival_ps": 1878.90344,
+      "fall_ps": 1878.90344,
+      "rise_ps": 1501.36182
+    },
+    {
+      "arrival_ps": 1256.36511,
+      "fall_ps": 1256.36511,
+      "rise_ps": 1132.45081
+    },
+    {
+      "arrival_ps": 2289.51611,
+      "fall_ps": 2289.51611,
+      "rise_ps": 2096.39868
+    },
+    {
+      "arrival_ps": 2416.95166,
+      "fall_ps": 2416.95166,
+      "rise_ps": 2124.75708
+    },
+    {
+      "arrival_ps": 726.596375,
+      "fall_ps": 726.596375,
+      "rise_ps": 487.041656
+    },
+    {
+      "arrival_ps": 2294.43311,
+      "fall_ps": 2294.43311,
+      "rise_ps": 1823.99805
+    },
+    {
+      "arrival_ps": 2313.88452,
+      "fall_ps": 2313.88452,
+      "rise_ps": 2190.18774
+    },
+    {
+      "arrival_ps": 1421.11865,
+      "fall_ps": 1421.11865,
+      "rise_ps": 1325.50476
+    },
+    {
+      "arrival_ps": 2376.0564,
+      "fall_ps": 2376.0564,
+      "rise_ps": 2039.89856
+    },
+    {
+      "arrival_ps": 1477.23047,
+      "fall_ps": 1477.23047,
+      "rise_ps": 1444.99048
+    },
+    {
+      "arrival_ps": 1502.03906,
+      "fall_ps": 1502.03906,
+      "rise_ps": 1458.64905
+    },
+    {
+      "arrival_ps": 2096.12573,
+      "fall_ps": 2096.12573,
+      "rise_ps": 1566.41772
+    },
+    {
+      "arrival_ps": 1387.87085,
+      "fall_ps": 1256.36511,
+      "rise_ps": 1387.87085
+    },
+    {
+      "arrival_ps": 2198.37402,
+      "fall_ps": 2198.37402,
+      "rise_ps": 2022.17224
+    },
+    {
+      "arrival_ps": 2097.125,
+      "fall_ps": 2097.125,
+      "rise_ps": 1582.18433
+    },
+    {
+      "arrival_ps": 2422.00317,
+      "fall_ps": 2422.00317,
+      "rise_ps": 2135.59619
+    },
+    {
+      "arrival_ps": 2319.32104,
+      "fall_ps": 2319.32104,
+      "rise_ps": 2142.10083
+    },
+    {
+      "arrival_ps": 2440.7522,
+      "fall_ps": 2440.7522,
+      "rise_ps": 2181.20239
+    },
+    {
+      "arrival_ps": 2234.24316,
+      "fall_ps": 2234.24316,
+      "rise_ps": 2204.76782
+    },
+    {
+      "arrival_ps": 2266.32349,
+      "fall_ps": 2266.32349,
+      "rise_ps": 1658.78577
+    },
+    {
+      "arrival_ps": 2282.54102,
+      "fall_ps": 2282.54102,
+      "rise_ps": 2013.22778
+    },
+    {
+      "arrival_ps": 1991.05176,
+      "fall_ps": 1747.30334,
+      "rise_ps": 1991.05176
+    },
+    {
+      "arrival_ps": 2259.85864,
+      "fall_ps": 2259.85864,
+      "rise_ps": 2130.4104
+    },
+    {
+      "arrival_ps": 1404.67224,
+      "fall_ps": 1214.97705,
+      "rise_ps": 1404.67224
+    },
+    {
+      "arrival_ps": 2450.6897,
+      "fall_ps": 2450.6897,
+      "rise_ps": 2150.02197
+    },
+    {
+      "arrival_ps": 2263.6106,
+      "fall_ps": 2263.6106,
+      "rise_ps": 1599.08496
+    },
+    {
+      "arrival_ps": 2167.13672,
+      "fall_ps": 2167.13672,
+      "rise_ps": 1623.94336
+    },
+    {
+      "arrival_ps": 2021.10608,
+      "fall_ps": 2021.10608,
+      "rise_ps": 1393.72156
+    },
+    {
+      "arrival_ps": 2408.09448,
+      "fall_ps": 2408.09448,
+      "rise_ps": 2193.15405
+    },
+    {
+      "arrival_ps": 2415.20508,
+      "fall_ps": 2415.20508,
+      "rise_ps": 2105.45044
+    },
+    {
+      "arrival_ps": 1546.83618,
+      "fall_ps": 1546.83618,
+      "rise_ps": 1237.02002
+    },
+    {
+      "arrival_ps": 2425.40552,
+      "fall_ps": 2425.40552,
+      "rise_ps": 2184.82861
+    },
+    {
+      "arrival_ps": 2311.7168,
+      "fall_ps": 2311.7168,
+      "rise_ps": 2164.56079
+    },
+    {
+      "arrival_ps": 1559.47192,
+      "fall_ps": 1559.47192,
+      "rise_ps": 1334.8905
+    },
+    {
+      "arrival_ps": 2330.70728,
+      "fall_ps": 2330.70728,
+      "rise_ps": 1636.34558
+    },
+    {
+      "arrival_ps": 2237.21094,
+      "fall_ps": 2237.21094,
+      "rise_ps": 2165.78174
+    },
+    {
+      "arrival_ps": 2410.17505,
+      "fall_ps": 2410.17505,
+      "rise_ps": 2165.52124
+    },
+    {
+      "arrival_ps": 2174.09424,
+      "fall_ps": 2174.09424,
+      "rise_ps": 2163.28613
+    },
+    {
+      "arrival_ps": 2040.22253,
+      "fall_ps": 2040.22253,
+      "rise_ps": 1644.33936
+    },
+    {
+      "arrival_ps": 2365.16772,
+      "fall_ps": 2365.16772,
+      "rise_ps": 2237.66089
+    },
+    {
+      "arrival_ps": 2188.98145,
+      "fall_ps": 2188.98145,
+      "rise_ps": 2160.16943
+    },
+    {
+      "arrival_ps": 1449.94507,
+      "fall_ps": 1449.94507,
+      "rise_ps": 1197.53906
+    },
+    {
+      "arrival_ps": 2149.68896,
+      "fall_ps": 2149.68896,
+      "rise_ps": 1653.03613
+    },
+    {
+      "arrival_ps": 2381.43652,
+      "fall_ps": 2381.43652,
+      "rise_ps": 1774.26672
+    },
+    {
+      "arrival_ps": 2406.67627,
+      "fall_ps": 2406.67627,
+      "rise_ps": 1806.83362
+    },
+    {
+      "arrival_ps": 2373.00146,
+      "fall_ps": 2373.00146,
+      "rise_ps": 2119.54492
+    },
+    {
+      "arrival_ps": 1950.60278,
+      "fall_ps": 1950.60278,
+      "rise_ps": 1535.18591
+    },
+    {
+      "arrival_ps": 2116.70435,
+      "fall_ps": 2116.70435,
+      "rise_ps": 1554.56165
+    }
+  ],
+  "provenance": {
+    "abc": {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc",
+      "sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb"
+    },
+    "library": {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db/input/asap7",
+      "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+    },
+    "original": {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261113T191340Z-mffc-full905-frozen-6a45b8db/output/case_0896_Ours/input.aig",
+      "sha256": "7b5852b32ac4bec230dcfb6a0eeef0b6a61ae55f59ade008ce1a372b0db96a15"
+    }
+  },
+  "runtime_s": 1.550051793223247,
+  "status": "PASS",
+  "timing_model": "ABC_SCL_LIBERTY",
+  "trace_semantics": "Native ABC min-slack traceback; mapped IDs are local to this mapping."
+}

@@ -1,9 +1,13 @@
-# GitHub 项目与最新 905 数据索引
+# GitHub 项目与实验数据索引
 
-目标仓库：`Appleeyelala/CULS_LiteCut`。默认私有；源码及正式 905 结果保留全部成功、失败、回退和 no-op 记录。
+目标仓库：`Appleeyelala/CULS_LiteCut`。当前公开；源码及正式 905 结果保留全部成功、失败、回退和 no-op 记录。
 实验算法冻结 commit：`ecc85e6ac82571caf9f1a6004098dbe976536256`。GitHub 整理提交不代表新算法版本或新实验。
 
-## 建议阅读顺序
+## 最新 STE100（先读）
+
+先读 [交接报告](../HANDOFF.md)、[STE100结果](mffc_gpu/STE100_RESULTS.md)、[实现](mffc_gpu/STE_ADAM_IMPLEMENTATION.md)和[数据](../analysis/ste100/README.md)。冻结算法`9a199bf`，100电路/300方法点；本轮为40步STE＋Adam、至多2次Mapping，无中间反馈。以下是保留的旧905版本，不能与STE100混算。
+
+## 旧905阅读顺序
 
 1. [项目说明](../README.md)、[梯度实现与实验状态](../GRADIENT_OPTIMIZATION_STATUS.md)。
 2. [正式实验协议](../BENCHMARK905_PROTOCOL.md)、[MFFC GPU 实现](mffc_gpu/IMPLEMENTATION.md)。
@@ -37,4 +41,4 @@ LiteCut 局部分数不是真实全局 Delay。缺少候选局部 abc_delay 实�
 分片全部还原核验原始 SHA256；未分片的资料包文件保持原始字节。无需下载 ZIP 或读取 Git LFS 对象。
 原数据和压缩包继续保存在服务器，未上传完整数据集、模型、Liberty、二进制或大型日志。
 
-对 ChatGPT 指定仓库及上述入口文件，并按问题读取对应数据；数百万行完整统计需流式程序处理。私有仓库需在 GitHub 应用中授予相应访问权限。
+对 ChatGPT 指定仓库及上述入口文件，并按问题读取对应数据；数百万行完整统计需流式程序处理。当前仓库公开；使用连接器时是否可读取还取决于应用连接范围。

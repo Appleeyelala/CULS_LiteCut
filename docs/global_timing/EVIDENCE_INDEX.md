@@ -1,6 +1,6 @@
 # 实现与验证证据入口
 
-本索引区分原始历史证据和本轮已完成的全量验证。最终状态依据64905的905项原始证据审计及逐要求验收；不表示所有历史程序功能PASS或算法优势成立。具体要求见[验收矩阵](IMPLEMENTATION_STATUS.md)，历史Gate结果见[工作历史](../WORK_HISTORY.md)。
+本索引区分原始历史证据和本轮已完成的全量验证。最终状态依据64905的905项原始证据审计及逐要求验收；不表示所有历史程序功能PASS或算法优势成立。具体要求见[验收矩阵](REQUIREMENTS_AUDIT.md)，历史Gate结果见[工作历史](../WORK_HISTORY.md)。
 
 最新主结果见[统一版本905输入搜索结果](FULL905_SEARCH_RESULTS.md)和[逐要求验收](REQUIREMENTS_AUDIT.md)。64854已完成全905固定cohort、搜索来源审计及原始replay执行核验：901 PASS/4个native对照缺失的PARTIAL，保存搜索与执行审计错误0；并未建立稳定优于随机搜索的优势。目录为`20261112T103045Z-final905-search-analysis-v2-32c72d46/`，其中`output/comparison/`、`search_quality/`、`execution_audit/`分别保留原始对比、误差/来源及trace证据。
 
@@ -48,7 +48,7 @@
 | 统一版本第九批路径采集 | `20261112T005832Z-consistent-path-audit-batch9-316b38d0/output/arrival_paths/summary.json`、`audit_summary.json`、`slurm_completion.json` | 固定52/52设计审计PASS，791份映射、947个引用；精确清单、冻结hash及Slurm正常终态已核验。原602 PASS/1 PARTIAL/302未记录保持不变 |
 | 统一版本第十批路径采集 | `20261112T010854Z-consistent-path-audit-batch10-1b537bfa/output/arrival_paths/summary.json`、`audit_summary.json`、`slurm_completion.json` | 固定35/35设计的有效测量审计PASS，518份映射、623个引用；含codec PARTIAL，native指标与路径引用保持缺失。精确清单、冻结hash及Slurm正常终态已核验 |
 
-上述搜索比较未显示稳定优于对等预算随机搜索的结果。真实CEC通过、代理预测准确、优化收益和跨设计泛化是不同结论，分别见[搜索分析](INTERIM_SEARCH_ANALYSIS.md)、[路径分析](PATH_CHANGE_ANALYSIS.md)和[限制报告](LIMITATIONS.md)。
+上述搜索比较未显示稳定优于对等预算随机搜索的结果。真实CEC通过、代理预测准确、优化收益和跨设计泛化是不同结论，分别见[搜索分析](https://github.com/Appleeyelala/CULS_LiteCut/blob/3860d604886d8f615a03c77fca27b61d3e5c2448/docs/global_timing/INTERIM_SEARCH_ANALYSIS.md)、[路径分析](PATH_CHANGE_ANALYSIS.md)和[限制报告](LIMITATIONS.md)。
 
 ## 全量运行期间的阶段记录（历史前缀）
 

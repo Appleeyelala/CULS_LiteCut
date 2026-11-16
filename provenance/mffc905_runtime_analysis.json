@@ -1,0 +1,67 @@
+{
+  "purpose": "User-requested existing formal905 runtime analysis vs A/B; no algorithm changes or new performance measurements.",
+  "algorithm_source_commit": "ecc85e6ac82571caf9f1a6004098dbe976536256",
+  "analysis_source_commit": "f7adc98d42ea9f56017b6165401aff84eed6ad0d",
+  "run": "/data/wushangge/CULS_LiteCut/runs/20261116T023042Z-mffc905-runtime-analysis-c7af31f2",
+  "job": {
+    "id": "65472",
+    "state": "COMPLETED",
+    "exit_code": "0:0",
+    "elapsed_s": 5,
+    "cpus": 2,
+    "memory_gib": 4,
+    "gpus": 0
+  },
+  "report": "docs/mffc_gpu/RUNTIME_ANALYSIS_905.md",
+  "outputs": {
+    "runtime_per_circuit.csv": {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261116T023042Z-mffc905-runtime-analysis-c7af31f2/output/runtime_per_circuit.csv",
+      "size_bytes": 446811,
+      "sha256": "cfc08750c6f858c50b4342a8098e2c9891065643a377c45dac3ceb13dba2fca6"
+    },
+    "runtime_stage_summary.csv": {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261116T023042Z-mffc905-runtime-analysis-c7af31f2/output/runtime_stage_summary.csv",
+      "size_bytes": 1979,
+      "sha256": "44f097cdd74b6fb1374e9c741646d10a4c6eec512588fb00b470bc318d234eb8"
+    },
+    "runtime_summary.json": {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261116T023042Z-mffc905-runtime-analysis-c7af31f2/output/runtime_summary.json",
+      "size_bytes": 42108,
+      "sha256": "834cfe58f04b8dc45a3d815aaa663b2af6fb355098a97518c98f4a44025504db"
+    },
+    "INPUT_CHECKSUMS.sha256": {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261116T023042Z-mffc905-runtime-analysis-c7af31f2/output/INPUT_CHECKSUMS.sha256",
+      "size_bytes": 345511,
+      "sha256": "07f5202c201c165041b405c433363f822e214e7a7d5613a2a2b372d849ddcb5c"
+    },
+    "MFFC905_RUNTIME_ANALYSIS.md": {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261116T023042Z-mffc905-runtime-analysis-c7af31f2/output/MFFC905_RUNTIME_ANALYSIS.md",
+      "size_bytes": 8878,
+      "sha256": "789d155afc5ca1c388fd5edb1fd1804d8b230f3ed047e018c18315c883391e96"
+    },
+    "runtime_breakdown.png": {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261116T023042Z-mffc905-runtime-analysis-c7af31f2/output/runtime_breakdown.png",
+      "size_bytes": 83416,
+      "sha256": "f4c7b05e6250b191b3c435bc2c5cc94fd44ac8156cf90c4c17145b93e61abeed"
+    },
+    "runtime_breakdown.pdf": {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261116T023042Z-mffc905-runtime-analysis-c7af31f2/output/runtime_breakdown.pdf",
+      "size_bytes": 18656,
+      "sha256": "33fd7d6bb263d802137d5995a7c0baccf75c1f65bc74ed7ec1baa503d76d0b2d"
+    }
+  },
+  "reconciliation": {
+    "all_905_have_nonnegative_unattributed_wall": true,
+    "minimum_unattributed_wall_s": 1.5793387689627707,
+    "all_per_circuit_components_sum_to_cold_wall": true,
+    "all_paired_gap_components_sum_to_actual_gap": true,
+    "instrumented_algorithm_files_equal_frozen_source": true
+  },
+  "nested_windows_removed": {
+    "count": 678,
+    "seconds": 3566.16872505378
+  },
+  "original_experiment_files_untouched": true,
+  "no_eda_ml_optimizer_or_performance_calls": true,
+  "plotting_warning": "Installed Matplotlib classic style has obsolete animation keys; plots generated and visually inspected. No experiment environment changed."
+}

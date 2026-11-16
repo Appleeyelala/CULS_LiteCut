@@ -105,7 +105,8 @@ def execute_one(self, choices, method, index, predicted=None):
     try:
         candidate, execution = replay(self.gpuls, self.aig, self.output / 'partition/owners.csv',
                                        self.catalogue, choices, work / 'rewrite', self.config.timeout_s,
-                                       allow_nonpositive_gain=self.config.allow_nonpositive_gain)
+                                       allow_nonpositive_gain=self.config.allow_nonpositive_gain,
+                                       allow_nonpositive_candidates=getattr(self.config, 'allow_nonpositive_candidates', False))
         metrics = self.evaluator.evaluate(candidate, work / 'evaluation')
         result.update(status='PASS', metrics=metrics, applied_rewrites=execution['applied_rewrites'], aig=str(candidate))
     except Exception as exc:

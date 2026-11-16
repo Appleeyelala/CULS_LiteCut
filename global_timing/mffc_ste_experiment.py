@@ -36,6 +36,18 @@ class SteSearchConfig:
             raise ValueError('STE100 uses the predeclared fixed settings; no tuning.')
 
 
+@dataclass(frozen=True)
+class NonpositiveSteConfig(SteSearchConfig):
+    """Versioned candidate-domain experiment; the STE optimizer stays frozen."""
+    allow_nonpositive_gain: bool = True
+    allow_nonpositive_candidates: bool = True
+    protocol: str = 'nonpositive_candidates_v1'
+
+    def validate(self):
+        if self != NonpositiveSteConfig():
+            raise ValueError('Nonpositive experiment keeps the fixed STE100 settings.')
+
+
 class SteExperiment:
     def __init__(self, aig, gpuls, abc, library, checkpoint, native_library, output,
                  config=SteSearchConfig(), validation_workers=2):
@@ -64,7 +76,8 @@ class SteExperiment:
                                'max_layer_width': layout.get('max_layer_width', 0)}
         save_json(self.output / 'structure_meta.json', self.structure_meta)
         self.catalogue = self.stage('candidate_enumeration', enumerate_candidates, self.gpuls, self.aig,
-                                    self.partition, self.output / 'candidates', config.timeout_s)
+                                    self.partition, self.output / 'candidates', config.timeout_s,
+                                    getattr(config, 'allow_nonpositive_candidates', False))
         self.catalogue, self.cut_audit = self.stage('boolean_validation', validate_catalogue,
             self.evaluator.abc, self.partition, self.catalogue, self.output / 'cut_validation', config.timeout_s)
         self.noop = [0] * len(self.catalogue.decisions)
@@ -123,8 +136,15 @@ class SteExperiment:
                 self.feasibility.validate(best['choices'])
                 final = self.stage('final_replay_cec_mapping', execute_one, self,
                                   best['choices'], 'final', 0, best)
-                selected['source'] = 'original_fallback'
-                if (final['status'] == 'PASS'
+                if isinstance(self.config, NonpositiveSteConfig):
+                    # Mapping is a research observation, never a delay-based gate.
+                    # Preserve failed execution as FAIL, without original substitution.
+                    selected = {'metrics': final.get('metrics'), 'aig': final.get('aig'),
+                                'choices': best['choices'], 'source': 'ste_adam_raw_candidate',
+                                'applied_rewrites': final.get('applied_rewrites', 0)}
+                else:
+                    selected['source'] = 'original_fallback'
+                if (not isinstance(self.config, NonpositiveSteConfig) and final['status'] == 'PASS'
                     and final['metrics']['area'] <= self.original['area'] * self.config.area_limit_ratio
                     and final['metrics']['delay_ps'] < self.original['delay_ps']):
                     selected = {'metrics': final['metrics'], 'aig': final['aig'],
@@ -133,7 +153,12 @@ class SteExperiment:
         mappings = list(self.output.rglob('mapping.command.json'))
         if len(mappings) > 2 or (not any((best or {}).get('choices', [])) and len(mappings) != 1):
             raise RuntimeError('Original plus at most one final mapping contract violated.')
-        summary = {'status': 'PASS', 'selected': selected, 'original': self.original,
+        status = 'PASS'
+        if isinstance(self.config, NonpositiveSteConfig) and final:
+            status = final['status']
+            if status == 'PASS' and final['metrics']['area'] > self.original['area'] * self.config.area_limit_ratio:
+                status = 'AREA_LIMIT_EXCEEDED'
+        summary = {'status': status, 'selected': selected, 'original': self.original,
                    'final_candidate': final, 'proxy_best': best, 'config': asdict(self.config),
                    'mapping_calls': len(mappings), 'backend': self.backend,
                    'regions': len(self.partition.regions), 'decisions': len(self.noop),

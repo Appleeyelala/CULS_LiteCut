@@ -53,7 +53,8 @@ public:
     void GetSelectedCutSlots(int n, int *CPUselectedCutSlots);
     void CopyLib(Library CPUlib);
     void EnumerateAndPreEvaluate(int *level, const std::vector<int> &levelCount, 
-                                 int n, int *CPUfanin0, int *CPUfanin1, int *CPUref, bool fUseZeros);
+                                 int n, int *CPUfanin0, int *CPUfanin1, int *CPUref, bool fUseZeros,
+                                 bool allowNonPositiveCandidates = false, unsigned long long *audit = nullptr);
     int EnumerateAndPreEvaluateWave(int currIter, int *level, const std::vector<int> &levelCount, 
                                     int n, int *CPUfanin0, int *CPUfanin1, int *CPUref, bool fUseZeros);
     int ReplaceSubgraphs(int n, int *CPUfanin0, int *CPUfanin1, int *CPUphase, int *CPUreplace);
@@ -86,6 +87,7 @@ struct RewriteReplayChoice {
 // Immutable, command-local enumeration of the original reordered graph.
 // Optional replay reuse never changes CPU sequential install/rejection rules.
 struct PreparedReplayEnumeration {
+    bool allowNonPositiveCandidates = false;
     int n = -1;
     int numInputs = -1;
     int numOutputs = -1;
@@ -107,6 +109,7 @@ struct RewriteAuditOptions {
     bool replayMode = false;
     const PreparedReplayEnumeration *preparedReplay = nullptr;
     bool allowNonPositiveReplayGain = false;
+    bool allowNonPositiveCandidates = false;
 };
 
 class CPUSolver {

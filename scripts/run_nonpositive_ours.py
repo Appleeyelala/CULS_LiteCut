@@ -39,6 +39,11 @@ def candidate_counts(work):
                     for c in range(1,d['candidate_count']+1)] for i,d in enumerate(data['decisions'])]
                 result['feasible'] = counts(Catalogue(data['decisions'],[],{}),f)
                 result['blocked_reasons'] = dict(Counter(v['reason'] for v in blocked))
+            elif key == 'verified' and not data['decisions']:
+                # Empty verified domain has exactly zero feasible choices;
+                # SteExperiment deliberately skips constructing this object.
+                result['feasible'] = counts(Catalogue([], [], {}))
+                result['feasibility_stage'] = 'NOT_REQUIRED_EMPTY_VERIFIED_DOMAIN'
     return result
 
 

@@ -127,6 +127,9 @@ def main():
     (out/'ZERO_CANDIDATE_RESOLUTION.md').write_text('\n'.join(md)+'\n')
     build=read(coverage/'run.json'); controls=read(args.control_run/'run.json')
     control=read(args.control_run/'output/default_control.json')
+    witnesses=read(args.control_run/'output/library_witnesses_17.json')
+    assert witnesses['status']=='PASS' and {r['circuit_id'] for r in witnesses['records']}==set(ZERO17)
+    write_json(out/'LEGAL_REPLACEMENT_WITNESSES_17.json',witnesses)
     meta={'coverage_run':str(coverage),'coverage_source_commit':build['source_commit'],
         'coverage_slurm_job_id':build['slurm_job_id'],'controls_run':str(args.control_run),
         'controls_source_commit':controls['source_commit'],'controls_slurm_job_id':controls['slurm_job_id'],
@@ -135,7 +138,8 @@ def main():
     write_json(out/'RUN_PROVENANCE.json',meta)
     for path in [coverage/'run.json',coverage/'job.slurm',coverage/'input/commands.json',
         coverage/'input/coverage_protocol.json',coverage/'output/GATE17.json',coverage/'output/COVERAGE_STATUS.json',
-        args.control_run/'output/default_control.json',args.control_run/'logs/command_0.log']:
+        args.control_run/'output/default_control.json',args.control_run/'logs/command_0.log',
+        args.control_run/'output/library_witnesses_17.json',args.control_run/'input/library_witness.py']:
         evidence_file(path,'run/control provenance')
     (out/'README.md').write_text(f'''# 非正节点 gain 候选实验
 
@@ -157,6 +161,8 @@ def main():
 - STE搜索、可行性规则、LiteCut、12参数代理、GPU DAG源码未改。40步、lr=.12、1restart、T1→.3、no-op+2、max16均冻结。
 
 候选检查源码 `{build['source_commit']}`；运行路径 `{coverage}`。编译命令、独立gpuls及所有冻结工具/模型/库哈希见 `RUN_PROVENANCE.json` 和该run的 `input/commands.json`/`run.json`。全量运行另列其真实源码commit，不把后续发布提交冒充运行提交。
+
+原17例各一个可行替换还独立通过 `verify_library_truth` 穷举库真值检查，见 `LEGAL_REPLACEMENT_WITNESSES_17.json`，Slurm {witnesses['slurm_job_id']}；此检查只读取已有catalogue，不重跑枚举/Mapping。各层计数中的 Boolean 指既有cut真值/原始上下文证明，随后完整Ours的LiteCut准备仍逐候选检查库真值。
 
 最小验证：{len(probes)}项新增零/负gain Replay/CEC探针（含普通与prepared模式），状态 {dict(Counter(p['status'] for p in probes))}。输入3默认正gain导出的 {control['candidates']} 个候选身份与旧正式记录完全一致。Slurm {controls['slurm_job_id']} 的5项政策单元检查验证退化候选保留、失败无替代指标、面积上限、旧回退和固定参数；实际输出见证据索引。
 

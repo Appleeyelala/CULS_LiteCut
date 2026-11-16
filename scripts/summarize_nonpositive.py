@@ -130,6 +130,7 @@ def main():
         'gain 是 GPU 枚举时的结构节点收益符号，不是 LiteCut 分数、代理目标或真实 Mapping Delay。']
     (out/'ZERO_CANDIDATE_RESOLUTION.md').write_text('\n'.join(md)+'\n')
     build=read(coverage/'run.json'); controls=read(args.control_run/'run.json')
+    full_metadata=read(args.full_run/'run.json') if args.full_run else {}
     control=read(args.control_run/'output/default_control.json')
     witnesses=read(args.control_run/'output/library_witnesses_17.json')
     assert witnesses['status']=='PASS' and {r['circuit_id'] for r in witnesses['records']}==set(ZERO17)
@@ -138,7 +139,8 @@ def main():
         'coverage_slurm_job_id':build['slurm_job_id'],'controls_run':str(args.control_run),
         'controls_source_commit':controls['source_commit'],'controls_slurm_job_id':controls['slurm_job_id'],
         'tools':protocol['tools'],'sample_seed':20261116,'rows':protocol['rows'],
-        'environment':build['environment'],'resources':build['resources'],'full905_run':str(args.full_run) if args.full_run else None}
+        'environment':build['environment'],'resources':build['resources'],'full905_run':str(args.full_run) if args.full_run else None,
+        'full905_source_commit':full_metadata.get('source_commit')}
     write_json(out/'RUN_PROVENANCE.json',meta)
     for path in [coverage/'run.json',coverage/'job.slurm',coverage/'input/commands.json',
         coverage/'input/coverage_protocol.json',coverage/'output/GATE17.json',coverage/'output/COVERAGE_STATUS.json',
@@ -154,6 +156,8 @@ def main():
 固定100沿用 seed=20261116、原100 ID及逐输入SHA；清单和工具身份见 `RUN_PROVENANCE.json`。`REPLAY_PROBES.csv` 是少量实际安装/CEC检查，不是 Adam 搜索质量。真实原始证据位置及哈希见 `EVIDENCE_INDEX.json`。
 
 原17例门槛：{len(resolved)}/17。GO_905={str(state['GO_905']).lower()}。{'全量新执行见 full905/；100子集结果来自该905运行，没有另跑100或A/B。' if args.full_run else '没有提交905全量结果；是否启动以门槛及已记录运行状态为准。'}
+
+完整905实际运行源码：`{full_metadata.get('source_commit', 'NOT_RUN')}`。完成分母、失败/超时、实际Slurm环境与资源见 `full905/FULL905_RUN_STATUS.json`；后续报告发布提交与实验运行提交分别记录。
 ''')
     implementation=f'''# 实现与证据
 
@@ -304,7 +308,7 @@ def full_reports(args,out,evidence_file):
     selected_count=runstatus['optimizer_selected_nonempty_count']
     runstatus['replay_pass_fraction_of_nonempty_selections']=runstatus['replay_pass_count']/selected_count if selected_count else None
     write_json(dest/'FULL905_RUN_STATUS.json',runstatus)
-    for path in [run/'run.json',run/'input/full905_manifest.json']+list((run/'input').glob('full905_session_*.json')):
+    for path in [run/'run.json',run/'input/full905_manifest.json',run/'input/launch_gate.json',run/'input/commands.json',run/'input/job_worker.py']+list((run/'input').glob('full905_session_*.json'))+list((run/'input').glob('job_*.json'))+list(run.glob('job_*.slurm'))+list((run/'output').glob('completion_shard_*.json')):
         evidence_file(path,'new full905 provenance')
     return f"""新版905实际终态 {len(records)}/905，{states}。确认零候选 {len(zero)}，候选域不可判定 {len(unknown)}。旧94变化见 full905/FULL905_ZERO_CANDIDATES.md。
 

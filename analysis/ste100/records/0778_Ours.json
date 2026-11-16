@@ -1,0 +1,95 @@
+{
+  "index": 778,
+  "input": "forgeEDA/ram_64x42.aig",
+  "input_sha256": "c5c56c1885f183ce244817e6bca6b4a5bc32821725d996cfe730c98d89446051",
+  "method": "Ours",
+  "status": "PASS",
+  "error": null,
+  "end_to_end_runtime_s": 7.7347516641020775,
+  "result_path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0778_Ours/child_result.json",
+  "detail_path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0778_Ours",
+  "source_commit": "9a199bf0ea0dcf20bf55e40da8caa8b8bbff5fac",
+  "slurm_job_id": "65534",
+  "metrics": {
+    "status": "PASS",
+    "input_sha256": "c5c56c1885f183ce244817e6bca6b4a5bc32821725d996cfe730c98d89446051",
+    "provenance": {
+      "abc": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc",
+        "sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb"
+      },
+      "library": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/input/asap7",
+        "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+      },
+      "original": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0778_Ours/input.aig",
+        "sha256": "c5c56c1885f183ce244817e6bca6b4a5bc32821725d996cfe730c98d89446051"
+      }
+    },
+    "input_structure_sha256": "556199434d88db852c534d0dd1580b43d30a81d7975ec10ad8a8204c6ac54e48",
+    "cec_interface": "AIGER_PI_PO_POSITIONAL_ORDER; symbol names may be absent after replay",
+    "cec": "PASS",
+    "timing_model": "ABC_SCL_LIBERTY",
+    "area": 7842.64014,
+    "delay_ps": 5417.70508,
+    "adp": 42489111.32708991,
+    "mapped_gates": 10491,
+    "critical_po_indices": [
+      2716,
+      2717,
+      2718,
+      2719,
+      2720,
+      2721,
+      2722,
+      2723,
+      2724,
+      2725,
+      2726,
+      2727,
+      2728,
+      2729,
+      2730,
+      2731,
+      2732,
+      2733,
+      2734,
+      2735,
+      2736,
+      2737,
+      2738,
+      2739,
+      2740,
+      2741,
+      2742,
+      2743,
+      2744,
+      2745,
+      2746,
+      2747,
+      2748,
+      2749,
+      2750,
+      2751,
+      2752,
+      2753,
+      2754,
+      2755,
+      2756,
+      2757
+    ],
+    "abc_native_trace_endpoints": [
+      2694,
+      2716
+    ],
+    "trace_semantics": "Native ABC min-slack traceback; mapped IDs are local to this mapping.",
+    "mapped_sha256": "93cb084350ce77259ceb53ee690dadd8af02eaa6f17b01c048725a003164256a",
+    "runtime_s": 2.2219160799868405
+  },
+  "final_source": "original_noop",
+  "backend": {
+    "device": "cuda",
+    "reason": "Candidate/Region workload exceeds fixed CPU thresholds."
+  }
+}

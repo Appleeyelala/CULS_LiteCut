@@ -1,0 +1,54 @@
+{
+  "index": 447,
+  "input": "forgeEDA/display_char.aig",
+  "input_sha256": "8c9379b509e9f0cb1c4dd7f622c6cf0079cb3e4bb16cdb5df81d4093bfb82c5c",
+  "method": "B",
+  "status": "PASS",
+  "error": null,
+  "end_to_end_runtime_s": 2.4712131381966174,
+  "result_path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0447_B/child_result.json",
+  "detail_path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0447_B",
+  "source_commit": "9a199bf0ea0dcf20bf55e40da8caa8b8bbff5fac",
+  "slurm_job_id": "65534",
+  "metrics": {
+    "status": "PASS",
+    "input_sha256": "104fbd3843bae2eef15fc85d5398147f1191908324764b5e7789a869741dd0ed",
+    "provenance": {
+      "abc": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc",
+        "sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb"
+      },
+      "library": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/input/asap7",
+        "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+      },
+      "original": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0447_B/input.aig",
+        "sha256": "8c9379b509e9f0cb1c4dd7f622c6cf0079cb3e4bb16cdb5df81d4093bfb82c5c"
+      }
+    },
+    "input_structure_sha256": "84b3fbf63652239cac4616c6ba30a5e9dd019b45c7e2b016cd6cdee1214a6168",
+    "cec_interface": "AIGER_PI_PO_POSITIONAL_ORDER; symbol names may be absent after replay",
+    "cec": "PASS",
+    "timing_model": "ABC_SCL_LIBERTY",
+    "area": 2658.92554,
+    "delay_ps": 750.883362,
+    "adp": 1996542.9487828657,
+    "mapped_gates": 2911,
+    "critical_po_indices": [
+      2
+    ],
+    "abc_native_trace_endpoints": [
+      52,
+      2
+    ],
+    "trace_semantics": "Native ABC min-slack traceback; mapped IDs are local to this mapping.",
+    "mapped_sha256": "d92a309d6f4af8ccbec671fdf95ad3828f104a2110f09c257513331920608e99",
+    "runtime_s": 1.955996226053685
+  },
+  "final_source": "abc_single_native_rewrite",
+  "backend": {
+    "device": "cpu",
+    "reason": "ABC baseline; no candidate/ML preparation."
+  }
+}

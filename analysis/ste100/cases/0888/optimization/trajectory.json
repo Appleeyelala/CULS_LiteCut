@@ -1,0 +1,2023 @@
+{
+  "anchor_area_error": 0.0,
+  "anchor_po_max_error_ps": 9.094947017729282e-13,
+  "device": "cuda:0",
+  "distinct_hard_combinations_including_noop": 7,
+  "dtype": "torch.float64",
+  "gradient_clip": 5.0,
+  "learning_rate": 0.12,
+  "logits_total_change_norm": 19.964817899858758,
+  "maximum_edits": 16,
+  "optimizer_parameters": "candidate_logits_only",
+  "proxy_parameters_frozen": true,
+  "restarts": 1,
+  "schema": "mffc_softmax_ste_adam_v1",
+  "scope": "Proxy scores only. No measured candidate feedback or online calibration.",
+  "seed": 20261117,
+  "steps": 40,
+  "temperature": [
+    1.0,
+    0.3
+  ],
+  "trajectory": [
+    {
+      "adam_update_norm": 0.8086863846647481,
+      "hard_edits": [],
+      "host_candidate_rows": 0,
+      "logits_gradient_norm": 0.00021376912318413113,
+      "loss": 1.0621867607568836,
+      "predicted_area": 21972.1758,
+      "predicted_delay_ps": 8378.04199,
+      "selection_changed": false,
+      "step": 0,
+      "temperature": 1.0
+    },
+    {
+      "adam_update_norm": 0.8069731001572336,
+      "hard_edits": [],
+      "host_candidate_rows": 0,
+      "logits_gradient_norm": 0.0002447670278664981,
+      "loss": 1.0621867607568836,
+      "predicted_area": 21972.1758,
+      "predicted_delay_ps": 8378.04199,
+      "selection_changed": false,
+      "step": 1,
+      "temperature": 0.982051282051282
+    },
+    {
+      "adam_update_norm": 0.8036887255714327,
+      "hard_edits": [],
+      "host_candidate_rows": 0,
+      "logits_gradient_norm": 0.0002838078530193302,
+      "loss": 1.0621867607568836,
+      "predicted_area": 21972.1758,
+      "predicted_delay_ps": 8378.04199,
+      "selection_changed": false,
+      "step": 2,
+      "temperature": 0.9641025641025641
+    },
+    {
+      "adam_update_norm": 0.7990477177573426,
+      "hard_edits": [],
+      "host_candidate_rows": 0,
+      "logits_gradient_norm": 0.0003296769310424163,
+      "loss": 1.0621867607568836,
+      "predicted_area": 21972.1758,
+      "predicted_delay_ps": 8378.04199,
+      "selection_changed": false,
+      "step": 3,
+      "temperature": 0.9461538461538461
+    },
+    {
+      "adam_update_norm": 0.793472646327808,
+      "hard_edits": [],
+      "host_candidate_rows": 0,
+      "logits_gradient_norm": 0.0003804546586588335,
+      "loss": 1.0621867607568836,
+      "predicted_area": 21972.1758,
+      "predicted_delay_ps": 8378.04199,
+      "selection_changed": false,
+      "step": 4,
+      "temperature": 0.9282051282051282
+    },
+    {
+      "adam_update_norm": 0.7875077914219669,
+      "hard_edits": [],
+      "host_candidate_rows": 0,
+      "logits_gradient_norm": 0.0004331774217597818,
+      "loss": 1.0621867607568836,
+      "predicted_area": 21972.1758,
+      "predicted_delay_ps": 8378.04199,
+      "selection_changed": false,
+      "step": 5,
+      "temperature": 0.9102564102564102
+    },
+    {
+      "adam_update_norm": 0.7816966993924596,
+      "hard_edits": [],
+      "host_candidate_rows": 0,
+      "logits_gradient_norm": 0.00048348107772832883,
+      "loss": 1.0621867607568836,
+      "predicted_area": 21972.1758,
+      "predicted_delay_ps": 8378.04199,
+      "selection_changed": false,
+      "step": 6,
+      "temperature": 0.8923076923076924
+    },
+    {
+      "adam_update_norm": 0.7764458689044524,
+      "hard_edits": [],
+      "host_candidate_rows": 0,
+      "logits_gradient_norm": 0.0005255243804658751,
+      "loss": 1.0621867607568836,
+      "predicted_area": 21972.1758,
+      "predicted_delay_ps": 8378.04199,
+      "selection_changed": false,
+      "step": 7,
+      "temperature": 0.8743589743589744
+    },
+    {
+      "adam_update_norm": 0.771885742080197,
+      "hard_edits": [],
+      "host_candidate_rows": 0,
+      "logits_gradient_norm": 0.0005525236121270294,
+      "loss": 1.0621867607568836,
+      "predicted_area": 21972.1758,
+      "predicted_delay_ps": 8378.04199,
+      "selection_changed": false,
+      "step": 8,
+      "temperature": 0.8564102564102565
+    },
+    {
+      "adam_update_norm": 0.7676829271499929,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 11,
+      "logits_gradient_norm": 0.000542713030157718,
+      "loss": 1.0602492419065035,
+      "predicted_area": 21972.61788274999,
+      "predicted_delay_ps": 8361.809375712526,
+      "selection_changed": true,
+      "step": 9,
+      "temperature": 0.8384615384615385
+    },
+    {
+      "adam_update_norm": 0.7629579408301767,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 14,
+      "logits_gradient_norm": 0.0005235900595564834,
+      "loss": 1.060248636292239,
+      "predicted_area": 21972.61788274999,
+      "predicted_delay_ps": 8361.804301850787,
+      "selection_changed": true,
+      "step": 10,
+      "temperature": 0.8205128205128205
+    },
+    {
+      "adam_update_norm": 0.7565022391567612,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 15,
+      "logits_gradient_norm": 0.0004804687753277845,
+      "loss": 1.060248636292239,
+      "predicted_area": 21972.61788274999,
+      "predicted_delay_ps": 8361.804301850787,
+      "selection_changed": false,
+      "step": 11,
+      "temperature": 0.8025641025641026
+    },
+    {
+      "adam_update_norm": 0.7468450258156389,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 15,
+      "logits_gradient_norm": 0.0004188502919305165,
+      "loss": 1.060248636292239,
+      "predicted_area": 21972.61788274999,
+      "predicted_delay_ps": 8361.804301850787,
+      "selection_changed": false,
+      "step": 12,
+      "temperature": 0.7846153846153847
+    },
+    {
+      "adam_update_norm": 0.7326132295656251,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 15,
+      "logits_gradient_norm": 0.00034757662124814385,
+      "loss": 1.060248636292239,
+      "predicted_area": 21972.61788274999,
+      "predicted_delay_ps": 8361.804301850787,
+      "selection_changed": false,
+      "step": 13,
+      "temperature": 0.7666666666666666
+    },
+    {
+      "adam_update_norm": 0.7129479059723857,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 15,
+      "logits_gradient_norm": 0.0002760026719867639,
+      "loss": 1.060248636292239,
+      "predicted_area": 21972.61788274999,
+      "predicted_delay_ps": 8361.804301850787,
+      "selection_changed": false,
+      "step": 14,
+      "temperature": 0.7487179487179487
+    },
+    {
+      "adam_update_norm": 0.6877790975815545,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 15,
+      "logits_gradient_norm": 0.00021129658462517206,
+      "loss": 1.060248636292239,
+      "predicted_area": 21972.61788274999,
+      "predicted_delay_ps": 8361.804301850787,
+      "selection_changed": false,
+      "step": 15,
+      "temperature": 0.7307692307692308
+    },
+    {
+      "adam_update_norm": 0.657819232495283,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 15,
+      "logits_gradient_norm": 0.00015724836513518998,
+      "loss": 1.060248636292239,
+      "predicted_area": 21972.61788274999,
+      "predicted_delay_ps": 8361.804301850787,
+      "selection_changed": false,
+      "step": 16,
+      "temperature": 0.7128205128205128
+    },
+    {
+      "adam_update_norm": 0.6243163363293942,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 15,
+      "logits_gradient_norm": 0.0001146484775568209,
+      "loss": 1.060248636292239,
+      "predicted_area": 21972.61788274999,
+      "predicted_delay_ps": 8361.804301850787,
+      "selection_changed": false,
+      "step": 17,
+      "temperature": 0.6948717948717948
+    },
+    {
+      "adam_update_norm": 0.5887242840517811,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 15,
+      "logits_gradient_norm": 8.241784471218775e-05,
+      "loss": 1.060248636292239,
+      "predicted_area": 21972.61788274999,
+      "predicted_delay_ps": 8361.804301850787,
+      "selection_changed": false,
+      "step": 18,
+      "temperature": 0.676923076923077
+    },
+    {
+      "adam_update_norm": 0.5524309112778898,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 15,
+      "logits_gradient_norm": 5.869497004231864e-05,
+      "loss": 1.060248636292239,
+      "predicted_area": 21972.61788274999,
+      "predicted_delay_ps": 8361.804301850787,
+      "selection_changed": false,
+      "step": 19,
+      "temperature": 0.6589743589743591
+    },
+    {
+      "adam_update_norm": 0.5166013658526113,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 15,
+      "logits_gradient_norm": 4.1539955747256114e-05,
+      "loss": 1.060248636292239,
+      "predicted_area": 21972.61788274999,
+      "predicted_delay_ps": 8361.804301850787,
+      "selection_changed": false,
+      "step": 20,
+      "temperature": 0.641025641025641
+    },
+    {
+      "adam_update_norm": 0.48212487202429194,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 15,
+      "logits_gradient_norm": 2.9267541277182478e-05,
+      "loss": 1.060248636292239,
+      "predicted_area": 21972.61788274999,
+      "predicted_delay_ps": 8361.804301850787,
+      "selection_changed": false,
+      "step": 21,
+      "temperature": 0.6230769230769231
+    },
+    {
+      "adam_update_norm": 0.4486721233996974,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          544,
+          2
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 16,
+      "logits_gradient_norm": 2.0543282719074405e-05,
+      "loss": 1.060248593599516,
+      "predicted_area": 21972.61788274999,
+      "predicted_delay_ps": 8361.803944169364,
+      "selection_changed": true,
+      "step": 22,
+      "temperature": 0.6051282051282052
+    },
+    {
+      "adam_update_norm": 0.41757211218287227,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          544,
+          2
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 16,
+      "logits_gradient_norm": 1.4363491210422037e-05,
+      "loss": 1.060248593599516,
+      "predicted_area": 21972.61788274999,
+      "predicted_delay_ps": 8361.803944169364,
+      "selection_changed": false,
+      "step": 23,
+      "temperature": 0.5871794871794873
+    },
+    {
+      "adam_update_norm": 0.3890545662288083,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          544,
+          2
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 16,
+      "logits_gradient_norm": 9.996345070600107e-06,
+      "loss": 1.060248593599516,
+      "predicted_area": 21972.61788274999,
+      "predicted_delay_ps": 8361.803944169364,
+      "selection_changed": false,
+      "step": 24,
+      "temperature": 0.5692307692307693
+    },
+    {
+      "adam_update_norm": 0.36322305317247755,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          544,
+          2
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 16,
+      "logits_gradient_norm": 6.916481882357575e-06,
+      "loss": 1.060248593599516,
+      "predicted_area": 21972.61788274999,
+      "predicted_delay_ps": 8361.803944169364,
+      "selection_changed": false,
+      "step": 25,
+      "temperature": 0.5512820512820513
+    },
+    {
+      "adam_update_norm": 0.340087608268161,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          544,
+          2
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 16,
+      "logits_gradient_norm": 4.750000032912786e-06,
+      "loss": 1.060248593599516,
+      "predicted_area": 21972.61788274999,
+      "predicted_delay_ps": 8361.803944169364,
+      "selection_changed": false,
+      "step": 26,
+      "temperature": 0.5333333333333333
+    },
+    {
+      "adam_update_norm": 0.31959030007522937,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          544,
+          2
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 16,
+      "logits_gradient_norm": 3.231621013107772e-06,
+      "loss": 1.060248593599516,
+      "predicted_area": 21972.61788274999,
+      "predicted_delay_ps": 8361.803944169364,
+      "selection_changed": false,
+      "step": 27,
+      "temperature": 0.5153846153846154
+    },
+    {
+      "adam_update_norm": 0.3016257651892822,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          544,
+          2
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 16,
+      "logits_gradient_norm": 2.173116444311695e-06,
+      "loss": 1.060248593599516,
+      "predicted_area": 21972.61788274999,
+      "predicted_delay_ps": 8361.803944169364,
+      "selection_changed": false,
+      "step": 28,
+      "temperature": 0.49743589743589745
+    },
+    {
+      "adam_update_norm": 0.28605697956308224,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          544,
+          2
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 16,
+      "logits_gradient_norm": 1.4406754786436546e-06,
+      "loss": 1.060248593599516,
+      "predicted_area": 21972.61788274999,
+      "predicted_delay_ps": 8361.803944169364,
+      "selection_changed": false,
+      "step": 29,
+      "temperature": 0.47948717948717956
+    },
+    {
+      "adam_update_norm": 0.27272352800321525,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          544,
+          2
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 16,
+      "logits_gradient_norm": 9.389234393020756e-07,
+      "loss": 1.060248593599516,
+      "predicted_area": 21972.61788274999,
+      "predicted_delay_ps": 8361.803944169364,
+      "selection_changed": false,
+      "step": 30,
+      "temperature": 0.46153846153846156
+    },
+    {
+      "adam_update_norm": 0.261437694316705,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          544,
+          2
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 16,
+      "logits_gradient_norm": 5.997221319756555e-07,
+      "loss": 1.060248593599516,
+      "predicted_area": 21972.61788274999,
+      "predicted_delay_ps": 8361.803944169364,
+      "selection_changed": false,
+      "step": 31,
+      "temperature": 0.44358974358974357
+    },
+    {
+      "adam_update_norm": 0.24895618670696948,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          544,
+          2
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          3773,
+          3
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 18,
+      "logits_gradient_norm": 3.7389363075288143e-07,
+      "loss": 1.060248574463854,
+      "predicted_area": 21972.1758,
+      "predicted_delay_ps": 8361.80378384998,
+      "selection_changed": true,
+      "step": 32,
+      "temperature": 0.4256410256410257
+    },
+    {
+      "adam_update_norm": 0.23805165027640104,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          544,
+          2
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          3773,
+          3
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 18,
+      "logits_gradient_norm": 2.2719552933106913e-07,
+      "loss": 1.060248574463854,
+      "predicted_area": 21972.1758,
+      "predicted_delay_ps": 8361.80378384998,
+      "selection_changed": false,
+      "step": 33,
+      "temperature": 0.4076923076923078
+    },
+    {
+      "adam_update_norm": 0.2269584122442529,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          532,
+          1
+        ],
+        [
+          544,
+          2
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          3773,
+          3
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 20,
+      "logits_gradient_norm": 1.337304256597849e-07,
+      "loss": 1.0602485564674429,
+      "predicted_area": 21866.77291516438,
+      "predicted_delay_ps": 8361.803633075293,
+      "selection_changed": true,
+      "step": 34,
+      "temperature": 0.3897435897435898
+    },
+    {
+      "adam_update_norm": 0.2166497342634221,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          532,
+          1
+        ],
+        [
+          544,
+          2
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          3773,
+          3
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 20,
+      "logits_gradient_norm": 7.698149001665666e-08,
+      "loss": 1.0602485564674429,
+      "predicted_area": 21866.77291516438,
+      "predicted_delay_ps": 8361.803633075293,
+      "selection_changed": false,
+      "step": 35,
+      "temperature": 0.3717948717948718
+    },
+    {
+      "adam_update_norm": 0.2066863794557095,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          532,
+          1
+        ],
+        [
+          544,
+          2
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          3773,
+          3
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 20,
+      "logits_gradient_norm": 4.409076986400219e-08,
+      "loss": 1.0602485564674429,
+      "predicted_area": 21866.77291516438,
+      "predicted_delay_ps": 8361.803633075293,
+      "selection_changed": false,
+      "step": 36,
+      "temperature": 0.3538461538461538
+    },
+    {
+      "adam_update_norm": 0.19663233571627667,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          532,
+          1
+        ],
+        [
+          544,
+          2
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          3773,
+          3
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 20,
+      "logits_gradient_norm": 2.620016991169581e-08,
+      "loss": 1.0602485564674429,
+      "predicted_area": 21866.77291516438,
+      "predicted_delay_ps": 8361.803633075293,
+      "selection_changed": false,
+      "step": 37,
+      "temperature": 0.3358974358974359
+    },
+    {
+      "adam_update_norm": 0.18632022966399206,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          532,
+          1
+        ],
+        [
+          544,
+          2
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          3771,
+          1
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 20,
+      "logits_gradient_norm": 1.7080235093057518e-08,
+      "loss": 1.0602485575988037,
+      "predicted_area": 21866.332964538575,
+      "predicted_delay_ps": 8361.803642553881,
+      "selection_changed": true,
+      "step": 38,
+      "temperature": 0.31794871794871804
+    },
+    {
+      "adam_update_norm": 0.1754119451215898,
+      "hard_edits": [
+        [
+          231,
+          1
+        ],
+        [
+          233,
+          1
+        ],
+        [
+          235,
+          1
+        ],
+        [
+          237,
+          1
+        ],
+        [
+          239,
+          1
+        ],
+        [
+          241,
+          1
+        ],
+        [
+          253,
+          1
+        ],
+        [
+          532,
+          1
+        ],
+        [
+          544,
+          2
+        ],
+        [
+          553,
+          1
+        ],
+        [
+          557,
+          1
+        ],
+        [
+          559,
+          1
+        ],
+        [
+          3771,
+          1
+        ],
+        [
+          4822,
+          1
+        ]
+      ],
+      "host_candidate_rows": 20,
+      "logits_gradient_norm": 1.190740054738201e-08,
+      "loss": 1.0602485575988037,
+      "predicted_area": 21866.332964538575,
+      "predicted_delay_ps": 8361.803642553881,
+      "selection_changed": false,
+      "step": 39,
+      "temperature": 0.30000000000000004
+    }
+  ]
+}

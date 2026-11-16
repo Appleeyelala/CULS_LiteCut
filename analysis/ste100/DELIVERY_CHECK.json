@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "circuits": 100,
+  "terminal_methods": 300,
+  "csv_matches_real_records": true,
+  "counts": {
+    "device_cuda": 83,
+    "full_accepted_cec_pass": 67,
+    "final_delay_worse": 34,
+    "optimized": 83,
+    "nonzero_logits_update": 80,
+    "nonzero_gradient_any_step": 81,
+    "all_steps_nonzero_update": 80,
+    "hard_selection_changed": 67,
+    "proxy_best_below_original": 67,
+    "proxy_last_loss_below_first": 67,
+    "final_delay_equal": 2,
+    "device_none": 17
+  },
+  "native_backward_calls": 3320,
+  "source_commit": "9a199bf0ea0dcf20bf55e40da8caa8b8bbff5fac",
+  "job_id": 65534,
+  "scope": "Read-only consistency checks on existing outputs; no new tools or experiments run."
+}

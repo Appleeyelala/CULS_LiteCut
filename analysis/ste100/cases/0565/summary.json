@@ -1,0 +1,173 @@
+{
+  "adam_steps": 0,
+  "backend": {
+    "device": "none",
+    "reason": "No verified executable decisions; Student/proxy not loaded."
+  },
+  "candidates": 0,
+  "config": {
+    "allow_nonpositive_gain": false,
+    "area_limit_ratio": 1.05,
+    "cpu_small_decisions": 32,
+    "cpu_small_regions": 1024,
+    "learning_rate": 0.12,
+    "maximum_edits": 16,
+    "seed": 20261117,
+    "steps": 40,
+    "timeout_s": 900
+  },
+  "decisions": 0,
+  "distinct_hard_combinations_including_noop": 1,
+  "final_candidate": null,
+  "logits_total_change_norm": null,
+  "mapping_calls": 1,
+  "native_profiles": [],
+  "noop_semantics": "Unmodified original AIG; no serialized replay-noop.",
+  "original": {
+    "abc_native_trace_endpoints": [
+      42,
+      20
+    ],
+    "adp": 1666439826.4628024,
+    "area": 33995.1953,
+    "cec": "PASS",
+    "cec_interface": "AIGER_PI_PO_POSITIONAL_ORDER; symbol names may be absent after replay",
+    "critical_po_indices": [
+      20,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39
+    ],
+    "delay_ps": 49019.8633,
+    "input_sha256": "11d150ba66cd7b7953cc8da7397e6ccce49e45e040ce0bf2d4b64b8ec92f0768",
+    "input_structure_sha256": "ac784229bd230ffabba7d35ca648f52fc3ea9c752edfedafc3a46679cf98258c",
+    "mapped_gates": 27138,
+    "mapped_sha256": "0d07c0d190f750e3e7d3db8edd8e10a2e6c79f275bcae36ee6f3c01214635cec",
+    "provenance": {
+      "abc": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc",
+        "sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb"
+      },
+      "library": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/input/asap7",
+        "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+      },
+      "original": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0565_Ours/input.aig",
+        "sha256": "11d150ba66cd7b7953cc8da7397e6ccce49e45e040ce0bf2d4b64b8ec92f0768"
+      }
+    },
+    "runtime_s": 7.008005617186427,
+    "status": "PASS",
+    "timing_model": "ABC_SCL_LIBERTY",
+    "trace_semantics": "Native ABC min-slack traceback; mapped IDs are local to this mapping."
+  },
+  "original_is_separate_paid_measurement": true,
+  "proxy_best": null,
+  "regions": 1214,
+  "scope": "One final exact acceptance + CEC + actual Liberty timing, no retries or feedback.",
+  "selected": {
+    "aig": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0565_Ours/input.aig",
+    "applied_rewrites": 0,
+    "choices_sparse": {
+      "length": 0,
+      "default": 0,
+      "nonzero": []
+    },
+    "metrics": {
+      "abc_native_trace_endpoints": [
+        42,
+        20
+      ],
+      "adp": 1666439826.4628024,
+      "area": 33995.1953,
+      "cec": "PASS",
+      "cec_interface": "AIGER_PI_PO_POSITIONAL_ORDER; symbol names may be absent after replay",
+      "critical_po_indices": [
+        20,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39
+      ],
+      "delay_ps": 49019.8633,
+      "input_sha256": "11d150ba66cd7b7953cc8da7397e6ccce49e45e040ce0bf2d4b64b8ec92f0768",
+      "input_structure_sha256": "ac784229bd230ffabba7d35ca648f52fc3ea9c752edfedafc3a46679cf98258c",
+      "mapped_gates": 27138,
+      "mapped_sha256": "0d07c0d190f750e3e7d3db8edd8e10a2e6c79f275bcae36ee6f3c01214635cec",
+      "provenance": {
+        "abc": {
+          "path": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc",
+          "sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb"
+        },
+        "library": {
+          "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/input/asap7",
+          "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+        },
+        "original": {
+          "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0565_Ours/input.aig",
+          "sha256": "11d150ba66cd7b7953cc8da7397e6ccce49e45e040ce0bf2d4b64b8ec92f0768"
+        }
+      },
+      "runtime_s": 7.008005617186427,
+      "status": "PASS",
+      "timing_model": "ABC_SCL_LIBERTY",
+      "trace_semantics": "Native ABC min-slack traceback; mapped IDs are local to this mapping."
+    },
+    "source": "original_noop"
+  },
+  "selected_original_mffcs": 0,
+  "stages": [
+    {
+      "elapsed_s": 7.038201448973268,
+      "stage": "original_cec_mapping"
+    },
+    {
+      "elapsed_s": 0.24991050269454718,
+      "stage": "mffc_partition"
+    },
+    {
+      "elapsed_s": 4.57084393221885,
+      "stage": "candidate_enumeration"
+    },
+    {
+      "elapsed_s": 0.0016384050250053406,
+      "stage": "boolean_validation"
+    }
+  ],
+  "status": "PASS",
+  "structure": {
+    "max_layer_width": 1024,
+    "region_dag_layers": 5,
+    "region_edges": 2951,
+    "region_ports": 21508,
+    "regions": 1214
+  }
+}

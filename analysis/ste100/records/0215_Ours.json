@@ -1,0 +1,90 @@
+{
+  "index": 215,
+  "input": "forgeEDA/LoadBuffer.aig",
+  "input_sha256": "01eb785fa64c17bd72555d8a1f0dc4953c763bc92c5057a3dabb4dc9bd5a9e27",
+  "method": "Ours",
+  "status": "PASS",
+  "error": null,
+  "end_to_end_runtime_s": 8.69449026696384,
+  "result_path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0215_Ours/child_result.json",
+  "detail_path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0215_Ours",
+  "source_commit": "9a199bf0ea0dcf20bf55e40da8caa8b8bbff5fac",
+  "slurm_job_id": "65534",
+  "metrics": {
+    "status": "PASS",
+    "input_sha256": "01eb785fa64c17bd72555d8a1f0dc4953c763bc92c5057a3dabb4dc9bd5a9e27",
+    "provenance": {
+      "abc": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc",
+        "sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb"
+      },
+      "library": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/input/asap7",
+        "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+      },
+      "original": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0215_Ours/input.aig",
+        "sha256": "01eb785fa64c17bd72555d8a1f0dc4953c763bc92c5057a3dabb4dc9bd5a9e27"
+      }
+    },
+    "input_structure_sha256": "9f8b78442451aa0a70cd608d9ea8a9bca4c8c3eaaa1137ec47777d46115d686f",
+    "cec_interface": "AIGER_PI_PO_POSITIONAL_ORDER; symbol names may be absent after replay",
+    "cec": "PASS",
+    "timing_model": "ABC_SCL_LIBERTY",
+    "area": 5096.70117,
+    "delay_ps": 6008.5625,
+    "adp": 30623847.523768127,
+    "mapped_gates": 4656,
+    "critical_po_indices": [
+      129,
+      143,
+      157,
+      171,
+      185,
+      199,
+      213,
+      227,
+      241,
+      255,
+      269,
+      283,
+      297,
+      311,
+      325,
+      339,
+      353,
+      367,
+      381,
+      395,
+      409,
+      423,
+      437,
+      451,
+      465,
+      479,
+      493,
+      507,
+      521,
+      535,
+      549,
+      563,
+      577,
+      591,
+      605,
+      619,
+      633
+    ],
+    "abc_native_trace_endpoints": [
+      761,
+      129
+    ],
+    "trace_semantics": "Native ABC min-slack traceback; mapped IDs are local to this mapping.",
+    "mapped_sha256": "82237e4c0cbcfd3bc8538601db2d25dc04fc855335fd510da7f74ea8d4df86c0",
+    "runtime_s": 1.4054109454154968
+  },
+  "final_source": "original_fallback",
+  "backend": {
+    "device": "cuda",
+    "reason": "Candidate/Region workload exceeds fixed CPU thresholds."
+  }
+}

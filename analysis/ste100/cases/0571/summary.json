@@ -1,0 +1,208 @@
+{
+  "adam_steps": 40,
+  "backend": {
+    "device": "cuda",
+    "reason": "Candidate/Region workload exceeds fixed CPU thresholds."
+  },
+  "candidates": 653,
+  "config": {
+    "allow_nonpositive_gain": false,
+    "area_limit_ratio": 1.05,
+    "cpu_small_decisions": 32,
+    "cpu_small_regions": 1024,
+    "learning_rate": 0.12,
+    "maximum_edits": 16,
+    "seed": 20261117,
+    "steps": 40,
+    "timeout_s": 900
+  },
+  "decisions": 448,
+  "distinct_hard_combinations_including_noop": 1,
+  "final_candidate": null,
+  "logits_total_change_norm": 0.1444428694812115,
+  "mapping_calls": 1,
+  "native_profiles": [
+    {
+      "backend": "mffc_ready_queue_cuda",
+      "blocks": 32,
+      "calls_cumulative": {
+        "backward": 0,
+        "forward": 1
+      },
+      "kernel_ms_since_collect": {
+        "backward": 0,
+        "forward": 12.96076774597168
+      },
+      "max_layer_width": 10240,
+      "ports": 39948,
+      "region_dag_layers": 474,
+      "region_thread_group": "warp32",
+      "regions": 15794,
+      "scope": "Native per-region forward and reverse dependencies on GPU; no CPU DAG adjoint. Kernel time excludes tensor aggregation and is not end-to-end runtime.",
+      "stage": "initialization",
+      "threads_per_block": 128
+    },
+    {
+      "backend": "mffc_ready_queue_cuda",
+      "blocks": 32,
+      "calls_cumulative": {
+        "backward": 40,
+        "forward": 42
+      },
+      "kernel_ms_since_collect": {
+        "backward": 544.6246070861816,
+        "forward": 463.710111618042
+      },
+      "max_layer_width": 10240,
+      "ports": 39948,
+      "region_dag_layers": 474,
+      "region_thread_group": "warp32",
+      "regions": 15794,
+      "scope": "Native per-region forward and reverse dependencies on GPU; no CPU DAG adjoint. Kernel time excludes tensor aggregation and is not end-to-end runtime.",
+      "stage": "ste_adam_optimization",
+      "threads_per_block": 128
+    }
+  ],
+  "noop_semantics": "Unmodified original AIG; no serialized replay-noop.",
+  "original": {
+    "abc_native_trace_endpoints": [
+      3036,
+      15918
+    ],
+    "adp": 197332320.45970666,
+    "area": 35961.7461,
+    "cec": "PASS",
+    "cec_interface": "AIGER_PI_PO_POSITIONAL_ORDER; symbol names may be absent after replay",
+    "critical_po_indices": [
+      15918
+    ],
+    "delay_ps": 5487.28418,
+    "input_sha256": "4c3d4bb31b55ba616da3bd8bbf0605454977be4d6c46ef483e9d32804e3975cd",
+    "input_structure_sha256": "0d9fe03ff1e08af6538ff67e4e2e0f496a21b504c02cc6427d2f0f82d2454ae4",
+    "mapped_gates": 20229,
+    "mapped_sha256": "91e9f4e6b82dd067305722c51b78db2e615228b65bd335770b08e4722bc91c2f",
+    "provenance": {
+      "abc": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc",
+        "sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb"
+      },
+      "library": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/input/asap7",
+        "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+      },
+      "original": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0571_Ours/input.aig",
+        "sha256": "4c3d4bb31b55ba616da3bd8bbf0605454977be4d6c46ef483e9d32804e3975cd"
+      }
+    },
+    "runtime_s": 3.742395631968975,
+    "status": "PASS",
+    "timing_model": "ABC_SCL_LIBERTY",
+    "trace_semantics": "Native ABC min-slack traceback; mapped IDs are local to this mapping."
+  },
+  "original_is_separate_paid_measurement": true,
+  "proxy_best": {
+    "area": 35961.7461,
+    "choices_sparse": {
+      "length": 448,
+      "default": 0,
+      "nonzero": []
+    },
+    "delay_ps": 5487.28418,
+    "edits": [],
+    "predicted_objective": 1.0482573384861325,
+    "source": "original_noop",
+    "step": -1
+  },
+  "regions": 15794,
+  "scope": "One final exact acceptance + CEC + actual Liberty timing, no retries or feedback.",
+  "selected": {
+    "aig": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0571_Ours/input.aig",
+    "applied_rewrites": 0,
+    "choices_sparse": {
+      "length": 448,
+      "default": 0,
+      "nonzero": []
+    },
+    "metrics": {
+      "abc_native_trace_endpoints": [
+        3036,
+        15918
+      ],
+      "adp": 197332320.45970666,
+      "area": 35961.7461,
+      "cec": "PASS",
+      "cec_interface": "AIGER_PI_PO_POSITIONAL_ORDER; symbol names may be absent after replay",
+      "critical_po_indices": [
+        15918
+      ],
+      "delay_ps": 5487.28418,
+      "input_sha256": "4c3d4bb31b55ba616da3bd8bbf0605454977be4d6c46ef483e9d32804e3975cd",
+      "input_structure_sha256": "0d9fe03ff1e08af6538ff67e4e2e0f496a21b504c02cc6427d2f0f82d2454ae4",
+      "mapped_gates": 20229,
+      "mapped_sha256": "91e9f4e6b82dd067305722c51b78db2e615228b65bd335770b08e4722bc91c2f",
+      "provenance": {
+        "abc": {
+          "path": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc",
+          "sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb"
+        },
+        "library": {
+          "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/input/asap7",
+          "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+        },
+        "original": {
+          "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0571_Ours/input.aig",
+          "sha256": "4c3d4bb31b55ba616da3bd8bbf0605454977be4d6c46ef483e9d32804e3975cd"
+        }
+      },
+      "runtime_s": 3.742395631968975,
+      "status": "PASS",
+      "timing_model": "ABC_SCL_LIBERTY",
+      "trace_semantics": "Native ABC min-slack traceback; mapped IDs are local to this mapping."
+    },
+    "source": "original_noop"
+  },
+  "selected_original_mffcs": 0,
+  "stages": [
+    {
+      "elapsed_s": 3.9132743100635707,
+      "stage": "original_cec_mapping"
+    },
+    {
+      "elapsed_s": 0.29578957613557577,
+      "stage": "mffc_partition"
+    },
+    {
+      "elapsed_s": 1.7065332382917404,
+      "stage": "candidate_enumeration"
+    },
+    {
+      "elapsed_s": 0.04941840376704931,
+      "stage": "boolean_validation"
+    },
+    {
+      "elapsed_s": 0.07172040920704603,
+      "stage": "candidate_reuse_preflight"
+    },
+    {
+      "elapsed_s": 1.095000486355275,
+      "stage": "litecut_preparation_inference"
+    },
+    {
+      "elapsed_s": 1.199514308013022,
+      "stage": "global_model_preparation"
+    },
+    {
+      "elapsed_s": 1.4746927260421216,
+      "stage": "ste_adam_proxy_optimization"
+    }
+  ],
+  "status": "PASS",
+  "structure": {
+    "max_layer_width": 10240,
+    "region_dag_layers": 474,
+    "region_edges": 18444,
+    "region_ports": 39948,
+    "regions": 15794
+  }
+}

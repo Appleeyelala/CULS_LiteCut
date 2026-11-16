@@ -1,0 +1,54 @@
+{
+  "index": 250,
+  "input": "forgeEDA/NV_NVDLA_CDP_HLS_icvt.aig",
+  "input_sha256": "a66fc0582c5281a10bada1ef102edd5425613a1542716d80550c756e330cd3a3",
+  "method": "A",
+  "status": "PASS",
+  "error": null,
+  "end_to_end_runtime_s": 1.7725492818281054,
+  "result_path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0250_A/child_result.json",
+  "detail_path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0250_A",
+  "source_commit": "9a199bf0ea0dcf20bf55e40da8caa8b8bbff5fac",
+  "slurm_job_id": "65534",
+  "metrics": {
+    "status": "PASS",
+    "input_sha256": "a66fc0582c5281a10bada1ef102edd5425613a1542716d80550c756e330cd3a3",
+    "provenance": {
+      "abc": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc",
+        "sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb"
+      },
+      "library": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/input/asap7",
+        "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+      },
+      "original": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0250_A/input.aig",
+        "sha256": "a66fc0582c5281a10bada1ef102edd5425613a1542716d80550c756e330cd3a3"
+      }
+    },
+    "input_structure_sha256": "48bf05925072c414764ba1f5741ecadb4d90f5c18bb072f2f5993e324ee1b150",
+    "cec_interface": "AIGER_PI_PO_POSITIONAL_ORDER; symbol names may be absent after replay",
+    "cec": "PASS",
+    "timing_model": "ABC_SCL_LIBERTY",
+    "area": 4679.36377,
+    "delay_ps": 1120.94592,
+    "adp": 5245313.726177318,
+    "mapped_gates": 6219,
+    "critical_po_indices": [
+      110
+    ],
+    "abc_native_trace_endpoints": [
+      302,
+      110
+    ],
+    "trace_semantics": "Native ABC min-slack traceback; mapped IDs are local to this mapping.",
+    "mapped_sha256": "ea551fdd5bc791cc70778eb0bcd0afca4a8ec9da1f8a6d2b1ac32aece39dd081",
+    "runtime_s": 1.3578657498583198
+  },
+  "final_source": "original",
+  "backend": {
+    "device": "cpu",
+    "reason": "ABC baseline; no candidate/ML preparation."
+  }
+}

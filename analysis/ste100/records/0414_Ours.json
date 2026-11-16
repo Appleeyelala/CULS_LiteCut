@@ -1,0 +1,54 @@
+{
+  "index": 414,
+  "input": "forgeEDA/crc32_dat128_flat.aig",
+  "input_sha256": "8b9de84a21a1cb37a980ab572aa08fb47df29f207dcb5cc13b3a922ebd5e1d61",
+  "method": "Ours",
+  "status": "PASS",
+  "error": null,
+  "end_to_end_runtime_s": 3.4806880988180637,
+  "result_path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0414_Ours/child_result.json",
+  "detail_path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0414_Ours",
+  "source_commit": "9a199bf0ea0dcf20bf55e40da8caa8b8bbff5fac",
+  "slurm_job_id": "65534",
+  "metrics": {
+    "status": "PASS",
+    "input_sha256": "8b9de84a21a1cb37a980ab572aa08fb47df29f207dcb5cc13b3a922ebd5e1d61",
+    "provenance": {
+      "abc": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc",
+        "sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb"
+      },
+      "library": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/input/asap7",
+        "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+      },
+      "original": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0414_Ours/input.aig",
+        "sha256": "8b9de84a21a1cb37a980ab572aa08fb47df29f207dcb5cc13b3a922ebd5e1d61"
+      }
+    },
+    "input_structure_sha256": "dd1a375873943b747eeca701cc94e1aab97c5dfdbad189b4575a65c67eda557e",
+    "cec_interface": "AIGER_PI_PO_POSITIONAL_ORDER; symbol names may be absent after replay",
+    "cec": "PASS",
+    "timing_model": "ABC_SCL_LIBERTY",
+    "area": 7657.18262,
+    "delay_ps": 552.480347,
+    "adp": 4230442.910939969,
+    "mapped_gates": 5379,
+    "critical_po_indices": [
+      621
+    ],
+    "abc_native_trace_endpoints": [
+      134,
+      621
+    ],
+    "trace_semantics": "Native ABC min-slack traceback; mapped IDs are local to this mapping.",
+    "mapped_sha256": "b4d5a90803f5ae3469fd12933a919d2a38c787a091f16beb72ea0b7653f107ef",
+    "runtime_s": 1.007208094932139
+  },
+  "final_source": "original_noop",
+  "backend": {
+    "device": "none",
+    "reason": "No verified executable decisions; Student/proxy not loaded."
+  }
+}

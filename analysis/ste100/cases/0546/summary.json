@@ -1,0 +1,222 @@
+{
+  "adam_steps": 40,
+  "backend": {
+    "device": "cuda",
+    "reason": "Candidate/Region workload exceeds fixed CPU thresholds."
+  },
+  "candidates": 2144,
+  "config": {
+    "allow_nonpositive_gain": false,
+    "area_limit_ratio": 1.05,
+    "cpu_small_decisions": 32,
+    "cpu_small_regions": 1024,
+    "learning_rate": 0.12,
+    "maximum_edits": 16,
+    "seed": 20261117,
+    "steps": 40,
+    "timeout_s": 900
+  },
+  "decisions": 1012,
+  "distinct_hard_combinations_including_noop": 1,
+  "final_candidate": null,
+  "logits_total_change_norm": 0.01205648259759592,
+  "mapping_calls": 1,
+  "native_profiles": [
+    {
+      "backend": "mffc_ready_queue_cuda",
+      "blocks": 32,
+      "calls_cumulative": {
+        "backward": 0,
+        "forward": 1
+      },
+      "kernel_ms_since_collect": {
+        "backward": 0,
+        "forward": 1.0751999616622925
+      },
+      "max_layer_width": 270,
+      "ports": 4495,
+      "region_dag_layers": 28,
+      "region_thread_group": "warp32",
+      "regions": 876,
+      "scope": "Native per-region forward and reverse dependencies on GPU; no CPU DAG adjoint. Kernel time excludes tensor aggregation and is not end-to-end runtime.",
+      "stage": "initialization",
+      "threads_per_block": 128
+    },
+    {
+      "backend": "mffc_ready_queue_cuda",
+      "blocks": 32,
+      "calls_cumulative": {
+        "backward": 40,
+        "forward": 42
+      },
+      "kernel_ms_since_collect": {
+        "backward": 25.787392020225525,
+        "forward": 24.3957759141922
+      },
+      "max_layer_width": 270,
+      "ports": 4495,
+      "region_dag_layers": 28,
+      "region_thread_group": "warp32",
+      "regions": 876,
+      "scope": "Native per-region forward and reverse dependencies on GPU; no CPU DAG adjoint. Kernel time excludes tensor aggregation and is not end-to-end runtime.",
+      "stage": "ste_adam_optimization",
+      "threads_per_block": 128
+    }
+  ],
+  "noop_semantics": "Unmodified original AIG; no serialized replay-noop.",
+  "original": {
+    "abc_native_trace_endpoints": [
+      72,
+      94
+    ],
+    "adp": 4783279.625678986,
+    "area": 4066.30371,
+    "cec": "PASS",
+    "cec_interface": "AIGER_PI_PO_POSITIONAL_ORDER; symbol names may be absent after replay",
+    "critical_po_indices": [
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101
+    ],
+    "delay_ps": 1176.32129,
+    "input_sha256": "e87bc1540d1033090816689df37129fbaa620e916ff82a645d2a7afa1de44e7a",
+    "input_structure_sha256": "2af33f09b659850d9347be3b229f76dc1098e5fe4d0d023f7c54693cbaaa7517",
+    "mapped_gates": 3720,
+    "mapped_sha256": "136729cda8442adfe3e1354da33148a6c9366411c8417382161c484569ee04de",
+    "provenance": {
+      "abc": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc",
+        "sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb"
+      },
+      "library": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/input/asap7",
+        "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+      },
+      "original": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0546_Ours/input.aig",
+        "sha256": "e87bc1540d1033090816689df37129fbaa620e916ff82a645d2a7afa1de44e7a"
+      }
+    },
+    "runtime_s": 1.6536306613124907,
+    "status": "PASS",
+    "timing_model": "ABC_SCL_LIBERTY",
+    "trace_semantics": "Native ABC min-slack traceback; mapped IDs are local to this mapping."
+  },
+  "original_is_separate_paid_measurement": true,
+  "proxy_best": {
+    "area": 4066.30371,
+    "choices_sparse": {
+      "length": 1012,
+      "default": 0,
+      "nonzero": []
+    },
+    "delay_ps": 1176.32129,
+    "edits": [],
+    "predicted_objective": 1.0415888309718602,
+    "source": "original_noop",
+    "step": -1
+  },
+  "regions": 876,
+  "scope": "One final exact acceptance + CEC + actual Liberty timing, no retries or feedback.",
+  "selected": {
+    "aig": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0546_Ours/input.aig",
+    "applied_rewrites": 0,
+    "choices_sparse": {
+      "length": 1012,
+      "default": 0,
+      "nonzero": []
+    },
+    "metrics": {
+      "abc_native_trace_endpoints": [
+        72,
+        94
+      ],
+      "adp": 4783279.625678986,
+      "area": 4066.30371,
+      "cec": "PASS",
+      "cec_interface": "AIGER_PI_PO_POSITIONAL_ORDER; symbol names may be absent after replay",
+      "critical_po_indices": [
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101
+      ],
+      "delay_ps": 1176.32129,
+      "input_sha256": "e87bc1540d1033090816689df37129fbaa620e916ff82a645d2a7afa1de44e7a",
+      "input_structure_sha256": "2af33f09b659850d9347be3b229f76dc1098e5fe4d0d023f7c54693cbaaa7517",
+      "mapped_gates": 3720,
+      "mapped_sha256": "136729cda8442adfe3e1354da33148a6c9366411c8417382161c484569ee04de",
+      "provenance": {
+        "abc": {
+          "path": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc",
+          "sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb"
+        },
+        "library": {
+          "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/input/asap7",
+          "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+        },
+        "original": {
+          "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0546_Ours/input.aig",
+          "sha256": "e87bc1540d1033090816689df37129fbaa620e916ff82a645d2a7afa1de44e7a"
+        }
+      },
+      "runtime_s": 1.6536306613124907,
+      "status": "PASS",
+      "timing_model": "ABC_SCL_LIBERTY",
+      "trace_semantics": "Native ABC min-slack traceback; mapped IDs are local to this mapping."
+    },
+    "source": "original_noop"
+  },
+  "selected_original_mffcs": 0,
+  "stages": [
+    {
+      "elapsed_s": 1.6583181591704488,
+      "stage": "original_cec_mapping"
+    },
+    {
+      "elapsed_s": 0.031743734143674374,
+      "stage": "mffc_partition"
+    },
+    {
+      "elapsed_s": 0.9009547550231218,
+      "stage": "candidate_enumeration"
+    },
+    {
+      "elapsed_s": 0.09873933810740709,
+      "stage": "boolean_validation"
+    },
+    {
+      "elapsed_s": 0.07904446916654706,
+      "stage": "candidate_reuse_preflight"
+    },
+    {
+      "elapsed_s": 1.5764071489684284,
+      "stage": "litecut_preparation_inference"
+    },
+    {
+      "elapsed_s": 0.983099807985127,
+      "stage": "global_model_preparation"
+    },
+    {
+      "elapsed_s": 0.257652317173779,
+      "stage": "ste_adam_proxy_optimization"
+    }
+  ],
+  "status": "PASS",
+  "structure": {
+    "max_layer_width": 270,
+    "region_dag_layers": 28,
+    "region_edges": 1915,
+    "region_ports": 4495,
+    "regions": 876
+  }
+}

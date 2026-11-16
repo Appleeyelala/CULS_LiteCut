@@ -1,0 +1,573 @@
+{
+  "adam_steps": 40,
+  "backend": {
+    "device": "cuda",
+    "reason": "Candidate/Region workload exceeds fixed CPU thresholds."
+  },
+  "candidates": 68,
+  "config": {
+    "allow_nonpositive_gain": false,
+    "area_limit_ratio": 1.05,
+    "cpu_small_decisions": 32,
+    "cpu_small_regions": 1024,
+    "learning_rate": 0.12,
+    "maximum_edits": 16,
+    "seed": 20261117,
+    "steps": 40,
+    "timeout_s": 900
+  },
+  "decisions": 29,
+  "distinct_hard_combinations_including_noop": 2,
+  "final_candidate": {
+    "aig": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0475_Ours/work/final/eval_0000/rewrite/raw/aigs/choice.aig",
+    "applied_rewrites": 1,
+    "choices_sparse": {
+      "length": 29,
+      "default": 0,
+      "nonzero": [
+        [
+          3,
+          1
+        ]
+      ]
+    },
+    "index": 0,
+    "method": "final",
+    "metrics": {
+      "abc_native_trace_endpoints": [
+        1843,
+        1878
+      ],
+      "adp": 23326867.340097554,
+      "area": 7834.24219,
+      "cec": "PASS",
+      "cec_interface": "AIGER_PI_PO_POSITIONAL_ORDER; symbol names may be absent after replay",
+      "critical_po_indices": [
+        1878,
+        1879,
+        1880,
+        1881,
+        1882,
+        1883,
+        1884,
+        1885,
+        1886,
+        1887,
+        1888,
+        1889,
+        1890,
+        1891,
+        1892,
+        1893,
+        1894,
+        1895,
+        1896,
+        1897,
+        1898,
+        1899,
+        1900,
+        1901,
+        1902,
+        1903,
+        1904,
+        1905,
+        1906,
+        1907,
+        1908,
+        1909,
+        1910,
+        1911,
+        1912,
+        1913,
+        1914,
+        1915,
+        1916,
+        1917,
+        1918,
+        1919,
+        1920,
+        1921,
+        1922,
+        1923,
+        1924,
+        1925,
+        1926,
+        1927,
+        1928,
+        1929,
+        1930,
+        1931,
+        1932,
+        1933,
+        1934,
+        1935,
+        1936,
+        1937,
+        1938,
+        1939,
+        1940,
+        1941,
+        1942,
+        1943,
+        1944,
+        1945,
+        1946,
+        1947,
+        1948,
+        1949,
+        1950,
+        1951,
+        1952,
+        1953,
+        1954,
+        1955,
+        1956,
+        1957,
+        1958,
+        1959,
+        1960,
+        1961,
+        1962,
+        1963,
+        1964,
+        1965,
+        1966,
+        1967,
+        1968
+      ],
+      "delay_ps": 2977.55249,
+      "input_sha256": "cfab37fc0d346563c21ccc5bcb0a7d1aed8c254a37aef213bda32864d79cf409",
+      "input_structure_sha256": "a6fedc86e2f8ea514f476fa0798cb0bd41abc32b72b3d9f7f1ed70d590d7ad7a",
+      "mapped_gates": 9263,
+      "mapped_sha256": "8291bffc7e47042a21133ad9b7fc54dc39a97dfcfd1b374749e6d353273c4fe1",
+      "provenance": {
+        "abc": {
+          "path": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc",
+          "sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb"
+        },
+        "library": {
+          "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/input/asap7",
+          "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+        },
+        "original": {
+          "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0475_Ours/input.aig",
+          "sha256": "5a8efb803c864a3b4cc5cfa27bbced141e75070ea9d60ef8437f811f4d0db8e7"
+        }
+      },
+      "runtime_s": 1.6982276672497392,
+      "status": "PASS",
+      "timing_model": "ABC_SCL_LIBERTY",
+      "trace_semantics": "Native ABC min-slack traceback; mapped IDs are local to this mapping."
+    },
+    "prediction_before_evaluation": {
+      "area": 7837.0415,
+      "choices_sparse": {
+        "length": 29,
+        "default": 0,
+        "nonzero": [
+          [
+            3,
+            1
+          ]
+        ]
+      },
+      "delay_ps": 2990.47656,
+      "edits": [
+        [
+          3,
+          1
+        ]
+      ],
+      "predicted_objective": 1.1116643657583754,
+      "source": "ste_adam_proxy_best",
+      "step": 9
+    },
+    "runtime_s": 3.6273865210823715,
+    "status": "PASS"
+  },
+  "logits_total_change_norm": 4.479585840090369,
+  "mapping_calls": 2,
+  "native_profiles": [
+    {
+      "backend": "mffc_ready_queue_cuda",
+      "blocks": 32,
+      "calls_cumulative": {
+        "backward": 0,
+        "forward": 1
+      },
+      "kernel_ms_since_collect": {
+        "backward": 0,
+        "forward": 2.279423952102661
+      },
+      "max_layer_width": 1917,
+      "ports": 13665,
+      "region_dag_layers": 5,
+      "region_thread_group": "warp32",
+      "regions": 3173,
+      "scope": "Native per-region forward and reverse dependencies on GPU; no CPU DAG adjoint. Kernel time excludes tensor aggregation and is not end-to-end runtime.",
+      "stage": "initialization",
+      "threads_per_block": 128
+    },
+    {
+      "backend": "mffc_ready_queue_cuda",
+      "blocks": 32,
+      "calls_cumulative": {
+        "backward": 40,
+        "forward": 42
+      },
+      "kernel_ms_since_collect": {
+        "backward": 97.29228830337524,
+        "forward": 93.08979177474976
+      },
+      "max_layer_width": 1917,
+      "ports": 13665,
+      "region_dag_layers": 5,
+      "region_thread_group": "warp32",
+      "regions": 3173,
+      "scope": "Native per-region forward and reverse dependencies on GPU; no CPU DAG adjoint. Kernel time excludes tensor aggregation and is not end-to-end runtime.",
+      "stage": "ste_adam_optimization",
+      "threads_per_block": 128
+    }
+  ],
+  "noop_semantics": "Unmodified original AIG; no serialized replay-noop.",
+  "original": {
+    "abc_native_trace_endpoints": [
+      1843,
+      1878
+    ],
+    "adp": 23436488.90549724,
+    "area": 7837.0415,
+    "cec": "PASS",
+    "cec_interface": "AIGER_PI_PO_POSITIONAL_ORDER; symbol names may be absent after replay",
+    "critical_po_indices": [
+      1878,
+      1879,
+      1880,
+      1881,
+      1882,
+      1883,
+      1884,
+      1885,
+      1886,
+      1887,
+      1888,
+      1889,
+      1890,
+      1891,
+      1892,
+      1893,
+      1894,
+      1895,
+      1896,
+      1897,
+      1898,
+      1899,
+      1900,
+      1901,
+      1902,
+      1903,
+      1904,
+      1905,
+      1906,
+      1907,
+      1908,
+      1909,
+      1910,
+      1911,
+      1912,
+      1913,
+      1914,
+      1915,
+      1916,
+      1917,
+      1918,
+      1919,
+      1920,
+      1921,
+      1922,
+      1923,
+      1924,
+      1925,
+      1926,
+      1927,
+      1928,
+      1929,
+      1930,
+      1931,
+      1932,
+      1933,
+      1934,
+      1935,
+      1936,
+      1937,
+      1938,
+      1939,
+      1940,
+      1941,
+      1942,
+      1943,
+      1944,
+      1945,
+      1946,
+      1947,
+      1948,
+      1949,
+      1950,
+      1951,
+      1952,
+      1953,
+      1954,
+      1955,
+      1956,
+      1957,
+      1958,
+      1959,
+      1960,
+      1961,
+      1962,
+      1963,
+      1964,
+      1965,
+      1966,
+      1967,
+      1968
+    ],
+    "delay_ps": 2990.47656,
+    "input_sha256": "5a8efb803c864a3b4cc5cfa27bbced141e75070ea9d60ef8437f811f4d0db8e7",
+    "input_structure_sha256": "ed743d4a31e13a9fcb1301169f8d71edb5a00badb9cb4265447fe792ae04d0d6",
+    "mapped_gates": 9264,
+    "mapped_sha256": "c95c6dc083f0627f935a34be23846d98f95329cab85dab3cb0a99212ae2290aa",
+    "provenance": {
+      "abc": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc",
+        "sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb"
+      },
+      "library": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/input/asap7",
+        "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+      },
+      "original": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0475_Ours/input.aig",
+        "sha256": "5a8efb803c864a3b4cc5cfa27bbced141e75070ea9d60ef8437f811f4d0db8e7"
+      }
+    },
+    "runtime_s": 1.669003644026816,
+    "status": "PASS",
+    "timing_model": "ABC_SCL_LIBERTY",
+    "trace_semantics": "Native ABC min-slack traceback; mapped IDs are local to this mapping."
+  },
+  "original_is_separate_paid_measurement": true,
+  "proxy_best": {
+    "area": 7837.0415,
+    "choices_sparse": {
+      "length": 29,
+      "default": 0,
+      "nonzero": [
+        [
+          3,
+          1
+        ]
+      ]
+    },
+    "delay_ps": 2990.47656,
+    "edits": [
+      [
+        3,
+        1
+      ]
+    ],
+    "predicted_objective": 1.1116643657583754,
+    "source": "ste_adam_proxy_best",
+    "step": 9
+  },
+  "regions": 3173,
+  "scope": "One final exact acceptance + CEC + actual Liberty timing, no retries or feedback.",
+  "selected": {
+    "aig": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0475_Ours/work/final/eval_0000/rewrite/raw/aigs/choice.aig",
+    "applied_rewrites": 1,
+    "choices_sparse": {
+      "length": 29,
+      "default": 0,
+      "nonzero": [
+        [
+          3,
+          1
+        ]
+      ]
+    },
+    "metrics": {
+      "abc_native_trace_endpoints": [
+        1843,
+        1878
+      ],
+      "adp": 23326867.340097554,
+      "area": 7834.24219,
+      "cec": "PASS",
+      "cec_interface": "AIGER_PI_PO_POSITIONAL_ORDER; symbol names may be absent after replay",
+      "critical_po_indices": [
+        1878,
+        1879,
+        1880,
+        1881,
+        1882,
+        1883,
+        1884,
+        1885,
+        1886,
+        1887,
+        1888,
+        1889,
+        1890,
+        1891,
+        1892,
+        1893,
+        1894,
+        1895,
+        1896,
+        1897,
+        1898,
+        1899,
+        1900,
+        1901,
+        1902,
+        1903,
+        1904,
+        1905,
+        1906,
+        1907,
+        1908,
+        1909,
+        1910,
+        1911,
+        1912,
+        1913,
+        1914,
+        1915,
+        1916,
+        1917,
+        1918,
+        1919,
+        1920,
+        1921,
+        1922,
+        1923,
+        1924,
+        1925,
+        1926,
+        1927,
+        1928,
+        1929,
+        1930,
+        1931,
+        1932,
+        1933,
+        1934,
+        1935,
+        1936,
+        1937,
+        1938,
+        1939,
+        1940,
+        1941,
+        1942,
+        1943,
+        1944,
+        1945,
+        1946,
+        1947,
+        1948,
+        1949,
+        1950,
+        1951,
+        1952,
+        1953,
+        1954,
+        1955,
+        1956,
+        1957,
+        1958,
+        1959,
+        1960,
+        1961,
+        1962,
+        1963,
+        1964,
+        1965,
+        1966,
+        1967,
+        1968
+      ],
+      "delay_ps": 2977.55249,
+      "input_sha256": "cfab37fc0d346563c21ccc5bcb0a7d1aed8c254a37aef213bda32864d79cf409",
+      "input_structure_sha256": "a6fedc86e2f8ea514f476fa0798cb0bd41abc32b72b3d9f7f1ed70d590d7ad7a",
+      "mapped_gates": 9263,
+      "mapped_sha256": "8291bffc7e47042a21133ad9b7fc54dc39a97dfcfd1b374749e6d353273c4fe1",
+      "provenance": {
+        "abc": {
+          "path": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc",
+          "sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb"
+        },
+        "library": {
+          "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/input/asap7",
+          "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+        },
+        "original": {
+          "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0475_Ours/input.aig",
+          "sha256": "5a8efb803c864a3b4cc5cfa27bbced141e75070ea9d60ef8437f811f4d0db8e7"
+        }
+      },
+      "runtime_s": 1.6982276672497392,
+      "status": "PASS",
+      "timing_model": "ABC_SCL_LIBERTY",
+      "trace_semantics": "Native ABC min-slack traceback; mapped IDs are local to this mapping."
+    },
+    "source": "ste_adam_verified_improvement"
+  },
+  "selected_original_mffcs": 1,
+  "stages": [
+    {
+      "elapsed_s": 1.6896044830791652,
+      "stage": "original_cec_mapping"
+    },
+    {
+      "elapsed_s": 0.06139759672805667,
+      "stage": "mffc_partition"
+    },
+    {
+      "elapsed_s": 1.6316046020947397,
+      "stage": "candidate_enumeration"
+    },
+    {
+      "elapsed_s": 0.03241591900587082,
+      "stage": "boolean_validation"
+    },
+    {
+      "elapsed_s": 0.05279849004000425,
+      "stage": "candidate_reuse_preflight"
+    },
+    {
+      "elapsed_s": 0.5492293639108539,
+      "stage": "litecut_preparation_inference"
+    },
+    {
+      "elapsed_s": 1.3604901968501508,
+      "stage": "global_model_preparation"
+    },
+    {
+      "elapsed_s": 0.4458456230349839,
+      "stage": "ste_adam_proxy_optimization"
+    },
+    {
+      "elapsed_s": 3.6514210058376193,
+      "stage": "final_replay_cec_mapping"
+    }
+  ],
+  "status": "PASS",
+  "structure": {
+    "max_layer_width": 1917,
+    "region_dag_layers": 5,
+    "region_edges": 5824,
+    "region_ports": 13665,
+    "regions": 3173
+  }
+}

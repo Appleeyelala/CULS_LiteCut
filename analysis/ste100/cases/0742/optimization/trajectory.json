@@ -1,0 +1,659 @@
+{
+  "anchor_area_error": 0.0,
+  "anchor_po_max_error_ps": 3.637978807091713e-12,
+  "device": "cuda:0",
+  "distinct_hard_combinations_including_noop": 2,
+  "dtype": "torch.float64",
+  "gradient_clip": 5.0,
+  "learning_rate": 0.12,
+  "logits_total_change_norm": 9.606463177591074,
+  "maximum_edits": 16,
+  "optimizer_parameters": "candidate_logits_only",
+  "proxy_parameters_frozen": true,
+  "restarts": 1,
+  "schema": "mffc_softmax_ste_adam_v1",
+  "scope": "Proxy scores only. No measured candidate feedback or online calibration.",
+  "seed": 20261117,
+  "steps": 40,
+  "temperature": [
+    1.0,
+    0.3
+  ],
+  "trajectory": [
+    {
+      "adam_update_norm": 0.35679478306568824,
+      "hard_edits": [],
+      "host_candidate_rows": 0,
+      "logits_gradient_norm": 0.002787306747918565,
+      "loss": 1.1393958133980318,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28528.906199999998,
+      "selection_changed": false,
+      "step": 0,
+      "temperature": 1.0
+    },
+    {
+      "adam_update_norm": 0.3558326336644199,
+      "hard_edits": [],
+      "host_candidate_rows": 0,
+      "logits_gradient_norm": 0.0032008408278377666,
+      "loss": 1.1393958133980318,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28528.906199999998,
+      "selection_changed": false,
+      "step": 1,
+      "temperature": 0.982051282051282
+    },
+    {
+      "adam_update_norm": 0.3543824094141808,
+      "hard_edits": [],
+      "host_candidate_rows": 0,
+      "logits_gradient_norm": 0.00371816340234212,
+      "loss": 1.1393958133980318,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28528.906199999998,
+      "selection_changed": false,
+      "step": 2,
+      "temperature": 0.9641025641025641
+    },
+    {
+      "adam_update_norm": 0.3525321999961608,
+      "hard_edits": [],
+      "host_candidate_rows": 0,
+      "logits_gradient_norm": 0.004324149155956074,
+      "loss": 1.1393958133980318,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28528.906199999998,
+      "selection_changed": false,
+      "step": 3,
+      "temperature": 0.9461538461538461
+    },
+    {
+      "adam_update_norm": 0.35045772411407017,
+      "hard_edits": [],
+      "host_candidate_rows": 0,
+      "logits_gradient_norm": 0.004994521494680465,
+      "loss": 1.1393958133980318,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28528.906199999998,
+      "selection_changed": false,
+      "step": 4,
+      "temperature": 0.9282051282051282
+    },
+    {
+      "adam_update_norm": 0.3483853585300275,
+      "hard_edits": [],
+      "host_candidate_rows": 0,
+      "logits_gradient_norm": 0.005691184373910367,
+      "loss": 1.1393958133980318,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28528.906199999998,
+      "selection_changed": false,
+      "step": 5,
+      "temperature": 0.9102564102564102
+    },
+    {
+      "adam_update_norm": 0.346537493307812,
+      "hard_edits": [],
+      "host_candidate_rows": 0,
+      "logits_gradient_norm": 0.006357427112740374,
+      "loss": 1.1393958133980318,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28528.906199999998,
+      "selection_changed": false,
+      "step": 6,
+      "temperature": 0.8923076923076924
+    },
+    {
+      "adam_update_norm": 0.34506937093890533,
+      "hard_edits": [],
+      "host_candidate_rows": 0,
+      "logits_gradient_norm": 0.006916785044104612,
+      "loss": 1.1393958133980318,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28528.906199999998,
+      "selection_changed": false,
+      "step": 7,
+      "temperature": 0.8743589743589744
+    },
+    {
+      "adam_update_norm": 0.34400298392287537,
+      "hard_edits": [],
+      "host_candidate_rows": 0,
+      "logits_gradient_norm": 0.0072798776950868645,
+      "loss": 1.1393958133980318,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28528.906199999998,
+      "selection_changed": false,
+      "step": 8,
+      "temperature": 0.8564102564102565
+    },
+    {
+      "adam_update_norm": 0.3484778553693823,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 3,
+      "logits_gradient_norm": 0.006838452337131902,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": true,
+      "step": 9,
+      "temperature": 0.8384615384615385
+    },
+    {
+      "adam_update_norm": 0.35857770202367606,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 3,
+      "logits_gradient_norm": 0.006606622745237824,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 10,
+      "temperature": 0.8205128205128205
+    },
+    {
+      "adam_update_norm": 0.365032555490088,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 3,
+      "logits_gradient_norm": 0.006073096864631673,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 11,
+      "temperature": 0.8025641025641026
+    },
+    {
+      "adam_update_norm": 0.3676061365903051,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 3,
+      "logits_gradient_norm": 0.005305371211642591,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 12,
+      "temperature": 0.7846153846153847
+    },
+    {
+      "adam_update_norm": 0.3662753129285729,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 3,
+      "logits_gradient_norm": 0.004413572236563566,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 13,
+      "temperature": 0.7666666666666666
+    },
+    {
+      "adam_update_norm": 0.36128082103619025,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 3,
+      "logits_gradient_norm": 0.0035145942645409514,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 14,
+      "temperature": 0.7487179487179487
+    },
+    {
+      "adam_update_norm": 0.35313863736198065,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 4,
+      "logits_gradient_norm": 0.0026986434919268553,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 15,
+      "temperature": 0.7307692307692308
+    },
+    {
+      "adam_update_norm": 0.3425131869583741,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 4,
+      "logits_gradient_norm": 0.002014251909041951,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 16,
+      "temperature": 0.7128205128205128
+    },
+    {
+      "adam_update_norm": 0.33001388559721756,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 4,
+      "logits_gradient_norm": 0.0014725792990721348,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 17,
+      "temperature": 0.6948717948717948
+    },
+    {
+      "adam_update_norm": 0.3160402490551656,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 4,
+      "logits_gradient_norm": 0.001061135022452688,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 18,
+      "temperature": 0.676923076923077
+    },
+    {
+      "adam_update_norm": 0.30078056253025987,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 4,
+      "logits_gradient_norm": 0.0007572123890049234,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 19,
+      "temperature": 0.6589743589743591
+    },
+    {
+      "adam_update_norm": 0.28436074752674945,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 4,
+      "logits_gradient_norm": 0.0005367457131485406,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 20,
+      "temperature": 0.641025641025641
+    },
+    {
+      "adam_update_norm": 0.2670096374013581,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 4,
+      "logits_gradient_norm": 0.000378610330542446,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 21,
+      "temperature": 0.6230769230769231
+    },
+    {
+      "adam_update_norm": 0.24910430786506166,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 4,
+      "logits_gradient_norm": 0.0002659482467237173,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 22,
+      "temperature": 0.6051282051282052
+    },
+    {
+      "adam_update_norm": 0.23109453552878223,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 4,
+      "logits_gradient_norm": 0.00018600933899706612,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 23,
+      "temperature": 0.5871794871794873
+    },
+    {
+      "adam_update_norm": 0.21339976234658647,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 4,
+      "logits_gradient_norm": 0.0001294446828102041,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 24,
+      "temperature": 0.5692307692307693
+    },
+    {
+      "adam_update_norm": 0.19634661415721222,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 4,
+      "logits_gradient_norm": 8.951781933948901e-05,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 25,
+      "temperature": 0.5512820512820513
+    },
+    {
+      "adam_update_norm": 0.18015466301725394,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 4,
+      "logits_gradient_norm": 6.141819372514975e-05,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 26,
+      "temperature": 0.5333333333333333
+    },
+    {
+      "adam_update_norm": 0.16495022422280958,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 4,
+      "logits_gradient_norm": 4.1723071464929034e-05,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 27,
+      "temperature": 0.5153846153846154
+    },
+    {
+      "adam_update_norm": 0.15078911960860364,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 4,
+      "logits_gradient_norm": 2.7997960024119706e-05,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 28,
+      "temperature": 0.49743589743589745
+    },
+    {
+      "adam_update_norm": 0.13767830673432763,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 4,
+      "logits_gradient_norm": 1.8508524706236854e-05,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 29,
+      "temperature": 0.47948717948717956
+    },
+    {
+      "adam_update_norm": 0.1255929585545947,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 4,
+      "logits_gradient_norm": 1.2016206778260008e-05,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 30,
+      "temperature": 0.46153846153846156
+    },
+    {
+      "adam_update_norm": 0.11448879578929556,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 4,
+      "logits_gradient_norm": 7.634380645661579e-06,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 31,
+      "temperature": 0.44358974358974357
+    },
+    {
+      "adam_update_norm": 0.10431056145997405,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 4,
+      "logits_gradient_norm": 4.7273970335492665e-06,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 32,
+      "temperature": 0.4256410256410257
+    },
+    {
+      "adam_update_norm": 0.09499766938982525,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 4,
+      "logits_gradient_norm": 2.839656171505056e-06,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 33,
+      "temperature": 0.4076923076923078
+    },
+    {
+      "adam_update_norm": 0.08648788580615238,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 4,
+      "logits_gradient_norm": 1.6455751862641362e-06,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 34,
+      "temperature": 0.3897435897435898
+    },
+    {
+      "adam_update_norm": 0.07871967758051758,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 4,
+      "logits_gradient_norm": 9.140441445613614e-07,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 35,
+      "temperature": 0.3717948717948718
+    },
+    {
+      "adam_update_norm": 0.07163366821282806,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 4,
+      "logits_gradient_norm": 4.829144720179405e-07,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 36,
+      "temperature": 0.3538461538461538
+    },
+    {
+      "adam_update_norm": 0.06517349982357319,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 4,
+      "logits_gradient_norm": 2.40438966093798e-07,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 37,
+      "temperature": 0.3358974358974359
+    },
+    {
+      "adam_update_norm": 0.05928629996517917,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 4,
+      "logits_gradient_norm": 1.1155166322818473e-07,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 38,
+      "temperature": 0.31794871794871804
+    },
+    {
+      "adam_update_norm": 0.053922885180259526,
+      "hard_edits": [
+        [
+          1,
+          1
+        ]
+      ],
+      "host_candidate_rows": 4,
+      "logits_gradient_norm": 4.7560963252504985e-08,
+      "loss": 1.123917277467535,
+      "predicted_area": 4096.39697,
+      "predicted_delay_ps": 28087.320500325528,
+      "selection_changed": false,
+      "step": 39,
+      "temperature": 0.30000000000000004
+    }
+  ]
+}

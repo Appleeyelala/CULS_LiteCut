@@ -1,0 +1,56 @@
+{
+  "index": 433,
+  "input": "forgeEDA/db_normal_filter.aig",
+  "input_sha256": "39af30bd13ebfa7c4499d64e729f44dd57e22bbd21c9a830a1c64573e4d0a41f",
+  "method": "A",
+  "status": "PASS",
+  "error": null,
+  "end_to_end_runtime_s": 1.722540243063122,
+  "result_path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0433_A/child_result.json",
+  "detail_path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0433_A",
+  "source_commit": "9a199bf0ea0dcf20bf55e40da8caa8b8bbff5fac",
+  "slurm_job_id": "65534",
+  "metrics": {
+    "status": "PASS",
+    "input_sha256": "39af30bd13ebfa7c4499d64e729f44dd57e22bbd21c9a830a1c64573e4d0a41f",
+    "provenance": {
+      "abc": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc",
+        "sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb"
+      },
+      "library": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/input/asap7",
+        "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+      },
+      "original": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0433_A/input.aig",
+        "sha256": "39af30bd13ebfa7c4499d64e729f44dd57e22bbd21c9a830a1c64573e4d0a41f"
+      }
+    },
+    "input_structure_sha256": "41ebe26e6ee6f6dec2931aa325d5ea9213510c161cc1fb5fcd0f830675606bf2",
+    "cec_interface": "AIGER_PI_PO_POSITIONAL_ORDER; symbol names may be absent after replay",
+    "cec": "PASS",
+    "timing_model": "ABC_SCL_LIBERTY",
+    "area": 5776.47949,
+    "delay_ps": 1833.4939,
+    "adp": 10591139.90839011,
+    "mapped_gates": 7547,
+    "critical_po_indices": [
+      1226,
+      1250,
+      1274
+    ],
+    "abc_native_trace_endpoints": [
+      151,
+      1226
+    ],
+    "trace_semantics": "Native ABC min-slack traceback; mapped IDs are local to this mapping.",
+    "mapped_sha256": "22e2d8ed9372340d4217f655968fc448642ca2048f48e3a9717e6f0278623be5",
+    "runtime_s": 1.3624166031368077
+  },
+  "final_source": "original",
+  "backend": {
+    "device": "cpu",
+    "reason": "ABC baseline; no candidate/ML preparation."
+  }
+}

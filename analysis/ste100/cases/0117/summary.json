@@ -1,0 +1,668 @@
+{
+  "adam_steps": 40,
+  "backend": {
+    "device": "cuda",
+    "reason": "Candidate/Region workload exceeds fixed CPU thresholds."
+  },
+  "candidates": 7085,
+  "config": {
+    "allow_nonpositive_gain": false,
+    "area_limit_ratio": 1.05,
+    "cpu_small_decisions": 32,
+    "cpu_small_regions": 1024,
+    "learning_rate": 0.12,
+    "maximum_edits": 16,
+    "seed": 20261117,
+    "steps": 40,
+    "timeout_s": 900
+  },
+  "decisions": 3940,
+  "distinct_hard_combinations_including_noop": 22,
+  "final_candidate": {
+    "aig": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0117_Ours/work/final/eval_0000/rewrite/raw/aigs/choice.aig",
+    "applied_rewrites": 16,
+    "choices_sparse": {
+      "length": 3940,
+      "default": 0,
+      "nonzero": [
+        [
+          462,
+          2
+        ],
+        [
+          1211,
+          1
+        ],
+        [
+          1260,
+          2
+        ],
+        [
+          1559,
+          2
+        ],
+        [
+          1652,
+          2
+        ],
+        [
+          1787,
+          2
+        ],
+        [
+          1860,
+          1
+        ],
+        [
+          1957,
+          2
+        ],
+        [
+          2347,
+          2
+        ],
+        [
+          2729,
+          2
+        ],
+        [
+          2750,
+          1
+        ],
+        [
+          2786,
+          2
+        ],
+        [
+          3640,
+          1
+        ],
+        [
+          3684,
+          2
+        ],
+        [
+          3706,
+          2
+        ],
+        [
+          3805,
+          1
+        ]
+      ]
+    },
+    "index": 0,
+    "method": "final",
+    "metrics": {
+      "abc_native_trace_endpoints": [
+        445,
+        1110
+      ],
+      "adp": 7047439.52509063,
+      "area": 9625.13281,
+      "cec": "PASS",
+      "cec_interface": "AIGER_PI_PO_POSITIONAL_ORDER; symbol names may be absent after replay",
+      "critical_po_indices": [
+        1110,
+        1152
+      ],
+      "delay_ps": 732.191406,
+      "input_sha256": "047f8d987568e197b8383556364fc84f1cd905ed60a5a21961d30e8172e3ec6e",
+      "input_structure_sha256": "3119879b1c3fc4537e8a286af622409f76aed143cd8fa22c9e1eb32476a0138e",
+      "mapped_gates": 11033,
+      "mapped_sha256": "6acbdc5c0783e296fcbe481d5ddf85e909dfcea5b64bd18b0b962c9930235184",
+      "provenance": {
+        "abc": {
+          "path": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc",
+          "sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb"
+        },
+        "library": {
+          "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/input/asap7",
+          "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+        },
+        "original": {
+          "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0117_Ours/input.aig",
+          "sha256": "7639723672263b013bb847ef164f7c7c9cf8ebaa15ee687b6df7a0ce26df2b3c"
+        }
+      },
+      "runtime_s": 1.5560291577130556,
+      "status": "PASS",
+      "timing_model": "ABC_SCL_LIBERTY",
+      "trace_semantics": "Native ABC min-slack traceback; mapped IDs are local to this mapping."
+    },
+    "prediction_before_evaluation": {
+      "area": 9653.680385518112,
+      "choices_sparse": {
+        "length": 3940,
+        "default": 0,
+        "nonzero": [
+          [
+            462,
+            2
+          ],
+          [
+            1211,
+            1
+          ],
+          [
+            1260,
+            2
+          ],
+          [
+            1559,
+            2
+          ],
+          [
+            1652,
+            2
+          ],
+          [
+            1787,
+            2
+          ],
+          [
+            1860,
+            1
+          ],
+          [
+            1957,
+            2
+          ],
+          [
+            2347,
+            2
+          ],
+          [
+            2729,
+            2
+          ],
+          [
+            2750,
+            1
+          ],
+          [
+            2786,
+            2
+          ],
+          [
+            3640,
+            1
+          ],
+          [
+            3684,
+            2
+          ],
+          [
+            3706,
+            2
+          ],
+          [
+            3805,
+            1
+          ]
+        ]
+      },
+      "delay_ps": 732.4426880000001,
+      "edits": [
+        [
+          462,
+          2
+        ],
+        [
+          1211,
+          1
+        ],
+        [
+          1260,
+          2
+        ],
+        [
+          1559,
+          2
+        ],
+        [
+          1652,
+          2
+        ],
+        [
+          1787,
+          2
+        ],
+        [
+          1860,
+          1
+        ],
+        [
+          1957,
+          2
+        ],
+        [
+          2347,
+          2
+        ],
+        [
+          2729,
+          2
+        ],
+        [
+          2750,
+          1
+        ],
+        [
+          2786,
+          2
+        ],
+        [
+          3640,
+          1
+        ],
+        [
+          3684,
+          2
+        ],
+        [
+          3706,
+          2
+        ],
+        [
+          3805,
+          1
+        ]
+      ],
+      "predicted_objective": 1.0780130050262144,
+      "source": "ste_adam_proxy_best",
+      "step": 20
+    },
+    "runtime_s": 2.2814322276972234,
+    "status": "PASS"
+  },
+  "logits_total_change_norm": 104.0601784232356,
+  "mapping_calls": 2,
+  "native_profiles": [
+    {
+      "backend": "mffc_ready_queue_cuda",
+      "blocks": 32,
+      "calls_cumulative": {
+        "backward": 0,
+        "forward": 1
+      },
+      "kernel_ms_since_collect": {
+        "backward": 0,
+        "forward": 3.0074880123138428
+      },
+      "max_layer_width": 681,
+      "ports": 13883,
+      "region_dag_layers": 27,
+      "region_thread_group": "warp32",
+      "regions": 3981,
+      "scope": "Native per-region forward and reverse dependencies on GPU; no CPU DAG adjoint. Kernel time excludes tensor aggregation and is not end-to-end runtime.",
+      "stage": "initialization",
+      "threads_per_block": 128
+    },
+    {
+      "backend": "mffc_ready_queue_cuda",
+      "blocks": 32,
+      "calls_cumulative": {
+        "backward": 40,
+        "forward": 42
+      },
+      "kernel_ms_since_collect": {
+        "backward": 115.0207998752594,
+        "forward": 119.7916157245636
+      },
+      "max_layer_width": 681,
+      "ports": 13883,
+      "region_dag_layers": 27,
+      "region_thread_group": "warp32",
+      "regions": 3981,
+      "scope": "Native per-region forward and reverse dependencies on GPU; no CPU DAG adjoint. Kernel time excludes tensor aggregation and is not end-to-end runtime.",
+      "stage": "ste_adam_optimization",
+      "threads_per_block": 128
+    }
+  ],
+  "noop_semantics": "Unmodified original AIG; no serialized replay-noop.",
+  "original": {
+    "abc_native_trace_endpoints": [
+      445,
+      1060
+    ],
+    "adp": 7084543.3154516965,
+    "area": 9672.48828,
+    "cec": "PASS",
+    "cec_interface": "AIGER_PI_PO_POSITIONAL_ORDER; symbol names may be absent after replay",
+    "critical_po_indices": [
+      1060,
+      1110,
+      1152,
+      1202
+    ],
+    "delay_ps": 732.442688,
+    "input_sha256": "7639723672263b013bb847ef164f7c7c9cf8ebaa15ee687b6df7a0ce26df2b3c",
+    "input_structure_sha256": "e43f9dcb0eea69a173c1b752106a96076a6b65cf094b7dca27e3bf58c8454406",
+    "mapped_gates": 11077,
+    "mapped_sha256": "bf680020acbae8629c20a4950c37becf1bf86df1568dd65a56b53d587159c00c",
+    "provenance": {
+      "abc": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc",
+        "sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb"
+      },
+      "library": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/input/asap7",
+        "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+      },
+      "original": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0117_Ours/input.aig",
+        "sha256": "7639723672263b013bb847ef164f7c7c9cf8ebaa15ee687b6df7a0ce26df2b3c"
+      }
+    },
+    "runtime_s": 1.4667130303569138,
+    "status": "PASS",
+    "timing_model": "ABC_SCL_LIBERTY",
+    "trace_semantics": "Native ABC min-slack traceback; mapped IDs are local to this mapping."
+  },
+  "original_is_separate_paid_measurement": true,
+  "proxy_best": {
+    "area": 9653.680385518112,
+    "choices_sparse": {
+      "length": 3940,
+      "default": 0,
+      "nonzero": [
+        [
+          462,
+          2
+        ],
+        [
+          1211,
+          1
+        ],
+        [
+          1260,
+          2
+        ],
+        [
+          1559,
+          2
+        ],
+        [
+          1652,
+          2
+        ],
+        [
+          1787,
+          2
+        ],
+        [
+          1860,
+          1
+        ],
+        [
+          1957,
+          2
+        ],
+        [
+          2347,
+          2
+        ],
+        [
+          2729,
+          2
+        ],
+        [
+          2750,
+          1
+        ],
+        [
+          2786,
+          2
+        ],
+        [
+          3640,
+          1
+        ],
+        [
+          3684,
+          2
+        ],
+        [
+          3706,
+          2
+        ],
+        [
+          3805,
+          1
+        ]
+      ]
+    },
+    "delay_ps": 732.4426880000001,
+    "edits": [
+      [
+        462,
+        2
+      ],
+      [
+        1211,
+        1
+      ],
+      [
+        1260,
+        2
+      ],
+      [
+        1559,
+        2
+      ],
+      [
+        1652,
+        2
+      ],
+      [
+        1787,
+        2
+      ],
+      [
+        1860,
+        1
+      ],
+      [
+        1957,
+        2
+      ],
+      [
+        2347,
+        2
+      ],
+      [
+        2729,
+        2
+      ],
+      [
+        2750,
+        1
+      ],
+      [
+        2786,
+        2
+      ],
+      [
+        3640,
+        1
+      ],
+      [
+        3684,
+        2
+      ],
+      [
+        3706,
+        2
+      ],
+      [
+        3805,
+        1
+      ]
+    ],
+    "predicted_objective": 1.0780130050262144,
+    "source": "ste_adam_proxy_best",
+    "step": 20
+  },
+  "regions": 3981,
+  "scope": "One final exact acceptance + CEC + actual Liberty timing, no retries or feedback.",
+  "selected": {
+    "aig": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0117_Ours/work/final/eval_0000/rewrite/raw/aigs/choice.aig",
+    "applied_rewrites": 16,
+    "choices_sparse": {
+      "length": 3940,
+      "default": 0,
+      "nonzero": [
+        [
+          462,
+          2
+        ],
+        [
+          1211,
+          1
+        ],
+        [
+          1260,
+          2
+        ],
+        [
+          1559,
+          2
+        ],
+        [
+          1652,
+          2
+        ],
+        [
+          1787,
+          2
+        ],
+        [
+          1860,
+          1
+        ],
+        [
+          1957,
+          2
+        ],
+        [
+          2347,
+          2
+        ],
+        [
+          2729,
+          2
+        ],
+        [
+          2750,
+          1
+        ],
+        [
+          2786,
+          2
+        ],
+        [
+          3640,
+          1
+        ],
+        [
+          3684,
+          2
+        ],
+        [
+          3706,
+          2
+        ],
+        [
+          3805,
+          1
+        ]
+      ]
+    },
+    "metrics": {
+      "abc_native_trace_endpoints": [
+        445,
+        1110
+      ],
+      "adp": 7047439.52509063,
+      "area": 9625.13281,
+      "cec": "PASS",
+      "cec_interface": "AIGER_PI_PO_POSITIONAL_ORDER; symbol names may be absent after replay",
+      "critical_po_indices": [
+        1110,
+        1152
+      ],
+      "delay_ps": 732.191406,
+      "input_sha256": "047f8d987568e197b8383556364fc84f1cd905ed60a5a21961d30e8172e3ec6e",
+      "input_structure_sha256": "3119879b1c3fc4537e8a286af622409f76aed143cd8fa22c9e1eb32476a0138e",
+      "mapped_gates": 11033,
+      "mapped_sha256": "6acbdc5c0783e296fcbe481d5ddf85e909dfcea5b64bd18b0b962c9930235184",
+      "provenance": {
+        "abc": {
+          "path": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc",
+          "sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb"
+        },
+        "library": {
+          "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/input/asap7",
+          "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+        },
+        "original": {
+          "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0117_Ours/input.aig",
+          "sha256": "7639723672263b013bb847ef164f7c7c9cf8ebaa15ee687b6df7a0ce26df2b3c"
+        }
+      },
+      "runtime_s": 1.5560291577130556,
+      "status": "PASS",
+      "timing_model": "ABC_SCL_LIBERTY",
+      "trace_semantics": "Native ABC min-slack traceback; mapped IDs are local to this mapping."
+    },
+    "source": "ste_adam_verified_improvement"
+  },
+  "selected_original_mffcs": 16,
+  "stages": [
+    {
+      "elapsed_s": 1.4767910321243107,
+      "stage": "original_cec_mapping"
+    },
+    {
+      "elapsed_s": 0.06629493087530136,
+      "stage": "mffc_partition"
+    },
+    {
+      "elapsed_s": 1.4175489880144596,
+      "stage": "candidate_enumeration"
+    },
+    {
+      "elapsed_s": 0.2752214949578047,
+      "stage": "boolean_validation"
+    },
+    {
+      "elapsed_s": 0.17843706579878926,
+      "stage": "candidate_reuse_preflight"
+    },
+    {
+      "elapsed_s": 4.31454538507387,
+      "stage": "litecut_preparation_inference"
+    },
+    {
+      "elapsed_s": 1.2112267171032727,
+      "stage": "global_model_preparation"
+    },
+    {
+      "elapsed_s": 0.6298132236115634,
+      "stage": "ste_adam_proxy_optimization"
+    },
+    {
+      "elapsed_s": 2.2954263095743954,
+      "stage": "final_replay_cec_mapping"
+    }
+  ],
+  "status": "PASS",
+  "structure": {
+    "max_layer_width": 681,
+    "region_dag_layers": 27,
+    "region_edges": 7004,
+    "region_ports": 13883,
+    "regions": 3981
+  }
+}

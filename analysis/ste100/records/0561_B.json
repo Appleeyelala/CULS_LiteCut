@@ -1,0 +1,79 @@
+{
+  "index": 561,
+  "input": "forgeEDA/local_predictor.aig",
+  "input_sha256": "23dea39cb750e1c79ab7624fae1b9406595401464ec32aa682d1bac40f48a43e",
+  "method": "B",
+  "status": "PASS",
+  "error": null,
+  "end_to_end_runtime_s": 3.225089048035443,
+  "result_path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0561_B/child_result.json",
+  "detail_path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0561_B",
+  "source_commit": "9a199bf0ea0dcf20bf55e40da8caa8b8bbff5fac",
+  "slurm_job_id": "65534",
+  "metrics": {
+    "status": "PASS",
+    "input_sha256": "4451035788914e531f570f6da41e8016336fcee7b7e56c23344d01f9ad22e23f",
+    "provenance": {
+      "abc": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc",
+        "sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb"
+      },
+      "library": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/input/asap7",
+        "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+      },
+      "original": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0561_B/input.aig",
+        "sha256": "23dea39cb750e1c79ab7624fae1b9406595401464ec32aa682d1bac40f48a43e"
+      }
+    },
+    "input_structure_sha256": "296d705440e8387fdcaa87b3b98f90fd1e2525ab93f62973e089d29526e5a64a",
+    "cec_interface": "AIGER_PI_PO_POSITIONAL_ORDER; symbol names may be absent after replay",
+    "cec": "PASS",
+    "timing_model": "ABC_SCL_LIBERTY",
+    "area": 8640.69141,
+    "delay_ps": 15324.5986,
+    "adp": 132415127.48471801,
+    "mapped_gates": 9871,
+    "critical_po_indices": [
+      6,
+      92,
+      156,
+      221,
+      286,
+      350,
+      414,
+      478,
+      670,
+      734,
+      798,
+      862,
+      926,
+      990,
+      1182,
+      1246,
+      1310,
+      1374,
+      1438,
+      1502,
+      1694,
+      1758,
+      1822,
+      1886,
+      1950,
+      2014
+    ],
+    "abc_native_trace_endpoints": [
+      1024,
+      6
+    ],
+    "trace_semantics": "Native ABC min-slack traceback; mapped IDs are local to this mapping.",
+    "mapped_sha256": "a6acd4dbe74b1c9b5c927099f1d337427e4104c5dd878e812e30b56aa311ec06",
+    "runtime_s": 2.6231765639968216
+  },
+  "final_source": "abc_single_native_rewrite",
+  "backend": {
+    "device": "cpu",
+    "reason": "ABC baseline; no candidate/ML preparation."
+  }
+}

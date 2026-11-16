@@ -1,0 +1,31 @@
+{
+  "repository": "https://github.com/Appleeyelala/CULS_LiteCut",
+  "visibility": "public",
+  "default_branch": "main",
+  "source_commit": "44c11a755b6cc6cd3316af0bbb5230a80f703af9",
+  "algorithm_frozen_commit": "9a199bf0ea0dcf20bf55e40da8caa8b8bbff5fac",
+  "previous_main": "c6d56d48e856157d9c9ef9deacddc6c169e42ff3",
+  "previous905_tree_unchanged": "0730d48dc3f5ed170135805d2fa24180b2400168",
+  "publication_run": "/data/wushangge/CULS_LiteCut/runs/20261116T075859Z-ste100-github-handoff-d855e3da",
+  "experiment_run": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a",
+  "data_path": "analysis/ste100",
+  "handoff": "HANDOFF.md",
+  "files_with_source_provenance": 573,
+  "data_bytes": 9959967,
+  "no_experiments_executed": true,
+  "history_not_rewritten": true,
+  "slurm_job_id": "65562",
+  "upload_slurm_job_id": "65563",
+  "preparation_attempts": [
+    {
+      "job_id": 65561,
+      "state": "FAILED",
+      "reason": "Old checkout uses github-delivery, not local main; no push."
+    },
+    {
+      "job_id": 65562,
+      "state": "FAILED_AFTER_EXPORT",
+      "reason": "Original CSV CRLF flagged as whitespace; exported files retained byte-identical; no push."
+    }
+  ]
+}

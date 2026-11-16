@@ -1,0 +1,54 @@
+{
+  "index": 501,
+  "input": "forgeEDA/freq_meter_calc.aig",
+  "input_sha256": "dfae3ee6bf5bb2cad017a3e16e344c02526e2e67bd943772a3bf47a719e9d153",
+  "method": "Ours",
+  "status": "PASS",
+  "error": null,
+  "end_to_end_runtime_s": 14.151400454808027,
+  "result_path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0501_Ours/child_result.json",
+  "detail_path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0501_Ours",
+  "source_commit": "9a199bf0ea0dcf20bf55e40da8caa8b8bbff5fac",
+  "slurm_job_id": "65534",
+  "metrics": {
+    "status": "PASS",
+    "input_sha256": "dfae3ee6bf5bb2cad017a3e16e344c02526e2e67bd943772a3bf47a719e9d153",
+    "provenance": {
+      "abc": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261111T173355Z-acyclic-replay-tool-build-64cf764e/build/framework_tools/abc/abc",
+        "sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb"
+      },
+      "library": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/input/asap7",
+        "sha256": "819ecfc2609a1f53b9d298bf0cba75af0f1a8c737f33d4bbc5c9fb1156e8fa55"
+      },
+      "original": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261116T070435Z-ste-adam-random100-d532863a/output/case_0501_Ours/input.aig",
+        "sha256": "dfae3ee6bf5bb2cad017a3e16e344c02526e2e67bd943772a3bf47a719e9d153"
+      }
+    },
+    "input_structure_sha256": "369c9b0ba060c3969c2a0881116adc6ac060671c65dcf1ab9565e893f240e74c",
+    "cec_interface": "AIGER_PI_PO_POSITIONAL_ORDER; symbol names may be absent after replay",
+    "cec": "PASS",
+    "timing_model": "ABC_SCL_LIBERTY",
+    "area": 11069.1357,
+    "delay_ps": 34460.0195,
+    "adp": 381442632.0701462,
+    "mapped_gates": 10930,
+    "critical_po_indices": [
+      76
+    ],
+    "abc_native_trace_endpoints": [
+      4,
+      76
+    ],
+    "trace_semantics": "Native ABC min-slack traceback; mapped IDs are local to this mapping.",
+    "mapped_sha256": "b1890e56f9366e4426aed6e2809d232f01029bb87106dd0b482ac36861e96e79",
+    "runtime_s": 1.6615875661373138
+  },
+  "final_source": "original_fallback",
+  "backend": {
+    "device": "cuda",
+    "reason": "Candidate/Region workload exceeds fixed CPU thresholds."
+  }
+}

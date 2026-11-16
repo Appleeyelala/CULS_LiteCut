@@ -134,6 +134,10 @@ def main():
             run_tool([sys.executable,'-B',__file__,'--child','--context',str(context)],outer,'cold_method',1800,environment)
             result=json.loads((outer/'child_result.json').read_text())
             status=result['status']
+            if status != 'PASS':
+                error=(result.get('final_candidate') or {}).get('error')
+                if status == 'AREA_LIMIT_EXCEEDED':
+                    error='Verified candidate exceeds actual mapped area limit 1.05; no delay-based fallback.'
         except Exception as exc:
             error=f'{type(exc).__name__}: {exc}'
             command=json.loads((outer/'cold_method.command.json').read_text())

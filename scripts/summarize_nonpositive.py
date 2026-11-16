@@ -38,7 +38,9 @@ def zero_reason(raw, verified, feasible, manifest):
     if raw is None: return 'NOT_OBSERVED_GPU_BOUNDARY'
     if raw==0:
         if manifest.get('eligible_cut_count')==0: return 'NO_ELIGIBLE_RETAINED_CUT'
-        if manifest.get('subgraphs_considered',0)==manifest.get('self_root_reuse_rejected',-1):
+        if manifest.get('subgraphs_considered')==0 and manifest.get('no_library_implementation_cuts',0)>0:
+            return 'NO_LIBRARY_IMPLEMENTATION_FOR_ELIGIBLE_CUTS'
+        if manifest.get('subgraphs_considered',0)>0 and manifest.get('subgraphs_considered')==manifest.get('self_root_reuse_rejected',-1):
             return 'ALL_AVAILABLE_LIBRARY_ROOTS_REUSE_ORIGINAL_ROOT'
         return 'GPU_EMPTY_SEE_REJECTION_COUNTERS'
     if verified is None: return 'BOOLEAN_BOUNDARY_NOT_COMPLETED'
@@ -258,9 +260,14 @@ def full_reports(args,out,evidence_file):
     win=sum(a<b for _,a,b,_ in quality);tie=sum(a==b for _,a,b,_ in quality);lose=sum(a>b for _,a,b,_ in quality)
     ratios=[a/b for _,a,b,_ in quality if a>0 and b>0]
     states=dict(Counter(r['status'] for r in result_rows))
+    reported_failures={
+        'cuda_oom_ids':sorted(i for i,r in records.items() if 'CUDA error: out of memory' in (r.get('error') or '')),
+        'replay_failure_ids':sorted(i for i,r in records.items() if r.get('replay_status')=='FAIL'),
+        'timeout_ids':sorted(i for i,r in records.items() if r.get('status')=='TIMEOUT'),
+        'scope':'Observed execution outcomes; no unmeasured root cause or missing metrics inferred.'}
     sessions=[read(p) for p in sorted((run/'input').glob('full905_session_*.json'))]
     runstatus={'status':'TERMINAL_905' if len(records)==905 else 'PARTIAL','expected':905,'completed':len(records),
-        'states':states,'zero_candidates':len(zero),'zero_ids':sorted(zeroids),'candidate_domain_unknown':sorted(unknownids),
+        'states':states,'reported_failures':reported_failures,'zero_candidates':len(zero),'zero_ids':sorted(zeroids),'candidate_domain_unknown':sorted(unknownids),
         'old94_resolved':sorted(oldzero&legal),'old94_still_zero':sorted(oldzero&zeroids),
         'old94_unknown':sorted(oldzero&unknownids),'new_zero':sorted(zeroids-oldzero),
         'nonempty_cec_mapping_pass':len(quality),'candidate_delay_win_tie_loss_vs_own_original':[win,tie,lose],
@@ -278,8 +285,8 @@ def full_reports(args,out,evidence_file):
         f"旧94个零候选：恢复合法候选 {len(oldzero&legal)}，仍零 {len(oldzero&zeroids)}，不可判定 {len(oldzero&unknownids)}；新增零候选 {len(zeroids-oldzero)}。",
         '原17例门槛全部通过且固定100完成后才提交本次905作业；详见上级目录。',
         '零候选与候选存在但优化器no-op分开；失败发生在某层完成前时该层留空，不能补造零或成功。','',
-        '|ID|名称|首次空/未完成边界|','|---:|---|---|']
-    lines += [f"|{r['circuit_id']}|{r['input']}|{r['reason']}|" for r in zero+unknown]
+        '|ID|名称|实际状态|Raw|Boolean 后|Feasible 后|首次空/未完成边界|','|---:|---|---|---:|---:|---:|---|']
+    lines += [f"|{r['circuit_id']}|{r['input']}|{r['status']}|{r['raw_candidates'] if r['raw_candidates'] is not None else '未完成'}|{r['verified_candidates'] if r['verified_candidates'] is not None else '未完成'}|{r['feasible_candidates'] if r['feasible_candidates'] is not None else '未完成'}|{r['reason']}|" for r in zero+unknown]
     lines += ['', '旧94恢复ID：'+str(sorted(oldzero&legal)), '旧94仍零ID：'+str(sorted(oldzero&zeroids)),
         '旧94不可判定ID：'+str(sorted(oldzero&unknownids)), '新增零ID：'+str(sorted(zeroids-oldzero))]
     (dest/'FULL905_ZERO_CANDIDATES.md').write_text('\n'.join(lines)+'\n')
@@ -311,6 +318,8 @@ def full_reports(args,out,evidence_file):
     for path in [run/'run.json',run/'input/full905_manifest.json',run/'input/launch_gate.json',run/'input/commands.json',run/'input/job_worker.py']+list((run/'input').glob('full905_session_*.json'))+list((run/'input').glob('job_*.json'))+list(run.glob('job_*.slurm'))+list((run/'output').glob('completion_shard_*.json')):
         evidence_file(path,'new full905 provenance')
     return f"""新版905实际终态 {len(records)}/905，{states}。确认零候选 {len(zero)}，候选域不可判定 {len(unknown)}。旧94变化见 full905/FULL905_ZERO_CANDIDATES.md。
+
+实际异常记录：CUDA OOM报告ID {reported_failures['cuda_oom_ids']}；Replay失败ID {reported_failures['replay_failure_ids']}；超时ID {reported_failures['timeout_ids']}。完整错误和已完成边界见CSV及原始记录。超时前未完成Boolean/Feasibility的电路保留未知，不补零；日志报告的OOM不等同于已确认其瞬时资源根因。
 
 选择非空组合 {selected_count} 个，完整Replay接受 {runstatus['replay_pass_count']} 个（以非空选择为分母的比例 {runstatus['replay_pass_fraction_of_nonempty_selections']}）。完整安装、CEC及Mapping成功的非空候选 {len(quality)} 个，相对自己付费原图真实Delay胜/平/负 {win}/{tie}/{lose}；候选/原图Delay比几何均值 {runstatus['candidate_delay_ratio_geomean']}。真实Area超1.05的数量 {runstatus['candidate_area_limit_exceeded']}，单列不伪装可行改善；没有按真实Delay回退。
 

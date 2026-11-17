@@ -101,7 +101,7 @@ def load_examples(data, manifest, shared, variant):
     return examples,audit
 
 
-def evaluate(examples,role,device):
+def evaluate(examples,role,device,loss_function=timing_loss):
     import torch
     import numpy as np
     from scipy.stats import spearmanr
@@ -113,7 +113,7 @@ def evaluate(examples,role,device):
             for domain in case['domains']:
                 model=move_graph(domain['model'],device);x=domain['x'].to(device);target=domain['target'].to(device)
                 po,_=model(x)
-                case_loss.append((float(timing_loss(po,target,model.baseline_po,model.delay_reference)),len(x)))
+                case_loss.append((float(loss_function(po,target,model.baseline_po,model.delay_reference)),len(x)))
                 predicted=po.max(-1).values.cpu().tolist();actual=target.max(-1).values.cpu().tolist()
                 tol=max(2e-5,2e-6*model.delay_reference)
                 for p,a,record in zip(predicted,actual,domain['records']):
@@ -152,7 +152,14 @@ def main():
     p.add_argument('--prepare-only',action='store_true');p.add_argument('--prepared',type=Path)
     p.add_argument('--global-context',choices=['original','endpoint'],default='original',
                    help='Single-change research ablation; original remains the default')
+    p.add_argument('--loss-mode',choices=['original','gap-ranking'],default='original')
     args=p.parse_args()
+    loss_function=timing_loss
+    if args.loss_mode=='gap-ranking':
+        if args.variant!='global' or args.global_context!='original':
+            p.error('Ranking-loss experiment requires original global structure and features')
+        from global_timing.ranking_loss import gap_ranking_loss
+        loss_function=gap_ranking_loss
     if not os.environ.get('SLURM_JOB_ID') or not ROOT.is_relative_to('/data/wushangge'):p.error('Committed /data source and Slurm required')
     import torch
     from global_timing.learned_ports import PortTimingParameters
@@ -203,13 +210,13 @@ def main():
                 # Each domain uses the same shared heads; update once per circuit.
                 for domain in case['domains']:
                     model=move_graph(domain['model'],args.device);x=domain['x'].to(args.device);target=domain['target'].to(args.device)
-                    po,_=model(x);loss=timing_loss(po,target,model.baseline_po,model.delay_reference)*len(x)/total
+                    po,_=model(x);loss=loss_function(po,target,model.baseline_po,model.delay_reference)*len(x)/total
                     if not torch.isfinite(loss):raise ValueError('Nonfinite training loss')
                     loss.backward();case_loss+=float(loss.detach())
                     move_graph(model,'cpu')
                 torch.nn.utils.clip_grad_norm_(shared.parameters(),5.)
                 optimizer.step();losses.append(case_loss)
-            validation=evaluate(examples,'validation',args.device);score=validation['mean_circuit_loss']
+            validation=evaluate(examples,'validation',args.device,loss_function);score=validation['mean_circuit_loss']
             row={'epoch':epoch,'train_loss':sum(losses)/len(losses),'validation_loss':score,
                  'validation_spearman':validation['median_spearman_with_undefined_as_zero'],
                  'validation_precision':validation['improvement_precision']};history.append(row);print(json.dumps(row),flush=True)
@@ -219,14 +226,18 @@ def main():
             if stale>=20:break
     shared.load_state_dict(best_state)
     torch.save({'state_dict':best_state,'variant':args.variant,'global_context':args.global_context,
+                'loss_mode':args.loss_mode,
+                'loss_code_sha256':sha(ROOT/'global_timing/ranking_loss.py') if args.loss_mode=='gap-ranking' else None,
                 'context_code_sha256':sha(ROOT/'global_timing/endpoint_context.py') if args.global_context=='endpoint' else None,
                 'seed':args.seed,'best_epoch':best_epoch,
                 'manifest_sha256':sha(args.manifest),'source_commit':os.environ.get('V3_SOURCE_COMMIT')},args.output/'weights.pt')
-    result={'variant':args.variant,'global_context':args.global_context,'seed':args.seed,'best_epoch':best_epoch,'history':history,
-        'validation':evaluate(examples,'validation',args.device),'train':evaluate(examples,'train',args.device),
+    result={'variant':args.variant,'global_context':args.global_context,'loss_mode':args.loss_mode,
+        'seed':args.seed,'best_epoch':best_epoch,'history':history,
+        'validation':evaluate(examples,'validation',args.device,loss_function),'train':evaluate(examples,'train',args.device,loss_function),
         'elapsed_s':time.perf_counter()-started,'new_mapping_calls':0,'manifest_sha256':sha(args.manifest),
         'training':{'optimizer':'AdamW','lr':1e-3,'weight_decay':1e-4,'max_epochs':200,'patience':20,
-                    'loss':'circuit-equal PO-delta Huber + Critical-delta Huber + 0.1 pairwise logistic; 1% scale',
+                    'loss':('bounded-gap pairwise logistic, 1% scale; no absolute fitting' if args.loss_mode=='gap-ranking'
+                            else 'circuit-equal PO-delta Huber + Critical-delta Huber + 0.1 pairwise logistic; 1% scale'),
                     'heads_dtype':'float32','timing_dtype':'float64'}}
     save(args.output/'summary.json',result)
 

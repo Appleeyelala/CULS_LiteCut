@@ -1,7 +1,7 @@
 import unittest
 from types import SimpleNamespace
 import torch
-from global_timing.compositional_proxy import condense_original,candidate_paths,CompositionalTimingSurrogate
+from global_timing.compositional_proxy import condense_original,original_cut_paths,candidate_paths,CompositionalTimingSurrogate
 
 
 def fixture():
@@ -30,6 +30,25 @@ class CompositionTests(unittest.TestCase):
             direct={i:0. for i in range(5)}
             for n,pair in aig.fanin_literals.items():direct[n]=max(direct[l>>1]+1+.2*(l&1) for l in pair)
             self.assertAlmostEqual(arrivals[8],direct[8])
+
+    def test_materialized_and_set_is_not_rebuilt_per_edge(self):
+        aig, *_ = fixture()
+        class PropertyAig:
+            # The real AIG parser exposes and_nodes as a freshly built set.
+            def __init__(self):
+                self.reads = 0
+                self.fanin_literals = aig.fanin_literals
+            @property
+            def and_nodes(self):
+                self.reads += 1
+                return set(aig.and_nodes)
+        wrapped = PropertyAig()
+        condensed = condense_original(wrapped, {8})
+        paths = original_cut_paths(wrapped, 8, [1, 2, 3, 4])
+        self.assertEqual(condensed[8], {0: 4.})
+        self.assertEqual(paths, {1: 4., 2: 4., 3: 3., 4: 2.})
+        self.assertLessEqual(wrapped.reads, 2,
+                            'Per-edge materialization makes graph setup quadratic')
 
     def test_candidate_ports_phase_and_shape(self):
         _,d,lib,*_=fixture()

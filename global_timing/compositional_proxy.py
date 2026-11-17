@@ -27,12 +27,14 @@ def condense_original(aig, retained, inversion_cost=.2):
     Parallel original paths from the same retained port keep their maximum.
     The result is exact for this structural timing model, not ABC timing.
     """
-    retained=set(retained)&set(aig.and_nodes)
+    # The parser property allocates a full set on each access. Materialize once.
+    and_nodes=aig.and_nodes
+    retained=set(retained)&and_nodes
     uses=Counter(lit>>1 for pair in aig.fanin_literals.values() for lit in pair)
     distances={};transfers={}
-    for node in sorted(aig.and_nodes):
+    for node in sorted(and_nodes):
         pair=aig.fanin_literals[node]
-        paths=merge_paths([(distances[lit>>1] if lit>>1 in aig.and_nodes else {0:0.},
+        paths=merge_paths([(distances[lit>>1] if lit>>1 in and_nodes else {0:0.},
                             1.+inversion_cost*(lit&1)) for lit in pair])
         if node in retained:transfers[node]=paths;distances[node]={node:0.}
         else:distances[node]=paths
@@ -43,11 +45,12 @@ def condense_original(aig, retained, inversion_cost=.2):
 
 
 def original_cut_paths(aig,root,leaves,inversion_cost=.2):
+    and_nodes=aig.and_nodes
     boundary=set(leaves)|{0};pending=[root];interior=set()
     while pending:
         node=pending.pop()
         if node in boundary or node in interior:continue
-        if node not in aig.and_nodes:
+        if node not in and_nodes:
             # Verified support cuts can have context-dependent external PIs.
             boundary.add(node);continue
         interior.add(node);pending.extend(lit>>1 for lit in aig.fanin_literals[node])

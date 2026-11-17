@@ -1,0 +1,95 @@
+{
+  "slurm_job_id": 65969,
+  "workspace": "/data/wushangge/CULS_LiteCut/staging/joint-gradient-unit-v3",
+  "source_hashes": {
+    "global_timing/joint_gradient.py": "7d279d089b823049db342b84a8872fd1747ca870a7e7f54e09d070d93eb994ef",
+    "global_timing/compositional_proxy.py": "ca2ffdeff240482ce8a2cc292acfb3de654db17d61664306997f279bf8542da3",
+    "scripts/joint_gradient_ablation.py": "6fba5c07157f3cffab0727d0a88a2f5531755b7870f642d56ef0ad23e1101432",
+    "tests/test_joint_gradient_v2.py": "63075faf9e8a8a1eb00b97261017f2bfbcbc75ac10875a7c175d15e6ef23e65f",
+    "tests/test_compositional_proxy.py": "c66f3f4bacb6cbdcf3bfb58a0a976b9cc631396efc0e2a61a4b45b6e6dbdc38c"
+  },
+  "test_results": {
+    "tests_run": 13,
+    "successful": true,
+    "records": [
+      {
+        "test": "test_compositional_proxy.CompositionTests.test_anchor_hard_rewrite_and_batch_gradients",
+        "status": "PASS",
+        "reason": null,
+        "elapsed_s": 0.01791892503388226
+      },
+      {
+        "test": "test_compositional_proxy.CompositionTests.test_candidate_ports_phase_and_shape",
+        "status": "PASS",
+        "reason": null,
+        "elapsed_s": 0.00018291804008185863
+      },
+      {
+        "test": "test_compositional_proxy.CompositionTests.test_condensation_matches_explicit_gate_traversal",
+        "status": "PASS",
+        "reason": null,
+        "elapsed_s": 0.00021041801664978266
+      },
+      {
+        "test": "test_joint_gradient_v2.JointGradientTests.test_alternative_and_atomic_conflict_swap_are_considered",
+        "status": "PASS",
+        "reason": null,
+        "elapsed_s": 0.0002909620525315404
+      },
+      {
+        "test": "test_joint_gradient_v2.JointGradientTests.test_gradient_finite_difference_is_for_proxy_only",
+        "status": "PASS",
+        "reason": null,
+        "elapsed_s": 0.006286991992965341
+      },
+      {
+        "test": "test_joint_gradient_v2.JointGradientTests.test_joint_updates_switch_bottlenecks_and_obey_budgets",
+        "status": "PASS",
+        "reason": null,
+        "elapsed_s": 0.005132424063049257
+      },
+      {
+        "test": "test_joint_gradient_v2.JointGradientTests.test_smaller_smooth_loss_does_not_displace_equal_max_noop",
+        "status": "PASS",
+        "reason": null,
+        "elapsed_s": 0.00012226705439388752
+      },
+      {
+        "test": "test_joint_gradient_v2.JointGradientTests.test_smoothing_bound_and_gradient",
+        "status": "PASS",
+        "reason": null,
+        "elapsed_s": 0.0003948600497096777
+      },
+      {
+        "test": "test_saved_arrays.SavedArrayTests.test_chunk_boundaries_and_archived_inputs",
+        "status": "PASS",
+        "reason": null,
+        "elapsed_s": 0.022605707985349
+      },
+      {
+        "test": "test_saved_arrays.SavedArrayTests.test_rejects_truncation_missing_field_and_nonobjects",
+        "status": "PASS",
+        "reason": null,
+        "elapsed_s": 0.012838337919674814
+      },
+      {
+        "test": "test_research_cohort.ResearchCohortTests.test_family_and_hash_groups_never_leak",
+        "status": "PASS",
+        "reason": null,
+        "elapsed_s": 0.010842569987289608
+      },
+      {
+        "test": "test_research_cohort.ResearchCohortTests.test_panel_does_not_read_labels",
+        "status": "PASS",
+        "reason": null,
+        "elapsed_s": 0.005100906942971051
+      },
+      {
+        "test": "test_research_cohort.ResearchCohortTests.test_tolerance_and_duplicate_identity",
+        "status": "PASS",
+        "reason": null,
+        "elapsed_s": 0.00033129495568573475
+      }
+    ]
+  }
+}

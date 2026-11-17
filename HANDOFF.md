@@ -1,4 +1,19 @@
-# 当前交接补充：joint-gradient v3 受控验证完成（2026-11-17）
+# 当前交接补充：Cut 时序代理配对验证完成（2026-11-17）
+
+工作分支 `work/cut-timing-proxy`，先读
+[实现与证据](analysis/cut_timing_proxy/IMPLEMENTATION.md) 和
+[三列预测/真实 Delay 对照](analysis/cut_timing_proxy/RESULTS.md)。
+
+统一 PO 可达 AIG 序列化，实现 Liberty Cut/引脚时序、冻结 LiteCut 局部
+尺度和 GPU 可微传播；没有训练新网络或修改梯度搜索器。沿用 v3 的固定
+12 个验证电路、96 个非空组合，预测先冻结，再 Replay/CEC/真实 Mapping。
+最终全部成功、无缺失或面积超限；数值仍有明显预测偏差，不宣称准确性
+已提升。原始证据和前期失败保留在 `/data`，六项发布检查与逐行核验通过。
+未扩展到 100/905，当前没有待续实验。
+
+---
+
+# 历史交接补充：joint-gradient v3 受控验证完成（2026-11-17）
 
 先读 [v3入口](analysis/joint_gradient_v3/README.md) 和
 [学习结果](analysis/joint_gradient_v3/PILOT_RESULTS.md)。分支 `work/joint-gradient-v3`。

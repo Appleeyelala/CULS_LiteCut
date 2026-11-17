@@ -210,7 +210,7 @@ def report(args):
     args.report.mkdir(parents=True,exist_ok=True)
     header=['circuit','predicted_mapping_delay_ps','actual_abc_mapping_delay_ps']
     with (args.report/'PREDICTED_VS_ABC_DELAY.csv').open('w') as f:
-        w=csv.writer(f);w.writerow(header);w.writerows(rows)
+        w=csv.writer(f,lineterminator='\n');w.writerow(header);w.writerows(rows)
     text='| 电路/组合编号 | 模型预测 Mapping Delay（ps） | 真实 ABC Mapping Delay（ps） |\n|---|---:|---:|\n'
     for circuit,pred,actual in rows:text+=f'| {circuit} | {pred:.6f} | '+(f'{actual:.6f}' if isinstance(actual,(float,int)) else actual)+' |\n'
     text+='\n本轮采用统一 AIG 输入、Liberty Cut/引脚传播及冻结 LiteCut 局部尺度；全部预测先冻结，再真实 Replay/Mapping，无实测回退或改选。'

@@ -74,8 +74,13 @@ class CutTimingTests(unittest.TestCase):
         scale=torch.tensor(1.,dtype=torch.double,requires_grad=True)
         self.assertTrue(torch.autograd.gradcheck(lambda a,b:p(a,b),(x,scale)))
         if torch.cuda.is_available():
-            expected=p(x).detach();p=p.cuda()
-            torch.testing.assert_close(p(x.detach().cuda()).cpu(),expected)
+            expected=p(x,scale)
+            cpu_grad=torch.autograd.grad(expected.sum(),(x,scale));p=p.cuda()
+            gpu_x=x.detach().cuda().requires_grad_();gpu_scale=scale.detach().cuda().requires_grad_()
+            actual=p(gpu_x,gpu_scale)
+            torch.testing.assert_close(actual.cpu(),expected.detach())
+            for actual_grad,expected_grad in zip(torch.autograd.grad(actual.sum(),(gpu_x,gpu_scale)),cpu_grad):
+                torch.testing.assert_close(actual_grad.cpu(),expected_grad)
 
     def test_functional_support_reference_keeps_omitted_pi_paths(self):
         a=graph({4:(2,4),5:(8,6)},[10])

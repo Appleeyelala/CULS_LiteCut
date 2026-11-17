@@ -8,12 +8,14 @@ import json
 import os
 from pathlib import Path
 import shutil
+import subprocess
 import sys
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from global_timing.common import digest, run_tool, save_json
+from global_timing.gpu_slot import acquire_gpu_slot
 from run_nonpositive_coverage import ZERO17, counts
 
 
@@ -107,11 +109,17 @@ def main():
                  'global_timing/candidates.py','global_timing/execution.py','global_timing/mffc_ste_experiment.py',
                  'global_timing/mffc_ste_search.py','global_timing/mffc_model.py','global_timing/feasibility.py']:
         assert digest(ROOT/name)==digest(args.coverage_run/'src'/name)
+    # Keep this handle alive until the shard exits. Historical four-shard jobs
+    # shared one device and could exhaust memory in unrelated small circuits.
+    gpu_slot, gpu_assignment = acquire_gpu_slot(run)
+    gpu_assignment['inventory'] = subprocess.check_output(
+        ['nvidia-smi', '--query-gpu=index,uuid,name,pci.bus_id,memory.total', '--format=csv'], text=True)
     session = {'source_commit':meta['source_commit'], 'tools':tools, 'search':asdict(NonpositiveSteConfig()),
         'slurm_job_id':os.environ['SLURM_JOB_ID'], 'node':os.environ.get('SLURMD_NODENAME'),
         'manifest':str(args.manifest), 'manifest_sha256':digest(args.manifest),
         'gate':str(gate_path), 'gate_sha256':digest(gate_path), 'shard':args.shard,'shards':args.shards,
-        'case_timeout_s':1800,'validation_workers':2,'methods':['Ours']}
+        'case_timeout_s':1800,'validation_workers':2,'methods':['Ours'],
+        'gpu_assignment':gpu_assignment}
     save_json(run/'input'/f'full905_session_{args.shard}.json',session)
     records = []
     for row in rows:

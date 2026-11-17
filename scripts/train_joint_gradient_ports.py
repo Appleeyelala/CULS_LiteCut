@@ -218,7 +218,9 @@ def main():
             else:stale+=1
             if stale>=20:break
     shared.load_state_dict(best_state)
-    torch.save({'state_dict':best_state,'variant':args.variant,'seed':args.seed,'best_epoch':best_epoch,
+    torch.save({'state_dict':best_state,'variant':args.variant,'global_context':args.global_context,
+                'context_code_sha256':sha(ROOT/'global_timing/endpoint_context.py') if args.global_context=='endpoint' else None,
+                'seed':args.seed,'best_epoch':best_epoch,
                 'manifest_sha256':sha(args.manifest),'source_commit':os.environ.get('V3_SOURCE_COMMIT')},args.output/'weights.pt')
     result={'variant':args.variant,'global_context':args.global_context,'seed':args.seed,'best_epoch':best_epoch,'history':history,
         'validation':evaluate(examples,'validation',args.device),'train':evaluate(examples,'train',args.device),

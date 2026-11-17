@@ -102,11 +102,13 @@ def predict(args):
         proxy=CutTimingProxy(aig,cat,read(folder/'scores.json')['scores'],lib,rewrite).cuda()
         save_json(folder/'port_model.json',{'arcs':proxy.audit,'device':torch.cuda.get_device_name(),'construction_s':time.monotonic()-started})
         with torch.no_grad():
-            zero=proxy(proxy.one_hot([0]*len(cat.decisions)))[0]
+            batch=torch.stack([proxy.one_hot([0]*len(cat.decisions))]+[proxy.one_hot(c['choices']) for c in combos])
+            predicted_batch=proxy(batch)
+            zero=predicted_batch[0]
             anchor=torch.tensor([[v['rise_ps'],v['fall_ps']] for v in baseline['po_rise_fall']],device='cuda',dtype=torch.double)
             predictions=[]
-            for c in combos:
-                raw_po=proxy(proxy.one_hot(c['choices']))[0]
+            for combination_index,c in enumerate(combos,1):
+                raw_po=predicted_batch[combination_index]
                 po=(anchor+(raw_po-zero)).clamp_min(0.)
                 # Explicit symbolic composition is solely an installation audit,
                 # not the numeric timing predictor; no actual Replay has run yet.

@@ -169,6 +169,15 @@ class CutTimingProxy(torch.nn.Module):
         self.width=max(self.counts,default=1);self.n_decisions=len(self.counts)
         by_root=defaultdict(list)
         for i,d in enumerate(catalogue.decisions):by_root[d['root']].append(i)
+        root_index={n:j+1 for j,n in enumerate(sorted(by_root))}
+        flat_choices=[];choice_roots=[]
+        for n,ds in by_root.items():
+            for i in ds:
+                for c in range(1,self.counts[i]):
+                    flat_choices.append(i*self.width+c);choice_roots.append(root_index[n])
+        self.root_count=1+len(root_index)
+        self.register_buffer('flat_choices',torch.tensor(flat_choices,dtype=torch.long))
+        self.register_buffer('choice_roots',torch.tensor(choice_roots,dtype=torch.long))
         lookup={(s['decision_index'],s['choice_index']):s for s in scores}
         transfers={};audit=[]
         for i,d in enumerate(catalogue.decisions):
@@ -192,13 +201,13 @@ class CutTimingProxy(torch.nn.Module):
             for i in by_root[node]:dependencies.extend(catalogue.decisions[i]['cut_leaves'])
             levels[node]=1+max(levels[n] for n in dependencies)
             layers[levels[node]].append(node)
-        self.layers=[];self.audit=audit;root_groups=[];option_sources=[];edge_sources=[];edge_cost=[];edge_dest=[]
+        self.layers=[];self.audit=audit
         # Each group is (node,phase,Rewrite option). Mapper matches compete within it.
         for level,nodes in sorted(layers.items()):
             groups=[];options=[];edges=[];sources=[];edge_outputs=[];option_groups=[];group_outputs=[];group_choices=[]
             for node in nodes:
                 for phase in (0,1):
-                    alternatives=[(-1,implementations[node][phase])]
+                    alternatives=[(-1-root_index.get(node,0),implementations[node][phase])]
                     for i in by_root[node]:
                         d=catalogue.decisions[i]
                         for c in range(1,self.counts[i]):
@@ -237,6 +246,9 @@ class CutTimingProxy(torch.nn.Module):
         key=str(x.device)
         if key not in self._device_layers:self._device_layers[key]=[tuple(t.to(x.device) for t in l) for l in self.layers]
         arrivals=self.initial[None].expand(len(x),-1)
+        flat=x.flatten(1)
+        root_sum=x.new_zeros((len(x),self.root_count)).scatter_add(
+            1,self.choice_roots[None].expand(len(x),-1),flat[:,self.flat_choices])
         for src,cost,edge_out,option_group,group_out,choice,group_node in self._device_layers[key]:
             values=arrivals[:,src]+cost[None]*(1. if arc_scale is None else arc_scale)
             option_count=len(option_group);groups=len(group_out)
@@ -248,12 +260,8 @@ class CutTimingProxy(torch.nn.Module):
             chosen=torch.full((len(x),groups),option_count,device=x.device,dtype=torch.long).scatter_reduce(
                 1,option_group[None].expand(len(x),-1),torch.where(worst==best[:,option_group],indices,option_count),reduce='amin')
             paired=option_value.gather(1,chosen[:,:,None].expand(-1,-1,2))
-            flat=x.flatten(1)
             weights=flat[:,choice.clamp_min(0)] if flat.shape[1] else x.new_ones((len(x),groups))
-            original=x.new_ones((len(x),groups))
-            # Original weight is one minus every nonzero choice at this root.
-            for n,ds in self.root_decisions.items():
-                original[:,group_node==n]=1.-x[:,ds,1:].sum((1,2))[:,None]
+            original=1.-root_sum[:,(-1-choice).clamp_min(0)]
             weights=torch.where(choice[None]<0,original,weights)
             destinations=torch.stack((group_out,group_out+1),1).flatten()
             update=x.new_zeros(arrivals.shape).scatter_add(1,destinations[None].expand(len(x),-1),(paired*weights[:,:,None]).flatten(1))

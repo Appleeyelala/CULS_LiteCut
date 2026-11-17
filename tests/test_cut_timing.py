@@ -64,9 +64,10 @@ class CutTimingTests(unittest.TestCase):
         # needing the large rewrite library. Both physical transitions share a match.
         p=CutTimingProxy.__new__(CutTimingProxy);torch.nn.Module.__init__(p)
         p.layers=[tuple(torch.tensor(v,dtype=torch.double if k==1 else torch.long)
-            for k,v in enumerate([[4,5,4,5],[2.,2.1,4.,4.1],[0,1,2,3],[0,1],[8,8],[-1,1],[2,2]]))]
+            for k,v in enumerate([[4,5,4,5],[2.,2.1,4.,4.1],[0,1,2,3],[0,1],[8,8],[-2,1],[2,2]]))]
         p.register_buffer('initial',torch.zeros(12,dtype=torch.double));p.register_buffer('outputs',torch.tensor([8,9]))
         p.root_decisions={2:[0]};p._device_layers={}
+        p.root_count=2;p.register_buffer('flat_choices',torch.tensor([1]));p.register_buffer('choice_roots',torch.tensor([1]))
         x=torch.tensor([[[.6,.4]]],dtype=torch.double,requires_grad=True)
         scale=torch.tensor(1.,dtype=torch.double,requires_grad=True)
         self.assertTrue(torch.autograd.gradcheck(lambda a,b:p(a,b),(x,scale)))

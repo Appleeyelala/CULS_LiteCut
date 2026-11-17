@@ -141,6 +141,9 @@ def measure(args):
     from global_timing.candidates import Catalogue
     from global_timing.execution import replay_many
     from global_timing.evaluation import Evaluator
+    # Enumeration and installation are separate native policies. The frozen
+    # domain includes zero/negative-gain candidates, so enable BOTH as in v3.
+    os.environ['CULS_ALLOW_NONPOSITIVE_CANDIDATES']='1'
     barrier=read(args.output/'PREDICTIONS_FROZEN.json');manifest=read(args.output/'panel.json')
     assert len(barrier['rows'])==12 and barrier['total']==96
     for r in barrier['rows']:
@@ -171,7 +174,8 @@ def measure(args):
             save_json(target.parent/'observation.json',row)
             print(json.dumps({'phase':'measured','circuit':r['circuit_id'],'combination':c['index'],'status':row['status']}),flush=True)
     save_json(args.output/'measurement_complete.json',{'finished_unix_ns':time.time_ns(),'gpuls_sha256':digest(args.gpuls),
-              'source_commit':os.environ['CUT_SOURCE_COMMIT'],'predictions_freeze_sha256':digest(args.output/'PREDICTIONS_FROZEN.json')})
+              'source_commit':os.environ['CUT_SOURCE_COMMIT'],'predictions_freeze_sha256':digest(args.output/'PREDICTIONS_FROZEN.json'),
+              'native_policy':{'CULS_ALLOW_NONPOSITIVE_CANDIDATES':'1','CULS_REPLAY_ALLOW_NONPOSITIVE_GAIN':'1'}})
 
 
 def report(args):

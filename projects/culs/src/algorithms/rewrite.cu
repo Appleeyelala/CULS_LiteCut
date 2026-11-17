@@ -382,7 +382,7 @@ __device__ int Eval(int cur, int *match, int Class, Library *lib, int curId) {
 
 __global__ void EvaluateNode(int sz, int *bestout, int *selectedCutSlots, int *fanin0, int *fanin1, int *isC0, int *isC1, int *nodeLevels, Cut *cuts, Cut* selectedCuts, int *nRef,
                              Library *lib, TableNode* hashTable, int fUseZeros,
-                             unsigned char *candidateMasks) {
+                             unsigned char *candidateMasks, bool allowNonPositiveCandidates, unsigned long long *audit) {
     if(blockIdx.x * blockDim.x + threadIdx.x >= sz) return;
     int id = 1 + blockIdx.x * blockDim.x + threadIdx.x, reduction = -1, bestLevel = 99999999, bestCut = -1, bestOut;
     int match[54], tableSize, tableId[TABLE_SIZE], tableNum[TABLE_SIZE];
@@ -420,9 +420,14 @@ __global__ void EvaluateNode(int sz, int *bestout, int *selectedCutSlots, int *f
                 matchLevel[num] = nodeLevels[nodeId];
             }
         }
+        if (audit && lib->nSubgr[Class] == 0) atomicAdd(audit + 5, 1ULL);
         for(int out = 0; out < lib->nSubgr[Class]; out++) {
+            if (audit) atomicAdd(audit, 1ULL);
             int rt = lib->pSubgr[Class][out];
-            if(match[rt] == id) continue;
+            if(match[rt] == id) {
+                if (audit) atomicAdd(audit + 1, 1ULL);
+                continue;
+            }
             int nodesAdded = Eval(rt, match, Class, lib, -out - 2);
             int rtLevel = matchLevel[rt];
             assert(rtLevel != -1);
@@ -432,9 +437,16 @@ __global__ void EvaluateNode(int sz, int *bestout, int *selectedCutSlots, int *f
             //     bestCut = i;
             //     bestOut = out;
             // }
-            if (saved - nodesAdded < 0 || (saved - nodesAdded == 0 && !fUseZeros))
+            const int gain = saved - nodesAdded;
+            if (!allowNonPositiveCandidates && (gain < 0 || (gain == 0 && !fUseZeros))) {
+                if (audit) atomicAdd(audit + 6, 1ULL);
                 continue;
-            candidateMasks[(ID(id, i) * MAX_REWRITE_SUBGR) + out] = 1;
+            }
+            // Nonzero mask values retain ordinary boolean membership semantics.
+            // Export sign without allocating a dense per-subgraph int buffer.
+            const unsigned char signCode = gain > 0 ? 1 : (gain == 0 ? 2 : 3);
+            candidateMasks[(ID(id, i) * MAX_REWRITE_SUBGR) + out] = signCode;
+            if (audit) atomicAdd(audit + 1 + signCode, 1ULL);
             if (saved - nodesAdded < reduction || (saved - nodesAdded == reduction && rtLevel >= bestLevel))
                 continue;
             reduction = saved - nodesAdded;
@@ -736,7 +748,12 @@ void GPUSolver::CopyLib(Library CPUlib) {
     cudaMemcpy(lib, &CPUlib, sizeof(Library), cudaMemcpyHostToDevice);
 }
 
-void GPUSolver::EnumerateAndPreEvaluate(int *level, const vector<int> &levelCount, int n, int *CPUfanin0, int *CPUfanin1, int *CPUref, bool fUseZeros) {
+void GPUSolver::EnumerateAndPreEvaluate(int *level, const vector<int> &levelCount, int n, int *CPUfanin0, int *CPUfanin1, int *CPUref, bool fUseZeros, bool allowNonPositiveCandidates, unsigned long long *audit) {
+    unsigned long long *deviceAudit = nullptr;
+    if (audit) {
+        gpuErrchk(cudaMalloc((void **)&deviceAudit, 7 * sizeof(unsigned long long)));
+        gpuErrchk(cudaMemset(deviceAudit, 0, 7 * sizeof(unsigned long long)));
+    }
     int * nodeLevels = phase; // note, phase has not been used yet, so use its memory for now
     cudaMemcpy(nodeLevels, level, (n + 1) * sizeof(int), cudaMemcpyHostToDevice);
 
@@ -762,11 +779,15 @@ void GPUSolver::EnumerateAndPreEvaluate(int *level, const vector<int> &levelCoun
     EvaluateNode<<<BLOCK_NUMBER(n, LARGE_BLOCK_SIZE), LARGE_BLOCK_SIZE>>> (
         n, bestSubgraph, selectedCutSlots, fanin0, fanin1, isComplement0, isComplement1,
         nodeLevels, cuts, selectedCuts, nRef, lib, hashTable, fUseZeros == true,
-        candidateMasks
+        candidateMasks, allowNonPositiveCandidates, deviceAudit
     );
     gpuErrchk( cudaDeviceSynchronize() );
     std::cerr << cudaGetLastError() << " in EvaluateNode " << std::endl;
 
+    if (audit) {
+        gpuErrchk(cudaMemcpy(audit, deviceAudit, 7 * sizeof(unsigned long long), cudaMemcpyDeviceToHost));
+        gpuErrchk(cudaFree(deviceAudit));
+    }
     EVAL_TIME += clock() - startTime;
 } 
 
@@ -1080,11 +1101,14 @@ void CPUSolver::Rewrite(bool fUseZeros, bool GPUReplace) {
     expected = 0;
     const PreparedReplayEnumeration *prepared = rewriteAuditOptions.preparedReplay;
     const bool allowNonPositive = rewriteAuditOptions.allowNonPositiveReplayGain;
+    const bool allowCandidates = rewriteAuditOptions.allowNonPositiveCandidates;
+    if (allowCandidates && !allowNonPositive)
+        throw std::runtime_error("nonpositive candidate replay requires installation permission");
     if (allowNonPositive && (!GPUReplace || fUseZeros || !rewriteAuditOptions.enabled || !rewriteAuditOptions.replayMode))
-        throw std::runtime_error("nonpositive gain policy is restricted to audited explicit positive-mask replay");
+        throw std::runtime_error("nonpositive gain policy is restricted to audited explicit replay");
     if (prepared && (!GPUReplace || fUseZeros || !rewriteAuditOptions.replayMode))
-        throw std::runtime_error("prepared enumeration is restricted to explicit positive-gain replay");
-    if (prepared && (prepared->n != n || prepared->numInputs != numInputs ||
+        throw std::runtime_error("prepared enumeration is restricted to audited explicit replay");
+    if (prepared && (prepared->allowNonPositiveCandidates != allowCandidates || prepared->n != n || prepared->numInputs != numInputs ||
         prepared->numOutputs != numOutputs ||
         prepared->fanin0.size() != static_cast<size_t>(n + 1) ||
         prepared->fanin1.size() != static_cast<size_t>(n + 1) ||
@@ -1104,7 +1128,7 @@ void CPUSolver::Rewrite(bool fUseZeros, bool GPUReplace) {
     if (prepared)
         gpuSolver->PrepareReplayGraph(n, fanin0, fanin1);
     else
-        gpuSolver->EnumerateAndPreEvaluate(level, levelCount, n, fanin0, fanin1, ref, fUseZeros);
+        gpuSolver->EnumerateAndPreEvaluate(level, levelCount, n, fanin0, fanin1, ref, fUseZeros, allowCandidates);
     prt << (prepared ? "Reused immutable enumeration; restored replacement graph"
                      : "Finished GPU enumeration and pre-evaluation") << endl;
     auto startTime = clock();
@@ -2102,11 +2126,14 @@ int gate3cRewriteDecisionDump(const char * outputDir, const char * inputPath,
 
         rw::Library lib{};
         gate3cLoadLibrary(lib);
+        const char *candidateFlag = std::getenv("CULS_ALLOW_NONPOSITIVE_CANDIDATES");
+        const bool allowCandidates = candidateFlag && std::string(candidateFlag) == "1";
+        unsigned long long audit[7] = {};
         rw::GPUSolver gpuSolver(n);
         gpuSolver.CopyLib(lib);
         gpuSolver.EnumerateAndPreEvaluate(
             levels.data(), levelCount, n, fanin0.data(), fanin1.data(),
-            refs.data(), false
+            refs.data(), false, allowCandidates, audit
         );
 
         std::vector<rw::Cut> cuts(static_cast<size_t>(n + 1) * CUT_SET_SIZE);
@@ -2146,11 +2173,15 @@ int gate3cRewriteDecisionDump(const char * outputDir, const char * inputPath,
 
                 int truth = cut.truthtable & 0xFFFF;
                 int Class = lib.pMap[truth];
-                std::vector<int> candidates;
+                std::vector<int> candidates, gainSigns;
                 for (int subgraphIndex = 0; subgraphIndex < lib.nSubgr[Class]; ++subgraphIndex) {
                     if (candidateMasks[(static_cast<size_t>(ID(gpuRoot, cutSlot)) *
-                                        MAX_REWRITE_SUBGR) + subgraphIndex])
+                                        MAX_REWRITE_SUBGR) + subgraphIndex]) {
                         candidates.push_back(subgraphIndex);
+                        const int code = candidateMasks[(static_cast<size_t>(ID(gpuRoot, cutSlot)) *
+                                                        MAX_REWRITE_SUBGR) + subgraphIndex];
+                        gainSigns.push_back(code == 1 ? 1 : (code == 2 ? 0 : -1));
+                    }
                 }
                 candidateCount += static_cast<int>(candidates.size());
                 if (!candidates.empty())
@@ -2177,6 +2208,8 @@ int gate3cRewriteDecisionDump(const char * outputDir, const char * inputPath,
                        << ",\"candidate_count\":" << candidates.size()
                        << ",\"candidate_subgraph_indices\":";
                 gate3cWriteIntArray(rawOut, candidates);
+                rawOut << ",\"candidate_gain_signs\":";
+                gate3cWriteIntArray(rawOut, gainSigns);
                 rawOut << ",\"removable_nodes\":";
                 gate3cWriteIntArray(rawOut, originalRemovable);
                 rawOut << ",\"removable_node_count\":" << originalRemovable.size()
@@ -2202,7 +2235,14 @@ int gate3cRewriteDecisionDump(const char * outputDir, const char * inputPath,
                  << ",\"eligible_cut_count\":" << eligibleCutCount
                  << ",\"executable_decision_count\":" << decisionCount
                  << ",\"candidate_count\":" << candidateCount
-                 << ",\"candidate_rule\":\"saved_minus_nodes_added_gt_zero\""
+                 << ",\"candidate_rule\":\"" << (allowCandidates ? "allow_nonpositive_gain" : "saved_minus_nodes_added_gt_zero") << "\""
+                 << ",\"subgraphs_considered\":" << audit[0]
+                 << ",\"self_root_reuse_rejected\":" << audit[1]
+                 << ",\"positive_gain_candidates\":" << audit[2]
+                 << ",\"zero_gain_candidates\":" << audit[3]
+                 << ",\"negative_gain_candidates\":" << audit[4]
+                 << ",\"no_library_implementation_cuts\":" << audit[5]
+                 << ",\"gain_rule_rejected\":" << audit[6]
                  << ",\"used_gpu_cut_enumeration\":true"
                  << ",\"used_gpu_candidate_mask_export\":true"
                  << ",\"used_gpu_rewrite_candidate_semantics\":true"
@@ -2476,15 +2516,21 @@ int gate3eExecutionReplay(const char * outputDir, const char * inputPath,
         const bool usePrepared = prepareFlag && std::string(prepareFlag) == "1";
         const char *gainFlag = std::getenv("CULS_REPLAY_ALLOW_NONPOSITIVE_GAIN");
         const bool allowNonPositive = gainFlag && std::string(gainFlag) == "1";
+        const char *candidateFlag = std::getenv("CULS_ALLOW_NONPOSITIVE_CANDIDATES");
+        const bool allowCandidates = candidateFlag && std::string(candidateFlag) == "1";
+        if (allowCandidates && !allowNonPositive)
+            throw std::runtime_error("nonpositive candidate replay requires installation permission");
         if (allowNonPositive) {
             std::ofstream policy(root / "replay_policy.json");
             if (!policy)
                 throw std::runtime_error("cannot open replay installation policy provenance");
             policy << "{\"installation_gain_policy\":\"allow_nonpositive\","
-                      "\"candidate_enumeration_zero_gain_enabled\":false,"
+                      "\"candidate_enumeration_zero_gain_enabled\":" << (allowCandidates ? "true" : "false") << ","
+                      "\"candidate_rule\":\"" << (allowCandidates ? "allow_nonpositive_gain" : "saved_minus_nodes_added_gt_zero") << "\","
                       "\"leaf_cycle_and_exact_acceptance_required\":true}\n";
         }
         if (usePrepared) {
+            prepared.allowNonPositiveCandidates = allowCandidates;
             prepared.n = n;
             prepared.numInputs = nPIs;
             prepared.numOutputs = nPOs;
@@ -2498,7 +2544,7 @@ int gate3eExecutionReplay(const char * outputDir, const char * inputPath,
             rw::GPUSolver enumeration(n);
             enumeration.CopyLib(library);
             enumeration.EnumerateAndPreEvaluate(graph.levels.data(), graph.levelCount, n,
-                graph.fanin0.data(), graph.fanin1.data(), graph.refs.data(), false);
+                graph.fanin0.data(), graph.fanin1.data(), graph.refs.data(), false, allowCandidates);
             enumeration.GetEnumeratedCuts(n, prepared.cuts.data());
             enumeration.GetCandidateMasks(n, prepared.candidateMasks.data());
             printf("gate3e: prepared one immutable enumeration for %zu configurations\n", configs.size());
@@ -2507,7 +2553,7 @@ int gate3eExecutionReplay(const char * outputDir, const char * inputPath,
                 throw std::runtime_error("cannot open prepared replay provenance");
             preparation << "{\"enumeration_count\":1,\"configuration_count\":" << configs.size()
                 << ",\"graph_identity_check\":\"exact reordered fanins/refcounts/interface\","
-                   "\"zero_gain_enabled\":false,\"execution_order_unchanged\":true,"
+                   "\"zero_gain_enabled\":" << (allowCandidates ? "true" : "false") << ",\"execution_order_unchanged\":true,"
                    "\"sequential_install_unchanged\":" << (allowNonPositive ? "false" : "true") << "}\n";
         }
 
@@ -2525,6 +2571,7 @@ int gate3eExecutionReplay(const char * outputDir, const char * inputPath,
             options.replayMode = true;
             options.preparedReplay = usePrepared ? &prepared : nullptr;
             options.allowNonPositiveReplayGain = allowNonPositive;
+            options.allowNonPositiveCandidates = allowCandidates;
             options.internalToOriginal = graph.newToOld;
             options.originalToRegion = originalToRegion;
             std::vector<bool> selectedInternal(static_cast<size_t>(n + 1), false);

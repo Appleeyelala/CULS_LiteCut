@@ -86,6 +86,8 @@ def catalogue_from_raw(rows, partition):
             continue
         if decision['classification'] != 'INTRA_REGION':
             raise ValueError('Cross-region removable cone requires an explicit multi-owner policy.')
+        if 'candidate_gain_signs' in row:
+            decision['candidate_gain_signs'] = row['candidate_gain_signs']
         decision['noop'] = {'choice_index': 0, 'subgraph_index': None, 'semantics': 'ORIGINAL_AIG'}
         decisions.append(decision)
     conflicts = []
@@ -113,11 +115,19 @@ def catalogue_from_raw(rows, partition):
     return Catalogue(decisions, conflicts, by_region)
 
 
-def enumerate_candidates(gpuls, aig, partition, output, timeout=300):
+def enumerate_candidates(gpuls, aig, partition, output, timeout=300, allow_nonpositive_candidates=False):
     output.mkdir(parents=True, exist_ok=False)
     raw = output / 'raw'
+    env = dict(os.environ)
+    env.pop('CULS_ALLOW_NONPOSITIVE_CANDIDATES', None)
+    if allow_nonpositive_candidates:
+        env['CULS_ALLOW_NONPOSITIVE_CANDIDATES'] = '1'
     run_tool([gpuls, '-c', f'read {tool_path(aig)}; gate3c_rewrite_decisions_dump -o {tool_path(raw)}'],
-             output, 'enumeration', timeout)
+             output, 'enumeration', timeout, env)
+    manifest = json.loads((raw / 'gate3c_raw_manifest.json').read_text())
+    expected = 'allow_nonpositive_gain' if allow_nonpositive_candidates else 'saved_minus_nodes_added_gt_zero'
+    if manifest['candidate_rule'] != expected:
+        raise ToolError('Native candidate policy did not match the request.')
     rows = read_jsonl(raw / 'gpu_rewrite_cuts.jsonl')
     catalogue = catalogue_from_raw(rows, partition)
     save_json(output / 'catalogue.json', {
@@ -126,11 +136,12 @@ def enumerate_candidates(gpuls, aig, partition, output, timeout=300):
             for a, b in catalogue.conflicts], 'region_decisions': catalogue.region_decisions,
         'legal_cut_count': len(rows), 'executable_decisions': len(catalogue.decisions),
         'candidate_count': sum(d['candidate_count'] for d in catalogue.decisions),
-        'policy': 'Positive node gain GPU masks; conservative static conflicts; exact replay acceptance required.'})
+        'policy': expected + '; conservative static conflicts; exact replay acceptance required.'})
     return catalogue
 
 
-def replay(gpuls, aig, owner_csv, catalogue, choices, output, timeout=300, allow_nonpositive_gain=False):
+def replay(gpuls, aig, owner_csv, catalogue, choices, output, timeout=300, allow_nonpositive_gain=False,
+           allow_nonpositive_candidates=False):
     requested = catalogue.requested(choices)  # reject conflicts BEFORE calling GPU
     output.mkdir(parents=True, exist_ok=False)
     config = output / 'choices.txt'
@@ -140,6 +151,11 @@ def replay(gpuls, aig, owner_csv, catalogue, choices, output, timeout=300, allow
               'order': 'ascending_original_root', 'installation_gain_policy': policy}
     env = dict(os.environ)
     env.pop('CULS_REPLAY_ALLOW_NONPOSITIVE_GAIN', None)
+    env.pop('CULS_ALLOW_NONPOSITIVE_CANDIDATES', None)
+    if allow_nonpositive_candidates:
+        if not allow_nonpositive_gain:
+            raise ValueError('Nonpositive candidates require explicit installation permission.')
+        env['CULS_ALLOW_NONPOSITIVE_CANDIDATES'] = '1'
     if allow_nonpositive_gain:
         env['CULS_REPLAY_ALLOW_NONPOSITIVE_GAIN'] = '1'
     try:
@@ -148,6 +164,8 @@ def replay(gpuls, aig, owner_csv, catalogue, choices, output, timeout=300, allow
                   f'--region-map {tool_path(owner_csv)} --config {tool_path(config)}'], output, 'rewrite', timeout, env)
         if allow_nonpositive_gain:
             actual_policy = json.loads((raw / 'replay_policy.json').read_text())
+            if allow_nonpositive_candidates and actual_policy.get('candidate_rule') != 'allow_nonpositive_gain':
+                raise ToolError('Native replay candidate mask policy did not match the request.')
             if actual_policy['installation_gain_policy'] != policy:
                 raise ToolError('Native replay installation policy did not match the request.')
         trace = read_jsonl(raw / 'traces/choice.jsonl')

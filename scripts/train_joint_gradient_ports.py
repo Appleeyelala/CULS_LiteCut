@@ -17,6 +17,15 @@ ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
 from joint_gradient_panel import read,save,sha
 
 
+def load_prepared_graphs(path):
+    import torch
+    from global_timing.common import legacy
+    # parse_aig returns this dynamically registered, historical dataclass.
+    # A fresh process must register it before trusted local cache unpickling.
+    legacy('gate3b_analyze')
+    return torch.load(path,map_location='cpu',weights_only=False)
+
+
 def move_graph(model, device):
     """Move per-circuit buffers without moving shared parameters/Adam state."""
     for name,buffer in model._buffers.items():
@@ -150,7 +159,7 @@ def main():
     manifest=read(args.manifest);started=time.perf_counter()
     code_hashes={n:sha(ROOT/'global_timing'/n) for n in ['learned_ports.py','phase_ports.py','conditional_arrival.py']}
     if args.prepared:
-        prepared=torch.load(args.prepared,map_location='cpu',weights_only=False)
+        prepared=load_prepared_graphs(args.prepared)
         if prepared['manifest_sha256']!=sha(args.manifest) or prepared['code_hashes']!=code_hashes:
             raise ValueError('Prepared graph provenance mismatch')
         examples,audit=prepared['examples'],prepared['audit'];shared=examples[0]['domains'][0]['model'].shared

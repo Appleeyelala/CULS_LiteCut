@@ -1,16 +1,28 @@
 import sys
+import io
 import unittest
 from pathlib import Path
 
 import torch
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts'))
-from train_joint_gradient_ports import timing_loss,move_graph
+from train_joint_gradient_ports import timing_loss,move_graph,load_prepared_graphs
 from global_timing.learned_ports import PortTimingParameters,LearnedPortSurrogate
 from test_learned_ports import fixture
 
 
 class PortLearningTests(unittest.TestCase):
+    def test_cache_load_registers_dynamic_aig_type_in_fresh_process(self):
+        from global_timing.common import legacy
+        module=legacy('gate3b_analyze')
+        aig=module.Aig(Path('unused.aig'),3,2,0,1,1,(6,),{3:(2,4)})
+        saved=io.BytesIO();torch.save({'aig':aig},saved);saved.seek(0)
+        sys.modules.pop('_culs_gate3b_analyze')
+        with self.assertRaises(ModuleNotFoundError):torch.load(saved,weights_only=False)
+        saved.seek(0);restored=load_prepared_graphs(saved)['aig']
+        self.assertEqual(restored.fanin_literals,{3:(2,4)})
+        self.assertEqual(restored.po_literals,(6,))
+
     def test_delta_loss_gradient_rewards_correct_direction(self):
         predicted=torch.tensor([[101.,90.],[99.,90.]],dtype=torch.double,requires_grad=True)
         target=torch.tensor([[98.,90.],[102.,90.]],dtype=torch.double)

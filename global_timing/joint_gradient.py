@@ -65,7 +65,7 @@ def final_better(candidate,best,model,config):
 
 def aligned_ste_search(model,feasibility,seed=20261117,steps=40,learning_rate=.12,maximum_edits=16,
                        config=JointGradientConfig()):
-    """Objective-only ablation; retains historical STE initialization/projection."""
+    """Objective/final-ranking control; retains STE initialization/projection."""
     config.validate();model.requires_grad_(False);prepare_selection_mask(model,feasibility)
     generator=torch.Generator(device=model.features.device).manual_seed(seed)
     logits=torch.nn.Parameter(torch.randn(model.features.shape[:2],dtype=torch.float64,

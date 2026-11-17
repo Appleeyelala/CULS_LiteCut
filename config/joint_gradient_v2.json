@@ -13,7 +13,7 @@
   "development_panel": {"circuits": 12, "per_mechanism": 4, "maximum_decisions": 4, "minimum_mffcs": 2, "maximum_nonempty_mappings": 180},
   "validation_panel": {"circuits": 24, "selection": "label_blind_source_size_stratified"},
   "test_panel": {"circuits": 100, "selection": "label_blind_source_size_stratified"},
-  "objective": {"normalized_smoothing_error": 0.001, "final_ranking": "hard_predicted_max_delay_then_area_then_fewer_edits", "area_penalty": 20.0},
+  "objective": {"normalized_smoothing_error": 0.001, "final_ranking": "hard_predicted_max_delay_then_fewer_edits_then_area", "area_penalty": 20.0},
   "diagnostic_budget": {"backward_calls": 40, "forward_calls": 160, "beam_width": 32, "initial_trust_radius": 2},
   "gates": {"median_within_circuit_spearman": 0.5, "improvement_precision": 0.7, "test_geomean_ours_over_B": 0.99, "test_bootstrap_upper_ours_over_B": 1.0, "test_geomean_ours_over_A": 1.0, "cec_failures": 0, "area_violations": 0},
   "mapping_policy": "Original anchor only in optimizer; immutable selection before independent final measurement; no measured-delay rollback or feedback.",

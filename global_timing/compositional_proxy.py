@@ -121,7 +121,7 @@ class CompositionalTimingSurrogate(torch.nn.Module):
         self.metadata={'schema':'compositional_cut_ports_v1','litecut_blend':litecut_blend,'inversion_cost':inversion_cost,
                        'smoothing_error':smoothing_error,'retained_nodes':len(self.nodes),'unit_ps':self.unit_ps,
                        'area_model':'unchanged historical gate-count predictor',
-                       'limitations':['unmapped structural path arcs','no dynamic hash/load/cell covering','PI arrivals zero before PO anchoring',
+                       'limitations':['unmapped structural path arcs','no constant folding or dynamic hash/load/cell covering','PI arrivals zero before PO anchoring',
                                       'soft incompatible mixtures are only a gradient extension; only hard feasible vectors are executable']}
 
     def one_hot(self,choices):

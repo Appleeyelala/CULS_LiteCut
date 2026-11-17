@@ -154,13 +154,30 @@ def measure(args):
         targets=[folder/'measurements'/f'combo_{c["index"]:02d}'/'rewrite' for c in pred]
         for p in targets:p.parent.mkdir(parents=True,exist_ok=False)
         replay_start=time.time_ns();assert replay_start>barrier['created_unix_ns']
-        executions=replay_many(args.gpuls,folder/'input.aig',folder/'owners.csv',cat,[c['choices'] for c in pred],
-                folder/'batch_replay',targets,timeout=900,prepared=True,allow_nonpositive_gain=True)
+        replay_starts=[replay_start]*len(pred)
+        if args.installed:
+            completed=read(args.installed/'measurement_complete.json')
+            assert completed['gpuls_sha256']==digest(args.gpuls)
+            old=args.installed/f'case_{r["circuit_id"]:04d}'
+            assert digest(old/'input.aig')==digest(folder/'input.aig')
+            executions=[]
+            for j,c in enumerate(pred):
+                installed=read(old/'measurements'/f'combo_{c["index"]:02d}'/'observation.json')
+                execution=installed['execution']
+                assert execution['status']=='PASS' and execution['choices']==c['choices']
+                assert execution['applied_rewrites']==sum(bool(v) for v in c['choices'])
+                assert installed['replay_start_unix_ns']>barrier.get('original_freeze_unix_ns',barrier['created_unix_ns'])
+                executions.append(execution);replay_starts[j]=installed['replay_start_unix_ns']
+        else:
+            executions=replay_many(args.gpuls,folder/'input.aig',folder/'owners.csv',cat,[c['choices'] for c in pred],
+                    folder/'batch_replay',targets,timeout=900,prepared=True,allow_nonpositive_gain=True)
         evaluator=Evaluator(Path(context['tools']['abc']['path']),Path(context['tools']['library']['path']),folder/'input.aig',900)
-        for c,execution,target in zip(pred,executions,targets):
+        for c,execution,target,actual_replay_start in zip(pred,executions,targets,replay_starts):
             row={'circuit':c['circuit'],'index':c['index'],'choices':c['choices'],
                  'predicted_mapping_delay_ps':c['predicted_mapping_delay_ps'],'prediction_file_sha256':digest(folder/'predictions.json'),
-                 'replay_start_unix_ns':replay_start,'execution':execution,'status':execution['status']}
+                 'replay_start_unix_ns':actual_replay_start,'measurement_start_unix_ns':time.time_ns(),
+                 'replay_reused_from':str(args.installed) if args.installed else None,
+                 'execution':execution,'status':execution['status']}
             try:
                 if execution['status']!='PASS':raise RuntimeError(execution.get('error'))
                 candidate=target.parent/'normalized_candidate.aig';normalize(parse_aig(Path(execution['aig'])),candidate)
@@ -207,7 +224,9 @@ def report(args):
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('phase',choices=['stage','preflight','predict','measure','report'])
     p.add_argument('--data',type=Path);p.add_argument('--output',type=Path,required=True);p.add_argument('--gpuls',type=Path)
-    p.add_argument('--report',type=Path);a=p.parse_args()
+    p.add_argument('--report',type=Path);p.add_argument('--installed',type=Path,
+        help='Reuse already fully installed identical requests; never reuse their timing labels')
+    a=p.parse_args()
     if a.phase!='report' and (not os.environ.get('SLURM_JOB_ID') or not ROOT.is_relative_to('/data/wushangge')):
         p.error('Run immutable /data source under Slurm')
     globals()[a.phase](a)

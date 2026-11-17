@@ -44,7 +44,8 @@ def verify(panel,report):
             assert float(row['predicted_mapping_delay_ps'])==p['predicted_mapping_delay_ps']
             path=folder/'measurements'/f'combo_{p["index"]:02d}'/'observation.json';o=read(path)
             assert o['prediction_file_sha256']==sha(folder/'predictions.json')
-            assert o['replay_start_unix_ns']>barrier['created_unix_ns']
+            assert o['replay_start_unix_ns']>barrier.get('original_freeze_unix_ns',barrier['created_unix_ns'])
+            assert o.get('measurement_start_unix_ns',o['replay_start_unix_ns'])>barrier['created_unix_ns']
             assert o['choices']==p['choices']
             if o['status']=='PASS':
                 m=o['metrics'];passed+=1

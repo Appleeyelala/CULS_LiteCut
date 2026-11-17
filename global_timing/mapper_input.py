@@ -4,17 +4,26 @@ from types import SimpleNamespace
 
 
 def canonical_graph(aig):
+    # Replay may retain pinned boundary nodes after they become unobservable.
+    # Serialize the PO-reachable network, preserving all PI positions. This
+    # is reachability cleanup, not Boolean optimization or structural merging.
+    reachable=set();pending=[l >> 1 for l in aig.po_literals]
+    while pending:
+        node=pending.pop()
+        if node in reachable or node not in aig.fanin_literals:continue
+        reachable.add(node);pending.extend(l >> 1 for l in aig.fanin_literals[node])
     hashes = {i: hashlib.sha256(f'PI:{i}'.encode()).digest() for i in range(aig.pi_count + 1)}
     hashes[0] = hashlib.sha256(b'CONST0').digest()
     ordered = {}
     for node, pair in sorted(aig.fanin_literals.items()):
+        if node not in reachable:continue
         ordered[node] = tuple(sorted(pair, key=lambda l: (hashes[l >> 1], l & 1)))
         hashes[node] = hashlib.sha256(b'AND' + b''.join(hashes[l >> 1] + bytes([l & 1])
                                                      for l in ordered[node])).digest()
     translated = {i: 2 * i for i in range(aig.pi_count + 1)}
     fanins = {}
-    # PO order and PI identity are invariant. Retain even disconnected gates.
-    roots = [l >> 1 for l in aig.po_literals] + sorted(ordered, key=lambda n: hashes[n])
+    # PO order and PI identity are invariant.
+    roots = [l >> 1 for l in aig.po_literals]
     for root in roots:
         stack = [(root, False)]
         while stack:

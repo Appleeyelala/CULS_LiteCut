@@ -40,6 +40,8 @@ class CutTimingTests(unittest.TestCase):
         self.assertEqual(aiger_bytes(x),aiger_bytes(y))
         self.assertEqual(aiger_bytes(x),aiger_bytes(canonical_graph(x)))
         self.assertEqual(len(x.fanin_literals),3)
+        with_dead=graph({**a.fanin_literals,7:(2,6)},a.po_literals)
+        self.assertEqual(aiger_bytes(x),aiger_bytes(canonical_graph(with_dead)))
 
     def test_boolean_parser(self):
         self.assertEqual(function_truth('(!A * B) + (A * !B)',('A','B')),6)

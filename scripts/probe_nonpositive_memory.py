@@ -23,7 +23,7 @@ def main():
     if not os.environ.get('SLURM_JOB_ID') or not ROOT.is_relative_to('/data/wushangge'):
         parser.error('Run committed /data source through Slurm.')
     import torch
-    from torch.utils._python_dispatch import TorchDispatchMode
+    from contextlib import contextmanager
     from global_timing.candidates import Catalogue
     from global_timing.feasibility import CandidateFeasibility
     from global_timing.mffc_model import MffcGpuSurrogate
@@ -41,22 +41,21 @@ def main():
             f.write(json.dumps(row)+'\n')
         print(json.dumps(row), flush=True)
 
-    class Allocations(TorchDispatchMode):
-        def __torch_dispatch__(self, func, types, args=(), kwargs=None):
-            before = torch.cuda.memory_allocated() if torch.cuda.is_initialized() else 0
-            try:
-                result = func(*args, **(kwargs or {}))
-            except Exception:
-                emit('operator_exception', operator=str(func), tensors=[
-                    {'shape':list(a.shape), 'layout':str(a.layout), 'dtype':str(a.dtype)}
-                    for a in args if isinstance(a, torch.Tensor)])
-                raise
-            after = torch.cuda.memory_allocated() if torch.cuda.is_initialized() else 0
-            if after-before > 128*1024**2:
-                emit('large_allocation', operator=str(func), delta=after-before, tensors=[
-                    {'shape':list(a.shape), 'layout':str(a.layout), 'dtype':str(a.dtype)}
-                    for a in args if isinstance(a, torch.Tensor)])
-            return result
+    @contextmanager
+    def allocations():
+        # TorchDispatchMode in Torch 1.13 cannot marshal record_stream's Stream.
+        # The autograd profiler observes allocator events without intercepting it.
+        profiler = torch.autograd.profiler.profile(profile_memory=True, record_shapes=True)
+        try:
+            with profiler:
+                yield
+        finally:
+            rows = [dict(operator=e.name, shapes=e.input_shapes,
+                         cuda_memory_bytes=e.cuda_memory_usage,
+                         cpu_memory_bytes=e.cpu_memory_usage)
+                    for e in profiler.function_events
+                    if e.cuda_memory_usage > 128 * 1024**2]
+            emit('large_allocations', operators=rows)
 
     metadata = {k:os.environ.get(k) for k in ['SLURM_JOB_ID','SLURMD_NODENAME',
         'SLURM_JOB_GPUS','SLURM_STEP_GPUS','CUDA_VISIBLE_DEVICES','CUDA_DEVICE_ORDER']}
@@ -98,14 +97,14 @@ def main():
             emit('before_model_to', buffers=buffers)
             return original_to(module,*a,**kw)
         torch.nn.Module.to=inspected_to
-        with Allocations():
+        with allocations():
             model=MffcGpuSurrogate(partition,catalogue,scores,baseline,
                                    context['tools']['native_library']['path'])
         torch.nn.Module.to=original_to
         del scores
         gc.collect()
         emit('model_ready')
-        with Allocations():
+        with allocations():
             best, trace=ste_adam_search(model,feasibility)
         emit('ste40_pass', steps=trace['steps'], edits=best['edits'],
              logits_change=trace['logits_total_change_norm'])

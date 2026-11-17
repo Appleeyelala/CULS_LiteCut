@@ -49,7 +49,10 @@ class CutTimingTests(unittest.TestCase):
         lib=SyntheticLibrary()
         a=graph({4:(2,4),5:(8,6)},[10])
         matrix=local_transfers(a,lib)
-        self.assertGreater(matrix[0,8],matrix[0,0])
+        # Cut leaves are ordered by node ID: the third PI is the fast pin of
+        # the second gate, while the first PI crosses two different pin arcs.
+        self.assertEqual(matrix[0,8],2.)
+        self.assertEqual(matrix[0,0],7.)
         positive=matrix[0].max()
         b=graph(a.fanin_literals,[11])
         complement=local_transfers(b,lib)

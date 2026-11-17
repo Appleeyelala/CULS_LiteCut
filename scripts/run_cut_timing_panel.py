@@ -49,6 +49,29 @@ def stage(args):
               'new_neural_networks':False,'optimizer_changes':False}})
 
 
+def preflight(args):
+    from global_timing.evaluation import Evaluator
+    manifest=read(args.output/'panel.json');checks=[]
+    for r in manifest['circuits']:
+        if r['circuit_id'] not in manifest['protocol']['preflight_ids']:continue
+        folder=Path(r['folder']);tools=read(folder/'context.json')['tools']
+        for key in ['abc','library']:
+            if digest(Path(tools[key]['path']))!=tools[key]['sha256']:raise ValueError('Changed tool '+key)
+        normalized=folder/'normalized_original.aig';normalize(parse_aig(folder/'input.aig'),normalized)
+        evaluator=Evaluator(Path(tools['abc']['path']),Path(tools['library']['path']),folder/'input.aig',900)
+        baseline=evaluator.evaluate(normalized,folder/'anchor')
+        repeat=evaluator.evaluate(normalized,folder/'repeat_identical')
+        old=args.data/f'case_{r["circuit_id"]:04d}'/'measurements/combo_00/rewrite/raw/aigs/choice.aig'
+        noop=folder/'normalized_saved_noop.aig';normalize(parse_aig(old),noop)
+        if digest(noop)!=digest(normalized):raise ValueError('Normalized original/no-op bytes differ')
+        control=evaluator.evaluate(noop,folder/'repeat_noop')
+        assert repeat['po_rise_fall']==baseline['po_rise_fall']==control['po_rise_fall']
+        record={'status':'PASS','circuit_id':r['circuit_id'],'original_sha256':digest(normalized),'noop_sha256':digest(noop),
+                'same_input_delay_ps':[baseline['delay_ps'],repeat['delay_ps'],control['delay_ps']]}
+        save_json(folder/'input_control.json',record);checks.append(record)
+    save_json(args.output/'preflight.json',{'checks':checks,'status':'PASS','new_mapping_calls':9})
+
+
 def predict(args):
     import torch
     from global_timing.evaluation import Evaluator
@@ -58,6 +81,7 @@ def predict(args):
     from global_timing.candidates import Catalogue
     from global_timing.feasibility import CandidateFeasibility
     from diagnose_joint_gradient_structure_v3 import literal_composition
+    assert read(args.output/'preflight.json')['status']=='PASS'
     manifest=read(args.output/'panel.json');rewrite=parse_library(ROOT/'projects/culs/src/algorithms/rewrite_library.inc')
     lib=None;allrows=[]
     for r in manifest['circuits']:
@@ -66,17 +90,8 @@ def predict(args):
             if digest(Path(tools[key]['path']))!=tools[key]['sha256']:raise ValueError('Changed tool '+key)
         normalized=folder/'normalized_original.aig';normalize(aig,normalized)
         evaluator=Evaluator(Path(tools['abc']['path']),Path(tools['library']['path']),folder/'input.aig',900)
-        baseline=evaluator.evaluate(normalized,folder/'anchor')
-        # Small causal control: same bytes twice, plus saved zero-edit Replay.
-        if r['circuit_id'] in manifest['protocol']['preflight_ids']:
-            repeat=evaluator.evaluate(normalized,folder/'repeat_identical')
-            old=args.data/f'case_{r["circuit_id"]:04d}'/'measurements/combo_00/rewrite/raw/aigs/choice.aig'
-            noop=folder/'normalized_saved_noop.aig';normalize(parse_aig(old),noop)
-            if digest(noop)!=digest(normalized):raise ValueError('Normalized original/no-op bytes differ')
-            control=evaluator.evaluate(noop,folder/'repeat_noop')
-            assert repeat['po_rise_fall']==baseline['po_rise_fall']==control['po_rise_fall']
-            save_json(folder/'input_control.json',{'status':'PASS','original_sha256':digest(normalized),'noop_sha256':digest(noop),
-                        'same_input_delay_ps':[baseline['delay_ps'],repeat['delay_ps'],control['delay_ps']]})
+        baseline=read(folder/'anchor/result.json') if (folder/'anchor/result.json').exists() else evaluator.evaluate(normalized,folder/'anchor')
+        assert baseline['status']=='PASS' and baseline['input_sha256']==digest(normalized)
         if lib is None:
             lib=CutLibrary(Path(tools['library']['path']));save_json(args.output/'library_model.json',lib.metadata())
         raw=read(folder/'catalogue.json');cat=Catalogue(raw['decisions'],raw['conflicts'],{int(k):v for k,v in raw['region_decisions'].items()})
@@ -184,7 +199,7 @@ def report(args):
 
 
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('phase',choices=['stage','predict','measure','report'])
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('phase',choices=['stage','preflight','predict','measure','report'])
     p.add_argument('--data',type=Path);p.add_argument('--output',type=Path,required=True);p.add_argument('--gpuls',type=Path)
     p.add_argument('--report',type=Path);a=p.parse_args()
     if a.phase!='report' and (not os.environ.get('SLURM_JOB_ID') or not ROOT.is_relative_to('/data/wushangge')):

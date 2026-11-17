@@ -81,6 +81,19 @@ class LearnedPortTests(unittest.TestCase):
         self.assertGreater(float(gradient[1,1].abs()),0.)
         self.assertTrue(torch.autograd.gradcheck(lambda y:model(y)[0],(x,),eps=1e-6,atol=1e-5))
 
+    def test_unused_domain_extension_does_not_dilute_global_edit_features(self):
+        r,s,l=fixture();shared=PortTimingParameters().double()
+        with torch.no_grad():
+            for p in shared.parameters():p.normal_(0.,.1)
+        first=LearnedPortSurrogate(r,s,l,shared)
+        predicted,_=first(first.one_hot([1]))
+        r.catalogue.decisions.append(dict(r.catalogue.decisions[0]));r.n_decisions=2;r.counts=[2,2]
+        for name in ['features','valid','sizes']:setattr(r,name,getattr(r,name).repeat((2,1,1) if name=='features' else (2,1) if name=='valid' else (2,)))
+        s=s+[dict(row,decision_index=1) for row in s]
+        second=LearnedPortSurrogate(r,s,l,shared)
+        extended,_=second(second.one_hot([1,0]))
+        torch.testing.assert_close(predicted,extended,rtol=1e-12,atol=1e-12)
+
     @unittest.skipUnless(torch.cuda.is_available(),'CUDA required for device parity')
     def test_gpu_forward_and_gradient_match_cpu(self):
         r,s,l=fixture();model=LearnedPortSurrogate(r,s,l)

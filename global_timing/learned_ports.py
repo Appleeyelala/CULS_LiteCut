@@ -99,7 +99,7 @@ class LearnedPortSurrogate(nn.Module):
                     layer[5].append(dest_local)
                     options.append(dest)
                     option_choice.append((i*self.width+c) if i is not None else -1-len(active_roots)+1)
-                    score = groups.get((i,c)) if i is not None else groups.get((by_root[n][0],0)) if by_root[n] else None
+                    score = groups.get((i,c)) if i is not None else None
                     raw = (score or {}).get('continuous_features_19', [0.]*19)
                     if len(raw) != 19: raise ValueError('Expected frozen 19-feature LiteCut record')
                     raw = [math.copysign(math.log1p(abs(float(v))),v)/10. for v in raw]
@@ -124,6 +124,7 @@ class LearnedPortSurrogate(nn.Module):
                            ('decision_regions',torch.tensor([d['decision_owner_region'] for d in self.catalogue.decisions],dtype=torch.long))]:
             self.register_buffer(name,value)
         self.root_count = len(active_roots)
+        self.register_buffer('learned_edges',(self.edge_features[:,23]>0).nonzero(as_tuple=False).flatten())
         regions = len(self.partition.regions)
         pairs = sorted(set(self.partition.edges)); degree = Counter(a for a,b in pairs)
         indices = torch.tensor(pairs,dtype=torch.long).T if pairs else torch.empty((2,0),dtype=torch.long)
@@ -182,14 +183,18 @@ class LearnedPortSurrogate(nn.Module):
         weights = torch.where(choice[None]>=0,flat[:,choice.clamp_min(0)],1.-roots[:,(-1-choice).clamp_min(0)])
         costs = self.edge_prior[None].expand(len(x),-1)
         if self.variant in {'ports','combined'}:
-            feature = torch.cat([self.edge_features[None].expand(len(x),-1,-1),context[:,self.edge_regions]],-1)
+            edges=self.learned_edges
+            feature = torch.cat([self.edge_features[None,edges].expand(len(x),-1,-1),context[:,self.edge_regions[edges]]],-1)
             network_dtype = next(self.shared.parameters()).dtype
             scale = (torch.nn.functional.softplus(self.shared.port(feature.to(network_dtype)).squeeze(-1))/math.log(2.)).to(x.dtype)
-            costs = costs*scale
+            # Keep untouched paths additive under extra retained cut boundaries.
+            # Otherwise merely adding unused candidates changes learned timing.
+            costs = costs.index_copy(1,edges,self.edge_prior[None,edges]*scale)
         operation = conditional_arrivals if self.backend=='bounded_tape' else conditional_reference
         arrival = operation(costs,weights,self.initial,self._layers(x.device),self.temperature)[:,self.outputs]
         if self.variant in {'global','combined'}:
-            mean = expected.sum(1)/max(self.n_decisions,1)
+            # Circuit normalization must not depend on catalogue/pruning size.
+            mean = expected.sum(1)/math.sqrt(max(self.partition.aig.and_count,1))
             weighted = (expected*self.sizes[None,:,None]).sum(1)/max(self.partition.aig.and_count,1)
             global_features = torch.cat([mean,weighted],-1)[:,None].expand(-1,len(self.outputs),-1)
             padded_context = torch.cat([context,x.new_zeros((len(x),1,8))],1)

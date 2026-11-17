@@ -6,7 +6,6 @@ visited once per epoch. Validation selects checkpoints; test labels are never
 opened. All unsuccessful/area-invalid records remain in the input audit.
 """
 import argparse
-import copy
 import json
 import os
 from pathlib import Path
@@ -68,7 +67,9 @@ def load_examples(data, manifest, shared, variant):
             if history['structural_max_error']>1e-8:raise ValueError('Historical structural gate failed')
             domains.append(('historical',history['catalogue'],history['scores'],
                 [dict(index=1,status='PASS',choices=history['choices'],metrics=history['metrics'],area_feasible=history['area_feasible'])]))
-        case={'circuit_id':entry['circuit_id'],'role':entry['role'],'family':entry['family'],'domains':[]}
+        noop=next((r.get('metrics',{}).get('delay_ps') for r in measured['results'] if r['index']==0 and r['status']=='PASS'),None)
+        case={'circuit_id':entry['circuit_id'],'role':entry['role'],'family':entry['family'],'domains':[],
+              'serialized_noop_delay_ps':noop}
         for domain,raw,scores,records in domains:
             accepted=[]
             for record in records:
@@ -110,6 +111,8 @@ def evaluate(examples,role,device):
                     rows.append(dict(circuit_id=case['circuit_id'],domain=domain['name'],index=record['index'],
                         predicted_delay_ps=p,actual_delay_ps=a,original_delay_ps=model.delay_reference,
                         predicted_improvement=p<model.delay_reference-tol,actual_improvement=a<model.delay_reference-tol,
+                        serialized_noop_delay_ps=case['serialized_noop_delay_ps'],
+                        improves_serialized_noop=a<case['serialized_noop_delay_ps']-tol if case['serialized_noop_delay_ps'] is not None else None,
                         area_feasible=record.get('area_feasible')))
                 if domain['name']=='sampled':
                     # Quantized ties use the declared timing tolerance.
@@ -123,10 +126,12 @@ def evaluate(examples,role,device):
     eligible=[r for r in rows if r['domain']=='sampled']
     correlations=[r['spearman'] if r['spearman'] is not None else 0. for r in case_statistics]
     precision=sum(r['actual_improvement'] for r in announced)/len(announced) if announced else None
+    measured_noop=[r for r in announced if r['improves_serialized_noop'] is not None]
     median=float(np.median(correlations)) if correlations else None
     return {'mean_circuit_loss':float(np.mean(losses)) if losses else None,'cases':case_statistics,'predictions':rows,
             'median_spearman_with_undefined_as_zero':median,'improvement_precision':precision,
             'improvement_coverage':len(announced)/len(eligible) if eligible else 0.,
+            'precision_against_serialized_noop':sum(r['improves_serialized_noop'] for r in measured_noop)/len(measured_noop) if measured_noop else None,
             'gate_pass':median is not None and median>=.5 and precision is not None and precision>=.7}
 
 
@@ -135,17 +140,39 @@ def main():
     p.add_argument('--data',type=Path,required=True);p.add_argument('--manifest',type=Path,required=True)
     p.add_argument('--output',type=Path,required=True);p.add_argument('--variant',choices=['fixed','ports','global','combined'],required=True)
     p.add_argument('--seed',type=int,required=True);p.add_argument('--device',default='cuda')
+    p.add_argument('--prepare-only',action='store_true');p.add_argument('--prepared',type=Path)
     args=p.parse_args()
     if not os.environ.get('SLURM_JOB_ID') or not ROOT.is_relative_to('/data/wushangge'):p.error('Committed /data source and Slurm required')
     import torch
     from global_timing.learned_ports import PortTimingParameters
     torch.set_num_threads(1);torch.manual_seed(args.seed);random.seed(args.seed)
     args.output.mkdir(parents=True,exist_ok=False)
-    manifest=read(args.manifest);shared=PortTimingParameters().to(args.device)  # float32 heads; float64 timing tape.
-    started=time.perf_counter();examples,audit=load_examples(args.data,manifest,shared,args.variant)
+    manifest=read(args.manifest);started=time.perf_counter()
+    code_hashes={n:sha(ROOT/'global_timing'/n) for n in ['learned_ports.py','phase_ports.py','conditional_arrival.py']}
+    if args.prepared:
+        prepared=torch.load(args.prepared,map_location='cpu',weights_only=False)
+        if prepared['manifest_sha256']!=sha(args.manifest) or prepared['code_hashes']!=code_hashes:
+            raise ValueError('Prepared graph provenance mismatch')
+        examples,audit=prepared['examples'],prepared['audit'];shared=examples[0]['domains'][0]['model'].shared
+        shared.load_state_dict(PortTimingParameters().state_dict())
+        for case in examples:
+            for domain in case['domains']:
+                model=domain['model']
+                if model.shared is not shared:raise ValueError('Prepared models lost shared parameter identity')
+                model.variant=args.variant;model.metadata['variant']=args.variant
+    else:
+        shared=PortTimingParameters()
+        examples,audit=load_examples(args.data,manifest,shared,args.variant)
     save(args.output/'label_audit.json',audit)
     if {c['circuit_id'] for c in examples}!={r['circuit_id'] for r in manifest['selected']}:
         raise ValueError('A frozen circuit has no usable labels; report it, do not silently replace it')
+    if args.prepare_only:
+        torch.save({'examples':examples,'audit':audit,'manifest_sha256':sha(args.manifest),'code_hashes':code_hashes},args.output/'prepared.pt')
+        save(args.output/'preparation.json',{'cases':len(examples),'domains':sum(len(c['domains']) for c in examples),
+             'code_hashes':code_hashes,'manifest_sha256':sha(args.manifest),'elapsed_s':time.perf_counter()-started,
+             'model_metadata':[{'circuit_id':c['circuit_id'],'domains':[d['model'].metadata for d in c['domains']]} for c in examples]})
+        return
+    shared.to(args.device)  # Move shared parameters once, before creating AdamW.
     parameters=shared.parameters() if args.variant=='combined' else shared.port.parameters() if args.variant=='ports' else shared.global_head.parameters()
     optimizer=torch.optim.AdamW(parameters,lr=1e-3,weight_decay=1e-4)
     history=[];best=float('inf');best_state={k:v.detach().cpu().clone() for k,v in shared.state_dict().items()};stale=0;best_epoch=-1

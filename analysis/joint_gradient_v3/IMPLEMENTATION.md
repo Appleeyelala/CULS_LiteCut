@@ -23,7 +23,9 @@ Second derivatives are unsupported. This is not a new fused native CUDA kernel.
 `learned_ports.py` provides four matched ablations: fixed structural ports,
 learned ports, global residual only, and both. The port MLP has two 64-unit SiLU
 layers; a Softplus multiplier gives nonnegative effective port cost, initialized
-to the structural prior. Wires retain zero transfer cost. The input comprises
+to the structural prior. Only replacement transfers receive learned multipliers;
+untouched transfers retain additive structural costs so inserting unused cut
+boundaries does not change their learned cost. Wires retain zero transfer cost. The input comprises
 the frozen Student's 19 features (signed log1p / 10), local-delay ratio, path
 cost, source/output phase, candidate flag, and eight context features. Context
 uses two fixed reverse Region-DAG mean aggregations of original region size,
@@ -32,6 +34,8 @@ boundary size, fanout and downstream depth plus expected edit features.
 The independent residual head has two 32-unit SiLU layers. It sees original PO
 timing/structural features, global edit summaries and PO-region context. Both
 heads are shared across circuits. Output is `original_PO + F(x) - F(noop)`;
+global edit summaries use circuit size, never the number of retained candidates,
+so pruning or adding unused choices does not dilute edit features.
 anchoring does not prove accuracy. Candidate measurements never enter forward
 features. The original gate-count area estimator is retained and real area
 violations remain independently reported. Soft conflicting mixtures are gradient
@@ -80,10 +84,11 @@ No 100/905 run is automatic.
 
 ## Verification and accounting
 
-Slurm 65999: 15 tests pass, including polarity cancellation, serial composition,
+Slurm 66000: 16 tests pass, including polarity cancellation, serial composition,
 downstream context, finite differences, parameter/selection gradients against
 the reference, GPU/CPU parity, mixed-precision learning and existing optimizer
-budget/critical-objective tests. Slurm 65995: full 192-row structural audit passes.
+budget/critical-objective tests and unused-candidate feature invariance.
+Slurm 65995: full 192-row structural audit passes.
 Earlier wrapper failures and the floating-point anchor regression are preserved
 in run logs; they are not successful experimental measurements.
 

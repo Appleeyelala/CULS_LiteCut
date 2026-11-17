@@ -1,4 +1,17 @@
-# 最新研究：v3 排序与输出端上下文单项实验（2026-11-17）
+# 最新研究：v3 排序损失单项实验（2026-11-18）
+
+分支 `work/joint-gradient-v3-ranking-loss`。先读
+[本轮报告](analysis/joint_gradient_v3/ranking_loss/README.md)。
+仅对原v3全局残差替换为预先冻结的差距加权成对logistic损失，原结构、特征、
+传播与搜索器不变，未启用上一轮endpoint特征。三个种子开发Pairwise
+54.91%→50.87%，Top-1 27.78%→19.44%，平均Regret 1.629%→2.646%，
+最差Regret 12.657%→15.516%；不建议接入搜索器，不追加调参。
+三个种子均按既有patience20结束于21轮，所选checkpoint为首轮更新后。
+新85个严重反向对中54个固定传播已反向、31个原先并列，尚不能唯一归因于表示或传播。
+原12开发电路已多次用于研究；没有独立测试、新Mapping、新Candidate或100/905运行。
+20项测试通过，Slurm66055/66056/66057均完成。原数据和旧实现保留；没有待续作业。
+
+# 历史研究：v3 排序与输出端上下文单项实验（2026-11-17）
 
 分支 `work/joint-gradient-v3-rank-improve`，基于 `work/joint-gradient-v3-ranking`。
 先读 [本轮结果](analysis/joint_gradient_v3/ranking_improvement/README.md)。

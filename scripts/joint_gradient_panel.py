@@ -30,7 +30,7 @@ def sha(p):
     return h.hexdigest()
 
 
-def load_subset(source):
+def load_subset(source, minimum_decisions=4):
     from global_timing.candidates import Catalogue,conflict_reason
     from global_timing.saved_arrays import iter_saved_array
     best=read(source/'work/optimization/proxy_best.json')
@@ -43,7 +43,7 @@ def load_subset(source):
             d['candidate_count']=1
             decisions.append(d);source_indices.append(i)
         if len(decisions)==len(edits):break
-    if len(decisions)!=len(edits) or len(decisions)<4:raise ValueError('Incomplete or too small archived best domain.')
+    if len(decisions)!=len(edits) or len(decisions)<minimum_decisions:raise ValueError('Incomplete or too small archived best domain.')
     lookup={source:i for i,source in enumerate(source_indices)}
     score_path=read(source/'work/litecut.json')['scores_path']
     scores=[]

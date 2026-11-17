@@ -82,5 +82,21 @@ class CutTimingTests(unittest.TestCase):
         self.assertEqual(local.pi_count,3)
         self.assertEqual(local_peak(local,SyntheticLibrary()),float(local_transfers(local,SyntheticLibrary()).max()))
 
+    def test_two_serial_choices_propagate_upstream_gradients(self):
+        p=CutTimingProxy.__new__(CutTimingProxy);torch.nn.Module.__init__(p)
+        arrays=[[[4,5,4,5],[2.,2.1,4.,4.1],[0,1,2,3],[0,1],[8,8],[-2,1],[2,2]],
+                [[8,9,8,9],[3.,3.,1.,1.],[0,1,2,3],[0,1],[12,12],[-3,3],[3,3]]]
+        p.layers=[tuple(torch.tensor(v,dtype=torch.double if k==1 else torch.long)
+                  for k,v in enumerate(layer)) for layer in arrays]
+        p.register_buffer('initial',torch.zeros(16,dtype=torch.double));p.register_buffer('outputs',torch.tensor([12,13]))
+        p.root_count=3;p._device_layers={}
+        p.register_buffer('flat_choices',torch.tensor([1,3]));p.register_buffer('choice_roots',torch.tensor([1,2]))
+        x=torch.tensor([[[.7,.3],[.6,.4]]],dtype=torch.double,requires_grad=True)
+        result=p(x)
+        torch.testing.assert_close(result,torch.tensor([[[4.8,4.9]]],dtype=torch.double))
+        gradient=torch.autograd.grad(result[0,0,0],x)[0]
+        torch.testing.assert_close(gradient,torch.tensor([[[0.,2.],[0.,-2.]]],dtype=torch.double))
+        self.assertTrue(torch.autograd.gradcheck(p,(x,)))
+
 
 if __name__=='__main__':unittest.main()

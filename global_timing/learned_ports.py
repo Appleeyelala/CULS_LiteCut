@@ -129,6 +129,18 @@ class LearnedPortSurrogate(nn.Module):
         indices = torch.tensor(pairs,dtype=torch.long).T if pairs else torch.empty((2,0),dtype=torch.long)
         context = torch.sparse_coo_tensor(indices,self.features.new_tensor([1./degree[a] for a,b in pairs]),(regions,regions)).coalesce()
         self.register_buffer('context_matrix',context)
+        sizes_by_region=Counter(owner.values());boundary=defaultdict(set);successors=defaultdict(list)
+        for node,pair in aig.fanin_literals.items():
+            for literal in pair:
+                source=literal>>1
+                if owner.get(source)!=owner[node]:boundary[owner[node]].add(source)
+        for a,b in pairs:successors[a].append(b)
+        distance={}
+        for region in reversed(getattr(self.partition,'order',list(range(regions)))):
+            distance[region]=max((distance[s]+1 for s in successors[region]),default=0)
+        static=[[math.log1p(sizes_by_region[r])/10.,math.log1p(len(boundary[r]))/10.,
+                 math.log1p(degree[r])/10.,distance[r]/max(max(distance.values(),default=1),1)] for r in range(regions)]
+        self.register_buffer('region_static',self.features.new_tensor(static).reshape(regions,4))
         po_regions = [owner.get(l>>1,regions) for l in aig.po_literals]
         self.register_buffer('po_regions',torch.tensor(po_regions,dtype=torch.long))
         po_static = [[float(self.baseline_po[j])/self.delay_reference,structural[j]/max(max(structural,default=1.),1.),
@@ -156,7 +168,7 @@ class LearnedPortSurrogate(nn.Module):
         r = self.context_matrix.shape[0]
         local = x.new_zeros((x.shape[0],r,4)).index_add(1,self.decision_regions,expected)
         # Sum of edit features, bounded smoothly; no candidate labels.
-        h = torch.tanh(local).permute(1,0,2).reshape(r,-1)
+        h = torch.tanh(local+self.region_static[None]).permute(1,0,2).reshape(r,-1)
         h1 = torch.sparse.mm(self.context_matrix,h)
         h2 = torch.sparse.mm(self.context_matrix,h1)
         context = torch.cat([h1.reshape(r,x.shape[0],4),h2.reshape(r,x.shape[0],4)],-1).permute(1,0,2)

@@ -163,6 +163,7 @@ def measure(args):
     results=[dict(mask=0,status='PASS',metrics=read(out/'baseline.json'),new_mapping=False,
                   provenance='Original saved paid mapping, not a serialized replay-noop or new runtime.')]
     for mask,execution in enumerate(records,1):
+        if shutil.disk_usage(out).free<8*1024**3:raise RuntimeError('STORAGE_GUARD before next evaluation; preserve partial results.')
         row=dict(mask=mask,status=execution['status'],execution=execution,prediction_sha256=before)
         if execution['status']=='PASS':
             try:
@@ -179,9 +180,56 @@ def measure(args):
          'scope':'Offline factorial diagnostic; extra labels are never used by the optimizer.'})
 
 
+def resume(args):
+    """Continue unstarted requests; never re-map an existing evaluation attempt."""
+    from global_timing.evaluation import Evaluator,parse_timing,cec_passed
+    out=args.output
+    if (out/'measurements.json').exists():return
+    if not (out/'batch_replay').exists():return measure(args)
+    frozen=out/'frozen_predictions.json';before=sha(frozen);payload=read(frozen)
+    source=Path(payload['source']);context=read(source/'context.json')
+    if sha(source/'input.aig')!=payload['input_sha256']:raise ValueError('Input changed.')
+    baseline=read(out/'baseline.json')
+    evaluator=Evaluator(Path(context['tools']['abc']['path']),Path(context['tools']['library']['path']),source/'input.aig',900)
+    results=[dict(mask=0,status='PASS',metrics=baseline,new_mapping=False,provenance='Existing original mapping')]
+    for mask in range(1,16):
+        folder=out/'measurements'/f'mask_{mask:02d}';observation=folder/'observation.json'
+        resumed=folder/'observation_resumed.json'
+        if resumed.exists():results.append(read(resumed));continue
+        if observation.exists() and observation.stat().st_size:
+            try:results.append(read(observation));continue
+            except json.JSONDecodeError:pass
+        execution=read(folder/'rewrite/replay.json')
+        if execution.get('choices')!=payload['combinations'][mask]['choices']:raise ValueError('Replay request changed.')
+        row=dict(mask=mask,status=execution['status'],execution=execution,prediction_sha256=before)
+        evaluation=folder/'evaluation'
+        if evaluation.exists():
+            # A missing command clock/returncode cannot become a fully verified
+            # success. Keep parseable timing as separate diagnostic evidence.
+            row.update(status='INCOMPLETE_RECORD',error='Existing evaluation attempt lacks complete observation; not rerun.')
+            try:
+                timing=parse_timing((evaluation/'mapping.log').read_text())
+                row['diagnostic_timing_only']=dict(timing,cec_log_pass=cec_passed((evaluation/'cec.log').read_text()))
+            except Exception as exc:row['diagnostic_parse_error']=str(exc)
+        elif execution['status']=='PASS':
+            if shutil.disk_usage(out).free<8*1024**3:raise RuntimeError('STORAGE_GUARD before next evaluation.')
+            try:
+                row['metrics']=evaluator.evaluate(Path(execution['aig']),evaluation)
+                row['area_feasible']=row['metrics']['area']<=baseline['area']*1.05
+            except Exception as exc:row.update(status='FAIL',error=str(exc))
+        save(folder/'observation_resumed.json',row);results.append(row)
+        print(json.dumps({'circuit':args.circuit,'mask':mask,'status':row['status'],'phase':'resume'}),flush=True)
+    if sha(frozen)!=before:raise ValueError('Frozen predictions changed.')
+    save(out/'measurements.json',{'circuit':args.circuit,'frozen_predictions_sha256':before,'tools':context['tools'],
+        'gpuls_sha256':sha(args.gpuls),'results':results,
+        'new_mapping_calls':len(list((out/'measurements').rglob('mapping.log'))),
+        'mapping_calls_with_missing_metadata':sum(not p.with_name('mapping.command.json').exists() for p in (out/'measurements').rglob('mapping.log')),
+        'scope':'Resumed frozen factorial evaluation; existing incomplete attempts excluded from verified metrics, never rerun.'})
+
+
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--phase',choices=['prepare','measure'],required=True)
+    p.add_argument('--phase',choices=['prepare','measure','resume'],required=True)
     p.add_argument('--reference-run',type=Path,required=True)
     p.add_argument('--circuit',type=int,required=True)
     p.add_argument('--output',type=Path,required=True)
@@ -189,8 +237,9 @@ def main():
     args=p.parse_args()
     if not os.environ.get('SLURM_JOB_ID') or not ROOT.is_relative_to('/data/wushangge'):
         p.error('Committed /data source and Slurm required.')
-    if args.phase=='measure' and not args.gpuls:p.error('--gpuls required for measurement.')
+    if args.phase in ('measure','resume') and not args.gpuls:p.error('--gpuls required for measurement.')
     if args.phase=='prepare':prepare(args)
+    elif args.phase=='resume':resume(args)
     else:measure(args)
 
 

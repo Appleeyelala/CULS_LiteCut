@@ -97,9 +97,10 @@ def main():
             emit('before_model_to', buffers=buffers)
             return original_to(module,*a,**kw)
         torch.nn.Module.to=inspected_to
-        with allocations():
-            model=MffcGpuSurrogate(partition,catalogue,scores,baseline,
-                                   context['tools']['native_library']['path'])
+        # CPU feature construction has millions of tiny tensor operations;
+        # profile only STE, not the constructor's unrelated host preparation.
+        model=MffcGpuSurrogate(partition,catalogue,scores,baseline,
+                               context['tools']['native_library']['path'])
         torch.nn.Module.to=original_to
         del scores
         gc.collect()

@@ -1,4 +1,16 @@
-# 当前交接补充：joint-gradient v3 受控验证完成（2026-11-17）
+# 最新研究：v3 排序与输出端上下文单项实验（2026-11-17）
+
+分支 `work/joint-gradient-v3-rank-improve`，基于 `work/joint-gradient-v3-ranking`。
+先读 [本轮结果](analysis/joint_gradient_v3/ranking_improvement/README.md)。
+诊断确认旧global头的下游context在终端PO为0；已只替换其八维上下文为
+原图根节点时序敏感性/可达性加权的候选特征，网络、损失与搜索器保持不变。
+三种子开发Pairwise从54.91%降到51.82%，Top1从27.78%升到33.33%，
+平均Regret从1.629%升到1.908%，因此不推进接入搜索器。原12验证电路已作为
+开发集；本轮没有独立测试、新Mapping或100/905运行，旧记录不变。
+19项检查通过，Slurm66052/66053/66054已完成；下一步建议先研究目标对齐，
+不把这次表示缺口修补当作真实排序改善。
+
+# 历史交接补充：joint-gradient v3 受控验证完成（2026-11-17）
 
 先读 [v3入口](analysis/joint_gradient_v3/README.md) 和
 [学习结果](analysis/joint_gradient_v3/PILOT_RESULTS.md)。分支 `work/joint-gradient-v3`。

@@ -1,0 +1,110 @@
+{
+  "protocol": {
+    "schema": "v3_endpoint_context_single_change_v1",
+    "base_commit": "fab87eb35047e182097c9c23b7310eb68fbcc685",
+    "diagnosis_commit": "1331ea5e",
+    "diagnosis_job": 66052,
+    "diagnosis_run": "/data/wushangge/CULS_LiteCut/runs/20261117T152453Z-v3-ranking-diagnosis-0d1782f8",
+    "hypothesis": "The original downstream-looking region context is zero at terminal POs and cannot locate upstream edits relative to outputs. Replacing only the global residual's last eight features with causal per-output edit summaries may improve joint-combination ranking.",
+    "single_change": "Keep the same 20-32-32-1 global head; replace its eight reverse-DAG PO-context inputs with tanh(sum_d sensitivity[p,d]*expected_edit_features[d]) and tanh(sum_d reachability[p,d]*expected_edit_features[d]). Sensitivity is the original structural timing derivative with respect to a common additive delay perturbation at both literal phases of a decision root; reachability is original root-to-PO connectivity. Neither uses candidate Mapping labels.",
+    "scope_of_sensitivity": "Fixed original structural timing, not mapped-cell criticality. Frozen reference coefficients do not model candidate-induced critical-path changes; the existing differentiable timing propagation still uses the selected combination. This is a hypothesis, not a proven cause of every ranking error.",
+    "unchanged": [
+      "frozen LiteCut and its saved features",
+      "20-32-32-1 global residual network",
+      "structural timing and no-op PO anchor",
+      "original PO Huber + critical Huber + 0.1 pairwise loss",
+      "training circuits and historical training domain",
+      "AdamW lr=0.001 weight_decay=0.0001",
+      "max_epochs=200 patience=20",
+      "checkpoint chosen by development loss",
+      "joint gradient searcher",
+      "Mapper input convention and saved labels"
+    ],
+    "seeds": [
+      20261117,
+      20261118,
+      20261119
+    ],
+    "prepared_sha256": "bf40fd2fdff451f97983fdbe43ac1d0f472302ba33e8bb73b08233d02ebf5bc3",
+    "data_roles": {
+      "train": "Original 12 training circuits only update weights",
+      "development": "Original 12 validation circuits already used for diagnosis and checkpoint selection; never called independent",
+      "independent": "No new circuits initially. Only consider a small frozen new panel if development comparison warrants it; never reuse normalized cut-proxy labels without matching."
+    },
+    "evaluation_protocol": "analysis/joint_gradient_v3/ranking_evaluation/PROTOCOL.json",
+    "severe_reversal": "True gap exceeds 5 percent of the circuit's best eight-combination delay and both predictions and labels are distinguishable under the frozen ranking tolerance. Report count over the same true-gap pair domain, not just selected top1.",
+    "advancement_gate": "Consider independent confirmation only if three-seed macro pairwise accuracy rises by at least 5 percentage points, Top1 hit does not fall, average regret falls, maximum regret does not rise, and severe reversals do not increase. This is an engineering go/no-go rule, not a significance test. If it fails, retain negative findings and do not tune or try another architecture in this round.",
+    "budgets": {
+      "new_training_runs": 3,
+      "new_mapping_calls_initial": 0,
+      "additional_model_variants": 1,
+      "large_panel_runs": 0
+    }
+  },
+  "training_run": "/data/wushangge/CULS_LiteCut/runs/20261117T153221Z-v3-endpoint-context-fit-be3408c8",
+  "old_run": "/data/wushangge/CULS_LiteCut/runs/20261117T075734Z-joint-v3-learning-fixed-bade277a",
+  "source_commit": "cec59f7636d75b2564058b5f672985adf3c2ff74",
+  "counts": {
+    "train_circuits": 12,
+    "development_circuits": 12,
+    "independent_circuits": 0,
+    "combinations_per_circuit": 8,
+    "seeds": 3,
+    "new_mapping_calls": 0,
+    "missing_records": 0
+  },
+  "files": [
+    {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261117T153415Z-v3-endpoint-report-51f7f22b/src/analysis/joint_gradient_v3/ranking_improvement/PROTOCOL.json",
+      "sha256": "77aec9d6dc8e2920ed1c25f8d41c539572d93e062782be32e606e941f8736cf7"
+    },
+    {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261117T153415Z-v3-endpoint-report-51f7f22b/src/analysis/joint_gradient_v3/ranking_evaluation/PROTOCOL.json",
+      "sha256": "be9df7477f4630e9b4f87d7b885ea6f0087c5a652c361b03eac1533eb4e7b302"
+    },
+    {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261117T153415Z-v3-endpoint-report-51f7f22b/src/analysis/joint_gradient_v3/learning_manifest.json",
+      "sha256": "18f0fa026d92f141838a863798de55c9dfc02b9d2b671ba7cdfc75ac5906975b"
+    },
+    {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261117T075734Z-joint-v3-learning-fixed-bade277a/output/global_20261117/summary.json",
+      "sha256": "b27dcf419bd2fbc8da51cb2bc7090fc7b316a9fc784a4964e0cca105da8c5e20"
+    },
+    {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261117T153221Z-v3-endpoint-context-fit-be3408c8/output/endpoint_20261117/summary.json",
+      "sha256": "f43d0e4a136acf5f08d99c99f737ba9e159a574efd05f7524b86c083f18c1c80"
+    },
+    {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261117T075734Z-joint-v3-learning-fixed-bade277a/output/global_20261118/summary.json",
+      "sha256": "d169f38727beb4fff473049bbc020216129a0520a2c47359075cebc98ec12477"
+    },
+    {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261117T153221Z-v3-endpoint-context-fit-be3408c8/output/endpoint_20261118/summary.json",
+      "sha256": "1fad8fb553c559e7d02e8a1823d31fbae318edf3f70d8561fbc95cb094255b2e"
+    },
+    {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261117T075734Z-joint-v3-learning-fixed-bade277a/output/global_20261119/summary.json",
+      "sha256": "d7897087c2e790062e9ab138b41b7a21785b638ee0b9cd3e640fd51cf6321faf"
+    },
+    {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261117T153221Z-v3-endpoint-context-fit-be3408c8/output/endpoint_20261119/summary.json",
+      "sha256": "473d22b1a2d346801937b5e82c7b382e3807bfbde5fa950a2f5a32bb994ca83c"
+    }
+  ],
+  "output_sha256": {
+    "overall_metrics.csv": "041c3a1693f5ad117c269da06fa83ad934e611c846325325d198c8794dfe0a85",
+    "seed_metrics.csv": "5cf76bcb5435d72104a9bb3a8be8341d9f4880a6fb9ef905069ec9d91dc5d44b",
+    "per_circuit.csv": "ca8aa20ad3fea68f87c1b1c274167fb5200652892a0a48aeb7e40dfd1f12f1b7",
+    "all_combinations.csv": "38bbb097075040aeee1d33cb9986f798fc4711d08a804a930385c71fe075db32",
+    "pair_changes.csv": "d5d1d43c4b84d613b26d05072da57592e8ef0f77fedbbb58f7799db71b02bca1",
+    "training_accounting.csv": "38e3c1d987de68cbf6f97cf640dab36bf94b14ab4109c9025a2c5523ac78777f"
+  },
+  "advancement_gate": {
+    "pairwise_plus_five_points": false,
+    "top1_not_lower": true,
+    "mean_regret_lower": false,
+    "max_regret_not_higher": true,
+    "severe_reversals_not_more": true
+  },
+  "consider_independent_confirmation": false
+}

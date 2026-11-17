@@ -27,6 +27,7 @@ def main():
         if r['status']=='PASS':
             assert int(r['gain_rule_rejected'])==0
             assert int(r['subgraphs_considered'])==int(r['self_root_reuse_rejected'])+int(r['gain_rule_rejected'])+int(r['new_raw_candidates'])
+            assert int(r['new_raw_positive'])==int(r['old_raw_candidates'])
         for stage in ('raw','verified','feasible'):
             n=r[f'new_{stage}_candidates']
             if n:
@@ -67,6 +68,11 @@ def main():
                 assert int(b['mapping_calls'])+int(b['mapping_calls_with_missing_clock'])<=2
         status=json.loads((full/'FULL905_RUN_STATUS.json').read_text())
         assert status['completed']==sum(x['status']!='NOT_COMPLETED' for x in r)
+        for x in r:
+            if x['status']!='NOT_COMPLETED':
+                assert x['source_commit']==status['run_metadata']['source_commit']
+            if x['status'] in ('PASS','AREA_LIMIT_EXCEEDED') and x['has_legal_candidate']=='True':
+                assert x['adam_steps']=='40'
         assert status['zero_candidates']==sum(x['has_legal_candidate']=='False' for x in c)
         assert len(status['old94_resolved'])+len(status['old94_still_zero'])+len(status['old94_unknown'])==94
     for path in d.rglob('*'):

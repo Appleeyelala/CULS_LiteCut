@@ -142,7 +142,8 @@ def main():
         'controls_source_commit':controls['source_commit'],'controls_slurm_job_id':controls['slurm_job_id'],
         'tools':protocol['tools'],'sample_seed':20261116,'rows':protocol['rows'],
         'environment':build['environment'],'resources':build['resources'],'full905_run':str(args.full_run) if args.full_run else None,
-        'full905_source_commit':full_metadata.get('source_commit')}
+        'full905_source_commit':full_metadata.get('source_commit'),
+        'report_source_commit':read(ROOT.parent/'run.json').get('source_commit') if (ROOT.parent/'run.json').exists() else None}
     write_json(out/'RUN_PROVENANCE.json',meta)
     for path in [coverage/'run.json',coverage/'job.slurm',coverage/'input/commands.json',
         coverage/'input/coverage_protocol.json',coverage/'output/GATE17.json',coverage/'output/COVERAGE_STATUS.json',
@@ -221,6 +222,12 @@ def full_reports(args,out,evidence_file):
     inventory=read(run/'input/full905_manifest.json')['rows']
     assert len(inventory)==905
     old905=[r for r in csv.DictReader((ROOT/'BENCHMARK905_RESULTS.csv').open()) if r['method']=='Ours']
+    for path,role in [
+        (ROOT/'BENCHMARK905_RESULTS.csv','historical905 positive-gain zero-candidate reference; not a new measurement'),
+        (ROOT/'benchmark905_manifest.json','frozen original905 input identity'),
+        (ROOT/'analysis/ste_adam_100/config/sampled_100_manifest.json','fixed100 identity and seed'),
+        (ROOT/'analysis/ste_adam_100/results/STE_ADAM_100_RESULTS.csv','historical A/B reference for fixed100; not rerun')]:
+        evidence_file(path,role)
     oldzero={int(r['index']) for r in old905 if r['candidates']=='0'}
     assert len(oldzero)==94
     candidate_rows=[]; result_rows=[]; zero=[]; unknown=[]; quality=[]

@@ -1,0 +1,79 @@
+{
+  "status": "PASS",
+  "historical_result_files_unchanged": true,
+  "no_new_mapping": true,
+  "code": [
+    {
+      "file": "global_timing/fixed_incidence.py",
+      "sha256": "94ba1040bd57a4197a6908209d2dc5616aa323961843a886dd9fe2065729f7b5",
+      "verified_snapshot": "/data/wushangge/CULS_LiteCut/runs/20261117T022902Z-ste-incidence-adjoint-bd443378/src/global_timing/fixed_incidence.py"
+    },
+    {
+      "file": "global_timing/mffc_model.py",
+      "sha256": "4a42813287cafdcc586e0af3a3dda105bc58f29ed231e6c2482375538815c12f",
+      "verified_snapshot": "/data/wushangge/CULS_LiteCut/runs/20261117T022902Z-ste-incidence-adjoint-bd443378/src/global_timing/mffc_model.py"
+    },
+    {
+      "file": "global_timing/mffc_ste_search.py",
+      "sha256": "931948cfb3fe820577f461599c81d46ef2ded7995681b11f9b22cf93feed17ce",
+      "verified_snapshot": "/data/wushangge/CULS_LiteCut/runs/20261117T022902Z-ste-incidence-adjoint-bd443378/src/global_timing/mffc_ste_search.py"
+    },
+    {
+      "file": "global_timing/gpu_slot.py",
+      "sha256": "55dc51b9559086ed6f5f3658175d842b8820a4f56d83db8e6957102e30c482d7",
+      "verified_snapshot": "/data/wushangge/CULS_LiteCut/runs/20261117T022902Z-ste-incidence-adjoint-bd443378/src/global_timing/gpu_slot.py"
+    },
+    {
+      "file": "scripts/run_nonpositive_ours.py",
+      "sha256": "c6e027cf7e3f107a80949f98ed3c77bde711f3c45574187983d6d821b203f5ca",
+      "verified_snapshot": "/data/wushangge/CULS_LiteCut/runs/20261117T022902Z-ste-incidence-adjoint-bd443378/src/scripts/run_nonpositive_ours.py"
+    },
+    {
+      "file": "tests/test_fixed_incidence.py",
+      "sha256": "9efc708c4df1295a8ecf4f8ca4c7af4c1043c67ce214a1a07a481c8c9ca4f7df",
+      "verified_snapshot": "/data/wushangge/CULS_LiteCut/runs/20261117T022902Z-ste-incidence-adjoint-bd443378/src/tests/test_fixed_incidence.py"
+    },
+    {
+      "file": "tests/test_gpu_slot.py",
+      "sha256": "596ea3299730bacb06b0ea2a5bdc20bffa18673e93cb84ed707992a6f32958f1",
+      "verified_snapshot": "/data/wushangge/CULS_LiteCut/runs/20261117T022902Z-ste-incidence-adjoint-bd443378/src/tests/test_gpu_slot.py"
+    },
+    {
+      "file": "projects/culs/src/algorithms/rewrite.cu",
+      "sha256": "5b7637af3b9840af5b963662f0342aa6f69c0b6f7952e626959c7d40335d2685",
+      "verified_snapshot": "/data/wushangge/CULS_LiteCut/runs/20261117T021531Z-replay-lifetime-fixed-79630f72/src/projects/culs/src/algorithms/rewrite.cu"
+    }
+  ],
+  "files": [
+    {
+      "file": "LITECUT_BOUNDED_PROFILE.json",
+      "sha256": "76fb9db987405ca345f17a8eedc265b3dac25b851d4609c366326d60e59e1a55",
+      "bytes": 3210
+    },
+    {
+      "file": "MEMORY_REGRESSION.json",
+      "sha256": "f9a7c9ad16e7832472f7b700f07c360d4640d38715c19529d0b97ae3bd921d43",
+      "bytes": 21165
+    },
+    {
+      "file": "README.md",
+      "sha256": "032ee6ea01f90eb033fc941b3b9389b31f6b035de65d5840fad170f97e4861d3",
+      "bytes": 1846
+    },
+    {
+      "file": "REPLAY_REGRESSION.json",
+      "sha256": "9b57de07a62eb14a98a85915b773f536726e1872057578e780303feb88a6cfba",
+      "bytes": 10503
+    },
+    {
+      "file": "ROOT_CAUSES_AND_REPAIRS.md",
+      "sha256": "7846f2efdcb547220a186f76c5bd6ae52d3ea26869273faff76cfc162c24bf03",
+      "bytes": 9998
+    }
+  ],
+  "limits": [
+    "Saved-input STE40 is not a new full end-to-end measurement.",
+    "Four historical replay failure combinations repaired; no full905 rerun.",
+    "Timeout subset profile is not a full-case timing breakdown."
+  ]
+}

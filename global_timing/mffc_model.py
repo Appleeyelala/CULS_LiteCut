@@ -6,6 +6,7 @@ multiple independent search trajectories substitute for those dependencies.
 import torch
 
 from .mffc_gpu import RegionGpuPlan, region_arrivals
+from .fixed_incidence import fixed_incidence_mm
 from .surrogate import TimingSurrogate
 
 
@@ -25,7 +26,7 @@ class MffcGpuSurrogate(TimingSurrogate):
         batch = expected.shape[0]
         regions = expected.new_zeros((batch, self.n_regions, 4)).index_add(1, self.decision_region, expected)
         flat = expected.permute(1, 0, 2).reshape(self.n_decisions, batch * 4)
-        local = torch.sparse.mm(self.port_incidence, flat).reshape(-1, batch, 4).permute(1, 0, 2)
+        local = fixed_incidence_mm(self.port_incidence, flat).reshape(-1, batch, 4).permute(1, 0, 2)
         upstream = regions[:, self.edge_sources.clamp_min(0)] * (self.edge_sources >= 0)[None, :, None]
         pair = regions[:, self.edge_targets] * upstream
         logs = (local * self.local_weights).sum(-1) + (pair * self.interaction_weights).sum(-1)

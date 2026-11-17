@@ -1,0 +1,910 @@
+{
+  "scope": "Saved-input isolated STE40; no full cold pipeline rerun and no new Mapping QoR. Allocated is PyTorch peak, not total GPU memory.",
+  "records": [
+    {
+      "label": "old_isolated",
+      "circuit": 16,
+      "source_commit": "ca3c34b136fe73d71d450e73d6d4fc7da40f074e",
+      "slurm_job_id": 65912,
+      "status": "PASS",
+      "completed_steps": 40,
+      "mapping_calls": 0,
+      "peak_allocated_bytes": 251823616,
+      "peak_allocated_gib": 0.2345290184020996,
+      "reserved_bytes_at_terminal": 289406976,
+      "error": null,
+      "incidence": {
+        "name": "port_incidence",
+        "shape": [
+          15436,
+          88784
+        ],
+        "bytes": 12980952,
+        "nnz": 540873
+      },
+      "logits_change": 958.7423428089941,
+      "final_edits": [
+        [
+          309,
+          6
+        ],
+        [
+          4720,
+          1
+        ],
+        [
+          7956,
+          2
+        ],
+        [
+          14910,
+          5
+        ],
+        [
+          17709,
+          1
+        ],
+        [
+          34634,
+          2
+        ],
+        [
+          35452,
+          3
+        ],
+        [
+          40762,
+          2
+        ],
+        [
+          40784,
+          4
+        ],
+        [
+          42415,
+          2
+        ],
+        [
+          54927,
+          1
+        ],
+        [
+          56826,
+          2
+        ],
+        [
+          57312,
+          4
+        ],
+        [
+          59167,
+          1
+        ],
+        [
+          74133,
+          12
+        ],
+        [
+          75185,
+          1
+        ]
+      ],
+      "gpu": {
+        "node": "eda",
+        "physical_slurm_gpu": "0",
+        "cuda_visible_devices": "0",
+        "model": "RTX4090",
+        "memory_mib": 24564,
+        "pci_bus": "00000000:67:00.0",
+        "initial_compute_process_count": 0
+      },
+      "input_sha256": "d7ae7fc25e88700775eab1d9c3166f0a5283ed80b9a3638fd38920d68c5529e1",
+      "native_library": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261113T182919Z-mffc-native-loop-validation-d928356f/build/mffc_gpu/libmffc_region.so",
+        "sha256": "0e53c03c0d473a2d083e3db6f3062e837b408c0991a6b992a63e004bc9a771fa"
+      },
+      "evidence": "/data/wushangge/CULS_LiteCut/runs/20261117T021835Z-ste-memory-profile-cbd2f8ae/output/case_0016/events.jsonl",
+      "evidence_sha256": "6de8876fd31bac2280377c176d532792c63a32ae9d1ff743f2be582ae1277f59"
+    },
+    {
+      "label": "old_isolated",
+      "circuit": 24,
+      "source_commit": "ca3c34b136fe73d71d450e73d6d4fc7da40f074e",
+      "slurm_job_id": 65912,
+      "status": "PASS",
+      "completed_steps": 40,
+      "mapping_calls": 0,
+      "peak_allocated_bytes": 608949248,
+      "peak_allocated_gib": 0.5671281814575195,
+      "reserved_bytes_at_terminal": 700448768,
+      "error": null,
+      "incidence": {
+        "name": "port_incidence",
+        "shape": [
+          24013,
+          177766
+        ],
+        "bytes": 64150200,
+        "nnz": 2672925
+      },
+      "logits_change": 907.8475100141001,
+      "final_edits": [
+        [
+          55735,
+          1
+        ],
+        [
+          55754,
+          1
+        ],
+        [
+          56480,
+          1
+        ],
+        [
+          57281,
+          4
+        ],
+        [
+          57299,
+          5
+        ],
+        [
+          58724,
+          4
+        ],
+        [
+          59629,
+          3
+        ],
+        [
+          66720,
+          3
+        ],
+        [
+          68700,
+          3
+        ],
+        [
+          86586,
+          3
+        ],
+        [
+          99564,
+          2
+        ],
+        [
+          102911,
+          3
+        ],
+        [
+          122355,
+          1
+        ],
+        [
+          125633,
+          2
+        ],
+        [
+          126215,
+          3
+        ],
+        [
+          127875,
+          1
+        ]
+      ],
+      "gpu": {
+        "node": "eda",
+        "physical_slurm_gpu": "0",
+        "cuda_visible_devices": "0",
+        "model": "RTX4090",
+        "memory_mib": 24564,
+        "pci_bus": "00000000:67:00.0",
+        "initial_compute_process_count": 0
+      },
+      "input_sha256": "390d601836717129b903a5ecc8fd96b41d322d26895d666b303c64b796bd0d1d",
+      "native_library": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261113T182919Z-mffc-native-loop-validation-d928356f/build/mffc_gpu/libmffc_region.so",
+        "sha256": "0e53c03c0d473a2d083e3db6f3062e837b408c0991a6b992a63e004bc9a771fa"
+      },
+      "evidence": "/data/wushangge/CULS_LiteCut/runs/20261117T021835Z-ste-memory-profile-cbd2f8ae/output/case_0024/events.jsonl",
+      "evidence_sha256": "cb52ab5ddfd6735d286d9696dd774dd5546d2b4ad330267aba63cbf7d4b648f6"
+    },
+    {
+      "label": "old_isolated",
+      "circuit": 827,
+      "source_commit": "ca3c34b136fe73d71d450e73d6d4fc7da40f074e",
+      "slurm_job_id": 65912,
+      "status": "FAIL",
+      "completed_steps": null,
+      "mapping_calls": 0,
+      "peak_allocated_bytes": 23377776128,
+      "peak_allocated_gib": 21.772250652313232,
+      "reserved_bytes_at_terminal": 24767365120,
+      "error": "CUDA out of memory. Tried to allocate 2.70 GiB (GPU 0; 23.64 GiB total capacity; 21.77 GiB already allocated; 72.81 MiB free; 23.07 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF",
+      "incidence": {
+        "name": "port_incidence",
+        "shape": [
+          19429,
+          124240
+        ],
+        "bytes": 8692831800,
+        "nnz": 362201325
+      },
+      "logits_change": null,
+      "final_edits": null,
+      "gpu": {
+        "node": "eda",
+        "physical_slurm_gpu": "0",
+        "cuda_visible_devices": "0",
+        "model": "RTX4090",
+        "memory_mib": 24564,
+        "pci_bus": "00000000:67:00.0",
+        "initial_compute_process_count": 0
+      },
+      "input_sha256": "4833e1ef0fd03c721b3841da71d368965c0ee827ce5fce6236c803740a223130",
+      "native_library": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261113T182919Z-mffc-native-loop-validation-d928356f/build/mffc_gpu/libmffc_region.so",
+        "sha256": "0e53c03c0d473a2d083e3db6f3062e837b408c0991a6b992a63e004bc9a771fa"
+      },
+      "evidence": "/data/wushangge/CULS_LiteCut/runs/20261117T021835Z-ste-memory-profile-cbd2f8ae/output/case_0827/events.jsonl",
+      "evidence_sha256": "281ae8f3bd65854c3eb43deacf674eda706c75778b8f906a14a808eec1014633",
+      "large_allocation_events": [
+        {
+          "operator": "aten::empty",
+          "shapes": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+          ],
+          "cuda_memory_bytes": 1449132032,
+          "cpu_memory_bytes": 0
+        },
+        {
+          "operator": "aten::empty",
+          "shapes": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+          ],
+          "cuda_memory_bytes": 1449132032,
+          "cpu_memory_bytes": 0
+        },
+        {
+          "operator": "aten::empty",
+          "shapes": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+          ],
+          "cuda_memory_bytes": 1449132032,
+          "cpu_memory_bytes": 0
+        },
+        {
+          "operator": "aten::empty",
+          "shapes": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+          ],
+          "cuda_memory_bytes": 1449132032,
+          "cpu_memory_bytes": 0
+        },
+        {
+          "operator": "aten::t",
+          "shapes": [
+            [
+              19429,
+              124240
+            ]
+          ],
+          "cuda_memory_bytes": 8693485568,
+          "cpu_memory_bytes": 0
+        },
+        {
+          "operator": "aten::transpose",
+          "shapes": [
+            [
+              19429,
+              124240
+            ],
+            [],
+            []
+          ],
+          "cuda_memory_bytes": 8693485568,
+          "cpu_memory_bytes": 0
+        },
+        {
+          "operator": "aten::clone",
+          "shapes": [
+            [
+              19429,
+              124240
+            ],
+            []
+          ],
+          "cuda_memory_bytes": 8693485568,
+          "cpu_memory_bytes": 0
+        },
+        {
+          "operator": "aten::to",
+          "shapes": [
+            [
+              362201325
+            ],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+          ],
+          "cuda_memory_bytes": 2898264064,
+          "cpu_memory_bytes": 0
+        },
+        {
+          "operator": "aten::_to_copy",
+          "shapes": [
+            [
+              362201325
+            ],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+          ],
+          "cuda_memory_bytes": 2898264064,
+          "cpu_memory_bytes": 0
+        },
+        {
+          "operator": "aten::empty_strided",
+          "shapes": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+          ],
+          "cuda_memory_bytes": 2898264064,
+          "cpu_memory_bytes": 0
+        },
+        {
+          "operator": "aten::to",
+          "shapes": [
+            [
+              2,
+              362201325
+            ],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+          ],
+          "cuda_memory_bytes": 5795221504,
+          "cpu_memory_bytes": 0
+        },
+        {
+          "operator": "aten::_to_copy",
+          "shapes": [
+            [
+              2,
+              362201325
+            ],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+          ],
+          "cuda_memory_bytes": 5795221504,
+          "cpu_memory_bytes": 0
+        },
+        {
+          "operator": "aten::empty_strided",
+          "shapes": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+          ],
+          "cuda_memory_bytes": 5795221504,
+          "cpu_memory_bytes": 0
+        },
+        {
+          "operator": "aten::zeros_like",
+          "shapes": [
+            [
+              362201325
+            ],
+            [],
+            [],
+            [],
+            [],
+            []
+          ],
+          "cuda_memory_bytes": 2898264064,
+          "cpu_memory_bytes": 0
+        },
+        {
+          "operator": "aten::empty_like",
+          "shapes": [
+            [
+              362201325
+            ],
+            [],
+            [],
+            [],
+            [],
+            []
+          ],
+          "cuda_memory_bytes": 2898264064,
+          "cpu_memory_bytes": 0
+        },
+        {
+          "operator": "aten::empty",
+          "shapes": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+          ],
+          "cuda_memory_bytes": 2898264064,
+          "cpu_memory_bytes": 0
+        },
+        {
+          "operator": "aten::mul",
+          "shapes": [
+            [
+              2,
+              362201325
+            ],
+            [
+              2,
+              1
+            ]
+          ],
+          "cuda_memory_bytes": 5795221504,
+          "cpu_memory_bytes": 0
+        }
+      ]
+    },
+    {
+      "label": "bounded_adjoint",
+      "circuit": 16,
+      "source_commit": "eebb69a2ec4a8c9529763051fd37b0a6e8035364",
+      "slurm_job_id": 65958,
+      "status": "PASS",
+      "completed_steps": 40,
+      "mapping_calls": 0,
+      "peak_allocated_bytes": 251823616,
+      "peak_allocated_gib": 0.2345290184020996,
+      "reserved_bytes_at_terminal": 289406976,
+      "error": null,
+      "incidence": {
+        "name": "port_incidence",
+        "shape": [
+          15436,
+          88784
+        ],
+        "bytes": 12980952,
+        "nnz": 540873
+      },
+      "logits_change": 958.7423428089941,
+      "final_edits": [
+        [
+          309,
+          6
+        ],
+        [
+          4720,
+          1
+        ],
+        [
+          7956,
+          2
+        ],
+        [
+          14910,
+          5
+        ],
+        [
+          17709,
+          1
+        ],
+        [
+          34634,
+          2
+        ],
+        [
+          35452,
+          3
+        ],
+        [
+          40762,
+          2
+        ],
+        [
+          40784,
+          4
+        ],
+        [
+          42415,
+          2
+        ],
+        [
+          54927,
+          1
+        ],
+        [
+          56826,
+          2
+        ],
+        [
+          57312,
+          4
+        ],
+        [
+          59167,
+          1
+        ],
+        [
+          74133,
+          12
+        ],
+        [
+          75185,
+          1
+        ]
+      ],
+      "gpu": {
+        "node": "eda",
+        "physical_slurm_gpu": "0",
+        "cuda_visible_devices": "0",
+        "model": "RTX4090",
+        "memory_mib": 24564,
+        "pci_bus": "00000000:67:00.0",
+        "initial_compute_process_count": 0
+      },
+      "input_sha256": "d7ae7fc25e88700775eab1d9c3166f0a5283ed80b9a3638fd38920d68c5529e1",
+      "native_library": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261113T182919Z-mffc-native-loop-validation-d928356f/build/mffc_gpu/libmffc_region.so",
+        "sha256": "0e53c03c0d473a2d083e3db6f3062e837b408c0991a6b992a63e004bc9a771fa"
+      },
+      "evidence": "/data/wushangge/CULS_LiteCut/runs/20261117T022902Z-ste-incidence-adjoint-bd443378/output/case_0016/events.jsonl",
+      "evidence_sha256": "5064d13a5ab452bab723daf8438c3ac03078844a6fbc614d9bf1cbb86feab516"
+    },
+    {
+      "label": "bounded_adjoint",
+      "circuit": 24,
+      "source_commit": "eebb69a2ec4a8c9529763051fd37b0a6e8035364",
+      "slurm_job_id": 65958,
+      "status": "PASS",
+      "completed_steps": 40,
+      "mapping_calls": 0,
+      "peak_allocated_bytes": 512283648,
+      "peak_allocated_gib": 0.47710132598876953,
+      "reserved_bytes_at_terminal": 589299712,
+      "error": null,
+      "incidence": {
+        "name": "port_incidence",
+        "shape": [
+          24013,
+          177766
+        ],
+        "bytes": 64150200,
+        "nnz": 2672925
+      },
+      "logits_change": 907.8475100141001,
+      "final_edits": [
+        [
+          55735,
+          1
+        ],
+        [
+          55754,
+          1
+        ],
+        [
+          56480,
+          1
+        ],
+        [
+          57281,
+          4
+        ],
+        [
+          57299,
+          5
+        ],
+        [
+          58724,
+          4
+        ],
+        [
+          59629,
+          3
+        ],
+        [
+          66720,
+          3
+        ],
+        [
+          68700,
+          3
+        ],
+        [
+          86586,
+          3
+        ],
+        [
+          99564,
+          2
+        ],
+        [
+          102911,
+          3
+        ],
+        [
+          122355,
+          1
+        ],
+        [
+          125633,
+          2
+        ],
+        [
+          126215,
+          3
+        ],
+        [
+          127875,
+          1
+        ]
+      ],
+      "gpu": {
+        "node": "eda",
+        "physical_slurm_gpu": "0",
+        "cuda_visible_devices": "0",
+        "model": "RTX4090",
+        "memory_mib": 24564,
+        "pci_bus": "00000000:67:00.0",
+        "initial_compute_process_count": 0
+      },
+      "input_sha256": "390d601836717129b903a5ecc8fd96b41d322d26895d666b303c64b796bd0d1d",
+      "native_library": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261113T182919Z-mffc-native-loop-validation-d928356f/build/mffc_gpu/libmffc_region.so",
+        "sha256": "0e53c03c0d473a2d083e3db6f3062e837b408c0991a6b992a63e004bc9a771fa"
+      },
+      "evidence": "/data/wushangge/CULS_LiteCut/runs/20261117T022902Z-ste-incidence-adjoint-bd443378/output/case_0024/events.jsonl",
+      "evidence_sha256": "70199d73f0606547f7b4d2de8d9b8677d32acefa1c59acf6c5cfa1eb254c94a1"
+    },
+    {
+      "label": "bounded_adjoint",
+      "circuit": 827,
+      "source_commit": "eebb69a2ec4a8c9529763051fd37b0a6e8035364",
+      "slurm_job_id": 65958,
+      "status": "PASS",
+      "completed_steps": 40,
+      "mapping_calls": 0,
+      "peak_allocated_bytes": 10413882880,
+      "peak_allocated_gib": 9.698684215545654,
+      "reserved_bytes_at_terminal": 11727273984,
+      "error": null,
+      "incidence": {
+        "name": "port_incidence",
+        "shape": [
+          19429,
+          124240
+        ],
+        "bytes": 8692831800,
+        "nnz": 362201325
+      },
+      "logits_change": 1525.3470850569365,
+      "final_edits": [
+        [
+          7814,
+          1
+        ],
+        [
+          8058,
+          1
+        ],
+        [
+          8660,
+          1
+        ],
+        [
+          11186,
+          1
+        ],
+        [
+          11427,
+          1
+        ],
+        [
+          11615,
+          1
+        ],
+        [
+          11904,
+          1
+        ],
+        [
+          30224,
+          5
+        ],
+        [
+          34110,
+          5
+        ],
+        [
+          35452,
+          5
+        ],
+        [
+          36272,
+          5
+        ],
+        [
+          43811,
+          1
+        ],
+        [
+          44987,
+          5
+        ],
+        [
+          45453,
+          1
+        ],
+        [
+          45797,
+          5
+        ],
+        [
+          124239,
+          1
+        ]
+      ],
+      "gpu": {
+        "node": "eda",
+        "physical_slurm_gpu": "0",
+        "cuda_visible_devices": "0",
+        "model": "RTX4090",
+        "memory_mib": 24564,
+        "pci_bus": "00000000:67:00.0",
+        "initial_compute_process_count": 0
+      },
+      "input_sha256": "4833e1ef0fd03c721b3841da71d368965c0ee827ce5fce6236c803740a223130",
+      "native_library": {
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261113T182919Z-mffc-native-loop-validation-d928356f/build/mffc_gpu/libmffc_region.so",
+        "sha256": "0e53c03c0d473a2d083e3db6f3062e837b408c0991a6b992a63e004bc9a771fa"
+      },
+      "evidence": "/data/wushangge/CULS_LiteCut/runs/20261117T022902Z-ste-incidence-adjoint-bd443378/output/case_0827/events.jsonl",
+      "evidence_sha256": "7c653c13726a0f2688873df1cd54929e1c9a4491e7b6b7e9b73a8f9b0e963f9d"
+    }
+  ],
+  "small_case_equivalence": [
+    {
+      "circuit": 16,
+      "all40_hard_selections_identical": true,
+      "proxy_best_identical": true,
+      "max_objective_difference": 0.0,
+      "max_gradient_norm_difference": 1.0842021724855044e-17
+    },
+    {
+      "circuit": 24,
+      "all40_hard_selections_identical": true,
+      "proxy_best_identical": true,
+      "max_objective_difference": 0.0,
+      "max_gradient_norm_difference": 6.938893903907228e-18
+    }
+  ],
+  "unit_test_logs": [
+    "/data/wushangge/CULS_LiteCut/runs/20261117T022902Z-ste-incidence-adjoint-bd443378/logs/case_0.log",
+    "/data/wushangge/CULS_LiteCut/runs/20261117T022902Z-ste-incidence-adjoint-bd443378/logs/case_1.log",
+    "/data/wushangge/CULS_LiteCut/runs/20261117T022902Z-ste-incidence-adjoint-bd443378/logs/case_2.log",
+    "/data/wushangge/CULS_LiteCut/runs/20261117T022902Z-ste-incidence-adjoint-bd443378/logs/case_3.log"
+  ],
+  "unit_test_commands": [
+    {
+      "argv": [
+        "/home/share/process/anaconda3/bin/python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "/data/wushangge/CULS_LiteCut/runs/20261117T022902Z-ste-incidence-adjoint-bd443378/src/tests",
+        "-p",
+        "test_fixed_incidence.py",
+        "-v"
+      ],
+      "returncode": 0,
+      "elapsed_s": 2.9768755198456347
+    },
+    {
+      "argv": [
+        "/home/share/process/anaconda3/bin/python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "/data/wushangge/CULS_LiteCut/runs/20261117T022902Z-ste-incidence-adjoint-bd443378/src/tests",
+        "-p",
+        "test_mffc_model.py",
+        "-v"
+      ],
+      "returncode": 0,
+      "elapsed_s": 2.4239842761307955
+    },
+    {
+      "argv": [
+        "/home/share/process/anaconda3/bin/python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "/data/wushangge/CULS_LiteCut/runs/20261117T022902Z-ste-incidence-adjoint-bd443378/src/tests",
+        "-p",
+        "test_mffc_ste.py",
+        "-v"
+      ],
+      "returncode": 0,
+      "elapsed_s": 2.6069338070228696
+    },
+    {
+      "argv": [
+        "/home/share/process/anaconda3/bin/python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "/data/wushangge/CULS_LiteCut/runs/20261117T022902Z-ste-incidence-adjoint-bd443378/src/tests",
+        "-p",
+        "test_gpu_slot.py",
+        "-v"
+      ],
+      "returncode": 0,
+      "elapsed_s": 0.5338069521822035
+    }
+  ],
+  "unsuccessful_diagnostic_attempts": [
+    {
+      "job": 65909,
+      "reason": "TorchDispatchMode Stream marshalling incompatibility, not algorithm failure."
+    },
+    {
+      "job": 65910,
+      "reason": "Redundant constructor profiler overhead; stopped by this task after focused replacement65912 completed; preserve output and DIAGNOSTIC_STOP.json."
+    }
+  ]
+}

@@ -150,6 +150,8 @@ def main():
     p.add_argument('--output',type=Path,required=True);p.add_argument('--variant',choices=['fixed','ports','global','combined'],required=True)
     p.add_argument('--seed',type=int,required=True);p.add_argument('--device',default='cuda')
     p.add_argument('--prepare-only',action='store_true');p.add_argument('--prepared',type=Path)
+    p.add_argument('--global-context',choices=['original','endpoint'],default='original',
+                   help='Single-change research ablation; original remains the default')
     args=p.parse_args()
     if not os.environ.get('SLURM_JOB_ID') or not ROOT.is_relative_to('/data/wushangge'):p.error('Committed /data source and Slurm required')
     import torch
@@ -181,6 +183,13 @@ def main():
              'code_hashes':code_hashes,'manifest_sha256':sha(args.manifest),'elapsed_s':time.perf_counter()-started,
              'model_metadata':[{'circuit_id':c['circuit_id'],'domains':[d['model'].metadata for d in c['domains']]} for c in examples]})
         return
+    if args.global_context=='endpoint':
+        if args.variant!='global':raise ValueError('Endpoint-context ablation requires global variant')
+        from global_timing.endpoint_context import EndpointContextSurrogate
+        for case in examples:
+            for domain in case['domains']:
+                model=move_graph(domain['model'],args.device)
+                domain['model']=move_graph(EndpointContextSurrogate.from_prepared(model),'cpu')
     shared.to(args.device)  # Move shared parameters once, before creating AdamW.
     parameters=shared.parameters() if args.variant=='combined' else shared.port.parameters() if args.variant=='ports' else shared.global_head.parameters()
     optimizer=torch.optim.AdamW(parameters,lr=1e-3,weight_decay=1e-4)
@@ -211,7 +220,7 @@ def main():
     shared.load_state_dict(best_state)
     torch.save({'state_dict':best_state,'variant':args.variant,'seed':args.seed,'best_epoch':best_epoch,
                 'manifest_sha256':sha(args.manifest),'source_commit':os.environ.get('V3_SOURCE_COMMIT')},args.output/'weights.pt')
-    result={'variant':args.variant,'seed':args.seed,'best_epoch':best_epoch,'history':history,
+    result={'variant':args.variant,'global_context':args.global_context,'seed':args.seed,'best_epoch':best_epoch,'history':history,
         'validation':evaluate(examples,'validation',args.device),'train':evaluate(examples,'train',args.device),
         'elapsed_s':time.perf_counter()-started,'new_mapping_calls':0,'manifest_sha256':sha(args.manifest),
         'training':{'optimizer':'AdamW','lr':1e-3,'weight_decay':1e-4,'max_epochs':200,'patience':20,

@@ -1,0 +1,152 @@
+{
+  "scope": "Completed development ablation and evidence audit; research quality gates failed, no expansion or end-to-end deployment claim.",
+  "runs": [
+    {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261117T053158Z-joint-gradient-resume-20123cb8/run.json",
+      "sha256": "112d0f6359be63d41cf3ccd86bfd1475e43c5e64985c4131958761368d469ecb",
+      "source_commit": "68bde516cc3d61c0590ee4984a2d6cf5958393ff",
+      "slurm_job_id": "65981",
+      "state": "CANCELLED_FOR_CONSTRUCTION_FIX",
+      "resources": {
+        "cpus": 4,
+        "memory_gib": 32,
+        "gpus": 1,
+        "partition": "Compute",
+        "node": "eda",
+        "time": "02:00:00"
+      },
+      "environment": {
+        "python": "3.11.5",
+        "node": "eda",
+        "CUDA_VISIBLE_DEVICES": "0",
+        "SLURM_JOB_GPUS": "0"
+      },
+      "ablation_state": null,
+      "corrected_test_run": null,
+      "mapping_count_before": 93,
+      "mapping_count_after": null
+    },
+    {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261117T053917Z-joint-gradient-construction-fix-81e9357c/run.json",
+      "sha256": "f14fa92f4ac66610f07843a726ae877fd79457308521b094caa626361fe4d752",
+      "source_commit": "6ee8d8afa408ce0ec0fa357e360b442fa445f64d",
+      "slurm_job_id": "65986",
+      "state": "FAILED",
+      "resources": {
+        "cpus": 4,
+        "memory_gib": 32,
+        "gpus": 1,
+        "partition": "Compute",
+        "node": "eda",
+        "time": "01:00:00"
+      },
+      "environment": {
+        "python": "3.11.5",
+        "node": "eda",
+        "CUDA_VISIBLE_DEVICES": "0",
+        "SLURM_JOB_GPUS": "1"
+      },
+      "ablation_state": "COMPLETED_12_CIRCUITS_72_METHOD_CHOICES",
+      "corrected_test_run": {
+        "slurm_job_id": 65987,
+        "tests_run": 15,
+        "status": "PASS",
+        "log": "/data/wushangge/CULS_LiteCut/runs/20261117T053917Z-joint-gradient-construction-fix-81e9357c/logs/tests-65987.log",
+        "log_sha256": "c9319b90a362ccf8d979ae054e7103a07b18d73579b94e51361fd67b30704503"
+      },
+      "mapping_count_before": null,
+      "mapping_count_after": null
+    },
+    {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261117T054155Z-joint-gradient-panel-complete-f757fa1e/run.json",
+      "sha256": "67db701c29928c014aabe22c4951a34f2aef6d35d4e39da5c45b03159e8e531f",
+      "source_commit": "6ee8d8afa408ce0ec0fa357e360b442fa445f64d",
+      "slurm_job_id": "65988",
+      "state": "COMPLETED",
+      "resources": {
+        "cpus": 4,
+        "memory_gib": 32,
+        "gpus": 1,
+        "partition": "Compute",
+        "node": "eda",
+        "time": "02:00:00"
+      },
+      "environment": {
+        "python": "3.11.5",
+        "node": "eda",
+        "CUDA_VISIBLE_DEVICES": "0",
+        "SLURM_JOB_GPUS": "0"
+      },
+      "ablation_state": null,
+      "corrected_test_run": null,
+      "mapping_count_before": 93,
+      "mapping_count_after": 180
+    },
+    {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261117T053543Z-joint-gradient-audit-resumed-da0e92d8/run.json",
+      "sha256": "f519af76e83223fafe77829b1d0fe7e497f8135b4901f46c75a0e9970023dff1",
+      "source_commit": "63acabe72e7fcf49b1a39014cf5e0e46b24e852d",
+      "slurm_job_id": "65982",
+      "state": "COMPLETED",
+      "resources": {
+        "cpus": 2,
+        "memory_gib": 8,
+        "gpus": 0,
+        "partition": "Compute",
+        "time": "00:20:00"
+      },
+      "environment": {
+        "python": "3.11.5",
+        "node": "eda"
+      },
+      "ablation_state": null,
+      "corrected_test_run": null,
+      "mapping_count_before": null,
+      "mapping_count_after": null
+    },
+    {
+      "path": "/data/wushangge/CULS_LiteCut/runs/20261117T055017Z-joint-gradient-structure-audit-da4f4e57/run.json",
+      "sha256": "479e73fc7e717f7ba918e8b7126a338324cef3f2f71710fe16dddfaadd63c4f8",
+      "source_commit": "ee7b700489e8173b5944872ca287b3415692609e",
+      "slurm_job_id": "65989",
+      "state": "COMPLETED",
+      "resources": {
+        "cpus": 2,
+        "memory_gib": 8,
+        "gpus": 0,
+        "partition": "Compute",
+        "time": "00:20:00"
+      },
+      "environment": {
+        "python": "3.11.5",
+        "node": "eda"
+      },
+      "ablation_state": null,
+      "corrected_test_run": null,
+      "mapping_count_before": null,
+      "mapping_count_after": null
+    }
+  ],
+  "focused_tests": {
+    "job": 65987,
+    "tests": 15,
+    "status": "PASS",
+    "log": "/data/wushangge/CULS_LiteCut/runs/20261117T053917Z-joint-gradient-construction-fix-81e9357c/logs/tests-65987.log",
+    "sha256": "c9319b90a362ccf8d979ae054e7103a07b18d73579b94e51361fd67b30704503"
+  },
+  "pre_fix_regression": {
+    "job": 65983,
+    "expected_failure": "14 full-set property reads, bound 2"
+  },
+  "regression_launcher_failure": {
+    "job": 65984,
+    "error": "incomplete module staging, missing global_timing.truth"
+  },
+  "corrected_property_checks": {
+    "job": 65985,
+    "tests": 4,
+    "status": "PASS"
+  },
+  "source_at_delivery": "ee7b700489e8173b5944872ca287b3415692609e",
+  "slurm_accounting": "JobID|State|Elapsed|ExitCode|MaxRSS\n65981|CANCELLED by 1028|00:09:21|0:0|\n65981.batch|CANCELLED|00:09:22|0:15|1585960K\n65982|COMPLETED|00:00:08|0:0|\n65982.batch|COMPLETED|00:00:08|0:0|1632K\n65983|FAILED|00:00:04|1:0|\n65983.batch|FAILED|00:00:04|1:0|1648K\n65984|FAILED|00:00:04|1:0|\n65984.batch|FAILED|00:00:04|1:0|1644K\n65985|COMPLETED|00:00:04|0:0|\n65985.batch|COMPLETED|00:00:04|0:0|1644K\n65986|FAILED|00:05:10|1:0|\n65986.batch|FAILED|00:05:10|1:0|1600988K\n65987|COMPLETED|00:00:04|0:0|\n65987.batch|COMPLETED|00:00:04|0:0|1644K\n65988|COMPLETED|00:09:13|0:0|\n65988.batch|COMPLETED|00:09:13|0:0|1028856K\n65989|COMPLETED|00:00:20|0:0|\n65989.batch|COMPLETED|00:00:20|0:0|1640K\n"
+}

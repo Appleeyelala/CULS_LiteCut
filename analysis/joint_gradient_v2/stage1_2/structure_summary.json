@@ -1,0 +1,95 @@
+{
+  "schema": "hard_structural_composition_audit_v1",
+  "cases": [
+    {
+      "circuit_id": 35,
+      "nonempty_checked": 15,
+      "mismatched_po_vectors": 0,
+      "median_max_po_error_units": 4.263256414560601e-14,
+      "maximum_max_po_error_units": 4.973799150320701e-14
+    },
+    {
+      "circuit_id": 48,
+      "nonempty_checked": 15,
+      "mismatched_po_vectors": 0,
+      "median_max_po_error_units": 1.4210854715202004e-14,
+      "maximum_max_po_error_units": 1.4210854715202004e-14
+    },
+    {
+      "circuit_id": 73,
+      "nonempty_checked": 15,
+      "mismatched_po_vectors": 12,
+      "median_max_po_error_units": 0.20000000000000107,
+      "maximum_max_po_error_units": 0.40000000000000036
+    },
+    {
+      "circuit_id": 83,
+      "nonempty_checked": 15,
+      "mismatched_po_vectors": 0,
+      "median_max_po_error_units": 8.881784197001252e-16,
+      "maximum_max_po_error_units": 8.881784197001252e-16
+    },
+    {
+      "circuit_id": 103,
+      "nonempty_checked": 15,
+      "mismatched_po_vectors": 0,
+      "median_max_po_error_units": 3.552713678800501e-15,
+      "maximum_max_po_error_units": 3.552713678800501e-15
+    },
+    {
+      "circuit_id": 471,
+      "nonempty_checked": 15,
+      "mismatched_po_vectors": 15,
+      "median_max_po_error_units": 0.8000000001802618,
+      "maximum_max_po_error_units": 1.6000000001804437
+    },
+    {
+      "circuit_id": 476,
+      "nonempty_checked": 15,
+      "mismatched_po_vectors": 0,
+      "median_max_po_error_units": 3.552713678800501e-15,
+      "maximum_max_po_error_units": 3.552713678800501e-15
+    },
+    {
+      "circuit_id": 583,
+      "nonempty_checked": 15,
+      "mismatched_po_vectors": 0,
+      "median_max_po_error_units": 7.105427357601002e-15,
+      "maximum_max_po_error_units": 7.105427357601002e-15
+    },
+    {
+      "circuit_id": 665,
+      "nonempty_checked": 15,
+      "mismatched_po_vectors": 0,
+      "median_max_po_error_units": 8.881784197001252e-16,
+      "maximum_max_po_error_units": 8.881784197001252e-16
+    },
+    {
+      "circuit_id": 676,
+      "nonempty_checked": 15,
+      "mismatched_po_vectors": 0,
+      "median_max_po_error_units": 8.881784197001252e-16,
+      "maximum_max_po_error_units": 8.881784197001252e-16
+    },
+    {
+      "circuit_id": 709,
+      "nonempty_checked": 15,
+      "mismatched_po_vectors": 0,
+      "median_max_po_error_units": 3.552713678800501e-15,
+      "maximum_max_po_error_units": 3.552713678800501e-15
+    },
+    {
+      "circuit_id": 885,
+      "nonempty_checked": 15,
+      "mismatched_po_vectors": 12,
+      "median_max_po_error_units": 0.20000000000000284,
+      "maximum_max_po_error_units": 0.20000000000000284
+    }
+  ],
+  "new_mapping_calls": 0,
+  "compression_max_po_error_units": 1.8189894035458565e-10,
+  "nonempty_checked": 180,
+  "mismatched_po_vectors": 39,
+  "contract": "Hard max, AND=1, inversion=0.2, zero PI arrival, LiteCut blend=0, no PO anchor. This checks structure, not ABC timing accuracy.",
+  "interpretation": "Compression equality checks propagation against explicit unsimplified root replacement. A difference versus installed AIG may arise from structural simplification/hash reuse or replay identity changes; this test alone does not assign a specific cause."
+}

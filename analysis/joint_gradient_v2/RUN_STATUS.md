@@ -1,46 +1,40 @@
-# 运行、阻碍与恢复
+# 运行状态与阶段决定
 
-状态：`PARTIAL_PENDING_RESUME`。2026-11-17按用户最新要求进一步删除旧运行后，估算释放1.41TiB，共享磁盘约2.0TiB可用，见[LATEST_ONLY_CLEANUP_20261117.md](LATEST_ONLY_CLEANUP_20261117.md)。研究尚未自动续跑；尚未执行新代理/新选择的真实电路消融，门槛未评估，不是算法验收完成。下文保留此前存储中断的调查；两份未完成快照已删除，源工作树已恢复为完整、干净状态。
+状态：`DEVELOPMENT_GATE_FAILED`。存储阻碍已解除，本次续跑完成剩余87次独立Mapping和12×6方法消融。179个非空组合具备完整CEC／Mapping记录；885/mask03仍是先前磁盘故障导致的INCOMPLETE_RECORD，未重复测量。12份原预测SHA256保持不变，累计180次非空Mapping尝试。当前无本轮作业仍在运行。
 
-## 来源与已执行任务
+排序、方向及面积门槛未通过，**不启动独立24、100或905**。这不是研究目标完成；下一步应先处理开发诊断暴露的结构表示、预测并列及面积漏判，见[结果与下一阶段决定](STAGE1_2_RESULTS.md)。
 
-| 工作 | 源码 | Slurm | 结果 |
+| 工作 | 源码 | Slurm | 实际状态 |
 |---|---|---:|---|
-| 905证据审计、家族划分 | 5b92e878 | 65961 | COMPLETED；1分29秒 |
-| 12×16预测冻结 | 4593837d | 65962 | COMPLETED；2分46秒；0新增Mapping |
-| 首次测量启动 | 4593837d | 65964 | FAILED；启动器误读prepare命令，FileExistsError；0新增Mapping |
-| 修正启动器后的测量 | 4593837d | 65967 | FAILED；3分57秒；92完整+1记录不完整Mapping |
-| 联合选择单元检查v1 | 未提交校验快照 | 65965 | 10项中1项错误：测试模型漏width属性 |
-| 联合选择单元检查v2 | 未提交校验快照 | 65968 | 10/10通过 |
-| 加入端口代理检查v3 | 随后提交为77030289 | 65969 | 13/13通过 |
-| 续跑协议检查 | f84da962 | 轻量stdlib，本地 | 1/1通过；不重复已有Mapping、不将残缺记录晋升PASS |
+| 首次恢复／旧构建对照 | 68bde516 | 65981 | 主动停止本轮自建作业；5例消融完成，471构建存在二次复杂度；0新增Mapping |
+| 节点集合最小复现 | 68bde516模块＋独立测试 | 65983 | 预期失败：4节点触发14次全图set创建 |
+| 修复检查首次启动 | 文件校验快照 | 65984 | 测试依赖暂存不完整，缺少truth模块；未执行检查 |
+| 修复后4项检查 | 随后提交6ee8d8af | 65985 | COMPLETED，4/4通过 |
+| 完整12例六方法对照 | 6ee8d8af | 65986 | 12例、72选择全部完成；批作业FAILED源于首条unittest包路径错误，原始失败不隐藏 |
+| 修正启动方式的完整检查 | 6ee8d8af | 65987 | COMPLETED，15/15通过 |
+| 剩余87次Mapping及汇总 | 6ee8d8af | 65988 | COMPLETED，9分13秒；87/87新增完整记录 |
+| 数据／CEC／工具hash／回归审计 | 63acabe7 | 65982 | COMPLETED；5个修复前后对照的全PO预测、面积、目标与选择完全一致 |
+| 180个已安装AIG结构审计 | ee7b7004 | 65989 | COMPLETED，20秒；检查成功，不代表模型结构匹配或QoR门槛通过 |
 
-大计算全部在`/data`通过Slurm。主测量任务4CPU、32GiB、1GPU；检查任务2CPU、4GiB。没有重跑A/B、没有后台新任务仍在运行。未将旧方向导数或STE100结果计入本轮组合统计。
+计算均在`/data`通过Slurm。GPU作业各4 CPU、32 GiB、1 GPU，最多同时2 GPU；只读审计各2 CPU、8 GiB。没有取消本轮启动前的用户作业。CPU测试与审计均计入64 CPU／256 GiB／2 GPU的总额度。
 
-运行目录：
+## 原始证据位置
 
-- 审计：`/data/wushangge/CULS_LiteCut/runs/20261117T042043Z-joint-gradient-audit-5fc79cac`
-- 组合准备及部分测量：`/data/wushangge/CULS_LiteCut/runs/20261117T042705Z-joint-gradient-panel-00895eff`
-- 13项检查：`/data/wushangge/CULS_LiteCut/staging/joint-gradient-unit-v3`
-- 不完整快照（禁止作为可执行source）：`20261117T044007Z-joint-gradient-ablation-14048a96`、`20261117T044211Z-joint-gradient-ablation-6d53ff33`。
+- 原面板：`/data/wushangge/CULS_LiteCut/runs/20261117T042705Z-joint-gradient-panel-00895eff`
+- 已停止的旧构建对照：`/data/wushangge/CULS_LiteCut/runs/20261117T053158Z-joint-gradient-resume-20123cb8`
+- 修复后消融／15项检查：`/data/wushangge/CULS_LiteCut/runs/20261117T053917Z-joint-gradient-construction-fix-81e9357c`
+- 实际测量续跑：`/data/wushangge/CULS_LiteCut/runs/20261117T054155Z-joint-gradient-panel-complete-f757fa1e`
+- 数值与证据审计：`/data/wushangge/CULS_LiteCut/runs/20261117T053543Z-joint-gradient-audit-resumed-da0e92d8`
+- 显式图结构审计：`/data/wushangge/CULS_LiteCut/runs/20261117T055017Z-joint-gradient-structure-audit-da4f4e57`
 
-主测量目录`input/measurement_predictions.json`保存测量开始前的12份预测SHA256；`run.json`保存两次启动历史。修正启动器独立存为`measure_worker_v2.py`，没有覆盖失败日志。
+各run.json记录源码、命令、资源、环境和退出状态；小型副本在[verification/resumed_20261117.json](verification/resumed_20261117.json)，数据路径和SHA256在[stage1_2/evidence_index.json](stage1_2/evidence_index.json)。旧记录中的FAILED或CANCELLED不会改成COMPLETED。
 
-## 存储故障
+## 当前边界
 
-885/mask03已经产生CEC、GT_META/GT_PO和mapped.v，但`mapping.command.json`、`result.json`、`observation.json`写入失败。只保留为`INCOMPLETE_RECORD`；真实命令结束状态和耗时不补造，正式指标排除。下一次继续不重新Mapping此组合，因此全部请求仍最多180次Mapping。
+- 数据只用于开发诊断，不是独立测试，不是新的905总体结论。
+- 所有选择在本次新增Mapping前冻结；算法不读取候选实测标签，不回退真实Delay退化组合。
+- 面积超限记录保留；主表的原始Delay几何比包含超限候选，不能称约束内部署成绩。
+- 新代理未证明准确，联合梯度未证明在完整候选域更优，完整优化Runtime和GPU加速优势尚未评估。
+- 不重跑A/B、不修改LiteCut、不覆盖旧100/905；仍在研究分支，未切换生产入口、未推送远端。
 
-本轮输出约2.1GiB。故障后`df`显示约14GiB可用、约2840万空闲inode，但源码快照创建和小文件创建仍连续`ENOSPC`。挂载为XFS、`noquota`。现有证据未定位到具体分配组/元数据或其他写入者，不能断言某个外部任务导致故障；8GiB的全局空闲量检查不足以保证这台近满文件系统能创建文件。
-
-未删除历史运行、旧日志或用户文件，也未转移计算到`/home`。已请求释放/扩容`/data`或提供其他获准的数据运行目录；建议至少100GiB余量再继续。
-
-## 恢复顺序
-
-1. 解决存储并验证目录和小文件可创建。干净源工作树`/data/wushangge/CULS_LiteCut/staging/joint-gradient-source`的checkout因ENOSPC缺失`tests/test_panel_resume.py`，应先恢复其当前提交的该文件并核对clean状态，不使用残缺快照。
-2. 用`prepare_run.py`从当前已提交分支准备新的完整快照，记录hash、环境、资源、目的。检查Slurm预算后提交；保留原run目录全部证据。
-3. 对原12个case顺序调用新快照中的`joint_gradient_panel.py --phase resume`，使用原reference-run、原output和固定gpuls。完整6例直接跳过；885复用已完成Replay和前两次Mapping，mask03标记不完整，执行其余12个；另5例各15个。只新增87次Mapping，不能重做已有93次。
-4. 独立运行`joint_gradient_ablation.py --panel <原case> --output <新run/output/case_NNNN/ablation.json>`。不得读候选测量后改选择；此入口本身不打开measurements。不同方法的选择冻结后，用汇总脚本关联已有标签。
-5. 将完整与残缺面板分开计算排序、方向、搜索差距、真实QoR及面积。单独报告885的缺失，不通过重测或删除记录让数据看起来完整。
-6. 根据开发消融决定修订/离线拟合或独立24验证；按计划门槛决定100及905扩展。目前这些阶段均未开始，不能默认门槛已通过。
-
-当前代码是研究分支上的原型；没有切换生产优化入口，没有推送远端或覆盖main。下一阶段仍需要端口组合与显式候选图的更广泛对照、真实电路消融、必要的共享参数拟合和完整Runtime测量。
+此前存储中断与部分结果见[STAGE1_PARTIAL.md](STAGE1_PARTIAL.md)，用户授权清理见[LATEST_ONLY_CLEANUP_20261117.md](LATEST_ONLY_CLEANUP_20261117.md)。

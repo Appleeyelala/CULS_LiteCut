@@ -1,6 +1,19 @@
 # CULS LiteCut workspace rules
 
-This repository consolidates existing AIG rewriting, MFFC, LiteCut and ABC timing research. The long-term objective is a paper. The current completed task is historical organization; a new research direction or experiment has not been selected.
+## 核心研究目标
+
+本项目研究基于 MFFC 结构化覆盖、LiteCut 局部时序预测和全局可微时序代理的 GPU 加速 AIG Rewrite 优化方法。论文的两个核心创新方向是：
+
+- **全局梯度联合优化（最高优先级）**：构建准确、可微的全局时序代理，利用梯度下降在多个 MFFC 中联合选择 Rewrite Candidate，使 Technology Mapping 后的真实全局 Critical Delay 尽可能降低。
+- **GPU 并行加速（同样是核心创新点）**：利用 GPU 加速候选处理、全局时序传播及梯度优化等主要计算阶段，显著降低完整优化 Runtime，使方法在实际电路上具有竞争力。
+
+研究优先级：**梯度联合优化与真实 Delay 改善 > GPU 加速与端到端 Runtime > 其他辅助问题**。LiteCut 是现有的局部预测基础，研究重点是全局时序建模、跨 MFFC 联合优化和 GPU 高效实现。
+
+最终评价以真实 ABC Technology Mapping 的 Critical Delay、完整 Runtime、功能等价性及面积约束为准，而不是仅看代理 Loss、局部 Delay 或候选数量。
+
+具体算法、模型设计、梯度策略、GPU 实现方式和超参数均可根据实验结果探索和改进；当前 STE＋Adam 的 40 步、16 个编辑等配置不是固定原则。所有研究和工程改进都应服务于上述两个核心创新方向。
+
+## 工程管理与实验规范
 
 - Read `README.md`, `docs/WORK_HISTORY.md` and `docs/KNOWN_LIMITATIONS.md` before interpreting results. Use `docs/PROJECT_MAP.md` for source locations.
 - Preserve the original repositories and historical run directories. Develop in this repository. Do not rewrite imported evidence to make old conclusions look current.

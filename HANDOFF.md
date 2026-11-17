@@ -1,3 +1,16 @@
+# 当前交接补充：执行修复已验证（2026-11-17）
+
+先读 [执行修复与根因](analysis/ste_adam_100/nonpositive_gain/execution_fixes/README.md) 和 [非正gain全量结果](analysis/ste_adam_100/nonpositive_gain/README.md)。下方2026-11-16段落是原STE100历史交接，不能替代后续实验现状。
+
+- 原STE100：正式源码`9a199bf0...`；之后已完成放宽gain后的固定100门槛和原905全量Ours，正式源码`bd87a176...`，历史结果851 PASS/41 AREA_LIMIT_EXCEEDED/7 FAIL/6 TIMEOUT。
+- 本次执行修复：Replay事务保护roots/cut边界；同GPU cold workers互斥并记录设备；大COO固定关联矩阵的分块反向。未改变STE/Adam、no-op或目标。
+- Slurm65911：4个历史Replay失败组合在两条路径下均16/16安装且CEC PASS，另2个成功对照通过。Slurm65912：原版16/24独占40步通过、827独占OOM。Slurm65958：修复后三者40步通过；827峰值allocated约9.70GiB。Slurm65959：552的64个保存Decision做有限函数剖析。
+- 新验证没有Mapping，不能据此重写full905状态/Delay/Runtime；未新跑100/905或A/B。结果与失败探针均保留。当前无待续作业。
+- 用户最新目标：CEC PASS；真实Mapping Delay整体优于Baseline B；Area改善次之；部署只做一次原图Mapping；GPU并行加速必须覆盖主要开销。主线是让梯度选出的联合组合更好，不预设转向预测器训练。
+- 下一步等待用户具体任务。优先检查smooth目标与critical-delay选择的对齐、组合交互/投影，再做主要阶段GPU化；不擅自调参或启动研究实验。
+
+---
+
 # 对话交接报告：MFFC + LiteCut + STE Adam（2026-11-16）
 
 ## 新对话先读

@@ -41,3 +41,14 @@ Gate2C 样本来自512条已捕获记录，而非全部1723条 engine records；
 R9 机制案例的 corrected MIO pair delay 为194.169998→193.519989 ps。关键链上的 cell类型和对应逻辑函数保持一致；一个 NAND4 的 critical input 从pin D换到pin C，arc由18.1800003降至17.5300007 ps，解释端点差值。该案例没有观察到逻辑关键路径切换，不能用于证明 Gate3F 四组 global stime 的关键路径身份。
 
 R9 local-arrival 原型使用14个PI闭合的TFI，分别计算49/47个AND；仍构建完整subject graph以保留对象序、结构引用等上下文。正相位mode0 arrival为109.239990→106.219986 ps，两侧与保存的full-map参考一致，delta为−3.020004 ps，见 [validation](../evidence/path_delay_model/R9_LOCAL_ARRIVAL_VALIDATION.json)。它没有实现仅13/11节点窗口的精确增量更新，也没有验证final cover、下游pin决策、端点或global delay。当前证据没有建立通用跨MFFC联合优化器或梯度下降方法。
+
+## 2026-11-17 后续研究：joint-gradient v3
+
+上述段落保留初始导入阶段口径。后续已实现相位端口GPU可微传播、冻结
+LiteCut特征上的共享候选端口学习、全局残差与固定预算联合梯度对照。
+旧39个结构不一致已定位并修复；12训练＋12验证的216次离线Mapping全部
+成功，但三种子学习的排序/方向门槛失败，停止扩大到独立24/100/905。
+旧12电路开发搜索达到小域代理最优仍未实现受面积约束的整体优于B。
+serialized no-op暴露了需进一步控制的输入编码/Mapping漂移混杂。
+见 [v3完整交付](../analysis/joint_gradient_v3/README.md)，不以本轮结果
+覆盖历史STE100、非正gain905或v2记录。

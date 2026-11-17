@@ -90,10 +90,11 @@ No 100/905 run is automatic.
 
 ## Verification and accounting
 
-Slurm 66000: 16 tests pass, including polarity cancellation, serial composition,
+Slurm 66004: 17 tests pass, including polarity cancellation, serial composition,
 downstream context, finite differences, parameter/selection gradients against
 the reference, GPU/CPU parity, mixed-precision learning and existing optimizer
-budget/critical-objective tests and unused-candidate feature invariance.
+budget/critical-objective tests, unused-candidate feature invariance and
+fresh-process loading of the dynamically registered historical AIG type.
 Slurm 65995: full 192-row structural audit passes.
 Earlier wrapper failures and the floating-point anchor regression are preserved
 in run logs; they are not successful experimental measurements.

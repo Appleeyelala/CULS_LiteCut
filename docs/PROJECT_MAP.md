@@ -41,3 +41,18 @@
 PO11 例子的 strict region path 是 R6 → R9 → R24 → R36 → R37 → R38。R9 的 region root=213，但被选择的 decision root=197；R24 的 region root=388，但 decision root=386。两者 cut_slot=2，G=subgraph0，L=subgraph2。
 
 后续 ABC 副本中没有 `.git` 元数据。整理时将其实际源码与 `third_party/abc` 对比，保存完整的修改文件而非猜测补丁叠加顺序。每个变体的 changed/extra/missing 文件清单在 [abc_variants.json](../provenance/abc_variants.json)。在未来 `/data` 工作区中先复制基线，再覆盖选定变体，才是对应源码；不能把多个变体叠加。干净基线与 Gate3F 冻结二进制具有日期和源码关联证据，但历史二进制的精确构建链未完全记录。
+
+## Joint-gradient v3 研究入口
+
+以下是后续研究分支实现，不替代上方历史处理顺序或生产STE入口。
+
+| 文件 | 职责 |
+|---|---|
+| `global_timing/phase_ports.py` | literal正/反相通道，候选边界相位组合 |
+| `global_timing/conditional_arrival.py` | 条件端口DAG的分层GPU前向和一阶反向 |
+| `global_timing/learned_ports.py` | 冻结LiteCut特征、共享候选端口网络和全局残差 |
+| `scripts/joint_gradient_learning_data.py` | 家族隔离、冻结合法组合、受控测量及历史标签复用 |
+| `scripts/train_joint_gradient_ports.py` | 离线PO/critical delta与排序学习 |
+| `scripts/evaluate_joint_gradient_v3.py` | 不读取候选真实标签的固定预算搜索对照 |
+| `scripts/audit_replay_noop_v3.py` | 原图与serialized no-op结构指纹审计 |
+| `analysis/joint_gradient_v3/` | 实现、原始记录索引、失败质量门槛和后续决定 |

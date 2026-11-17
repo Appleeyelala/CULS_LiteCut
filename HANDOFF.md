@@ -1,4 +1,18 @@
-# 当前交接补充：执行修复已验证（2026-11-17）
+# 当前交接补充：joint-gradient v3 受控验证完成（2026-11-17）
+
+先读 [v3入口](analysis/joint_gradient_v3/README.md) 和
+[学习结果](analysis/joint_gradient_v3/PILOT_RESULTS.md)。分支 `work/joint-gradient-v3`。
+
+- 已实现无需内部pin对齐的相位端口代理、GPU前反向、候选端口学习及全局残差；LiteCut冻结。
+- 旧39/180结构不一致已定位为literal相位组合问题并修复；180组合＋12原图全部通过。
+- 12训练＋12验证、216次新增离线Mapping全部成功，另复用24个历史组合；三种子学习未过排序/方向门槛。
+- 旧12电路96个开发搜索选择已完成，无新增Mapping。结合代理＋联合梯度/B几何比1.016664且1例面积超限。
+- 新发现：19/24 serialized no-op的真实Delay不同于原图，最大+32.29%；结构哈希、工具和命令语义相同。未唯一归因于编号策略，不重写历史结论。
+- 未启动后续独立24、100或905；未替换生产入口。当前无待续作业。下一步建议先统一序列化/Mapping基准，尚未实施。
+
+---
+
+# 历史交接补充：执行修复已验证（2026-11-17）
 
 先读 [执行修复与根因](analysis/ste_adam_100/nonpositive_gain/execution_fixes/README.md) 和 [非正gain全量结果](analysis/ste_adam_100/nonpositive_gain/README.md)。下方2026-11-16段落是原STE100历史交接，不能替代后续实验现状。
 

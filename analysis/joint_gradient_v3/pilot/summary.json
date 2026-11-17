@@ -1,0 +1,42 @@
+{
+  "data_source_commit": "f9546180e6a32c25b6e993533b85cf1392a47dd2",
+  "learning_source_commit": "59d26cf954fab52f0ed1c2942b603c6be4acfdd4",
+  "circuits": 24,
+  "new_mapping_calls": 216,
+  "new_records": 216,
+  "successful_records": 216,
+  "nonempty_successful": 192,
+  "area_violations": 0,
+  "structural_mismatches": 0,
+  "historical_combinations_reused": 24,
+  "seed_gates": {
+    "ports": {
+      "complete": true,
+      "median_seed_spearman": 0.0,
+      "median_seed_precision": null,
+      "pass": false,
+      "undefined_precision_seeds": 3,
+      "precision_gate_contribution": 0.0
+    },
+    "global": {
+      "complete": true,
+      "median_seed_spearman": 0.15533391047687023,
+      "median_seed_precision": 0.22580645161290322,
+      "pass": false,
+      "undefined_precision_seeds": 0,
+      "precision_gate_contribution": 0.22580645161290322
+    },
+    "combined": {
+      "complete": true,
+      "median_seed_spearman": 0.1196911254769552,
+      "median_seed_precision": 0.26785714285714285,
+      "pass": false,
+      "undefined_precision_seeds": 0,
+      "precision_gate_contribution": 0.26785714285714285
+    }
+  },
+  "independent24_authorized_by_gate": false,
+  "serialized_noop_ratio_median": 1.0,
+  "serialized_noop_max_absolute_relative_drift": 0.3229068093937648,
+  "scope": "Bounded offline-learning pilot, not end-to-end Ours performance; no candidate timing feedback in search."
+}

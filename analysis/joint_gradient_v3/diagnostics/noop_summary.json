@@ -1,0 +1,25 @@
+{
+  "circuits": 24,
+  "different_delay_count": 19,
+  "nonempty_qor_by_reference": {
+    "original": {
+      "win": 75,
+      "tie": 19,
+      "loss": 98
+    },
+    "serialized_noop": {
+      "win": 48,
+      "tie": 52,
+      "loss": 92
+    }
+  },
+  "changed_win_tie_loss_labels": 67,
+  "same_command_semantics": true,
+  "same_tool_hashes": true,
+  "new_mapping_calls_for_audit": 0,
+  "audit_source": "/data/wushangge/CULS_LiteCut/runs/20261117T082108Z-joint-v3-evidence-verification-7741e855/output/noop_audit_numbering.json",
+  "audit_slurm_job_id": 66010,
+  "initial_audit_source": "/data/wushangge/CULS_LiteCut/runs/20261117T075535Z-joint-v3-noop-audit-64ea43e6/output/noop_audit.json",
+  "initial_audit_slurm_job_id": 66005,
+  "exact_numbered_graph_equal_count": 0
+}

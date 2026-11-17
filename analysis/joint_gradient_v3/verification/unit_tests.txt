@@ -1,0 +1,24 @@
+test_anchor_is_preserved_after_learning_and_batch (test_learned_ports.LearnedPortTests.test_anchor_is_preserved_after_learning_and_batch) ... /data/wushangge/CULS_LiteCut/staging/joint-v3-model-tests/global_timing/conditional_arrival.py:16: UserWarning: scatter_reduce() is in beta and the API may change at any time. (Triggered internally at ../aten/src/ATen/native/TensorAdvancedIndexing.cpp:1615.)
+  maximum = maximum.scatter_reduce(1, index, values, reduce='amax').detach()
+ok
+test_first_order_tape_matches_reference_parameters_and_selection (test_learned_ports.LearnedPortTests.test_first_order_tape_matches_reference_parameters_and_selection) ... ok
+test_gpu_forward_and_gradient_match_cpu (test_learned_ports.LearnedPortTests.test_gpu_forward_and_gradient_match_cpu) ... ok
+test_literal_prior_matches_installed_structural_model (test_learned_ports.LearnedPortTests.test_literal_prior_matches_installed_structural_model) ... ok
+test_serial_joint_propagation_and_downstream_context (test_learned_ports.LearnedPortTests.test_serial_joint_propagation_and_downstream_context) ... ok
+test_unused_domain_extension_does_not_dilute_global_edit_features (test_learned_ports.LearnedPortTests.test_unused_domain_extension_does_not_dilute_global_edit_features) ... ok
+test_cache_load_registers_dynamic_aig_type_in_fresh_process (test_port_learning.PortLearningTests.test_cache_load_registers_dynamic_aig_type_in_fresh_process) ... ok
+test_delta_loss_gradient_rewards_correct_direction (test_port_learning.PortLearningTests.test_delta_loss_gradient_rewards_correct_direction) ... ok
+test_shared_float32_heads_update_from_double_timing_tape (test_port_learning.PortLearningTests.test_shared_float32_heads_update_from_double_timing_tape) ... ok
+test_complemented_wire_keeps_boundary_phase (test_phase_ports.PhasePortTests.test_complemented_wire_keeps_boundary_phase) ... ok
+test_noop_and_both_output_polarities (test_phase_ports.PhasePortTests.test_noop_and_both_output_polarities) ... ok
+test_output_and_consumer_complements_cancel (test_phase_ports.PhasePortTests.test_output_and_consumer_complements_cancel) ... ok
+test_alternative_and_atomic_conflict_swap_are_considered (test_joint_gradient_v2.JointGradientTests.test_alternative_and_atomic_conflict_swap_are_considered) ... ok
+test_gradient_finite_difference_is_for_proxy_only (test_joint_gradient_v2.JointGradientTests.test_gradient_finite_difference_is_for_proxy_only) ... ok
+test_joint_updates_switch_bottlenecks_and_obey_budgets (test_joint_gradient_v2.JointGradientTests.test_joint_updates_switch_bottlenecks_and_obey_budgets) ... ok
+test_smaller_smooth_loss_does_not_displace_equal_max_noop (test_joint_gradient_v2.JointGradientTests.test_smaller_smooth_loss_does_not_displace_equal_max_noop) ... ok
+test_smoothing_bound_and_gradient (test_joint_gradient_v2.JointGradientTests.test_smoothing_bound_and_gradient) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 1.485s
+
+OK

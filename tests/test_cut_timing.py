@@ -8,7 +8,7 @@ import torch
 
 from global_timing.mapper_input import aiger_bytes, canonical_graph
 from global_timing.cut_library import function_truth
-from global_timing.cut_timing import CutTimingProxy, local_transfers
+from global_timing.cut_timing import CutTimingProxy, local_transfers, local_original, local_peak
 from global_timing.candidates import Catalogue
 
 
@@ -73,6 +73,13 @@ class CutTimingTests(unittest.TestCase):
         if torch.cuda.is_available():
             expected=p(x).detach();p=p.cuda()
             torch.testing.assert_close(p(x.detach().cuda()).cpu(),expected)
+
+    def test_functional_support_reference_keeps_omitted_pi_paths(self):
+        a=graph({4:(2,4),5:(8,6)},[10])
+        local=local_original(a,{'root':5,'cut_leaves':[1,2]})
+        self.assertEqual(local.extra_boundary_pis,[3])
+        self.assertEqual(local.pi_count,3)
+        self.assertEqual(local_peak(local,SyntheticLibrary()),float(local_transfers(local,SyntheticLibrary()).max()))
 
 
 if __name__=='__main__':unittest.main()

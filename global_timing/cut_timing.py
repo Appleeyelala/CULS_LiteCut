@@ -97,18 +97,42 @@ def local_transfers(aig, library):
 
 
 def local_original(aig, decision):
-    leaves=decision['cut_leaves'];mapping={n:2*(i+1) for i,n in enumerate(leaves)};mapping.setdefault(0,0)
-    needed=set();stack=[decision['root']]
+    leaves=list(decision['cut_leaves']);mapping={n:2*(i+1) for i,n in enumerate(leaves)};mapping.setdefault(0,0)
+    needed=set();external=set();stack=[decision['root']]
     while stack:
         n=stack.pop()
-        if n in mapping or n in needed:continue
-        if n not in aig.fanin_literals:raise ValueError('Decision is not a closed structural cut')
+        if n in mapping or n in needed or n in external:continue
+        if 0<n<=aig.pi_count:
+            external.add(n);continue
+        if n not in aig.fanin_literals:raise ValueError('Unknown original node')
         needed.add(n);stack.extend(l>>1 for l in aig.fanin_literals[n])
+    # A verified functional-support cut can omit structurally reachable PIs.
+    # Keep these paths in the original cost reference; never substitute a
+    # different Boolean implementation and call it the original structure.
+    leaves.extend(sorted(external));mapping.update({n:2*(i+1) for i,n in enumerate(leaves)})
     fanins={}
     for n in sorted(needed):
         target=len(leaves)+len(fanins)+1
         fanins[target]=tuple(mapping[l>>1]^(l&1) for l in aig.fanin_literals[n]);mapping[n]=2*target
-    return SimpleNamespace(pi_count=len(leaves),fanin_literals=fanins,po_literals=[mapping[decision['root']]])
+    return SimpleNamespace(pi_count=len(leaves),fanin_literals=fanins,po_literals=[mapping[decision['root']]],
+                           extra_boundary_pis=sorted(external))
+
+
+def local_peak(aig,library):
+    """Scalar zero-arrival reference without a dense all-PI transfer matrix."""
+    arrival=np.zeros(4*(aig.pi_count+len(aig.fanin_literals)+1))
+    for node,channels in node_options(aig,library).items():
+        for phase,options in enumerate(channels):
+            best=None;best_delay=math.inf
+            for edges in options:
+                pair=np.full(2,-np.inf)
+                for src,out,d in edges:pair[out]=max(pair[out],arrival[src]+d)
+                delay=float(pair.max())
+                if delay<best_delay:best,best_delay=pair,delay
+            arrival[4*node+2*phase:4*node+2*phase+2]=best
+    root=aig.po_literals[0]
+    # Same two logical phase reference as local_transfers().max().
+    return float(arrival[4*(root>>1):4*(root>>1)+4].max())
 
 
 def local_candidate(decision, choice, rewrite_library):
@@ -148,8 +172,8 @@ class CutTimingProxy(torch.nn.Module):
         lookup={(s['decision_index'],s['choice_index']):s for s in scores}
         transfers={};audit=[]
         for i,d in enumerate(catalogue.decisions):
-            original=local_transfers(local_original(aig,d),library)
-            original_peak=float(np.max(original))
+            original=local_original(aig,d)
+            original_peak=local_peak(original,library)
             for c in range(1,self.counts[i]):
                 ports=local_transfers(local_candidate(d,c,rewrite_library),library)
                 peak=float(np.max(ports))
@@ -159,7 +183,8 @@ class CutTimingProxy(torch.nn.Module):
                 scale=float(np.clip(math.sqrt(ratio/(peak/max(original_peak,1e-9))),.5,2.)) if peak>0 else 1.
                 transfers[i,c]=ports*scale
                 audit.append({'decision_index':i,'choice_index':c,'library_peak_ps':peak,
-                              'original_library_peak_ps':original_peak,'student_ratio':ratio,'scale':scale})
+                              'original_library_peak_ps':original_peak,'student_ratio':ratio,'scale':scale,
+                              'original_extra_boundary_pis':original.extra_boundary_pis})
         implementations=node_options(aig,library,by_root)
         levels={i:0 for i in range(aig.pi_count+1)};layers=defaultdict(list)
         for node,pair in sorted(aig.fanin_literals.items()):

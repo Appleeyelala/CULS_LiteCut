@@ -14,7 +14,7 @@
   "learning_panel": {"train": 12, "validation": 12, "maximum_ands": 64000, "maximum_nonempty_per_circuit": 8, "serialized_noop_per_circuit": 1, "maximum_new_mappings": 216},
   "gradient_search": {"max_backward": 40, "max_forward": 160, "beam_width": 32, "candidate_pool": 64, "initial_radius": 2},
   "aligned_ste_control": {"steps": 40, "learning_rate": 0.12, "maximum_edits": 16},
-  "gates": {"median_within_circuit_spearman": 0.5, "undefined_spearman_contribution": 0.0, "improvement_precision": 0.7, "report_coverage": true, "report_serialized_noop_relative_quality": true},
+  "gates": {"median_within_circuit_spearman": 0.5, "undefined_spearman_contribution": 0.0, "improvement_precision": 0.7, "report_coverage": true, "report_serialized_noop_relative_quality": true, "seed_aggregation": "all three complete; median seed metrics pass; at least one seed passes both", "advancing_variants": ["ports", "combined"]},
   "conditional_independent_evaluation": {"circuits": 24, "maximum_new_mappings": 72, "target_geomean_over_B": 0.99, "target_geomean_over_A_below": 1.0, "area_limit_ratio": 1.05},
   "no_automatic_100_or_905": true,
   "candidate_mapping_in_gradient_loop": false

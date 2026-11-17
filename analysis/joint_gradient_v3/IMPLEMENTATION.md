@@ -75,6 +75,12 @@ correlation contributes zero; median Spearman must reach 0.5 and improvement
 precision 0.7. This stricter tie treatment is not numerically interchangeable
 with v2's exclusion of undefined correlations. No successful gate is asserted
 until actual evaluation completes.
+Before fitting, aggregation is fixed as follows: all three seeds must finish;
+their median rank and precision metrics must pass, with at least one seed
+passing both individually. Ports or combined must pass to expand; global-only
+is an explanatory control. Primary development optimizer comparisons use seed
+20261117. An independent-stage checkpoint, if allowed, uses lowest validation
+loss among passing seeds, preferring combined when both structural variants pass.
 
 `evaluate_joint_gradient_v3.py` freezes aligned-STE and joint-gradient searches
 with the existing budgets on the old factorial domain, without reading candidate

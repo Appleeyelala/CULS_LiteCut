@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from global_timing.boolean_candidates import parse_library, verify_library_truth
 from global_timing.structure import parse_aig
+from global_timing.phase_ports import hard_phase_arrivals
 
 
 def structural_arrivals(aig):
@@ -110,6 +111,8 @@ def main():
             row = {'circuit_id': frozen['circuit'], 'mask': mask,
                    'installed_aig': str(installed), 'installed_sha256': sha(installed)}
             choices = [(mask >> i) & 1 for i in range(len(decisions))]
+            compressed = hard_phase_arrivals(aig, decisions, choices, lib)
+            row['phase_ports_max_po_error_units'] = max(abs(a-b) for a,b in zip(actual,compressed))
             for simplify, name in [(False, 'literal_only'), (True, 'canonical')]:
                 graph, events = literal_composition(aig, decisions, choices, lib, simplify)
                 pred = structural_arrivals(graph)
@@ -123,7 +126,7 @@ def main():
                'units': 'AND=1, complemented edge=0.2, PI=0; not ps',
                'comparators': {name: {'mismatches': sum(r[name+'_max_po_error_units'] > 1e-8 for r in rows),
                                       'maximum_error': max(r[name+'_max_po_error_units'] for r in rows)}
-                              for name in ['literal_only', 'canonical']}}
+                              for name in ['literal_only', 'canonical', 'phase_ports']}}
     args.output.mkdir(parents=True, exist_ok=False)
     (args.output/'summary.json').write_text(json.dumps(summary, indent=2)+'\n')
     (args.output/'phase_events.json').write_text(json.dumps(evidence, indent=2)+'\n')

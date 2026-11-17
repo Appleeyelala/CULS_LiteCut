@@ -1230,6 +1230,27 @@ void CPUSolver::Rewrite(bool fUseZeros, bool GPUReplace) {
         };
 
         std::vector<int> dependencyMarks(n + 1, 0);
+        // An explicit joint selection is evaluated on the original graph.
+        // Earlier edits can lower references and reclaim a later cut boundary,
+        // even when that node was outside their original removable sets.
+        // Hold selected roots/boundaries alive for the whole transaction; these
+        // artificial references are released before final dangling cleanup.
+        // Restrict this to the explicit nonpositive candidate protocol so the
+        // legacy greedy gain accounting/selection remains unchanged.
+        std::vector<int> replayPins;
+        if (allowCandidates && rewriteAuditOptions.replayMode) {
+            for (int root : executionRoots) {
+                const Cut &cut = bestCut[root];
+                if (!cut.used) continue;
+                replayPins.push_back(root);
+                for (int j = 0; j < cut.nLeaves; ++j)
+                    if (cut.leaves[j] > numInputs)
+                        replayPins.push_back(cut.leaves[j]);
+            }
+            std::sort(replayPins.begin(), replayPins.end());
+            replayPins.erase(std::unique(replayPins.begin(), replayPins.end()), replayPins.end());
+            for (int node : replayPins) ++ref[node];
+        }
         int cycleRejectCount = 0;
         for (int executionOrder = 0; executionOrder < static_cast<int>(executionRoots.size()); ++executionOrder) {
             int i = executionRoots[executionOrder];
@@ -1403,6 +1424,15 @@ void CPUSolver::Rewrite(bool fUseZeros, bool GPUReplace) {
                 appendAuditRecord(std::move(auditRecord));
             }
         }
+        for (int node : replayPins) --ref[node];
+        int releasedDangling = 0;
+        for (int node : replayPins)
+            if (!isDeleted[node] && ref[node] == 0)
+                releasedDangling += FastDelete(node);
+        expected += releasedDangling;
+        if (!replayPins.empty())
+            printf("explicit replay boundary lifetime: pinned %zu nodes, released %d dangling nodes\n",
+                   replayPins.size(), releasedDangling);
         if (rewriteAuditOptions.enabled)
             rewriteAuditWriteTrace(rewriteAuditOptions, auditRecords);
         free(replace);

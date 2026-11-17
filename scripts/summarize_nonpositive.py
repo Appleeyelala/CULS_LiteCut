@@ -285,7 +285,7 @@ def full_reports(args,out,evidence_file):
     ratios=[a/b for _,a,b,_ in quality if a>0 and b>0]
     states=dict(Counter(r['status'] for r in result_rows))
     reported_failures={
-        'cuda_oom_ids':sorted(i for i,r in records.items() if 'CUDA error: out of memory' in (r.get('error') or '')),
+        'cuda_oom_ids':sorted(i for i,r in records.items() if 'cuda' in (r.get('error') or '').lower() and 'out of memory' in (r.get('error') or '').lower()),
         'replay_failure_ids':sorted(i for i,r in records.items() if r.get('replay_status')=='FAIL'),
         'timeout_ids':sorted(i for i,r in records.items() if r.get('status')=='TIMEOUT'),
         'scope':'Observed execution outcomes; no unmeasured root cause or missing metrics inferred.'}

@@ -19,13 +19,17 @@ def fingerprints(aig):
     hashes={i:hashlib.sha256(f'PI:{i}'.encode()).digest() for i in range(aig.pi_count+1)}
     hashes[0]=hashlib.sha256(b'CONST0').digest()
     counts=Counter()
+    labeled=hashlib.sha256(f'{aig.pi_count},{aig.po_count},{aig.and_count};'.encode())
     for node,pair in sorted(aig.fanin_literals.items()):
+        labeled.update(f'{node},{pair[0]},{pair[1]};'.encode())
         parts=sorted(hashes[l>>1]+bytes([l&1]) for l in pair)
         value=hashlib.sha256(b'AND'+b''.join(parts)).digest();hashes[node]=value;counts[value]+=1
     outputs=[hashlib.sha256(hashes[l>>1]+bytes([l&1])).hexdigest() for l in aig.po_literals]
+    labeled.update(','.join(map(str,aig.po_literals)).encode())
     forest=hashlib.sha256(b''.join(h+k.to_bytes(8,'little') for h,k in sorted(counts.items()))).hexdigest()
     return {'ands':aig.and_count,'pis':aig.pi_count,'pos':aig.po_count,'output_hashes':outputs,
-            'internal_hash_multiset':forest,'duplicate_structural_nodes':sum(n-1 for n in counts.values())}
+            'internal_hash_multiset':forest,'duplicate_structural_nodes':sum(n-1 for n in counts.values()),
+            'labeled_graph_digest':labeled.hexdigest()}
 
 
 def main():
@@ -48,6 +52,7 @@ def main():
             'original_and_count':before['ands'],'replayed_and_count':after['ands'],
             'output_count_equal':before['pos']==after['pos'],'changed_po_structural_hash_indices':changed,
             'internal_hash_multiset_equal':before['internal_hash_multiset']==after['internal_hash_multiset'],
+            'exact_numbered_graph_equal':before['labeled_graph_digest']==after['labeled_graph_digest'],
             'original_duplicate_structural_nodes':before['duplicate_structural_nodes'],
             'replayed_duplicate_structural_nodes':after['duplicate_structural_nodes'],
             'original_path':str(original),'replayed_path':str(replayed)})

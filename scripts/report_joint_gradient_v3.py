@@ -63,9 +63,12 @@ def main():
         selected=[r for r in training if r['variant']==variant]
         complete={r['seed'] for r in selected}=={20261117,20261118,20261119}
         rho=statistics.median(r['median_spearman'] or 0. for r in selected) if selected else None
-        precision=statistics.median(r['precision'] or 0. for r in selected) if selected else None
-        passed=complete and rho>=.5 and precision>=.7 and any(r['gate_pass'] for r in selected)
-        gates[variant]={'complete':complete,'median_seed_spearman':rho,'median_seed_precision':precision,'pass':passed}
+        undefined=sum(r['precision'] is None for r in selected)
+        precision=statistics.median(r['precision'] for r in selected) if selected and not undefined else None
+        precision_gate=statistics.median(r['precision'] or 0. for r in selected) if selected else 0.
+        passed=complete and rho>=.5 and precision_gate>=.7 and any(r['gate_pass'] for r in selected)
+        gates[variant]={'complete':complete,'median_seed_spearman':rho,'median_seed_precision':precision,
+                       'undefined_precision_seeds':undefined,'precision_gate_contribution':precision_gate,'pass':passed}
     nonempty=[r for r in rows if r['index'] and r['status']=='PASS']
     summary={'data_source_commit':data['source_commit'],'learning_source_commit':learning['source_commit'],
         'circuits':len(cases),'new_mapping_calls':sum(c['mapping_calls'] for c in cases),

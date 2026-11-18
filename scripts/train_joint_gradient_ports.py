@@ -153,7 +153,11 @@ def main():
     p.add_argument('--global-context',choices=['original','endpoint'],default='original',
                    help='Single-change research ablation; original remains the default')
     p.add_argument('--loss-mode',choices=['original','gap-ranking'],default='original')
+    p.add_argument('--omit-litecut-delay', action='store_true',
+                   help='Zero the local delay channel for all global-head training and evaluation domains')
     args=p.parse_args()
+    if args.omit_litecut_delay and (args.variant != 'global' or args.global_context != 'original' or args.prepare_only):
+        p.error('Local delay ablation requires the original global head in training mode')
     loss_function=timing_loss
     if args.loss_mode=='gap-ranking':
         if args.variant!='global' or args.global_context!='original':
@@ -190,6 +194,15 @@ def main():
              'code_hashes':code_hashes,'manifest_sha256':sha(args.manifest),'elapsed_s':time.perf_counter()-started,
              'model_metadata':[{'circuit_id':c['circuit_id'],'domains':[d['model'].metadata for d in c['domains']]} for c in examples]})
         return
+    if args.omit_litecut_delay:
+        changed = 0
+        for case in examples:
+            for domain in case['domains']:
+                features = domain['model'].features
+                changed += int(torch.count_nonzero(features[..., 0]))
+                features[..., 0].zero_()
+        if changed == 0:
+            raise ValueError('Expected nonzero LiteCut input in frozen graph features')
     if args.global_context=='endpoint':
         if args.variant!='global':raise ValueError('Endpoint-context ablation requires global variant')
         from global_timing.endpoint_context import EndpointContextSurrogate
@@ -226,12 +239,12 @@ def main():
             if stale>=20:break
     shared.load_state_dict(best_state)
     torch.save({'state_dict':best_state,'variant':args.variant,'global_context':args.global_context,
-                'loss_mode':args.loss_mode,
+                'loss_mode':args.loss_mode,'omit_litecut_delay':args.omit_litecut_delay,
                 'loss_code_sha256':sha(ROOT/'global_timing/ranking_loss.py') if args.loss_mode=='gap-ranking' else None,
                 'context_code_sha256':sha(ROOT/'global_timing/endpoint_context.py') if args.global_context=='endpoint' else None,
                 'seed':args.seed,'best_epoch':best_epoch,
                 'manifest_sha256':sha(args.manifest),'source_commit':os.environ.get('V3_SOURCE_COMMIT')},args.output/'weights.pt')
-    result={'variant':args.variant,'global_context':args.global_context,'loss_mode':args.loss_mode,
+    result={'variant':args.variant,'global_context':args.global_context,'loss_mode':args.loss_mode,'omit_litecut_delay':args.omit_litecut_delay,
         'seed':args.seed,'best_epoch':best_epoch,'history':history,
         'validation':evaluate(examples,'validation',args.device,loss_function),'train':evaluate(examples,'train',args.device,loss_function),
         'elapsed_s':time.perf_counter()-started,'new_mapping_calls':0,'manifest_sha256':sha(args.manifest),

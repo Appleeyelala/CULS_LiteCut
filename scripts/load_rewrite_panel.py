@@ -45,7 +45,7 @@ if __name__=='__main__':
                 vec=rec['choices']
                 rule.validate(vec)
                 with torch.no_grad():
-                    latency,area=bank.graph.forward(bank.hard(vec))
+                    latency,area=bank.forward(bank.hard(vec))
                 rows.append(dict(circuit=i,index=rec['index'],edits=sum(bool(x) for x in vec),
                                  alpha=alpha,score=float(latency),area=float(area)))
         save_json(a.output/f.name/'predictions.json',rows)
@@ -58,8 +58,9 @@ if __name__=='__main__':
         assert set(range(1,9))<=labels.keys()
         best=min(labels[k]['delay_ps'] for k in range(1,9))
         for alpha in [0.,.5]:
-            r=min((v for v in allrows if v['circuit']==i and v['alpha']==alpha and v['index']),
-                  key=lambda v:(v['score'],v['edits'],v['index']))
+            group=[v for v in allrows if v['circuit']==i and v['alpha']==alpha and v['index']]
+            lowest=min(v['score'] for v in group)
+            r=min((v for v in group if v['score']<=lowest+max(2e-5,2e-6*lowest)),key=lambda v:(v['edits'],v['index']))
             actual=labels[r['index']]['delay_ps']
             selected.append(dict(**r,real_ps=actual,best_ps=best,regret_pct=100*(actual/best-1),
                                  top1=abs(actual-best)<=max(2e-5,best*2e-6)))

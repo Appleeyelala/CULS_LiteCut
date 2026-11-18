@@ -13,7 +13,7 @@ def optimize(bank, rule, method, budget, seconds, edit_limit, area_ratio, seed):
     def evaluate(vector):
         rule.validate(vector)
         with torch.no_grad():
-            delay,area=bank.graph.forward(bank.hard(vector))
+            delay,area=bank.forward(bank.hard(vector))
         values=float(delay),float(area)
         if not all(map(math.isfinite,values)): raise ValueError('Nonfinite hard score')
         return values
@@ -66,7 +66,7 @@ def optimize(bank, rule, method, budget, seconds, edit_limit, area_ratio, seed):
             weights=bank.soft(z)
             # Hard forward values determine selection; gradients follow the soft
             # pin loads, active references and arrival/slew on this same network.
-            sd,sa=bank.graph.forward(weights)
+            sd,sa=bank.forward(weights)
             loss=sd/base
             if area_ratio is not None:
                 loss=loss+20.*torch.relu(sa/max(a0,1.e-6)-area_ratio)

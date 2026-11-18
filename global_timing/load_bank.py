@@ -1,5 +1,6 @@
 """Compile root-local alternatives into one technology-mapped template forest."""
-from collections import defaultdict
+from collections import Counter, defaultdict
+from graphlib import TopologicalSorter
 from pathlib import Path
 import torch
 from .abc_choices import choice_program
@@ -66,17 +67,52 @@ def prepare_forest(aig, catalogue, allowed, scores, lib, path):
     return groups,scales
 
 
+def combine_covers(paths, lib):
+    # Match identical physical cells across covers, preserving duplicate
+    # instances inside either cover. All cross-cover names are positional.
+    union, identities, ends = {}, {}, []
+    for path in paths:
+        pins, outs, gates = mapped_graph(path,lib)
+        names = {p:f"pin{i}" for i,p in enumerate(pins)}
+        occurrences=Counter()
+        for n in TopologicalSorter({n:p for n,(_,p) in gates.items()}).static_order():
+            if n not in gates:
+                if n not in names and n not in ("1'b0","1'b1"): raise ValueError("Undriven template pin "+n)
+                names.setdefault(n,n)
+                continue
+            cell,parents=gates[n]
+            wires=tuple(names[k] for k in parents)
+            if cell is None:
+                names[n]=wires[0]
+                continue
+            key=(cell,wires)
+            occurrences[key]+=1
+            identity=(key,occurrences[key])
+            if identity not in identities:
+                name=f"cell{len(identities)}"
+                identities[identity]=name
+                union[name]=(cell,wires)
+            names[n]=identities[identity]
+        iface=(len(pins),len(outs))
+        if ends and iface!=shape: raise ValueError("Template interface changed")
+        shape=iface
+        ends.append([names.get(n,n) for n in outs])
+    return [f"pin{i}" for i in range(shape[0])],list(zip(*ends)),union
+
+
 class LoadBank:
     def __init__(self, aig, catalogue, rule, scores, rewrite_lib, timing_lib, abc, liberty, work, alpha=0.):
         work.mkdir()
         source=work/'forest.aig'
         self.groups,ratios=prepare_forest(aig,catalogue,rule.allowed(),scores,rewrite_lib,source)
         mapped=work/'templates.v'
+        initial=work/'initial.v'
         # ABC expands supergates and runs its delay pass, reference counting and
         # required-time area recovery once on the entire bank of local templates.
-        run_tool([abc,'-c',f'read_lib {tool_path(liberty)}; read_aiger {tool_path(source)}; map; write_verilog {tool_path(mapped)}'],
+        run_tool([abc,'-c',f'read_lib {tool_path(liberty)}; read_aiger {tool_path(source)}; map -r; write_verilog {tool_path(initial)}; read_aiger {tool_path(source)}; map; write_verilog {tool_path(mapped)}'],
                  work,'compile_templates',900)
-        pins,outs,graph=mapped_graph(mapped,timing_lib)
+        pins,pairs,graph=combine_covers((initial,mapped),timing_lib)
+        outs=[f"boundary{i}" for i in range(len(pairs))]
         if len(pins)!=aig.pi_count+len(self.groups) or len(outs)!=aig.po_count+sum(map(len,self.groups)):
             raise ValueError('Template port identity changed')
         selectors={}
@@ -85,11 +121,39 @@ class LoadBank:
             lo=aig.po_count+start
             selectors[pins[aig.pi_count+j]]=(start,outs[lo:lo+len(g)],r)
             start+=len(g)
+        self.states=start
+        changed=[]
+        for n,(early,late) in zip(outs,pairs):
+            if early==late:
+                graph[n]=(None,[early])
+            else:
+                selectors[n]=(start,[early,late],[1.,1.])
+                changed.append((n,early,late))
+                start+=2
+        self.choices=len(changed)
         self.graph=TimingGraph(timing_lib,graph,pins[:aig.pi_count],outs[:aig.po_count],selectors)
         self.ratios=[stage[-1] for stage in self.graph.stages]
         self.set_alpha(alpha)
-        self.states=start
         self.device=timing_lib.device
+        self.group_ids=timing_lib.index([j for j,g in enumerate(self.groups) for _ in g])
+        self.cover_indices=tuple(timing_lib.index([self.graph.positions.get(p[k],0) for p in changed])
+                                 for k in range(3))
+        self.initial=torch.tensor([1.,0.]*self.choices,device=self.device)
+        self.recovered=1.-self.initial
+
+    def forward(self,weights):
+        if not self.choices:
+            return self.graph.forward(weights)
+        # Choose a lower-area cover at each template boundary only when both
+        # transitions fit the required times of the current delay-first cover.
+        # Recompute actual load/slew after combining the individual decisions.
+        boundary,early,late=self.cover_indices
+        with torch.no_grad():
+            _,required,early_flow=self.graph.forward(torch.cat((weights.detach(),self.initial)),detail="recovery")
+            arrivals,_,late_flow=self.graph.forward(torch.cat((weights.detach(),self.recovered)),detail="recovery")
+            use_late=((arrivals[late]<=required[boundary]+1.e-4).all(1) & (late_flow[late]<=early_flow[early]))
+            recovery=torch.stack((~use_late,use_late),1).float().flatten()
+        return self.graph.forward(torch.cat((weights,recovery)))
 
     def set_alpha(self,alpha):
         for j,r in enumerate(self.ratios):
@@ -113,4 +177,7 @@ class LoadBank:
         return result
 
     def soft(self,z):
-        return torch.cat([v.softmax(0) for v in z.split([len(g) for g in self.groups])]) if self.groups else z
+        if not self.groups: return z
+        peak=z.new_full((len(self.groups),),-torch.inf).scatter_reduce(0,self.group_ids,z.detach(),reduce="amax")
+        exp=(z-peak[self.group_ids]).exp()
+        return exp/torch.zeros_like(peak).index_add(0,self.group_ids,exp)[self.group_ids]

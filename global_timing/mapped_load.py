@@ -84,12 +84,19 @@ def load_impact(model, mapped, cells, lib):
     for node, (a,b) in sorted(aig.fanin_literals.items()):
         aig_sig[node] = literal(a) & literal(b)
     drivers, pins, uses, caps = {}, {}, Counter(), Counter()
-    all_nets = set()
+    declarations={'input':[], 'output':[]}
     with mapped.open() as stream:
         for line in stream:
+            decl=re.match(r'\s*(input|output)\s+(.*)',line)
+            if decl:
+                names=decl[2]
+                while ';' not in names:
+                    names+=' '+next(stream).strip()
+                declarations[decl[1]].extend(n.strip() for n in names.split(';')[0].split(','))
+                continue
             if '_ASAP7_' in line and re.match(r'\s*\w+\s+g\d+\s*\(',line):
                 kind = line.split()[0]
-                conn = re.findall(r'\.(\w+)\(([^()]*)\)',line)
+                conn = [(k,n.strip()) for k,n in re.findall(r'\.(\w+)\(([^()]*)\)',line)]
                 if not conn or not line.strip().endswith('));'):
                     raise ValueError('Unsupported gate syntax')
                 inputs = {k:n for k,n in conn if k in cells[kind][1]}
@@ -101,7 +108,7 @@ def load_impact(model, mapped, cells, lib):
                     uses[net]+=1
                     caps[net]+=cells[kind][1][pin]
             elif line.lstrip().startswith('assign '):
-                out,net = re.fullmatch(r"\s*assign\s+(\w+)\s*=\s*(\w+|1'b[01])\s*;\s*",line).groups()
+                out,net = re.fullmatch(r"\s*assign\s+(\S+)\s*=\s*(\S+|1'b[01])\s*;\s*",line).groups()
                 inputs={'A':net}
                 kind=None
             else:
@@ -109,16 +116,18 @@ def load_impact(model, mapped, cells, lib):
             if out in drivers:
                 raise ValueError('Duplicate mapped driver')
             drivers[out],pins[out]=kind,inputs
-            all_nets.update([out,*inputs.values()])
+    pi_index={n:i for i,n in enumerate(declarations['input'],1)}
+    if len(pi_index)!=aig.pi_count or len(declarations['output'])!=len(aig.po_literals):
+        raise ValueError('Mapped interface size mismatch')
     # Topological propagation is local to this Verilog namespace.
     order=list(TopologicalSorter({n:set(ip.values()) for n,ip in pins.items()}).static_order())
     sig,arrival,parent,per_sink={}, {}, {}, {}
     probed=defaultdict(list)
-    outputs={}
+    outputs=dict(enumerate(declarations['output']))
     for n in order:
         if n not in drivers:
-            if n.startswith('pi') and n[2:].isdigit():
-                sig[n]=aig_sig[int(n[2:])+1]
+            if n in pi_index:
+                sig[n]=aig_sig[pi_index[n]]
             elif n in ("1'b0","1'b1"):
                 sig[n]=mask if n.endswith('1') else 0
             else:
@@ -138,8 +147,6 @@ def load_impact(model, mapped, cells, lib):
             if uses[n] and tables:
                 per_sink[n]=slope*caps[n]/uses[n]
             probed[sig[n]].append(n)
-        if n.startswith('po') and n[2:].isdigit():
-            outputs[int(n[2:])]=n
     if len(outputs)!=len(aig.po_literals) or any(sig[outputs[i]]!=literal(lit) for i,lit in enumerate(aig.po_literals)):
         raise ValueError('Mapped port signature/order mismatch')
     # Reject repeated AIG or mapped signatures and near-constant signatures.

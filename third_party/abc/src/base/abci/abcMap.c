@@ -153,6 +153,12 @@ clk = Abc_Clock();
         Map_ManSetUseProfile( pMan );
     if ( LogFan != 0 )
         Map_ManCreateNodeDelays( pMan, LogFan );
+    if ( getenv("CULS_PREPARE_BANK") )
+    {
+        int ok = Map_CulsPrepareBank(pMan, getenv("CULS_PREPARE_BANK"), getenv("CULS_BANK_ANCHORS"), Abc_NtkObjNumMax(pNtk));
+        Map_ManFree(pMan);
+        return ok ? Abc_NtkDup(pNtk) : NULL;
+    }
     if ( getenv("CULS_HARD_VECTORS") )
     {
         int ok = Map_CulsHardScores(pMan, getenv("CULS_HARD_VECTORS"));

@@ -13,7 +13,7 @@ from global_timing.abc_choices import choice_program, symbolic_states
 from global_timing.abc_sparse_timing import SparseTiming
 from global_timing.boolean_candidates import parse_library
 from global_timing.candidates import Catalogue, replay
-from global_timing.common import digest, run_tool, save_json, tool_path
+from global_timing.common import ToolError, digest, run_tool, save_json, tool_path
 from global_timing.evaluation import Evaluator, cec_passed, parse_timing
 from global_timing.feasibility import CandidateFeasibility
 from global_timing.structure import parse_aig
@@ -59,6 +59,44 @@ def joint_search(model, rule, steps, edit_budget):
     return best,history
 
 
+def evaluate_proposal(args, catalogue, rule, vector, original):
+    """Install the frozen proposal once and return the artifact that passed acceptance."""
+    out = args.output
+    selected_aig = args.original
+    selected = original
+    candidate = None
+    status = "ORIGINAL"
+    failure = None
+    rule.validate(vector)
+    if any(vector):
+        try:
+            installed, _ = replay(args.gpuls, args.original, args.owners, catalogue, vector,
+                                  out / "replay", 900, allow_nonpositive_gain=True,
+                                  allow_nonpositive_candidates=True)
+            evaluator = Evaluator(args.frozen_abc, args.liberty, args.original, 900)
+            candidate = evaluator.evaluate(installed, out / "final")
+        except ToolError as exc:
+            status = "ORIGINAL_AFTER_TOOL_FAILURE"
+            failure = str(exc)
+        else:
+            if candidate["area"] > 1.05 * original["area"]:
+                status = "ORIGINAL_AFTER_AREA_CHECK"
+            elif candidate["delay_ps"] >= original["delay_ps"]:
+                status = "ORIGINAL_AFTER_DELAY_CHECK"
+            else:
+                status = "ACCEPTED"
+                selected_aig, selected = installed, candidate
+
+    return dict(status=status, cec="PASS", vector=vector, selected_aig=str(selected_aig),
+                selected_aig_sha256=digest(selected_aig), tool_failure=failure,
+                mapped_evaluations=1 + int((out / "final" / "mapping.log").exists()),
+                original_delay_ps=original["delay_ps"], delay_ps=selected["delay_ps"],
+                area_ratio=selected["area"]/original["area"],
+                candidate_cec=candidate["cec"] if candidate else None,
+                candidate_delay_ps=candidate["delay_ps"] if candidate else None,
+                candidate_area_ratio=candidate["area"]/original["area"] if candidate else None)
+
+
 def run(args):
     start=time.perf_counter()
     out=args.output
@@ -95,21 +133,9 @@ def run(args):
         model=SparseTiming(bank,work/"anchors",groups,args.device)
         vector,trace=joint_search(model,rule,args.steps,args.max_edits)
     save_json(out/"frozen_proposal.json",dict(vector=vector,trace=trace,alpha=args.alpha,device=args.device))
-    final=original;count=1;status="ORIGINAL";candidate=None
-    if any(vector):
-        rule.validate(vector)
-        installed,_=replay(args.gpuls,args.original,args.owners,cat,vector,out/"replay",900,
-                           allow_nonpositive_gain=True,allow_nonpositive_candidates=True)
-        count+=1
-        candidate=Evaluator(args.frozen_abc,args.liberty,args.original,900).evaluate(installed,out/"final")
-        if candidate["area"]<=1.05*original["area"] and candidate["delay_ps"]<original["delay_ps"]:
-            final=candidate;status="ACCEPTED"
-        else:status="ORIGINAL_AFTER_FINAL_CHECK"
-    row=dict(status=status,cec="PASS",mapped_evaluations=count,precover_calls=int(bool(groups)),
-             prepared_catalogue_seconds=time.perf_counter()-start, original_delay_ps=original["delay_ps"],
-             delay_ps=final["delay_ps"],area_ratio=final["area"]/original["area"],vector=vector,
-             candidate_delay_ps=candidate["delay_ps"] if candidate else None,
-             scope="Starts from supplied catalogue, owners and Student scores; upstream costs excluded.")
+    row = evaluate_proposal(args, cat, rule, vector, original)
+    row.update(precover_calls=int(bool(groups)), prepared_catalogue_seconds=time.perf_counter()-start,
+               scope="Starts from supplied catalogue, owners and Student scores; upstream costs excluded.")
     save_json(out/"result.json",row)
     return row
 

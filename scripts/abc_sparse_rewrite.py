@@ -79,7 +79,8 @@ def evaluate_proposal(args, catalogue, rule, vector, original):
             status = "ORIGINAL_AFTER_TOOL_FAILURE"
             failure = str(exc)
         else:
-            if candidate["area"] > 1.05 * original["area"]:
+            area_limit = getattr(args, "area_limit", 1.05)
+            if area_limit is not None and candidate["area"] > area_limit * original["area"]:
                 status = "ORIGINAL_AFTER_AREA_CHECK"
             elif candidate["delay_ps"] >= original["delay_ps"]:
                 status = "ORIGINAL_AFTER_DELAY_CHECK"

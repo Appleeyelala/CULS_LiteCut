@@ -25,7 +25,12 @@ def score(binary, liberty, installed, work, tags, alpha):
     env.pop("CULS_CHOICES", None)
     if alpha and tags:
         spec = work/"pins.txt"
-        spec.write_text("".join(f"t {2*t['installed_node']} {t['pin_scale']**alpha:.12g}\n" for t in tags))
+        lines = []
+        for t in tags:
+            anchor, *aliases = t["alias_literals"]
+            lines.extend(f"e {anchor} {other}" for other in aliases)
+            lines.append(f"t {anchor} {t['pin_scale']**alpha:.12g}")
+        spec.write_text("\n".join(lines) + "\n")
         env["CULS_CHOICES"] = str(spec)
     log = run_tool([binary, "-c", f"read_lib {tool_path(liberty)}; read_aiger {tool_path(installed)}; map -r"],
                    work,"mode0",900,env)
@@ -128,7 +133,7 @@ def main():
                  if stage=="factorial" or read(f/"frozen.json")["role"]==stage]
         if len(folders)!=12:
             raise ValueError(f"Unexpected {stage} cohort size")
-        alphas=[0.,.25,.5,1.] if stage=="train" else sorted({0.,frozen_alpha})
+        alphas=[0.,.25,.5,1.] if stage=="train" else sorted({0.,frozen_alpha,1.})
         out=a.output/stage;out.mkdir()
         with ThreadPoolExecutor(max_workers=int(os.environ["SLURM_CPUS_PER_TASK"])) as pool:
             chunks=list(pool.map(lambda f: predict_case(f,out,a.abc,lib,alphas,stage=="factorial"),folders))

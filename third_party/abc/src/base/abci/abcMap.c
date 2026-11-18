@@ -326,7 +326,7 @@ Map_Man_t * Abc_NtkToMap( Abc_Ntk_t * pNtk, double DelayTarget, int fRecovery, f
         }
         assert( Abc_ObjIsNode(pNode) );
         // add the node to the mapper
-        pNodeMap = Map_NodeAnd( pMan, 
+        pNodeMap = (pNode->culsPrivate ? Map_CulsPrivateAnd : Map_NodeAnd)( pMan,
             Map_NotCond( Abc_ObjFanin0(pNode)->pCopy, (int)Abc_ObjFaninC0(pNode) ),
             Map_NotCond( Abc_ObjFanin1(pNode)->pCopy, (int)Abc_ObjFaninC1(pNode) ) );
         assert( pNode->pCopy == NULL );

@@ -101,6 +101,11 @@ void            Map_NodeSetData( Map_Node_t * p, int fPhase, char * pData ) { if
 void            Map_NodeSetNextE( Map_Node_t * p, Map_Node_t * pNextE )     { p->pNextE = pNextE;       }
 void            Map_NodeSetRepr( Map_Node_t * p, Map_Node_t * pRepr )       { p->pRepr = pRepr;         }
 void            Map_NodeSetSwitching( Map_Node_t * p, float Switching )     { p->Switching = Switching; }
+Map_Node_t * Map_CulsPrivateAnd( Map_Man_t * p, Map_Node_t * left, Map_Node_t * right )
+{
+    ++p->culsPrivateCount;
+    return Map_NodeCreate(p, left, right);
+}
 void Map_CulsSetTag( Map_Node_t * p, unsigned long long vectors, float scale )
 {
     p->culsVectors = vectors;
@@ -540,7 +545,7 @@ clk = Abc_Clock();
             pBinsNew[Key] = pEnt;
             Counter++;
         }
-    assert( Counter == pMan->nNodes - pMan->nInputs );
+    assert( Counter == pMan->nNodes - pMan->nInputs - pMan->culsPrivateCount );
     if ( pMan->fVerbose )
     {
 //        printf( "Increasing the unique table size from %6d to %6d. ", pMan->nBins, nBinsNew );

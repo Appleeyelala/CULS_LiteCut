@@ -126,6 +126,7 @@ extern void            Map_NodeSetNextE( Map_Node_t * p, Map_Node_t * pNextE );
 extern void            Map_NodeSetRepr( Map_Node_t * p, Map_Node_t * pRepr );
 extern void            Map_NodeSetSwitching( Map_Node_t * p, float Switching );
 extern int             Map_CulsHardScores( Map_Man_t * p, const char * argument );
+extern Map_Node_t *    Map_CulsPrivateAnd( Map_Man_t *, Map_Node_t *, Map_Node_t * );
 extern void            Map_CulsSetTag( Map_Node_t * p, unsigned long long vectors, float scale );
 extern unsigned long long Map_CulsVectors( Map_Cut_t * cut );
 extern void            Map_NodeSetAigId( Map_Node_t * p, int Id );

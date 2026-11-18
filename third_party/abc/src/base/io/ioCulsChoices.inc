@@ -2,6 +2,8 @@
 /* Research-only input for one combinational read_aiger/map process.
    Literal indices refer to the reader's actual vNodes, including strashing.
    The caller supplies locally truth-checked candidates and frozen vector masks. */
+extern Abc_Obj_t * Abc_AigAndCreate( Abc_Aig_t *, Abc_Obj_t *, Abc_Obj_t * );
+
 typedef struct {
     Abc_Obj_t * repr, * alt;
     unsigned long long original, allowed;
@@ -29,6 +31,13 @@ static int CulsReadChoices( Abc_Ntk_t * ntk, Vec_Ptr_t * nodes, const char * pat
             Abc_Obj_t * x = CulsReadLit(nodes, left), * y = CulsReadLit(nodes, right);
             if ( !x || !y ) goto invalid;
             Vec_PtrPush(nodes, Abc_AigAnd((Abc_Aig_t *)ntk->pManFunc, x, y));
+        }
+        else if ( line[0] == 'e' )
+        {
+            Abc_Obj_t * x, * y;
+            if ( sscanf(line, "e %d %d", &left, &right) != 2 ) goto invalid;
+            x = CulsReadLit(nodes, left); y = CulsReadLit(nodes, right);
+            if ( !x || x != y ) goto invalid;
         }
         else if ( line[0] == 't' )
         {
@@ -74,12 +83,20 @@ static int CulsReadChoices( Abc_Ntk_t * ntk, Vec_Ptr_t * nodes, const char * pat
             e->repr->culsVectors |= e->allowed;
             status = "alias";
         }
-        else if ( !Abc_ObjIsNode(e->alt) || Abc_ObjFanoutNum(e->alt) ) status = "shared_or_terminal";
+        else if ( !Abc_ObjIsNode(e->alt) ) status = "terminal";
         else {
             for ( j = 0; j < i && a[j].alt != e->alt; ++j ) {}
             if ( j < i && a[j].repr != e->repr ) status = "shared_class";
             else {
                 if ( j == i ) {
+                    if ( Abc_ObjFanoutNum(e->alt) ) {
+                        Abc_Obj_t * original = e->alt;
+                        e->alt = Abc_AigAndCreate((Abc_Aig_t *)ntk->pManFunc,
+                                                  Abc_ObjChild0(original), Abc_ObjChild1(original));
+                        e->alt->culsPrivate = 1;
+                        for ( j = i+1; j < count; ++j )
+                            if ( a[j].repr == e->repr && a[j].alt == original ) a[j].alt = e->alt;
+                    }
                     e->alt->pData = e->repr->pData;
                     e->repr->pData = e->alt;
                     e->alt->culsScale = e->scale;
@@ -91,6 +108,7 @@ static int CulsReadChoices( Abc_Ntk_t * ntk, Vec_Ptr_t * nodes, const char * pat
         }
         printf("CULS_OPTION %d %d %d %d %d %s\n", e->decision, e->choice, e->repr->Id, e->alt->Id, e->invert, status);
     }
+    if ( count == 0 ) Abc_AigCleanup((Abc_Aig_t *)ntk->pManFunc);
     return 1;
 invalid:
     fclose(file);

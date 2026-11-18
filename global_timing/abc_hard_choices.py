@@ -64,10 +64,11 @@ def hard_annotations(original, installed, program, options):
     for o in options:
         key = keys[o["original_root"]]
         places = locations[key//2]
-        unique = (key//2 not in baseline and len(places) == 1 and multiplicity[key//2] == 1
+        unique = (key//2 not in baseline and bool(places) and multiplicity[key//2] == 1
                   and places[0] in installed.fanin_literals and o["ratio_valid"])
         tagged.append(dict(o, present_in_original=(key//2 in baseline),
                            installed_occurrences=len(places), candidate_origins=multiplicity[key//2],
+                           alias_literals=[2*n + ((actual[n] ^ key)&1) for n in places] if unique else [],
                            installed_node=places[0] if unique else None,
                            installed_polarity=((actual[places[0]] ^ key) & 1) if unique else None))
     return tagged

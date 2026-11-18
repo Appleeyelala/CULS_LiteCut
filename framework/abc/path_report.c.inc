@@ -73,6 +73,17 @@ static void CulsTraceArrivalPath( SC_Man * p, Abc_Obj_t * pPo, int iPo )
         printf( "GT_PATH_ARC %d %d %d %d %d %d %d %.9g %.9g %.9g %.9g %.9g %.9g\n",
                 iPo, Sequence, Abc_ObjId(pNode), Abc_ObjId(pBest), BestPin, BestRise, Rise,
                 Abc_SclObjTimeOne(p, pBest, BestRise), BestArc, Extra, Actual, BestSlew, BestLoad );
+        if ( getenv("CULS_ARC_AUDIT") )
+        {
+            SC_Timing * t = Scl_CellPinTime(pCell, BestPin);
+            SC_Surface * table = Rise ? &t->pCellRise : &t->pCellFall;
+            /* Timing-table interventions on this same pin and transition only. */
+            printf("GT_AUDIT %d %d %s %d %.9g %.9g %.9g %.9g %.9g\n",
+                iPo, Sequence, SC_CellPinName(pCell, BestPin), Abc_ObjFanoutNum(pNode),
+                Scl_LibLookup(table, 20.f, 1.f), Scl_LibLookup(table, 20.f, BestLoad),
+                Scl_LibLookup(table, BestSlew, 1.f), Vec_FltEntryLast(&table->vIndex0),
+                Vec_FltEntryLast(&table->vIndex1));
+        }
         pNode = pBest; Rise = BestRise; Sequence++;
     }
     printf( "GT_PATH_ERROR %d INVALID_OR_CYCLIC_CHAIN\n", iPo );

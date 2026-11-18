@@ -40,7 +40,10 @@ def design(args, original, out):
             return fn(*a,**kw)
         finally:
             stages[name]=time.monotonic()-begin
-    paths={k:Path(args.tools[k]).resolve(strict=True) for k in ('abc','frozen_abc','gpuls','liberty','checkpoint')}
+    required=['abc','frozen_abc','gpuls','liberty']
+    if args.alpha:
+        required.append('checkpoint')
+    paths={k:Path(args.tools[k]).resolve(strict=True) for k in required}
     tools=SimpleNamespace(**paths)
     save_json(out/'inputs.json',dict(original=str(original),original_sha256=digest(original),
         tools={k:dict(path=str(p),sha256=digest(p)) for k,p in paths.items()},mode=args.mode,
@@ -57,6 +60,8 @@ def design(args, original, out):
             if digest(f/n)!=h: raise ValueError('Changed prepared input: '+n)
         owners=f/'owners.csv'
         cat=Catalogue(**read(f/'catalogue.json')); scores=read(f/'scores.json')['scores']
+        if args.alpha and manifest.get('checkpoint_sha256')!=digest(tools.checkpoint):
+            scores=[]
     else:
         part=stage('partition',make_partition,aig)
         part.write(out/'partition')
@@ -67,7 +72,8 @@ def design(args, original, out):
         f=out/'prepared'; f.mkdir()
         shutil.copyfile(owners,f/'owners.csv')
         save_json(f/'catalogue.json',asdict(cat));save_json(f/'scores.json',{'scores':scores})
-        save_json(f/'prepared.json',dict(original_sha256=digest(original),files={n:digest(f/n) for n in ('owners.csv','catalogue.json','scores.json')}))
+        save_json(f/'prepared.json',dict(original_sha256=digest(original),
+            checkpoint_sha256=digest(tools.checkpoint) if args.alpha else None,files={n:digest(f/n) for n in ('owners.csv','catalogue.json','scores.json')}))
     if args.alpha and cat.decisions and not scores:
         part=stage('partition',make_partition,aig)
         scores,_=stage('student',score_catalogue,original,part,cat,tools.checkpoint,out/'litecut_cache')

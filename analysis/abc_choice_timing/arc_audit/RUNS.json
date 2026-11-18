@@ -83,5 +83,20 @@
       "memory_gib": 4,
       "gpu": 0
     }
+  },
+  "20261118T075319Z-abc-arc-verify-00488948": {
+    "run": "/data/wushangge/CULS_LiteCut/runs/20261118T075319Z-abc-arc-verify-00488948",
+    "source_commit": "17de3b1eaae8b6a39c99e7bc8e18e750ba118adb",
+    "job": "66100",
+    "command": [
+      "/home/share/process/anaconda3/bin/python",
+      "-B",
+      "input/verify.py"
+    ],
+    "resources": {
+      "cpu": 1,
+      "memory_gib": 4,
+      "gpu": 0
+    }
   }
 }

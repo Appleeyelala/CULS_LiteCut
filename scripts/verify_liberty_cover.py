@@ -20,9 +20,12 @@ if __name__=='__main__':
     run_tool([a.abc,'-c',f'read_lib {tool_path(a.library)}; read_aiger {tool_path(a.original)}; map; topo; stime'],
              out,'export',900,dict(os.environ,CULS_LIB_TABLES=str(path)))
     results=[]
+    cases=sorted(a.reference.glob('case_*/trace.json'))
+    if len(cases)!=12:
+        raise ValueError(f'Expected 12 archived fixed covers, found {len(cases)}')
     for dev in ('cpu','cuda'):
         model=Liberty(path,dev)
-        for file in sorted(a.reference.glob('case_*/trace.json')):
+        for file in cases:
             frozen=json.loads(file.read_text())['timing']
             ins,outs,gates=mapped_graph(file.with_name('mapped.v'),model)
             graph=TimingGraph(model,gates,ins,outs)

@@ -69,7 +69,8 @@ def design(args, original, out):
         save_json(f/'catalogue.json',asdict(cat));save_json(f/'scores.json',{'scores':scores})
         save_json(f/'prepared.json',dict(original_sha256=digest(original),files={n:digest(f/n) for n in ('owners.csv','catalogue.json','scores.json')}))
     if args.alpha and cat.decisions and not scores:
-        raise ValueError('LiteCut calibration requires a prepared catalogue with Student scores')
+        part=stage('partition',make_partition,aig)
+        scores,_=stage('student',score_catalogue,original,part,cat,tools.checkpoint,out/'litecut_cache')
     rules=stage('rewrite_library',parse_library,ROOT/'projects/culs/src/algorithms/rewrite_library.inc')
     rule=stage('feasibility',CandidateFeasibility,aig,cat,rules)
     work=out/'original';work.mkdir()

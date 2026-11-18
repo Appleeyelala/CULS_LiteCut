@@ -1,3 +1,4 @@
+#include <math.h>
 /* Research-only input for one combinational read_aiger/map process.
    Literal indices refer to the reader's actual vNodes, including strashing.
    The caller supplies locally truth-checked candidates and frozen vector masks. */
@@ -28,6 +29,19 @@ static int CulsReadChoices( Abc_Ntk_t * ntk, Vec_Ptr_t * nodes, const char * pat
             Abc_Obj_t * x = CulsReadLit(nodes, left), * y = CulsReadLit(nodes, right);
             if ( !x || !y ) goto invalid;
             Vec_PtrPush(nodes, Abc_AigAnd((Abc_Aig_t *)ntk->pManFunc, x, y));
+        }
+        else if ( line[0] == 't' )
+        {
+            float factor;
+            Abc_Obj_t * x;
+            if ( sscanf(line, "t %d %f", &left, &factor) != 2 || !isfinite(factor) || factor <= 0 )
+                goto invalid;
+            x = CulsReadLit(nodes, left);
+            if ( !x || !Abc_ObjIsNode(Abc_ObjRegular(x)) ) goto invalid;
+            x = Abc_ObjRegular(x);
+            x->culsScale = x->culsTagged ? 1.f : factor;
+            x->culsTagged = 1;
+            x->culsVectors = ~0ULL;
         }
         else if ( line[0] == 'r' && count < 256 )
         {

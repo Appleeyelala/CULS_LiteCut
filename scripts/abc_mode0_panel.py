@@ -15,7 +15,7 @@ from abc_choice_reference import read
 from global_timing.abc_choices import choice_program
 from global_timing.abc_hard_choices import hard_annotations
 from global_timing.boolean_candidates import parse_library
-from global_timing.common import digest, run_tool, save_json, tool_path
+from global_timing.common import legacy, digest, run_tool, save_json, tool_path
 from global_timing.structure import parse_aig
 
 
@@ -60,14 +60,20 @@ def predict_case(folder, output, binary, library, alphas, factorial):
         installed = original if idx == 0 else folder/"measurements"/(
             f"mask_{idx:02d}" if factorial else f"combo_{idx:02d}")/"rewrite/raw/aigs/choice.aig"
         program, options = choice_program(aig, cat, [v["choices"]], scores, library, 1.)
-        checked = hard_annotations(aig, parse_aig(installed), program, options)
-        save_json(work/"correspondence.json", checked)
+        try:
+            checked = hard_annotations(aig, parse_aig(installed), program, options)
+            status = "verified"
+        except ValueError as exc:
+            if str(exc) != "Candidate-composed and installed signed PO structures differ":
+                raise
+            checked, status = [], "signed_structure_mismatch"
+        save_json(work/"correspondence.json", {"status": status, "annotations": checked})
         tags = [t for t in checked if t["installed_node"] is not None and t["pin_scale"] != 1.]
         native = score(binary,liberty,installed,work/"native",[],0)
         for alpha in alphas:
             value = score(binary,liberty,installed,work/f"a{alpha}",tags,alpha) if alpha and tags else native
             rows.append(dict(circuit=int(name[5:]), index=idx, edits=sum(bool(x) for x in v["choices"]),
-                             alpha=alpha, native=native, prediction=value, tags=len(tags),
+                             correspondence=status, alpha=alpha, native=native, prediction=value, tags=len(tags),
                              installed=str(installed), sha256=digest(installed)))
     save_json(out/"predictions.json", rows)
     return rows
@@ -113,6 +119,7 @@ def main():
     if not os.getenv("SLURM_JOB_ID") or not a.output.resolve().is_relative_to("/data/wushangge"):
         p.error("Use a /data Slurm snapshot")
     lib=parse_library(ROOT/"projects/culs/src/algorithms/rewrite_library.inc")
+    legacy("gate3b_analyze")  # finish the lazy import before worker threads start
     frozen_alpha=None
     records=[]
     for stage in ("train","validation","factorial"):

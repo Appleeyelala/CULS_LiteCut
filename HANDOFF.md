@@ -1,5 +1,7 @@
 # 新对话接续入口（2026-11-18，ABC 时序分支）
 
+2026-11-18 最新分支 `work/abc-arc-audit`。进入[ID75/179 逐弧诊断及 12 电路复核](analysis/abc_choice_timing/arc_audit/README.md)。两对关键信号均已核对到最终网表引脚。对数扇出修正命中从 1/12 提至 4/12，两个核心反例仍未解决；面积在本轮只记录。
+
 当前分支 `work/abc-choice-timing`。先看[实验报告与逐电路表](analysis/abc_choice_timing/README.md)、[ID75/179 三阶段实测](analysis/abc_choice_timing/stages.csv)及[运行索引](analysis/abc_choice_timing/RUNS.json)。最新研究入口源码为 `910db701`。冻结开发集的平均选优损失从原生 ABC 的 3.045% 升到 LiteCut 校准后的 3.198%，Top-1 均为 2/12。入口默认使用原生时序弧。四个电路上三种搜索器均找到代理最优，代理选择离真实可行最优仍有差距。建议下一轮先定位面积恢复覆盖及其 Liberty 时序对组合排序的影响，暂缓扩大电路集。
 
 ---

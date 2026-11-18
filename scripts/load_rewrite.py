@@ -63,11 +63,13 @@ def design(args, original, out):
         owners=out/'partition/owners.csv'
         raw=stage('candidate_enumeration',enumerate_candidates,tools.gpuls,original,part,out/'candidates',900,True)
         cat,_=stage('candidate_validation',validate_catalogue,tools.frozen_abc,part,raw,out/'cut_validation',900)
-        scores,_=stage('student',score_catalogue,original,part,cat,tools.checkpoint,out/'litecut_cache') if cat.decisions else ([],None)
+        scores,_=stage('student',score_catalogue,original,part,cat,tools.checkpoint,out/'litecut_cache') if args.alpha and cat.decisions else ([],None)
         f=out/'prepared'; f.mkdir()
         shutil.copyfile(owners,f/'owners.csv')
         save_json(f/'catalogue.json',asdict(cat));save_json(f/'scores.json',{'scores':scores})
         save_json(f/'prepared.json',dict(original_sha256=digest(original),files={n:digest(f/n) for n in ('owners.csv','catalogue.json','scores.json')}))
+    if args.alpha and cat.decisions and not scores:
+        raise ValueError('LiteCut calibration requires a prepared catalogue with Student scores')
     rules=stage('rewrite_library',parse_library,ROOT/'projects/culs/src/algorithms/rewrite_library.inc')
     rule=stage('feasibility',CandidateFeasibility,aig,cat,rules)
     work=out/'original';work.mkdir()
@@ -94,10 +96,11 @@ def design(args, original, out):
     if digest(dest)!=row['selected_aig_sha256']: raise ValueError('Returned AIG changed')
     row.update(returned_aig=str(dest),proposal_delay_ps=row['candidate_delay_ps'] if any(vector) else row['original_delay_ps'],
         proposal_area_ratio=row['candidate_area_ratio'] if any(vector) else 1.,
-        mode=args.mode,method=args.method,template_mappings=once,decisions=len(cat.decisions),local_states=nstates,
+        mode=args.mode,method=args.method,template_preparations=once,template_match_passes=2*once,decisions=len(cat.decisions),local_states=nstates,
         search_seconds=trace.get('seconds',0.),unique_vectors=trace['unique_vectors'],stages=stages,
         cuda_peak_bytes=torch.cuda.max_memory_allocated() if args.device=='cuda' else 0,
         process_maxrss_kib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+        child_maxrss_kib=resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss,
         elapsed_s=time.monotonic()-start,timing_scope='prepared catalogue' if args.prepared else 'raw AIG')
     save_json(out/'result.json',row)
     return row

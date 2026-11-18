@@ -41,7 +41,6 @@ def optimize(bank, rule, method, budget, seconds, edit_limit, area_ratio, seed):
                 offset+=len(g)
             candidate=rule.project(zero,edits,edit_limit)
         elif step and method=='random':
-            rng.shuffle(options)
             picks=[rng.choice(g[1:]) for g in bank.groups]
             candidate=rule.project(zero,[(rng.random(),i,c) for i,c in picks],
                                    rng.randint(1,edit_limit) if edit_limit else 0)
@@ -57,7 +56,10 @@ def optimize(bank, rule, method, budget, seconds, edit_limit, area_ratio, seed):
         if not step: delay,area=d0,a0
         else: delay,area=evaluate(candidate)
         key=(delay,sum(bool(x) for x in candidate),tuple(candidate))
-        if area<=limit and key<rank:
+        tolerance=max(2.e-5,2.e-6*abs(rank[0]))
+        improves=delay < rank[0]-tolerance
+        tied=abs(delay-rank[0])<=tolerance
+        if area<=limit and (improves or (tied and key[1:]<rank[1:])):
             rank=key;best=candidate.copy()
         visited.add(tuple(candidate))
         row=dict(step=step,vector=candidate,delay_ps=delay,area=area)

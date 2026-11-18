@@ -126,13 +126,39 @@ class TimingGraph:
             name,parents=net[n]
             depth[n]=1+max((depth[p] for p in parents),default=0)
             levels[depth[n]].append(n)
+        # A variable consumer changes its driver load even if its driver's
+        # Boolean function is fixed. Mark these dependencies before forward
+        # propagation so shared fanout and aliased wires keep correct timing.
+        varying_active, varying_load = set(), set()
+        for n in reversed(order):
+            if n not in net:
+                continue
+            kind, parents = net[n]
+            if kind == 'MUX' or n in varying_active:
+                varying_active.update(parents)
+            if kind == 'MUX' or (kind is None and n in varying_load) or (
+                    kind is not None and n in varying_active):
+                varying_load.update(parents)
+        varying_time = set()
+        for n in order:
+            if n in net:
+                kind, parents = net[n]
+                if kind == 'MUX' or n in varying_load or any(p in varying_time for p in parents):
+                    varying_time.add(n)
+        self.fixed_stages=set()
+        self.cached_stages={}
         self.stages=[]
         self.size=len(pos)
         area=[0.]*len(pos)
         self.state_count=max((start+len(p) for start,p,_ in groups.values()),default=0)
         for _,nodes in sorted(levels.items()):
-            for off in range(0,len(nodes),chunk):
-                subset=nodes[off:off+chunk]
+            fixed=[n for n in nodes if n not in varying_time and net[n][0] is not None]
+            fixed_set=set(fixed)
+            variable=[n for n in nodes if n not in fixed_set]
+            chunks=(part[off:off+chunk] for part in (fixed,variable) for off in range(0,len(part),chunk))
+            for subset in chunks:
+                if subset[0] in fixed_set:
+                    self.fixed_stages.add(len(self.stages))
                 arcs=[]; wires=[]; trans=[]; scale=[]
                 for j,n in enumerate(subset):
                     name,parents=net[n]
@@ -184,7 +210,7 @@ class TimingGraph:
         arr=zeros(self.size,2); slew=zeros(self.size,2)
         # Local driver delay used by LiteCut scaling at candidate boundaries.
         delta=zeros(self.size,2)
-        for ids,(src,dst,pin),(parent,child,state),(arc,ip,op,tab),scale in self.stages:
+        for stage_idx,(ids,(src,dst,pin),(parent,child,state),(arc,ip,op,tab),scale) in enumerate(self.stages):
             a=zeros(len(ids)*2);s=zeros(len(ids)*2);d=zeros(len(ids)*2)
             if recovery:
                 flow_local=self.area[ids]
@@ -193,8 +219,11 @@ class TimingGraph:
                 if parent is not None:
                     flow_local=flow_local.index_add(0,child,w[state]*flow[parent]/refs[parent].clamp_min(1.))
                 flow=flow.index_copy(0,ids,flow_local)
+            cached=self.cached_stages.get(stage_idx)
             cost=None
-            if arc is not None:
+            if cached is not None:
+                a,s,d,cost=cached
+            elif arc is not None:
                 u=src[arc]; v=dst[arc]; target=2*v+op
                 sl=slew[u,ip]; cap=loads[ids[v],op]
                 cost=lib.lookup(tab,sl,cap)
@@ -202,6 +231,8 @@ class TimingGraph:
                 a=a.scatter_reduce(0,target,value,reduce='amax')
                 s=s.scatter_reduce(0,target,lib.lookup(tab+2,sl,cap),reduce='amax')
                 d=d.scatter_reduce(0,target,torch.where(value==a[target],cost,0.),reduce='amax')
+            if cached is None and stage_idx in self.fixed_stages and cost is not None:
+                self.cached_stages[stage_idx]=tuple(v.detach() for v in (a,s,d,cost))
             if recovery: arc_delays.append(cost)
             a,s,d=[v.view(-1,2) for v in (a,s,d)]
             if parent is not None:

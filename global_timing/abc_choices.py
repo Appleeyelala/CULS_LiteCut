@@ -9,8 +9,11 @@ from .boolean_candidates import verify_cut_truth, verify_library_truth
 def choice_program(aig, decisions, vectors, scores, library, alpha):
     if not 1 <= len(vectors) <= 64 or any(len(v) != len(decisions) for v in vectors):
         raise ValueError("Expected 1..64 frozen vectors of catalogue width")
-    if len({d["root"] for d in decisions}) != len(decisions):
-        raise ValueError("Shared-root decisions require a joint choice class")
+    by_root = {}
+    for i, d in enumerate(decisions):
+        by_root.setdefault(d["root"], []).append(i)
+    if any(sum(bool(v[i]) for i in indices) > 1 for v in vectors for indices in by_root.values()):
+        raise ValueError("Two simultaneous rewrites at the same root")
     if any(type(c) is not int or not 0 <= c <= len(d["candidate_subgraph_indices"])
            for v in vectors for c, d in zip(v, decisions)):
         raise ValueError("Invalid frozen choice")
@@ -33,6 +36,8 @@ def choice_program(aig, decisions, vectors, scores, library, alpha):
 
         masks = {c: sum(1 << k for k, v in enumerate(vectors) if v[i] == c)
                  for c in [0] + present}
+        masks[0] = sum(1 << k for k, v in enumerate(vectors)
+                       if all(v[j] == 0 for j in by_root[d["root"]]))
         truth = d["truth"] & 0xffff
         perm = library["perms4"][library["p_perms"][truth]]
         phase = library["p_phases"][truth]

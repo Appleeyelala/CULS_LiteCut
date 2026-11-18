@@ -3,6 +3,7 @@ from collections import defaultdict
 from graphlib import TopologicalSorter
 from pathlib import Path
 import re
+import numpy as np
 import torch
 
 
@@ -46,6 +47,7 @@ class Liberty:
                                                for v in (gx,gy,tables,caps)]
         self.counts=torch.tensor(counts,device=device)
         self.senses=senses
+        self.host_caps=np.asarray(caps,dtype=np.float32)
 
     def index(self, values):
         return torch.tensor(values,device=self.device,dtype=torch.long)
@@ -147,6 +149,22 @@ class TimingGraph:
                     varying_time.add(n)
         self.fixed_stages=set()
         self.cached_stages={}
+        self.fixed_loads=None
+        if not groups:
+            # ABC adds float pin capacitances in cell order. On a net with
+            # thousands of sinks, one rounding per addition is observable.
+            drivers={}
+            for n in order:
+                drivers[n]=drivers[net[n][1][0]] if n in net and net[n][0] is None else pos[n]
+            sources, pin_ids=[], []
+            for n,(cell,parents) in graph.items():
+                if cell is not None and n in needed:
+                    sources.extend(drivers[p] for p in parents)
+                    pin_ids.extend(lib.cells[cell]['pins'].values())
+            fixed_loads=np.zeros((len(pos),2), dtype=np.float32)
+            if sources:
+                np.add.at(fixed_loads,sources,lib.host_caps[pin_ids])
+            self.fixed_loads=torch.from_numpy(fixed_loads).to(lib.device)
         self.stages=[]
         self.size=len(pos)
         area=[0.]*len(pos)
@@ -193,7 +211,11 @@ class TimingGraph:
         loads=torch.zeros((self.size,2),device=lib.device,dtype=torch.float64)
         recovery=detail=="recovery"
         refs=zeros(self.size) if recovery else None
-        for ids,(src,dst,pin),(parent,child,state),_,_ in reversed(self.stages):
+        reverse_stages=reversed(self.stages)
+        if self.fixed_loads is not None and not recovery:
+            active=torch.ones_like(active)
+            reverse_stages=()
+        for ids,(src,dst,pin),(parent,child,state),_,_ in reverse_stages:
             if src is not None:
                 a=active[ids[dst]]
                 loads=loads.index_add(0,src,(lib.caps[pin]*a[:,None]).double())
@@ -204,7 +226,7 @@ class TimingGraph:
                 loads=loads.index_add(0,parent,loads[ids[child]]*w[state,None])
                 if recovery: refs=refs.index_add(0,parent,a)
                 active=active.scatter_reduce(0,parent,a,reduce='amax')
-        loads=loads.float()
+        loads=self.fixed_loads if self.fixed_loads is not None else loads.float()
         arc_delays=[]
         flow=zeros(self.size) if recovery else None
         arr=zeros(self.size,2); slew=zeros(self.size,2)

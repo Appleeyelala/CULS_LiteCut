@@ -153,6 +153,12 @@ clk = Abc_Clock();
         Map_ManSetUseProfile( pMan );
     if ( LogFan != 0 )
         Map_ManCreateNodeDelays( pMan, LogFan );
+    if ( getenv("CULS_HARD_VECTORS") )
+    {
+        int ok = Map_CulsHardScores(pMan, getenv("CULS_HARD_VECTORS"));
+        Map_ManFree(pMan);
+        return ok ? Abc_NtkDup(pNtk) : NULL;
+    }
     if ( !Map_Mapping( pMan ) )
     {
         Map_ManFree( pMan );

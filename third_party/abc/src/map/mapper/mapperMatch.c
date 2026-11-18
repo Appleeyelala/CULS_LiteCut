@@ -307,6 +307,14 @@ int Map_MatchNodePhase( Map_Man_t * p, Map_Node_t * pNode, int fPhase )
     fWorstLimit = pNode->tRequired[fPhase].Worst;
     for ( pCut = pNode->pCuts->pNext; pCut; pCut = pCut->pNext )
     {
+        if ( p->culsCondition )
+        {
+            int j;
+            if ( !(pCut->culsVectors & p->culsCondition) ) continue;
+            for ( j = 0; j < pCut->nLeaves; ++j )
+                if ( !pCut->ppLeaves[j]->pCutBest[0] && !pCut->ppLeaves[j]->pCutBest[1] ) break;
+            if ( j < pCut->nLeaves ) continue;
+        }
         // limit gate sizes based on fanout count
         if ( p->fSkipFanout && ((pNode->nRefs > 3 && pCut->nLeaves > 2) || (pNode->nRefs > 1 && pCut->nLeaves > 3)) )
             continue;
@@ -638,6 +646,7 @@ int Map_MappingMatches( Map_Man_t * p )
         // make sure that at least one phase is mapped
         if ( pNode->pCutBest[0] == NULL && pNode->pCutBest[1] == NULL )
         {
+            if ( p->culsCondition ) continue;
             printf( "\nError: Could not match both phases of AIG node %d.\n", pNode->Num );
             printf( "Please make sure that the supergate library has equivalents of AND2 or NAND2.\n" );
             printf( "If such supergates exist in the library, report a bug.\n" );

@@ -1,5 +1,8 @@
 """Compile locally proved replacements for the research ABC choice reader."""
 import math
+from pathlib import Path
+from .truth import ContextProofRequired
+from .evaluation import cec_passed
 from .boolean_candidates import verify_cut_truth, verify_library_truth
 
 
@@ -20,7 +23,14 @@ def choice_program(aig, decisions, vectors, scores, library, alpha):
         present = sorted(set(v[i] for v in vectors) - {0})
         if not present:
             continue
-        verify_cut_truth(aig, d)
+        try:
+            verify_cut_truth(aig, d)
+        except (ContextProofRequired, RecursionError):
+            proof = d.get("cut_validation", {})
+            if (proof.get("boolean_validator") != "ABC_ORIGINAL_CONTEXT_CEC" or
+                    proof.get("status") != "PASS" or not cec_passed(Path(proof["proof"]).read_text())):
+                raise
+
         masks = {c: sum(1 << k for k, v in enumerate(vectors) if v[i] == c)
                  for c in [0] + present}
         truth = d["truth"] & 0xffff

@@ -88,6 +88,7 @@ def case_reference(folder, out, binary, lib, bdelay):
                                               cover_cec="PASS", selection_uses_labels=False))
     # Both controls are evaluated afresh; the legal empty vector deploys the original.
     indices = [0] + ([selected] if selected else [])
+    os.environ["CULS_ALLOW_NONPOSITIVE_CANDIDATES"] = "1"
     replay = replay_many(gpuls, original, source/"work/partition/owners.csv", cat,
                          [vectors[k] for k in indices], out/"batch",
                          [out/f"replay_{k}" for k in indices], timeout=900, allow_nonpositive_gain=True)

@@ -95,7 +95,7 @@ float Map_TimeCutComputeArrival( Map_Node_t * pNode, Map_Cut_t * pCut, int fPhas
         // get the rise of the output due to rise of the inputs
         if ( pSuper->tDelaysR[i].Rise > 0 )
         {
-            tDelay = ptArrIn->Rise + pSuper->tDelaysR[i].Rise + tExtra;
+            tDelay = ptArrIn->Rise + ( pCut->culsScale > 0 ? pCut->culsScale * pSuper->tDelaysR[i].Rise : pSuper->tDelaysR[i].Rise ) + tExtra;
             if ( tDelay > tWorstLimit )
                 return MAP_FLOAT_LARGE;
             if ( ptArrRes->Rise < tDelay )
@@ -105,7 +105,7 @@ float Map_TimeCutComputeArrival( Map_Node_t * pNode, Map_Cut_t * pCut, int fPhas
         // get the rise of the output due to fall of the inputs
         if ( pSuper->tDelaysR[i].Fall > 0 )
         {
-            tDelay = ptArrIn->Fall + pSuper->tDelaysR[i].Fall + tExtra;
+            tDelay = ptArrIn->Fall + ( pCut->culsScale > 0 ? pCut->culsScale * pSuper->tDelaysR[i].Fall : pSuper->tDelaysR[i].Fall ) + tExtra;
             if ( tDelay > tWorstLimit )
                 return MAP_FLOAT_LARGE;
             if ( ptArrRes->Rise < tDelay )
@@ -115,7 +115,7 @@ float Map_TimeCutComputeArrival( Map_Node_t * pNode, Map_Cut_t * pCut, int fPhas
         // get the fall of the output due to rise of the inputs
         if ( pSuper->tDelaysF[i].Rise > 0 )
         {
-            tDelay = ptArrIn->Rise + pSuper->tDelaysF[i].Rise + tExtra;
+            tDelay = ptArrIn->Rise + ( pCut->culsScale > 0 ? pCut->culsScale * pSuper->tDelaysF[i].Rise : pSuper->tDelaysF[i].Rise ) + tExtra;
             if ( tDelay > tWorstLimit )
                 return MAP_FLOAT_LARGE;
             if ( ptArrRes->Fall < tDelay )
@@ -125,7 +125,7 @@ float Map_TimeCutComputeArrival( Map_Node_t * pNode, Map_Cut_t * pCut, int fPhas
         // get the fall of the output due to fall of the inputs
         if ( pSuper->tDelaysF[i].Fall > 0 )
         {
-            tDelay = ptArrIn->Fall + pSuper->tDelaysF[i].Fall + tExtra;
+            tDelay = ptArrIn->Fall + ( pCut->culsScale > 0 ? pCut->culsScale * pSuper->tDelaysF[i].Fall : pSuper->tDelaysF[i].Fall ) + tExtra;
             if ( tDelay > tWorstLimit )
                 return MAP_FLOAT_LARGE;
             if ( ptArrRes->Fall < tDelay )
@@ -180,7 +180,7 @@ void Map_TimePropagateRequiredPhase( Map_Man_t * p, Map_Node_t * pNode, int fPha
 //                ptArrOut->Rise = ptArrIn->Rise + pSuper->tDelaysR[i].Rise;
         if ( pSuper->tDelaysR[i].Rise > 0 )
         {
-            tNewReqTime = ptReqOut->Rise - pSuper->tDelaysR[i].Rise - tExtra;
+            tNewReqTime = ptReqOut->Rise - ( pCut->culsScale > 0 ? pCut->culsScale * pSuper->tDelaysR[i].Rise : pSuper->tDelaysR[i].Rise ) - tExtra;
             ptReqIn->Rise = MAP_MIN( ptReqIn->Rise, tNewReqTime );
         }
 
@@ -189,7 +189,7 @@ void Map_TimePropagateRequiredPhase( Map_Man_t * p, Map_Node_t * pNode, int fPha
 //                ptArrOut->Rise = ptArrIn->Fall + pSuper->tDelaysR[i].Fall;
         if ( pSuper->tDelaysR[i].Fall > 0 )
         {
-            tNewReqTime = ptReqOut->Rise - pSuper->tDelaysR[i].Fall - tExtra;
+            tNewReqTime = ptReqOut->Rise - ( pCut->culsScale > 0 ? pCut->culsScale * pSuper->tDelaysR[i].Fall : pSuper->tDelaysR[i].Fall ) - tExtra;
             ptReqIn->Fall = MAP_MIN( ptReqIn->Fall, tNewReqTime );
         }
 
@@ -198,7 +198,7 @@ void Map_TimePropagateRequiredPhase( Map_Man_t * p, Map_Node_t * pNode, int fPha
 //                ptArrOut->Fall = ptArrIn->Rise + pSuper->tDelaysF[i].Rise;
         if ( pSuper->tDelaysF[i].Rise > 0 )
         {
-            tNewReqTime = ptReqOut->Fall - pSuper->tDelaysF[i].Rise - tExtra;
+            tNewReqTime = ptReqOut->Fall - ( pCut->culsScale > 0 ? pCut->culsScale * pSuper->tDelaysF[i].Rise : pSuper->tDelaysF[i].Rise ) - tExtra;
             ptReqIn->Rise = MAP_MIN( ptReqIn->Rise, tNewReqTime );
         }
 
@@ -207,7 +207,7 @@ void Map_TimePropagateRequiredPhase( Map_Man_t * p, Map_Node_t * pNode, int fPha
 //                ptArrOut->Fall = ptArrIn->Fall + pSuper->tDelaysF[i].Fall;
         if ( pSuper->tDelaysF[i].Fall > 0 )
         {
-            tNewReqTime = ptReqOut->Fall - pSuper->tDelaysF[i].Fall - tExtra;
+            tNewReqTime = ptReqOut->Fall - ( pCut->culsScale > 0 ? pCut->culsScale * pSuper->tDelaysF[i].Fall : pSuper->tDelaysF[i].Fall ) - tExtra;
             ptReqIn->Fall = MAP_MIN( ptReqIn->Fall, tNewReqTime );
         }
     }

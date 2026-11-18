@@ -231,6 +231,8 @@ static char * Ioa_ReadLoadFileGzAig( char * pFileName, int * pFileSize )
   SeeAlso     []
 
 ***********************************************************************/
+#include "ioCulsChoices.inc"
+
 Abc_Ntk_t * Io_ReadAiger( char * pFileName, int fCheck )
 {
     ProgressBar * pProgress;
@@ -578,10 +580,18 @@ Abc_Ntk_t * Io_ReadAiger( char * pFileName, int fCheck )
 
     // skipping the comments
     ABC_FREE( pContents );
-    Vec_PtrFree( vNodes );
-
-    // remove the extra nodes
-    Abc_AigCleanup( (Abc_Aig_t *)pNtkNew->pManFunc );
+    if ( getenv("CULS_CHOICES") )
+    {
+        if ( !CulsReadChoices(pNtkNew, vNodes, getenv("CULS_CHOICES")) )
+        {
+            fprintf(stderr, "Invalid CULS choice file.\n");
+            Vec_PtrFree(vNodes);
+            Abc_NtkDelete(pNtkNew);
+            return NULL;
+        }
+    }
+    else Abc_AigCleanup( (Abc_Aig_t *)pNtkNew->pManFunc );
+    Vec_PtrFree(vNodes);
 
     // update polarity of the additional outputs
     if ( nBad || nConstr || nJust || nFair )

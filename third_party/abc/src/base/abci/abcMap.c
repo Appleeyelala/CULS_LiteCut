@@ -328,6 +328,8 @@ Map_Man_t * Abc_NtkToMap( Abc_Ntk_t * pNtk, double DelayTarget, int fRecovery, f
         pNode->pCopy = (Abc_Obj_t *)pNodeMap;
         if ( pSwitching )
             Map_NodeSetSwitching( pNodeMap, pSwitching[pNode->Id] );
+        if ( pNode->culsTagged )
+            Map_CulsSetTag(pNodeMap, pNode->culsVectors, pNode->culsScale);
         // set up the choice node
         if ( Abc_AigNodeIsChoice( pNode ) )
             for ( pPrev = pNode, pFanin = (Abc_Obj_t *)pNode->pData; pFanin; pPrev = pFanin, pFanin = (Abc_Obj_t *)pFanin->pData )
@@ -430,6 +432,13 @@ Abc_Obj_t * Abc_NodeFromMapPhase_rec( Abc_Ntk_t * pNtkNew, Map_Node_t * pNodeMap
     ppLeaves   = Map_CutReadLeaves( pCutBest );
     //Vec_Ptr_t * vAnds = Map_CutInternalNodes( pNodeMap, pCutBest );
 
+    if ( getenv("CULS_COVER_TRACE") && Map_CulsVectors(pCutBest) != ~0ULL )
+    {
+        printf("CULS_CUT %d %d %d %u %llx", Map_NodeReadAigId(pNodeMap), fPhase,
+               Map_SuperReadNum(pSuperBest), uPhaseBest, Map_CulsVectors(pCutBest));
+        for ( i = 0; i < nLeaves; ++i ) printf(" %d", Map_NodeReadAigId(ppLeaves[i]));
+        printf("\n");
+    }
     // collect the PI nodes
     for ( i = 0; i < nLeaves; i++ )
     {

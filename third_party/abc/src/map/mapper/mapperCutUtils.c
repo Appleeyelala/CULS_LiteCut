@@ -47,6 +47,7 @@ Map_Cut_t * Map_CutAlloc( Map_Man_t * p )
     pCut = (Map_Cut_t *)Extra_MmFixedEntryFetch( p->mmCuts );
     memset( pCut, 0, sizeof(Map_Cut_t) );
 
+    pCut->culsVectors = ~0ULL;
     pMatch = pCut->M;
     pMatch->AreaFlow       = MAP_FLOAT_LARGE; // unassigned
     pMatch->tArrive.Rise   = MAP_FLOAT_LARGE; // unassigned

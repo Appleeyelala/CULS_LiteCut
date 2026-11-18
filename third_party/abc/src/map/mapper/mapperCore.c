@@ -79,6 +79,8 @@ int Map_Mapping( Map_Man_t * p )
     p->fMappingMode = 0;
     if ( !Map_MappingMatches( p ) )
         return 0;
+    if ( getenv("CULS_COVER_TRACE") )
+        printf("CULS_MODE0 %.9g\n", Map_TimeComputeArrivalMax(p));
     p->timeMatch = Abc_Clock() - clk;
     // compute the references and collect the nodes used in the mapping
     Map_MappingSetRefs( p );

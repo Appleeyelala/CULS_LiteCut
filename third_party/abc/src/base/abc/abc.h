@@ -144,6 +144,9 @@ struct Abc_Obj_t_     // 48/72 bytes (32-bits/64-bits)
     Vec_Int_t         vFanouts;      // the array of fanouts
     union { void *    pData;         // the network specific data
       int             iData; };      // (SOP, BDD, gate, equiv class, etc)
+    unsigned long long culsVectors;  // frozen rewrite vectors admitting this structure
+    int culsTagged;
+    float culsScale;
     union { void *    pTemp;         // temporary store for user's data
       Abc_Obj_t *     pCopy;         // the copy of this object
       int             iTemp;

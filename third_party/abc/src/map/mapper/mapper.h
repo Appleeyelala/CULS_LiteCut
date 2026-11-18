@@ -125,6 +125,8 @@ extern void            Map_NodeSetData( Map_Node_t * p, int fPhase, char * pData
 extern void            Map_NodeSetNextE( Map_Node_t * p, Map_Node_t * pNextE );
 extern void            Map_NodeSetRepr( Map_Node_t * p, Map_Node_t * pRepr );
 extern void            Map_NodeSetSwitching( Map_Node_t * p, float Switching );
+extern void            Map_CulsSetTag( Map_Node_t * p, unsigned long long vectors, float scale );
+extern unsigned long long Map_CulsVectors( Map_Cut_t * cut );
 extern void            Map_NodeSetAigId( Map_Node_t * p, int Id );
 
 extern int             Map_NodeIsConst( Map_Node_t * p );

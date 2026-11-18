@@ -210,6 +210,8 @@ struct Map_NodeStruct_t_
     int                 Num;           // the unique number of this node
     int                 TravId;        // the traversal ID (use to avoid cleaning marks)
     int                 nRefs;         // the number of references (fanouts) of the given node
+    unsigned long long  culsVectors;
+    float               culsScale;
     unsigned            fMark0 : 1;    // the mark used for traversals
     unsigned            fMark1 : 1;    // the mark used for traversals
     unsigned            fUsed  : 1;    // the mark to mark the node or its fanins
@@ -264,6 +266,8 @@ struct Map_MatchStruct_t_
 struct Map_CutStruct_t_  
 {
     Map_Cut_t *         pNext;         // the pointer to the next cut in the list
+    unsigned long long  culsVectors;
+    float               culsScale;
     Map_Cut_t *         pOne;          // the father of this cut
     Map_Cut_t *         pTwo;          // the mother of this cut
     Map_Node_t *        ppLeaves[6];   // the leaves of this cut

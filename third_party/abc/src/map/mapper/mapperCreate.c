@@ -101,6 +101,12 @@ void            Map_NodeSetData( Map_Node_t * p, int fPhase, char * pData ) { if
 void            Map_NodeSetNextE( Map_Node_t * p, Map_Node_t * pNextE )     { p->pNextE = pNextE;       }
 void            Map_NodeSetRepr( Map_Node_t * p, Map_Node_t * pRepr )       { p->pRepr = pRepr;         }
 void            Map_NodeSetSwitching( Map_Node_t * p, float Switching )     { p->Switching = Switching; }
+void Map_CulsSetTag( Map_Node_t * p, unsigned long long vectors, float scale )
+{
+    p->culsVectors = vectors;
+    p->culsScale = scale;
+}
+unsigned long long Map_CulsVectors( Map_Cut_t * cut ) { return cut->culsVectors; }
 void            Map_NodeSetAigId( Map_Node_t * p, int Id )            { p->p->pAigNodeIDs[p->Num] = Id; }
 
 ;
@@ -378,6 +384,7 @@ Map_Node_t * Map_NodeCreate( Map_Man_t * p, Map_Node_t * p1, Map_Node_t * p2 )
     memset( pNode, 0, sizeof(Map_Node_t) );
     pNode->tRequired[0].Rise = pNode->tRequired[0].Fall = pNode->tRequired[0].Worst = MAP_FLOAT_LARGE;
     pNode->tRequired[1].Rise = pNode->tRequired[1].Fall = pNode->tRequired[1].Worst = MAP_FLOAT_LARGE;
+    pNode->culsVectors = ~0ULL;
     pNode->p1  = p1; 
     pNode->p2  = p2;
     pNode->p = p;

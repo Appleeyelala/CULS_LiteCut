@@ -238,6 +238,13 @@ Map_Cut_t * Map_CutCompute( Map_Man_t * p, Map_CutTable_t * pTable, Map_Node_t *
     // merge the lists
     pList = Map_CutMergeLists( p, pTable, pList1, pList2, 
         Map_IsComplement(pNode->p1), Map_IsComplement(pNode->p2) );
+    // Capture the generating structure before ABC transfers cuts to a representative.
+    for ( pCut = pList; pCut; pCut = pCut->pNext )
+    {
+        pCut->culsVectors = pNode->culsVectors & Map_CutRegular(pCut->pOne)->culsVectors
+                                               & Map_CutRegular(pCut->pTwo)->culsVectors;
+        pCut->culsScale = pNode->culsScale;
+    }
     // if there are functionally equivalent nodes, union them with this list
     assert( pList );
     // only add to the list of cuts if the node is a representative one

@@ -141,9 +141,9 @@ class LoadBank:
         self.initial=torch.tensor([1.,0.]*self.choices,device=self.device)
         self.recovered=1.-self.initial
 
-    def forward(self,weights):
+    def forward(self,weights,detail=False):
         if not self.choices:
-            return self.graph.forward(weights)
+            return self.graph.forward(weights,detail)
         # Choose a lower-area cover at each template boundary only when both
         # transitions fit the required times of the current delay-first cover.
         # Recompute actual load/slew after combining the individual decisions.
@@ -153,7 +153,7 @@ class LoadBank:
             arrivals,_,late_flow=self.graph.forward(torch.cat((weights.detach(),self.recovered)),detail="recovery")
             use_late=((arrivals[late]<=required[boundary]+1.e-4).all(1) & (late_flow[late]<=early_flow[early]))
             recovery=torch.stack((~use_late,use_late),1).float().flatten()
-        return self.graph.forward(torch.cat((weights,recovery)))
+        return self.graph.forward(torch.cat((weights,recovery)),detail)
 
     def set_alpha(self,alpha):
         for j,r in enumerate(self.ratios):

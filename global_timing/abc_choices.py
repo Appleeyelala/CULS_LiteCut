@@ -6,7 +6,17 @@ from .evaluation import cec_passed
 from .boolean_candidates import verify_cut_truth, verify_library_truth
 
 
-def choice_program(aig, decisions, vectors, scores, library, alpha):
+def symbolic_states(decisions, vectors):
+    groups = {}
+    for i, d in enumerate(decisions):
+        for c in sorted({v[i] for v in vectors} - {0}):
+            groups.setdefault(d["root"], [(-1, 0)]).append((i, c))
+    if sum(map(len, groups.values())) > 64:
+        raise ValueError("The sparse prototype supports up to 64 local categorical states")
+    return groups
+
+
+def choice_program(aig, decisions, vectors, scores, library, alpha, symbolic=False):
     if not 1 <= len(vectors) <= 64 or any(len(v) != len(decisions) for v in vectors):
         raise ValueError("Expected 1..64 frozen vectors of catalogue width")
     by_root = {}
@@ -17,6 +27,14 @@ def choice_program(aig, decisions, vectors, scores, library, alpha):
     if any(type(c) is not int or not 0 <= c <= len(d["candidate_subgraph_indices"])
            for v in vectors for c, d in zip(v, decisions)):
         raise ValueError("Invalid frozen choice")
+    state_bits = {}
+    if symbolic:
+        offset = 0
+        for root, group in symbolic_states(decisions, vectors).items():
+            all_states = ((1 << len(group)) - 1) << offset
+            for j, entry in enumerate(group):
+                state_bits[root, entry] = ((1 << 64) - 1) ^ (all_states ^ (1 << (offset+j)))
+            offset += len(group)
     lines, options = [], []
     next_node = aig.maximum_variable + 1
     local = {(s["decision_index"], s["choice_index"]): s["predicted_local_abc_delay"]
@@ -38,6 +56,8 @@ def choice_program(aig, decisions, vectors, scores, library, alpha):
                  for c in [0] + present}
         masks[0] = sum(1 << k for k, v in enumerate(vectors)
                        if all(v[j] == 0 for j in by_root[d["root"]]))
+        if symbolic:
+            masks = {c: state_bits[d["root"], (i,c) if c else (-1,0)] for c in [0]+present}
         truth = d["truth"] & 0xffff
         perm = library["perms4"][library["p_perms"][truth]]
         phase = library["p_phases"][truth]

@@ -119,4 +119,3 @@ def cover_witness(log, vectors, options):
             key=lambda k: (sum(c != 0 for c in vectors[k]), k)), "mode0": native[0],
             "cuts": trace, "options": [dict(o, abc=statuses[o["decision_index"], o["choice"]])
                                        for o in options]}
-

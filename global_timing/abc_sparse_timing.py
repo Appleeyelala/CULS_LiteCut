@@ -146,4 +146,3 @@ class SparseTiming:
         hard=self.forward(logits,states)
         soft=self.forward(logits)
         return hard.detach()+(soft-soft.detach())
-

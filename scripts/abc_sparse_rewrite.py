@@ -155,4 +155,3 @@ if __name__=="__main__":
         if isinstance(v,Path):setattr(a,k,v.resolve())
     torch.set_num_threads(1)
     print(json.dumps(run(a)))
-

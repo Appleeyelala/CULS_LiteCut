@@ -35,13 +35,39 @@
     "job": "66108"
   },
   "system_verification": {
-    "path": "/data/wushangge/CULS_LiteCut/runs/20261118T083509Z-load-system-verification-09d1ddc5",
-    "source_commit": "0e83786848d59e7b5a40e67689d8d869c4978e14",
-    "job": "66110"
+    "path": "/data/wushangge/CULS_LiteCut/runs/20261118T083935Z-load-pin-order-verify-4ba7c3dd",
+    "source_commit": "746dc6e67bccc6d7d4c3e91c624b50ce9d3b01f4",
+    "job": "66113",
+    "state": "COMPLETED"
   },
   "pair_audit": {
+    "path": "/data/wushangge/CULS_LiteCut/runs/20261118T083925Z-load-pin-order-audit-da263835",
+    "source_commit": "746dc6e67bccc6d7d4c3e91c624b50ce9d3b01f4",
+    "job": "66112",
+    "state": "COMPLETED"
+  },
+  "pin_order_first_failure": {
     "path": "/data/wushangge/CULS_LiteCut/runs/20261118T083752Z-load-endpoint-audit-392de506",
     "source_commit": "426173ad653f42223ff474113cded5a7b4bcde2e",
-    "job": "66111"
+    "job": "66111",
+    "state": "FAILED"
+  },
+  "system_verification_before_pin_order": {
+    "path": "/data/wushangge/CULS_LiteCut/runs/20261118T083509Z-load-system-verification-09d1ddc5",
+    "source_commit": "0e83786848d59e7b5a40e67689d8d869c4978e14",
+    "job": "66110",
+    "state": "COMPLETED"
+  },
+  "cleanup": {
+    "path": "/data/wushangge/CULS_LiteCut/runs/20261118T084038Z-load-build-cleanup-2c910310",
+    "source_commit": "746dc6e67bccc6d7d4c3e91c624b50ce9d3b01f4",
+    "job": "66114",
+    "state": "COMPLETED"
+  },
+  "device_runtime": {
+    "path": "/data/wushangge/CULS_LiteCut/runs/20261118T084104Z-load-device-runtime-e245d6de",
+    "source_commit": "746dc6e67bccc6d7d4c3e91c624b50ce9d3b01f4",
+    "job": "66115",
+    "state": "COMPLETED"
   }
 }

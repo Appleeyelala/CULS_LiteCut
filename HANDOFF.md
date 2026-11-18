@@ -1,3 +1,7 @@
+# 新对话接续入口（2026-11-18，ABC 门级覆盖与原始 AIG 闭环）
+
+研究分支 `work/abc-load-rewrite`。[实现、反例与验收](analysis/abc_load_rewrite/README.md)和[逐电路有／无 LiteCut 对照](analysis/abc_load_rewrite/development.csv)。固定网表的 CPU／GPU 逐输出到达时间复现 ABC。预估覆盖在 ID75 错选 PO124，在 ID421 漏掉改写后 PO1274 的时延跃升。新模型平均选优损失 20.463%、Top-1 为 1/12，未达到扩评条件。原始 AIG 入口、带面积约束的回退和实际交付路径均已验证。
+
 # 新对话接续入口（2026-11-18，ABC 时序分支）
 
 2026-11-18 最新分支 `work/abc-arc-audit`。进入[ID75/179 逐弧诊断及 12 电路复核](analysis/abc_choice_timing/arc_audit/README.md)。两对关键信号均已核对到最终网表引脚。对数扇出修正命中从 1/12 提至 4/12，两个核心反例仍未解决；面积在本轮只记录。

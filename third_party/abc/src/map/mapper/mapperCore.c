@@ -47,6 +47,8 @@ ABC_NAMESPACE_IMPL_START
   SeeAlso     []
 
 ***********************************************************************/
+#include "mapperCulsHard.inc"
+
 int Map_Mapping( Map_Man_t * p )
 {
     int fShowSwitching         = 0;

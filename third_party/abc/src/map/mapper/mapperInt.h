@@ -113,6 +113,7 @@ struct Map_ManStruct_t_
     int                 nVarsMax;      // the max number of variables
     int                 fAreaRecovery; // the flag to enable area recovery
     int                 fVerbose;      // the verbosiness flag
+    unsigned long long  culsCondition; // one active hard vector, or zero for ordinary ABC
     int                 fMappingMode;  // set to 1 when doing area
     float               fRequiredGlo;  // the global required times
     float               fEpsilon;      // the epsilon used to compare floats

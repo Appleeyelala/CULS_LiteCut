@@ -2,7 +2,7 @@
 /* Research-only input for one combinational read_aiger/map process.
    Literal indices refer to the reader's actual vNodes, including strashing.
    The caller supplies locally truth-checked candidates and frozen vector masks. */
-extern Abc_Obj_t * Abc_AigAndCreate( Abc_Aig_t *, Abc_Obj_t *, Abc_Obj_t * );
+extern Abc_Obj_t * Abc_CulsCopyChoiceRoot( Abc_Aig_t *, Abc_Obj_t * );
 
 typedef struct {
     Abc_Obj_t * repr, * alt;
@@ -91,8 +91,7 @@ static int CulsReadChoices( Abc_Ntk_t * ntk, Vec_Ptr_t * nodes, const char * pat
                 if ( j == i ) {
                     if ( Abc_ObjFanoutNum(e->alt) ) {
                         Abc_Obj_t * original = e->alt;
-                        e->alt = Abc_AigAndCreate((Abc_Aig_t *)ntk->pManFunc,
-                                                  Abc_ObjChild0(original), Abc_ObjChild1(original));
+                        e->alt = Abc_CulsCopyChoiceRoot((Abc_Aig_t *)ntk->pManFunc, original);
                         e->alt->culsPrivate = 1;
                         for ( j = i+1; j < count; ++j )
                             if ( a[j].repr == e->repr && a[j].alt == original ) a[j].alt = e->alt;

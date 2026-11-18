@@ -400,6 +400,11 @@ Abc_Obj_t * Abc_AigAndCreateFrom( Abc_Aig_t * pMan, Abc_Obj_t * p0, Abc_Obj_t * 
   SeeAlso     []
 
 ***********************************************************************/
+Abc_Obj_t * Abc_CulsCopyChoiceRoot( Abc_Aig_t * pMan, Abc_Obj_t * root )
+{
+    return Abc_AigAndCreate(pMan, Abc_ObjChild0(root), Abc_ObjChild1(root));
+}
+
 Abc_Obj_t * Abc_AigAndLookup( Abc_Aig_t * pMan, Abc_Obj_t * p0, Abc_Obj_t * p1 )
 {
     Abc_Obj_t * pAnd, * pConst1;

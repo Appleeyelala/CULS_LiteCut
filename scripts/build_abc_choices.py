@@ -24,9 +24,9 @@ def main():
     call = "    Abc_SclTimeNtkPrint( p, fShowAll, fPrintPath );"
     assert content.count(start) == content.count(call) == 1
     observer = "\n".join((ROOT / "framework/abc" / name).read_text()
-                         for name in ("endpoint_report.c.inc", "path_report.c.inc"))
+                         for name in ("endpoint_report.c.inc", "path_report.c.inc", "liberty_export.c.inc"))
     timing.write_text(content.replace(start, observer + "\n" + start).replace(
-        call, call + "\n    CulsGlobalTimingReport( p );\n    CulsGlobalPathReport( p );"))
+        call, call + "\n    CulsGlobalTimingReport( p );\n    CulsGlobalPathReport( p );\n    CulsExportLiberty( p );"))
     command = ["make", "-j", os.environ["SLURM_CPUS_PER_TASK"], "ABC_USE_NO_READLINE=1",
                "CC=/usr/local/bin/gcc", "CXX=/usr/local/bin/g++", "LD=/usr/local/bin/g++"]
     subprocess.run(command, cwd=args.destination, check=True)

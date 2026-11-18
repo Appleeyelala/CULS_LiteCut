@@ -31,7 +31,7 @@ if __name__=='__main__':
             results.append(dict(case=file.parent.name,device=dev,max_error=float((pred-ref).abs().max()),
                                area_error=float(area)-frozen['area'],outputs=len(outs),
                                mapped_sha256=digest(file.with_name('mapped.v'))))
-            save_json(out/'parity.json',results)
             torch.testing.assert_close(pred,ref,atol=.015,rtol=3.e-5)
             if abs(float(area)-frozen['area'])>max(.02,3.e-5*frozen['area']):
                 raise ValueError((float(area),frozen['area']))
+    save_json(out/'parity.json',results)

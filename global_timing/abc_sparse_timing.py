@@ -86,6 +86,8 @@ class SparseTiming:
             if len(selected)>1:
                 raise ValueError("Rewrite vector conflicts at a shared root")
             states.append(selected[0] if selected else 0)
+        if sum(bool(s) for s in states) != sum(bool(c) for c in vector):
+            raise ValueError("Rewrite vector contains a choice outside the prepared bank")
         return states
 
     def probabilities(self, logits, states=None):

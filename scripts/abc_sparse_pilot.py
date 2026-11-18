@@ -49,7 +49,9 @@ def optimize(model, vectors, indices, budget=8):
     gradient=[];gradnorm=[]
     for step in range(budget):
         logits=z[selector].sum(1)
-        chosen=min((k for k,v in zip(indices,logits.detach().cpu().tolist()) if v==float(logits.max().detach())),key=norm)
+        projected=logits.detach().cpu().tolist()
+        maximum=max(projected)
+        chosen=min((k for k,v in zip(indices,projected) if v==maximum),key=norm)
         opt.zero_grad()
         objective=model.straight_through(z,states[chosen])
         gradient.append((chosen,float(objective.detach())))

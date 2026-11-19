@@ -212,11 +212,32 @@ def outputs(args):
                 **{d+'_'+k:x for d in ('cpu','cuda') for k,x in v[d]['soft'][i].items()},
                 **gr,cuda_peak_bytes=v['cuda']['peak_bytes'],work=str(p.parent)))
     table(out/'devices_fixed.csv',fixed)
+    cone=read(args.cone)
+    replay=next(r for r in cone if r['label']=='noop')
+    table(out/'system_cone.csv',[dict(**{k:v for k,v in r.items() if k!='cell_counts'},
+         unchanged_signed_cone=r['signed_aig_cone_sha256']==replay['signed_aig_cone_sha256'],
+         unchanged_cell_cone=r['mapped_cone_sha256']==replay['mapped_cone_sha256']) for r in cone])
+    from plot_paper_ablation import main as plot
+    plot(out,out/'joint_ablation.pdf')
+    manifests={}
+    inputs={}
+    for field,value in vars(args).items():
+        if field=='output':
+            continue
+        paths=value if isinstance(value,list) else [value]
+        inputs[field]=[str(p) for p in paths]
+        for p in paths:
+            manifest=next(parent/'run.json' for parent in (p,*p.parents) if (parent/'run.json').is_file())
+            raw=read(manifest)
+            manifests[raw['slurm_job_id']]=dict(manifest=str(manifest),state=raw['state'],
+                                  commit=raw['source_commit'],resources=raw['resources'],command=raw['command'])
+    (out/'sources.json').write_text(json.dumps(dict(inputs=inputs,runs=manifests),indent=2)+'\n')
+
 
 
 if __name__=='__main__':
     ap=argparse.ArgumentParser(description=__doc__)
-    for name in ('singles','pilot','frozen-system','coverage','panel','parsers','fixed','owners','endpoints','marginals','output'):
+    for name in ('singles','pilot','frozen-system','coverage','panel','parsers','fixed','owners','endpoints','cone','marginals','output'):
         ap.add_argument('--'+name,type=Path,required=True)
     for name in ('selectors','runtime'):
         ap.add_argument('--'+name,type=Path,nargs='+',required=True)

@@ -68,7 +68,8 @@ def collect(panel, shards):
             methods.append(dict(**common,method='control_'+m,original_ps=original,b_ps=b,**data))
         info.append(dict(**common,source=design['source'],stage_error=error,original_ps=original,
             noop_ps=noop.get('delay_ps') if noop else None,b_ps=b,primary_delivered_ps=raw.get('delay_ps'),
-            raw_wall_s=attempt.get('seconds'),primary_status=raw.get('status'),controls_complete=available,
+            raw_wall_s=attempt.get('seconds'),b_wall_s=base.get('seconds'),
+            primary_status=raw.get('status'),controls_complete=available,
             **{m+'_delivered_ps':(min(original,r['delay_ps']) if r['status']=='PASS' else original)
                for m,r in selections.items()},work=str(w)))
     return info,methods

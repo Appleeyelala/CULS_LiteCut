@@ -190,6 +190,7 @@ def outputs(args):
             times.append(dict(circuit=case,device=meta['device'],alpha=meta['alpha'],trial=p.parent.name,host=attempt['host'],
                 raw_wall_s=attempt['seconds'],archived_raw_wall_s=reference[case]['wall_s'],search_s=r['stages']['search'],
                 cuda_peak_gib=r['cuda_peak_bytes']/2**30,cpu_peak_gib=r['process_maxrss_kib']/2**20,
+                child_peak_gib=r['child_maxrss_kib']/2**20,
                 vector_matches_archived=r['vector']==old['vector'],returned_bytes_match=r['selected_aig_sha256']==old['selected_aig_sha256'],
                 original_ps=r['original_delay_ps'],delivered_ps=r['delay_ps'],status=r['status'],
                 **{('stage_'+k):v for k,v in r['stages'].items()},**{('template_'+k):v for k,v in r['template_stages'].items()},work=str(w)))

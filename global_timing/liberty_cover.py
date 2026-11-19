@@ -91,6 +91,17 @@ def mapped_graph(path, lib, prefix=''):
     return ins,outs,gates
 
 
+
+def scatter_active_max(active, index, updates):
+    """Keep autograd's max/tie bookkeeping local to the touched net IDs."""
+    if not torch.is_grad_enabled() or not (active.requires_grad or updates.requires_grad):
+        return active.scatter_reduce(0, index, updates, reduce='amax')
+    touched, local_index = torch.unique(index, return_inverse=True)
+    old = active.index_select(0, touched)
+    new = old.scatter_reduce(0, local_index, updates, reduce='amax')
+    return active.index_copy(0, touched, new)
+
+
 class TimingGraph:
     """Reverse active fanout and pin load, then forward arrival and slew.
 
@@ -220,12 +231,12 @@ class TimingGraph:
                 a=active[ids[dst]]
                 loads=loads.index_add(0,src,(lib.caps[pin]*a[:,None]).double())
                 if recovery: refs=refs.index_add(0,src,a)
-                active=active.scatter_reduce(0,src,a,reduce='amax')
+                active=scatter_active_max(active,src,a)
             if parent is not None:
                 a=active[ids[child]]*w[state]
                 loads=loads.index_add(0,parent,loads[ids[child]]*w[state,None])
                 if recovery: refs=refs.index_add(0,parent,a)
-                active=active.scatter_reduce(0,parent,a,reduce='amax')
+                active=scatter_active_max(active,parent,a)
         loads=self.fixed_loads if self.fixed_loads is not None else loads.float()
         arc_delays=[]
         flow=zeros(self.size) if recovery else None

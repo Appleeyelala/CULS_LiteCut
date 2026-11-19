@@ -105,6 +105,7 @@ def design(args, original, out):
         proposal_area_ratio=row['candidate_area_ratio'] if any(vector) else 1.,
         mode=args.mode,method=args.method,template_preparations=once,template_match_passes=2*once,decisions=len(cat.decisions),local_states=nstates,
         search_seconds=trace.get('seconds',0.),unique_vectors=trace['unique_vectors'],stages=stages,
+        template_stages=bank.preparation_times if once else {},
         cuda_peak_bytes=torch.cuda.max_memory_allocated() if args.device=='cuda' else 0,
         process_maxrss_kib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
         child_maxrss_kib=resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss,

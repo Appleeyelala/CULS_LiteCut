@@ -2,6 +2,7 @@
 from collections import Counter, defaultdict
 from graphlib import TopologicalSorter
 from pathlib import Path
+from time import perf_counter
 import torch
 from .abc_choices import choice_program
 from .abc_hard_choices import StructuralIds
@@ -67,12 +68,15 @@ def prepare_forest(aig, catalogue, allowed, scores, lib, path):
     return groups,scales
 
 
-def combine_covers(paths, lib):
+def combine_covers(paths, lib, timings=None):
     # Match identical physical cells across covers, preserving duplicate
     # instances inside either cover. All cross-cover names are positional.
     union, identities, ends = {}, {}, []
     for path in paths:
+        begin = perf_counter()
         pins, outs, gates = mapped_graph(path,lib)
+        if timings is not None:
+            timings["parse_" + Path(path).stem] = perf_counter() - begin
         names = {p:f"pin{i}" for i,p in enumerate(pins)}
         occurrences=Counter()
         for n in TopologicalSorter({n:p for n,(_,p) in gates.items()}).static_order():
@@ -104,14 +108,23 @@ class LoadBank:
     def __init__(self, aig, catalogue, rule, scores, rewrite_lib, timing_lib, abc, liberty, work, alpha=0.):
         work.mkdir()
         source=work/'forest.aig'
+        self.preparation_times = {}
+        begin = perf_counter()
         self.groups,ratios=prepare_forest(aig,catalogue,rule.allowed(),scores,rewrite_lib,source)
+        self.preparation_times["forest"] = perf_counter() - begin
         mapped=work/'templates.v'
         initial=work/'initial.v'
         # ABC expands supergates and runs its delay pass, reference counting and
         # required-time area recovery once on the entire bank of local templates.
+        begin = perf_counter()
         run_tool([abc,'-c',f'read_lib {tool_path(liberty)}; read_aiger {tool_path(source)}; map -r; write_verilog {tool_path(initial)}; read_aiger {tool_path(source)}; map; write_verilog {tool_path(mapped)}'],
                  work,'compile_templates',900)
-        pins,pairs,graph=combine_covers((initial,mapped),timing_lib)
+        self.preparation_times["abc_mapping"] = perf_counter() - begin
+        begin = perf_counter()
+        pins,pairs,graph=combine_covers((initial,mapped),timing_lib,self.preparation_times)
+        self.preparation_times["merge"] = (perf_counter() - begin - self.preparation_times["parse_initial"]
+                                          - self.preparation_times["parse_templates"])
+        begin = perf_counter()
         outs=[f"boundary{i}" for i in range(len(pairs))]
         if len(pins)!=aig.pi_count+len(self.groups) or len(outs)!=aig.po_count+sum(map(len,self.groups)):
             raise ValueError('Template port identity changed')
@@ -140,6 +153,7 @@ class LoadBank:
                                  for k in range(3))
         self.initial=torch.tensor([1.,0.]*self.choices,device=self.device)
         self.recovered=1.-self.initial
+        self.preparation_times["timing_graph"] = perf_counter() - begin
 
     def forward(self,weights,detail=False):
         if not self.choices:

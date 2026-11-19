@@ -1,0 +1,33 @@
+{
+  "open_panel": true,
+  "frozen_challenger_parity": {
+    "area": true,
+    "cec": true,
+    "delay_ps": true,
+    "input_sha256": true,
+    "input_structure_sha256": true,
+    "po_rise_fall": true
+  },
+  "raw_comparisons": [
+    {
+      "circuit": "cabac_ucontext",
+      "original_ps": 14819.457,
+      "delivered_ps": 7238.76709,
+      "status": "ACCEPTED",
+      "same_method_vector_matches": true,
+      "same_method_delivery_matches": true,
+      "same_method_delivered_bytes_match": true,
+      "work": "/data/wushangge/CULS_LiteCut/runs/20261119T104351Z-paper-challenger-cca7a725/output/data/raw/trial_00/cabac_ucontext_cuda_global_marginal"
+    },
+    {
+      "circuit": "bc0",
+      "original_ps": 345.391327,
+      "delivered_ps": 327.915833,
+      "status": "ACCEPTED",
+      "same_method_vector_matches": true,
+      "same_method_delivery_matches": true,
+      "same_method_delivered_bytes_match": true,
+      "work": "/data/wushangge/CULS_LiteCut/runs/20261119T104351Z-paper-challenger-cca7a725/output/data/raw/trial_01/bc0_cuda_global_marginal"
+    }
+  ]
+}

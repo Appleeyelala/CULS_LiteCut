@@ -1,0 +1,358 @@
+{
+  "inputs": {
+    "singles": [
+      "/data/wushangge/CULS_LiteCut/runs/20261119T065123Z-paper-isolated-cb117fd8/output/data"
+    ],
+    "pilot": [
+      "/data/wushangge/CULS_LiteCut/runs/20261119T072437Z-paper-pilot-04d20721/output/data/pilot"
+    ],
+    "frozen_system": [
+      "/data/wushangge/CULS_LiteCut/runs/20261119T065314Z-paper-selectors-cfc0b674/output/data/systemcaes_comb/frozen.json"
+    ],
+    "coverage": [
+      "/data/wushangge/CULS_LiteCut/runs/20261119T065747Z-paper-coverage-d4efc076/output/data"
+    ],
+    "panel": [
+      "/data/wushangge/CULS_LiteCut/runs/20261119T070904Z-paper-split24-399b690c/output/data/panel.json"
+    ],
+    "parsers": [
+      "/data/wushangge/CULS_LiteCut/runs/20261119T065224Z-paper-parsers-8d2d1de3/output/data"
+    ],
+    "fixed": [
+      "/data/wushangge/CULS_LiteCut/runs/20261119T071303Z-paper-system-2bcb124e/output/data/fixed"
+    ],
+    "owners": [
+      "/data/wushangge/CULS_LiteCut/runs/20261119T083041Z-paper-development-a-3288cd37/output/data/owners"
+    ],
+    "endpoints": [
+      "/data/wushangge/CULS_LiteCut/runs/20261119T071706Z-paper-endpoints-f9300c53/output/data"
+    ],
+    "cone": [
+      "/data/wushangge/CULS_LiteCut/runs/20261119T072522Z-paper-trace663-9640da77/output/data/cones.json"
+    ],
+    "marginals": [
+      "/data/wushangge/CULS_LiteCut/runs/20261119T083041Z-paper-development-a-3288cd37/output/data/marginals"
+    ],
+    "challenger": [
+      "/data/wushangge/CULS_LiteCut/runs/20261119T102349Z-paper-development-c-51e439e2/output/data/challenger-ablation/cabac_ucontext/ablation.json"
+    ],
+    "selectors": [
+      "/data/wushangge/CULS_LiteCut/runs/20261119T065314Z-paper-selectors-cfc0b674/output/data",
+      "/data/wushangge/CULS_LiteCut/runs/20261119T071303Z-paper-system-2bcb124e/output/data/nested",
+      "/data/wushangge/CULS_LiteCut/runs/20261119T083041Z-paper-development-a-3288cd37/output/data/bc0",
+      "/data/wushangge/CULS_LiteCut/runs/20261119T083041Z-paper-development-a-3288cd37/output/data/dma_rc_logic",
+      "/data/wushangge/CULS_LiteCut/runs/20261119T083041Z-paper-development-a-3288cd37/output/data/ac97_ctrl",
+      "/data/wushangge/CULS_LiteCut/runs/20261119T083041Z-paper-development-a-3288cd37/output/data/b17_1_comb",
+      "/data/wushangge/CULS_LiteCut/runs/20261119T083041Z-paper-development-a-3288cd37/output/data/sc_cpu",
+      "/data/wushangge/CULS_LiteCut/runs/20261119T100225Z-paper-development-b-d07c54b1/output/data/pci",
+      "/data/wushangge/CULS_LiteCut/runs/20261119T100225Z-paper-development-b-d07c54b1/output/data/cabac_ucontext",
+      "/data/wushangge/CULS_LiteCut/runs/20261119T100225Z-paper-development-b-d07c54b1/output/data/jpeg",
+      "/data/wushangge/CULS_LiteCut/runs/20261119T102349Z-paper-development-c-51e439e2/output/data/b22_comb",
+      "/data/wushangge/CULS_LiteCut/runs/20261119T102349Z-paper-development-c-51e439e2/output/data/hevc_md_top",
+      "/data/wushangge/CULS_LiteCut/runs/20261119T102349Z-paper-development-c-51e439e2/output/data/b18_1_comb"
+    ],
+    "runtime": [
+      "/data/wushangge/CULS_LiteCut/runs/20261119T065644Z-paper-devices-e8f9bce4/output/data",
+      "/data/wushangge/CULS_LiteCut/runs/20261119T071303Z-paper-system-2bcb124e/output/data/b18",
+      "/data/wushangge/CULS_LiteCut/runs/20261119T072437Z-paper-pilot-04d20721/output/data/jpeg",
+      "/data/wushangge/CULS_LiteCut/runs/20261119T083041Z-paper-development-a-3288cd37/output/data/no-student",
+      "/data/wushangge/CULS_LiteCut/runs/20261119T104351Z-paper-challenger-cca7a725/output/data/raw"
+    ]
+  },
+  "runs": {
+    "66185": {
+      "manifest": "/data/wushangge/CULS_LiteCut/runs/20261119T065123Z-paper-isolated-cb117fd8/run.json",
+      "state": "COMPLETED",
+      "commit": "d398d3389ef2a2d334b83252750b2c2a553b2c57",
+      "resources": {
+        "partition": "Compute",
+        "cpus_per_task": 4,
+        "memory_gib": 24,
+        "gpus": 1,
+        "walltime": "04:00:00",
+        "nodelist": "eda2"
+      },
+      "command": [
+        "/home/share/process/anaconda3/bin/python",
+        "-B",
+        "src/scripts/paper_joint_evidence.py",
+        "/data/wushangge/CULS_LiteCut/runs/20261119T065123Z-paper-isolated-cb117fd8/output/data",
+        "c5315",
+        "intra_pred_PE"
+      ]
+    },
+    "66198": {
+      "manifest": "/data/wushangge/CULS_LiteCut/runs/20261119T072437Z-paper-pilot-04d20721/run.json",
+      "state": "COMPLETED",
+      "commit": "248229bbdea36f3785b884bc0f828d087555533c",
+      "resources": {
+        "partition": "Compute",
+        "cpus_per_task": 5,
+        "memory_gib": 72,
+        "gpus": 1,
+        "walltime": "04:00:00",
+        "nodelist": "eda2"
+      },
+      "command": [
+        "/home/share/process/anaconda3/bin/python",
+        "-B",
+        "src/scripts/paper_campaign.py",
+        "/data/wushangge/CULS_LiteCut/runs/20261119T072437Z-paper-pilot-04d20721/output/data",
+        "/data/wushangge/CULS_LiteCut/runs/20261119T072437Z-paper-pilot-04d20721/input/tasks.json"
+      ]
+    },
+    "66187": {
+      "manifest": "/data/wushangge/CULS_LiteCut/runs/20261119T065314Z-paper-selectors-cfc0b674/run.json",
+      "state": "FAILED",
+      "commit": "86d22065260a1a77016ed6115bf1364940ee27fb",
+      "resources": {
+        "partition": "Compute",
+        "cpus_per_task": 4,
+        "memory_gib": 24,
+        "gpus": 1,
+        "walltime": "04:00:00",
+        "nodelist": "eda2"
+      },
+      "command": [
+        "/home/share/process/anaconda3/bin/python",
+        "-B",
+        "src/scripts/paper_joint_selectors.py",
+        "/data/wushangge/CULS_LiteCut/runs/20261119T065314Z-paper-selectors-cfc0b674/output/data",
+        "cuda",
+        "c5315",
+        "intra_pred_PE",
+        "systemcaes_comb"
+      ]
+    },
+    "66189": {
+      "manifest": "/data/wushangge/CULS_LiteCut/runs/20261119T065747Z-paper-coverage-d4efc076/run.json",
+      "state": "COMPLETED",
+      "commit": "f541da68354167dec05c81961f1e33ba54e9826c",
+      "resources": {
+        "partition": "Compute",
+        "cpus_per_task": 2,
+        "memory_gib": 48,
+        "gpus": 0,
+        "walltime": "04:00:00",
+        "nodelist": "eda2"
+      },
+      "command": [
+        "/home/share/process/anaconda3/bin/python",
+        "-B",
+        "src/scripts/paper_region_coverage.py",
+        "/data/wushangge/CULS_LiteCut/runs/20261119T065747Z-paper-coverage-d4efc076/output/data"
+      ]
+    },
+    "66194": {
+      "manifest": "/data/wushangge/CULS_LiteCut/runs/20261119T070904Z-paper-split24-399b690c/run.json",
+      "state": "COMPLETED",
+      "commit": "0285eb7bf6de0743f0f446a18ec3eecb99ef4f47",
+      "resources": {
+        "partition": "Compute",
+        "cpus_per_task": 2,
+        "memory_gib": 16,
+        "gpus": 0,
+        "walltime": "04:00:00",
+        "nodelist": "eda2"
+      },
+      "command": [
+        "/home/share/process/anaconda3/bin/python",
+        "-B",
+        "src/scripts/freeze_paper_validation.py",
+        "/data/wushangge/CULS_LiteCut/runs/20261119T070904Z-paper-split24-399b690c/output/data",
+        "/data/wushangge/CULS_LiteCut/assets/inputs/paper_audit_905"
+      ]
+    },
+    "66186": {
+      "manifest": "/data/wushangge/CULS_LiteCut/runs/20261119T065224Z-paper-parsers-8d2d1de3/run.json",
+      "state": "COMPLETED",
+      "commit": "c9a28268aaa78d3aaaf3c37c704ab77b4dd98843",
+      "resources": {
+        "partition": "Compute",
+        "cpus_per_task": 5,
+        "memory_gib": 32,
+        "gpus": 0,
+        "walltime": "04:00:00",
+        "nodelist": "eda2"
+      },
+      "command": [
+        "/home/share/process/anaconda3/bin/python",
+        "-B",
+        "src/scripts/profile_paper_templates.py",
+        "/data/wushangge/CULS_LiteCut/runs/20261119T065224Z-paper-parsers-8d2d1de3/output/data",
+        "/data/wushangge/CULS_LiteCut/runs/20261119T063936Z-paper14-choices-79bdffd0/src/global_timing/liberty_cover.py"
+      ]
+    },
+    "66195": {
+      "manifest": "/data/wushangge/CULS_LiteCut/runs/20261119T071303Z-paper-system-2bcb124e/run.json",
+      "state": "COMPLETED",
+      "commit": "248229bbdea36f3785b884bc0f828d087555533c",
+      "resources": {
+        "partition": "Compute",
+        "cpus_per_task": 5,
+        "memory_gib": 72,
+        "gpus": 1,
+        "walltime": "04:00:00",
+        "nodelist": "eda2"
+      },
+      "command": [
+        "/home/share/process/anaconda3/bin/python",
+        "-B",
+        "src/scripts/paper_campaign.py",
+        "/data/wushangge/CULS_LiteCut/runs/20261119T071303Z-paper-system-2bcb124e/output/data",
+        "/data/wushangge/CULS_LiteCut/runs/20261119T071303Z-paper-system-2bcb124e/input/tasks.json"
+      ]
+    },
+    "66204": {
+      "manifest": "/data/wushangge/CULS_LiteCut/runs/20261119T083041Z-paper-development-a-3288cd37/run.json",
+      "state": "COMPLETED",
+      "commit": "bf814a55699ffe69c186e7d538846871e5a56a91",
+      "resources": {
+        "partition": "Compute",
+        "cpus_per_task": 5,
+        "memory_gib": 72,
+        "gpus": 1,
+        "walltime": "04:00:00",
+        "nodelist": "eda2"
+      },
+      "command": [
+        "/home/share/process/anaconda3/bin/python",
+        "-B",
+        "src/scripts/paper_campaign.py",
+        "/data/wushangge/CULS_LiteCut/runs/20261119T083041Z-paper-development-a-3288cd37/output/data",
+        "/data/wushangge/CULS_LiteCut/runs/20261119T083041Z-paper-development-a-3288cd37/input/tasks.json"
+      ]
+    },
+    "66196": {
+      "manifest": "/data/wushangge/CULS_LiteCut/runs/20261119T071706Z-paper-endpoints-f9300c53/run.json",
+      "state": "COMPLETED",
+      "commit": "f2462ea67f6cab66022d651369b4524f65727ee5",
+      "resources": {
+        "partition": "Compute",
+        "cpus_per_task": 2,
+        "memory_gib": 24,
+        "gpus": 0,
+        "walltime": "04:00:00",
+        "nodelist": "eda2"
+      },
+      "command": [
+        "/home/share/process/anaconda3/bin/python",
+        "-B",
+        "src/scripts/paper_endpoint_errors.py",
+        "/data/wushangge/CULS_LiteCut/runs/20261119T071706Z-paper-endpoints-f9300c53/output/data",
+        "/data/wushangge/CULS_LiteCut/runs/20261119T065123Z-paper-isolated-cb117fd8/output/data/c5315/results.json",
+        "/data/wushangge/CULS_LiteCut/runs/20261119T065123Z-paper-isolated-cb117fd8/output/data/intra_pred_PE/results.json",
+        "/data/wushangge/CULS_LiteCut/runs/20261119T071303Z-paper-system-2bcb124e/output/data/nested/systemcaes_comb/selected.json"
+      ]
+    },
+    "66199": {
+      "manifest": "/data/wushangge/CULS_LiteCut/runs/20261119T072522Z-paper-trace663-9640da77/run.json",
+      "state": "COMPLETED",
+      "commit": "d750efe28c411a1f481b7d6aa03a49a1dc44d36f",
+      "resources": {
+        "partition": "Compute",
+        "cpus_per_task": 2,
+        "memory_gib": 16,
+        "gpus": 0,
+        "walltime": "04:00:00",
+        "nodelist": "eda2"
+      },
+      "command": [
+        "/home/share/process/anaconda3/bin/python",
+        "-B",
+        "src/scripts/paper_cone_trace.py",
+        "/data/wushangge/CULS_LiteCut/runs/20261119T072522Z-paper-trace663-9640da77/output/data",
+        "/data/wushangge/CULS_LiteCut/runs/20261119T071303Z-paper-system-2bcb124e/output/data/nested/systemcaes_comb/selected.json",
+        "/data/wushangge/CULS_LiteCut/runs/20261119T022538Z-paper14-b2-ba3bfef3/output/cases/systemcaes_comb",
+        "663"
+      ]
+    },
+    "66209": {
+      "manifest": "/data/wushangge/CULS_LiteCut/runs/20261119T102349Z-paper-development-c-51e439e2/run.json",
+      "state": "COMPLETED",
+      "commit": "e1f82f5c70d463e16aa3a2241cd0c552b523e7ae",
+      "resources": {
+        "partition": "Compute",
+        "cpus_per_task": 5,
+        "memory_gib": 72,
+        "gpus": 1,
+        "walltime": "04:00:00",
+        "nodelist": "eda2"
+      },
+      "command": [
+        "/home/share/process/anaconda3/bin/python",
+        "-B",
+        "src/scripts/paper_campaign.py",
+        "/data/wushangge/CULS_LiteCut/runs/20261119T102349Z-paper-development-c-51e439e2/output/data",
+        "/data/wushangge/CULS_LiteCut/runs/20261119T102349Z-paper-development-c-51e439e2/input/tasks.json"
+      ]
+    },
+    "66206": {
+      "manifest": "/data/wushangge/CULS_LiteCut/runs/20261119T100225Z-paper-development-b-d07c54b1/run.json",
+      "state": "COMPLETED",
+      "commit": "bf814a55699ffe69c186e7d538846871e5a56a91",
+      "resources": {
+        "partition": "Compute",
+        "cpus_per_task": 5,
+        "memory_gib": 72,
+        "gpus": 1,
+        "walltime": "04:00:00",
+        "nodelist": "eda2"
+      },
+      "command": [
+        "/home/share/process/anaconda3/bin/python",
+        "-B",
+        "src/scripts/paper_campaign.py",
+        "/data/wushangge/CULS_LiteCut/runs/20261119T100225Z-paper-development-b-d07c54b1/output/data",
+        "/data/wushangge/CULS_LiteCut/runs/20261119T100225Z-paper-development-b-d07c54b1/input/tasks.json"
+      ]
+    },
+    "66188": {
+      "manifest": "/data/wushangge/CULS_LiteCut/runs/20261119T065644Z-paper-devices-e8f9bce4/run.json",
+      "state": "COMPLETED",
+      "commit": "a9d43277f9b1f19b01ab56e7840ed2804aca1e44",
+      "resources": {
+        "partition": "Compute",
+        "cpus_per_task": 4,
+        "memory_gib": 32,
+        "gpus": 1,
+        "walltime": "04:00:00",
+        "nodelist": "eda2"
+      },
+      "command": [
+        "/home/share/process/anaconda3/bin/python",
+        "-B",
+        "src/scripts/paper_runtime_devices.py",
+        "/data/wushangge/CULS_LiteCut/runs/20261119T065644Z-paper-devices-e8f9bce4/output/data",
+        "c5315/cpu",
+        "c5315/cuda",
+        "intra_pred_PE/cuda",
+        "intra_pred_PE/cpu",
+        "c5315/cuda",
+        "c5315/cpu",
+        "intra_pred_PE/cpu",
+        "intra_pred_PE/cuda"
+      ]
+    },
+    "66210": {
+      "manifest": "/data/wushangge/CULS_LiteCut/runs/20261119T104351Z-paper-challenger-cca7a725/run.json",
+      "state": "COMPLETED",
+      "commit": "12f6d56db23f1052e8ab41e81e0c91fabcd6893a",
+      "resources": {
+        "partition": "Compute",
+        "cpus_per_task": 5,
+        "memory_gib": 72,
+        "gpus": 1,
+        "walltime": "04:00:00",
+        "nodelist": "eda2"
+      },
+      "command": [
+        "/home/share/process/anaconda3/bin/python",
+        "-B",
+        "src/scripts/paper_campaign.py",
+        "/data/wushangge/CULS_LiteCut/runs/20261119T104351Z-paper-challenger-cca7a725/output/data",
+        "/data/wushangge/CULS_LiteCut/runs/20261119T104351Z-paper-challenger-cca7a725/input/tasks.json"
+      ]
+    }
+  }
+}

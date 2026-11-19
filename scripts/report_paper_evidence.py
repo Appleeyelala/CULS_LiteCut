@@ -19,7 +19,7 @@ def table(path,rows):
         raise ValueError(f'Empty table {path.name}')
     columns=list(dict.fromkeys(k for row in rows for k in row))
     with path.open('x',newline='') as f:
-        writer=csv.DictWriter(f,fieldnames=columns)
+        writer=csv.DictWriter(f,fieldnames=columns,lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 

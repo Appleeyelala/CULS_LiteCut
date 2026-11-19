@@ -140,6 +140,7 @@ def outputs(args):
         def geo_change(base):
             return 100*math.expm1(sum(math.log(r['delivered_ps']/r[base]) for r in rows)/len(rows))
         aggregate.append(dict(method=m,designs=len(rows),accepted=sum(r['delivered_ps']<r['original_ps'] for r in rows),
+                         accepted_and_faster_than_noop=sum(r['delivered_ps']<min(r['original_ps'],r['noop_ps']) for r in rows),
                          faster_than_b=sum(r['delivered_ps']<r['b_ps'] for r in rows),
                          accepted_and_faster_than_b=sum(r['delivered_ps']<min(r['b_ps'],r['original_ps']) for r in rows),
                          overtook_b=sum(r['delivered_ps']<r['b_ps']<=r['original_ps'] for r in rows),

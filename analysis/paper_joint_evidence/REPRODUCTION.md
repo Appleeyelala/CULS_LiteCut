@@ -1,6 +1,6 @@
 # 复现与测量口径
 
-运行入口是 `scripts/load_rewrite.py`。原始 AIG、候选枚举和验证、Student 推理、两次 ABC 模板映射、PyTorch 全局传播与搜索，以及交付前的真实 ABC 验收都计入原始入口的墙钟。保持冻结的库、工具、输入和种子。用 `--alpha 0.5 --steps 8 --max-edits 16 --method gradient --mode delay` 复现默认方法，用 `--alpha 0` 从原始入口跳过 Student。`--adaptive-sizes` 与 `--anchor-outputs` 是配对实验开关。面积上限敏感性表只对已测提案施加交付门槛。
+运行入口是 `scripts/load_rewrite.py`。原始 AIG、候选枚举和验证、Student 推理、两次 ABC 模板映射、PyTorch 全局传播与搜索，以及交付前的真实 ABC 验收都计入原始入口的墙钟。保持冻结的库、工具、输入和种子。用 `--alpha 0.5 --steps 8 --max-edits 16 --method gradient --mode delay` 复现默认方法。保持同一预算与输入，改为 `--method global_marginal` 可独立运行逐轮重算全局方向导数的选块对照；`--alpha 0` 从原始入口跳过 Student。`--adaptive-sizes` 与 `--anchor-outputs` 是配对实验开关。面积上限敏感性表只对已测提案施加交付门槛。
 
 ## 表格中的实验单位
 

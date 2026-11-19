@@ -195,14 +195,29 @@ def outputs(args):
             old=read(prior/'result.json')
             case=prior.name
             assert r['cec']=='PASS' and meta['original_sha256']==read(prior/'inputs.json')['original_sha256']
+            control_name='gradient_no_litecut' if not meta['alpha'] and meta['method']=='gradient' else meta['method']
+            control=next(m for m in methods if m['circuit']==case and m['method']==control_name)
+            replay=Path(control['work'])/'replay/replay.json'
+            expected=read(replay)['choices'] if replay.is_file() else [0]*len(r['vector'])
+            control_aig=control['raw_aig_sha256'] if control['delivered_ps']<control['original_ps'] else meta['original_sha256']
             times.append(dict(circuit=case,device=meta['device'],alpha=meta['alpha'],method=meta['method'],trial=p.parent.name,host=attempt['host'],
                 raw_wall_s=attempt['seconds'],archived_raw_wall_s=reference[case]['wall_s'],search_s=r['stages']['search'],
                 cuda_peak_gib=r['cuda_peak_bytes']/2**30,cpu_peak_gib=r['process_maxrss_kib']/2**20,
                 child_peak_gib=r['child_maxrss_kib']/2**20,
                 vector_matches_archived=r['vector']==old['vector'],returned_bytes_match=r['selected_aig_sha256']==old['selected_aig_sha256'],
+                same_method_vector_matches=r['vector']==expected,same_method_delivery_matches=r['delay_ps']==control['delivered_ps'],
+                same_method_delivered_bytes_match=r['selected_aig_sha256']==control_aig,
                 original_ps=r['original_delay_ps'],delivered_ps=r['delay_ps'],status=r['status'],
                 **{('stage_'+k):v for k,v in r['stages'].items()},**{('template_'+k):v for k,v in r['template_stages'].items()},work=str(w)))
     table(out/'runtime.csv',times)
+    challenger=[r for r in times if r['method']=='global_marginal']
+    assert len(challenger)==2 and {r['circuit'] for r in challenger}=={'cabac_ucontext','bc0'}
+    open_panel=all(audit['parity'].values()) and all(r['delivered_ps']<r['original_ps'] for r in challenger)
+    (out/'validation_gate.json').write_text(json.dumps(dict(open_panel=open_panel,
+           frozen_challenger_parity=audit['parity'],raw_comparisons=[{k:r[k] for k in
+           ('circuit','original_ps','delivered_ps','status','same_method_vector_matches','same_method_delivery_matches',
+            'same_method_delivered_bytes_match','work')} for r in challenger]),indent=2)+'\n')
+
     parser_rows=[]
     for p in sorted(args.parsers.glob('*.json')):
         rows=read(p)

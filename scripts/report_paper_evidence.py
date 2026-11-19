@@ -130,14 +130,16 @@ def outputs(args):
     for name in sorted({r['circuit'] for r in methods}):
         arms={r['method']:r for r in methods if r['circuit']==name}
         gradient=arms['gradient']
-        best_control=min(arms[m]['delivered_ps'] for m in METHODS if not m.startswith('gradient'))
+        competitors=[m for m in METHODS if m not in ('gradient','gradient_no_litecut')]
+        best_control=min(arms[m]['delivered_ps'] for m in competitors)
+        best_gradient_free=min(arms[m]['delivered_ps'] for m in competitors if m!='global_marginal')
         designs.append(dict(circuit=name,original_ps=gradient['original_ps'],noop_ps=gradient['noop_ps'],
                        b_ps=gradient['b_ps'],native_litecut_ps=reference[name]['litecut_ps'],
                        gradient_raw_ps=gradient['raw_ps'],gradient_area_pct=gradient['area_pct'],
                        gradient_area_cap_5pct_ps=gradient['delivered_ps_if_area_cap_5pct'],
                        **{m+'_delivered_ps':r['delivered_ps'] for m,r in arms.items()},
-                       best_nongradient_delivered_ps=best_control,
-                       gradient_vs_best_nongradient_pct=(gradient['delivered_ps']/best_control-1)*100))
+                       best_greedy_or_random_delivered_ps=best_control,best_gradient_free_delivered_ps=best_gradient_free,
+                       gradient_vs_best_greedy_or_random_pct=(gradient['delivered_ps']/best_control-1)*100))
     for m in METHODS:
         rows=[r for r in methods if r['method']==m]
         def geo_change(base):

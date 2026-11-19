@@ -86,7 +86,7 @@ def mapped_graph(path, lib, prefix=''):
         elif re.match(r'\w+\s+g\d+\(',line):
             name=line.split()[0]
             cell=lib.cells[name]
-            ports=dict(re.findall(r'\.(\w+)\(([^()]*)\)',line))
+            ports={pin:wire.strip() for pin,wire in re.findall(r'\.(\w+)\(([^()]*)\)',line)}
             gates[prefix+ports[cell['output']]]=(name,[prefix+ports[p] for p in cell['pins']])
     if not outs or not set(ins).isdisjoint(gates):
         raise ValueError('Invalid mapped interface')

@@ -4,7 +4,7 @@ import tempfile
 import unittest
 import torch
 
-from global_timing.liberty_cover import Liberty, TimingGraph
+from global_timing.liberty_cover import Liberty, TimingGraph, mapped_graph
 
 
 def library(directory, device):
@@ -26,6 +26,15 @@ class LoadCoverTest(unittest.TestCase):
         scratch = tempfile.TemporaryDirectory()
         self.addCleanup(scratch.cleanup)
         self.lib = library(scratch.name, 'cpu')
+
+    def test_escaped_mapped_port_whitespace(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'named.v'
+            path.write_text('input \\a/0 ;\noutput \\z/0 ;\nBUF g1(.Y(\\z/0 ), .A(\\a/0 ));\n')
+            inputs, outputs, gates = mapped_graph(path, self.lib)
+            self.assertEqual(inputs, [r'\a/0'])
+            self.assertEqual(outputs, [r'\z/0'])
+            self.assertEqual(gates[outputs[0]], ('BUF',inputs))
 
     def test_reconvergent_sinks_constant_and_inversion(self):
         gates = {'d': ('BUF', ['p']), 'n': ('INV', ['d']), 'out': ('JOIN', ['d', 'n'])}

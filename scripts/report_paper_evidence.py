@@ -138,6 +138,8 @@ def outputs(args):
                          overtook_b=sum(r['delivered_ps']<r['b_ps']<=r['original_ps'] for r in rows),
                          failed_proposals=sum(r['evaluation_status']!='PASS' for r in rows),
                          gm_vs_original_pct=geo_change('original_ps'),gm_vs_b_pct=geo_change('b_ps'),
+                         gm_area_change_pct=100*math.expm1(sum(math.log1p(r['area_pct']/100) for r in rows)/len(rows)),
+                         above_five_pct_area=sum(r['area_pct']>5 for r in rows),
                          median_search_s=median(r['search_seconds'] for r in rows)))
     table(out/'development.csv',designs)
     table(out/'aggregate.csv',aggregate)

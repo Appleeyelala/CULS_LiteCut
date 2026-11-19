@@ -3,6 +3,7 @@ import math
 import random
 import time
 import torch
+from .load_marginals import marginal_greedy
 
 
 def size_for_step(limit, tried, incumbent):
@@ -23,6 +24,14 @@ def size_for_step(limit, tried, incumbent):
 
 def optimize(bank, rule, method, budget, seconds, edit_limit, area_ratio, seed, record_priority=False,
              adaptive_sizes=False, observed_po=None, priority_target=None):
+    if method=='global_marginal':
+        if adaptive_sizes or observed_po is not None or priority_target is not None or record_priority:
+            raise ValueError('Global marginal search uses its own forward block policy')
+        best,trace,elapsed=marginal_greedy(bank,rule,budget,edit_limit,seconds,area_ratio)
+        selected=next(r for r in trace if r['vector']==best)
+        return best,dict(trace=trace,unique_vectors=len({tuple(r['vector']) for r in trace}),hard_calls=len(trace),
+                         method=method,rank_delay=selected['delay_ps'],original_model_delay=trace[0]['delay_ps'],
+                         original_model_area=trace[0]['area'],seconds=elapsed)
     start=time.monotonic()
     zero=[0]*len(rule.catalogue.decisions)
     z=torch.zeros(bank.states,device=bank.device,requires_grad=True)

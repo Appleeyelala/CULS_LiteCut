@@ -123,7 +123,7 @@ def main():
     p.add_argument('--output',type=Path,required=True)
     p.add_argument('--prepared',type=Path)
     p.add_argument('--mode',choices=['delay','area'],default='delay')
-    p.add_argument('--method',choices=['gradient','greedy','random'],default='gradient')
+    p.add_argument('--method',choices=['gradient','global_marginal','greedy','random'],default='gradient')
     p.add_argument('--device',choices=['cpu','cuda'],default='cuda')
     p.add_argument('--alpha',choices=[0.,.5],type=float,default=0.)
     p.add_argument('--adaptive-sizes',action='store_true',help='Explore edit capacities within the same gradient search budget')
@@ -133,7 +133,7 @@ def main():
     a=p.parse_args()
     if (not os.getenv('SLURM_JOB_ID') or not a.output.resolve().is_relative_to('/data/wushangge')
             or a.steps<1 or a.max_edits<0 or (a.seconds is not None and a.seconds<=0)
-            or (a.adaptive_sizes and a.method!='gradient') or (a.prepared and len(a.original)!=1)):
+            or (a.anchor_outputs and a.method=='global_marginal') or (a.adaptive_sizes and a.method!='gradient') or (a.prepared and len(a.original)!=1)):
         p.error('Use a dedicated /data Slurm output, positive budgets and one input for prepared mode')
     torch.set_num_threads(1)
     a.tools=read(a.tools);a.output=a.output.resolve()

@@ -46,6 +46,14 @@ class CalibrationTest(unittest.TestCase):
         vector,trace,_=marginal_greedy(TwoChoiceBank(),OneRule(),8,1)
         self.assertEqual(vector,[1])
         self.assertEqual([t['delay_ps'] for t in trace],[8,5])
+        for area_ratio in (None,1.05):
+            returned,report=optimize(TwoChoiceBank(),OneRule(),'global_marginal',8,None,1,area_ratio,1)
+            self.assertEqual(returned,vector)
+            self.assertEqual(report['hard_calls'],2)
+            self.assertEqual(report['rank_delay'],5)
+        returned,report=optimize(TwoChoiceBank(),OneRule(),'global_marginal',1,None,1,None,1)
+        self.assertEqual(returned,[0])
+        self.assertEqual(report['hard_calls'],1)
 
     def test_caps_are_valid_and_explore_extremes(self):
         for limit in (0,1,2,3,8,16):

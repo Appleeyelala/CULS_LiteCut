@@ -5,25 +5,31 @@ import time
 import torch
 
 
-def marginal_greedy(bank,rule,budget,edit_limit):
+def marginal_greedy(bank,rule,budget,edit_limit,seconds=None,area_ratio=None):
     start=time.monotonic()
     incumbent=[0]*len(rule.catalogue.decisions)
     base_weights=bank.hard(incumbent)
     uniform=bank.soft(torch.zeros_like(base_weights))
     with torch.no_grad():
-        best=float(bank.forward(base_weights)[0])
-    if not math.isfinite(best):
+        delay,area=bank.forward(base_weights)
+        best,baseline_area=float(delay),float(area)
+    baseline_delay=best
+    max_area=math.inf if area_ratio is None else baseline_area*area_ratio
+    if not math.isfinite(best) or not math.isfinite(baseline_area):
         raise ValueError('Nonfinite baseline score')
-    trace=[dict(vector=incumbent.copy(),delay_ps=best)]
+    trace=[dict(step=0,vector=incumbent.copy(),delay_ps=best,area=baseline_area,elapsed_s=time.monotonic()-start)]
     attempted=set()
     updates=0
     for step in range(1,budget):
-        if updates>=edit_limit:
+        if updates>=edit_limit or (seconds is not None and time.monotonic()-start>=seconds):
             break
         # A fixed midpoint keeps candidate branches observable when the incumbent is one-hot.
         probe=((bank.hard(incumbent)+uniform)*.5).detach().requires_grad_()
-        delay,_=bank.forward(probe)
-        grad,=torch.autograd.grad(delay,probe)
+        delay,area=bank.forward(probe)
+        objective=delay
+        if area_ratio is not None:
+            objective=delay/max(baseline_delay,1e-6)+20*torch.relu(area/max(baseline_area,1e-6)-area_ratio)
+        grad,=torch.autograd.grad(objective,probe)
         if not torch.isfinite(grad).all():
             raise ValueError('Nonfinite global marginal')
         values=grad.detach().cpu().tolist()
@@ -46,11 +52,12 @@ def marginal_greedy(bank,rule,budget,edit_limit):
             break
         attempted.update(changes)
         with torch.no_grad():
-            score=float(bank.forward(bank.hard(trial))[0])
-        if not math.isfinite(score):
+            delay,area=bank.forward(bank.hard(trial))
+            score,trial_area=float(delay),float(area)
+        if not math.isfinite(score) or not math.isfinite(trial_area):
             raise ValueError('Nonfinite hard score')
-        trace.append(dict(vector=trial,delay_ps=score))
-        if score < best-max(2e-5,abs(best)*2e-6):
+        trace.append(dict(step=step,vector=trial,delay_ps=score,area=trial_area,elapsed_s=time.monotonic()-start))
+        if trial_area<=max_area and score < best-max(2e-5,abs(best)*2e-6):
             incumbent=trial
             best=score
             updates+=len(changes)

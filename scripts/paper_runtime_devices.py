@@ -16,9 +16,10 @@ from global_timing.common import digest, save_json
 def run(out, task, references):
     parts = task.split('/')
     name, device = parts[:2]
-    alpha = parts[2] if len(parts)==3 else '0.5'
-    if len(parts) not in (2,3) or alpha not in ('0','0.5'):
-        raise ValueError('Expected circuit/device[/alpha]')
+    alpha = parts[2] if len(parts)>=3 else '0.5'
+    method = parts[3] if len(parts)==4 else 'gradient'
+    if len(parts) not in (2,3,4) or alpha not in ('0','0.5') or method not in ('gradient','global_marginal'):
+        raise ValueError('Expected circuit/device[/alpha[/method]]')
     row = references[name]
     old = Path(row['work'])
     inputs = json.loads((old / 'inputs.json').read_text())
@@ -29,8 +30,10 @@ def run(out, task, references):
         if key in inputs['tools']:
             assert digest(Path(path)) == inputs['tools'][key]['sha256']
     dest = out / (name + '_' + device + ('_no_student' if alpha=='0' else ''))
+    if method!='gradient':
+        dest=dest.with_name(dest.name+'_'+method)
     cmd = [sys.executable, '-B', str(ROOT / 'scripts/load_rewrite.py'), '--original', str(source),
-           '--output', str(dest), '--tools', str(tool_config), '--method', 'gradient', '--mode', 'delay',
+           '--output', str(dest), '--tools', str(tool_config), '--method', method, '--mode', 'delay',
            '--alpha', alpha, '--steps', '8', '--seed', str(inputs['seed']), '--max-edits', '16',
            '--device', device]
     begin = time.perf_counter()

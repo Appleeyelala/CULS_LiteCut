@@ -54,6 +54,9 @@ if __name__=='__main__':
     a=parser.parse_args()
     if not 0<=a.shard<a.shards:
         parser.error('Invalid shard')
+    frozen=read(ROOT/'analysis/paper_joint_evidence/validation_freeze.json')
+    if digest(a.manifest)!=frozen['panel_sha256'] or a.arm!=frozen['arm']:
+        parser.error('Arm or panel does not match the committed prospective validation freeze')
     records=read(a.manifest)['rows']
     assert len({r['aig_sha256'] for r in records})==len(records)==24
     a.out.mkdir()

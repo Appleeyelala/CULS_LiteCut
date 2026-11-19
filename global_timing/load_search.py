@@ -27,12 +27,12 @@ def optimize(bank, rule, method, budget, seconds, edit_limit, area_ratio, seed, 
     zero=[0]*len(rule.catalogue.decisions)
     z=torch.zeros(bank.states,device=bank.device,requires_grad=True)
     optimizer=torch.optim.Adam([z],lr=.15) if method=='gradient' and bank.states else None
-    offset = None
+    po_correction = None
     def prediction(weights):
-        if offset is None:
+        if po_correction is None:
             return bank.forward(weights)
         po, area, _, _ = bank.forward(weights, detail=True)
-        return (po + offset).amax(), area
+        return (po + po_correction).amax(), area
 
     def evaluate(vector):
         rule.validate(vector)
@@ -50,7 +50,7 @@ def optimize(bank, rule, method, budget, seconds, edit_limit, area_ratio, seed, 
             observed = po.new_tensor(observed_po)
             if observed.shape != po.shape or not torch.isfinite(observed).all():
                 raise ValueError("Invalid ABC baseline PO rise/fall observations")
-            offset = observed - po
+            po_correction = observed - po
             d0, a0 = float(observed.amax()), float(area)
     tried_sizes = set()
     base=max(d0,1.e-6)

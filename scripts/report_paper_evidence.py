@@ -7,7 +7,7 @@ from pathlib import Path
 from statistics import median
 
 ROOT=Path(__file__).resolve().parents[1]
-METHODS=('gradient','gradient_no_litecut','local_greedy','global_prefix','global_block','greedy','random')
+METHODS=('gradient','gradient_no_litecut','local_greedy','global_prefix','global_block','greedy','random','global_marginal')
 
 
 def read(path):
@@ -112,6 +112,13 @@ def outputs(args):
                         item['oracle_deliverable_ps']=best
                         item['delivery_regret_ps']=item['delivered_ps']-best
                     (pilots if pilot else methods).append(item)
+    for p in sorted(args.marginals.glob('*/marginal.json')):
+        name=p.parent.name
+        rows=read(p)
+        freeze=read(p.parent/'marginal_freeze.json')
+        item=label(name,rows[2],*rows[:2],float(reference[name]['baseline_b_ps']))
+        assert (rows[2]['edits'] or [])==freeze['selection']
+        methods.append(dict(**item,hard_calls=len(freeze['trace']),search_seconds=freeze['seconds']))
     assert len(set((r['circuit'],r['method']) for r in methods))==len(methods)
     for name in {r['circuit'] for r in methods}:
         assert {r['method'] for r in methods if r['circuit']==name}==set(METHODS)
@@ -209,7 +216,7 @@ def outputs(args):
 
 if __name__=='__main__':
     ap=argparse.ArgumentParser(description=__doc__)
-    for name in ('singles','pilot','frozen-system','coverage','panel','parsers','fixed','owners','endpoints','output'):
+    for name in ('singles','pilot','frozen-system','coverage','panel','parsers','fixed','owners','endpoints','marginals','output'):
         ap.add_argument('--'+name,type=Path,required=True)
     for name in ('selectors','runtime'):
         ap.add_argument('--'+name,type=Path,nargs='+',required=True)

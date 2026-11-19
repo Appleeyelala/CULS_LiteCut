@@ -3,6 +3,7 @@ from types import SimpleNamespace
 
 import torch
 
+from global_timing.load_marginals import marginal_greedy
 from global_timing.load_search import optimize, size_for_step
 
 
@@ -40,6 +41,11 @@ class CalibrationTest(unittest.TestCase):
                                         None, 1, observed_po=observed)
             self.assertEqual(selection,[1])
             self.assertEqual([r['delay_ps'] for r in trace['trace']],expected)
+
+    def test_marginal_greedy_accepts_a_globally_faster_move(self):
+        vector,trace,_=marginal_greedy(TwoChoiceBank(),OneRule(),8,1)
+        self.assertEqual(vector,[1])
+        self.assertEqual([t['delay_ps'] for t in trace],[8,5])
 
     def test_caps_are_valid_and_explore_extremes(self):
         for limit in (0,1,2,3,8,16):

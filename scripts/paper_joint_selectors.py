@@ -9,6 +9,7 @@ from global_timing.feasibility import CandidateFeasibility
 from global_timing.liberty_cover import Liberty
 from global_timing.load_bank import LoadBank
 from global_timing.load_search import optimize
+from global_timing.load_marginals import marginal_greedy
 from global_timing.structure import parse_aig
 
 SIZES=(0,1,2,4,6,8,12,16)
@@ -40,7 +41,7 @@ def informed(bank,rule,case,scores,block):
                 best=trial;best_ps=ps
     return full,best,trace
 
-def run(name,out,device,offline=True,reference_work=None):
+def run(name,out,device,offline=True,reference_work=None,marginal_only=False):
     start=time.monotonic()
     case=FrozenCase(name,out/name,reference_work)
     rules=parse_library(ROOT/'projects/culs/src/algorithms/rewrite_library.inc')
@@ -48,7 +49,7 @@ def run(name,out,device,offline=True,reference_work=None):
     rule=CandidateFeasibility(aig,case.cat,rules)
     if not any(any(mask[1:]) for mask in rule.allowed()):
         original = case.measure('original',None)
-        controls = ('gradient','gradient_no_litecut','local_greedy','global_prefix','global_block','greedy','random')
+        controls = ('gradient','gradient_no_litecut','local_greedy','global_prefix','global_block','greedy','random','global_marginal')
         save_json(case.out/'selected.json',[original,case.measure('noop',case.zero)]+[dict(original,label=m) for m in controls])
         save_json(case.out/'frozen.json',dict(no_legal_edits=True,methods={m:dict(selection=[],seconds=0,trace=[]) for m in controls}))
         return
@@ -56,6 +57,14 @@ def run(name,out,device,offline=True,reference_work=None):
     bank=LoadBank(aig,case.cat,rule,scores,rules,Liberty(case.old/'original/tables',device),
                   case.tools['abc'],case.tools['liberty'],case.out/'bank',.5)
     assert digest(case.out/'bank/forest.aig')==digest(case.old/'templates/forest.aig')
+    if marginal_only:
+        v,trace,seconds=marginal_greedy(bank,rule,8,16)
+        frozen=dict(selection=sparse(v),seconds=seconds,trace=[dict(edits=sparse(t['vector']),proxy_ps=t['delay_ps']) for t in trace])
+        save_json(case.out/'marginal_freeze.json',frozen)
+        results=[case.measure('original',None),case.measure('noop',case.zero),
+                 case.measure('global_marginal',v if any(v) else None)]
+        save_json(case.out/'marginal.json',results)
+        return
     methods={};traces={};times={}
     for method in ('gradient','greedy','random','gradient_no_litecut'):
         begin=time.monotonic()
@@ -72,9 +81,11 @@ def run(name,out,device,offline=True,reference_work=None):
     begin=time.monotonic()
     _,methods['global_block'],traces['global_block']=informed(bank,rule,case,scores,True)
     times['global_block']=time.monotonic()-begin
+    if not offline:
+        methods['global_marginal'],traces['global_marginal'],times['global_marginal']=marginal_greedy(bank,rule,8,16)
     assert all(1<=len(t)<=8 for t in traces.values())
     if reference_work is None:
-        assert all(len(t)==8 for t in traces.values())
+        assert all(len(t)==8 for m,t in traces.items() if m!='global_marginal')
     old=read(case.old/'proposal.json')
     parity=methods['gradient']==case.selected
     frozen={m:dict(selection=sparse(v),seconds=times[m],
@@ -109,6 +120,6 @@ if __name__=='__main__':
     out=Path(sys.argv[1]);out.mkdir()
     torch.set_num_threads(1)
     names=sys.argv[3:]
-    selected_only=names[0]=='--selected-only'
-    for name in names[int(selected_only):]:
-        run(name,out,sys.argv[2],offline=not selected_only)
+    mode=names[0] if names[0] in ('--selected-only','--marginal-only') else None
+    for name in names[int(mode is not None):]:
+        run(name,out,sys.argv[2],offline=mode is None,marginal_only=mode=='--marginal-only')

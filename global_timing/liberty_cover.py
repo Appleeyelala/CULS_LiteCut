@@ -75,9 +75,11 @@ def mapped_graph(path, lib, prefix=''):
         line=line.strip()
         if line.startswith(('input ', 'output ')):
             kind,buf=line.split(None,1)
-            while ';' not in buf:
-                buf+=' '+next(lines).strip()
-            (ins if kind=='input' else outs).extend(prefix+n.strip() for n in buf.split(';')[0].split(','))
+            pieces=[buf]
+            while ';' not in pieces[-1]:
+                pieces.append(next(lines).strip())
+            declaration=' '.join(pieces).partition(';')[0]
+            (ins if kind=='input' else outs).extend(prefix+n.strip() for n in declaration.split(','))
         elif line.startswith('assign '):
             out,src=re.fullmatch(r'assign\s+(\S+)\s*=\s*(\S+)\s*;',line).groups()
             gates[prefix+out]=(None,[prefix+src])
@@ -86,7 +88,7 @@ def mapped_graph(path, lib, prefix=''):
             cell=lib.cells[name]
             ports=dict(re.findall(r'\.(\w+)\(([^()]*)\)',line))
             gates[prefix+ports[cell['output']]]=(name,[prefix+ports[p] for p in cell['pins']])
-    if not outs or any(n in ins for n in gates):
+    if not outs or not set(ins).isdisjoint(gates):
         raise ValueError('Invalid mapped interface')
     return ins,outs,gates
 

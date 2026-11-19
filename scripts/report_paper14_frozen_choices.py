@@ -64,7 +64,15 @@ def report(audit, out):
         require(prev['delay_ps']==selected['delay_ps'] and prev['area']==selected['area']
                 and prev['input_sha256']==selected['aig_sha256'],name+' historical mismatch')
         guarded=min(o,selected['delay_ps']); denom=oracle['delay_ps']
-        decisions.append(dict(circuit=name,original_ps=o,noop_ps=z,noop_minus_original_ps=z-o,
+        switched=any(r['baseline_direction_differs'] for r in nonempty)
+        if best['delay_ps']>=o:
+            action='control_serialization_then_edit_count' if switched else 'test_nested_edit_counts'
+        elif guarded>denom:
+            action='trace_proxy_at_true_critical_outputs'
+        else:
+            action='retain_positive_control'
+        decisions.append(dict(circuit=name,next_action=action,
+                              selected_minus_best_nonempty_ps=selected['delay_ps']-best['delay_ps'],original_ps=o,noop_ps=z,noop_minus_original_ps=z-o,
                               selected=selected['configuration'],selected_ps=selected['delay_ps'],selected_rank=selected['nonempty_rank'],
                               valid_nonempty=len(nonempty),best_nonempty=best['configuration'],best_ps=best['delay_ps'],
                               best_ties='|'.join(r['configuration'] for r in nonempty if r['delay_ps']==best['delay_ps']),

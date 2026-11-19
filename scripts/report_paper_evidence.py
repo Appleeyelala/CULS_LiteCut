@@ -2,6 +2,7 @@
 import argparse
 import csv
 import json
+import math
 from pathlib import Path
 from statistics import median
 
@@ -114,6 +115,46 @@ def outputs(args):
     assert len(set((r['circuit'],r['method']) for r in methods))==len(methods)
     for name in {r['circuit'] for r in methods}:
         assert {r['method'] for r in methods if r['circuit']==name}==set(METHODS)
+    designs=[]
+    aggregate=[]
+    for name in sorted({r['circuit'] for r in methods}):
+        arms={r['method']:r for r in methods if r['circuit']==name}
+        gradient=arms['gradient']
+        best_control=min(arms[m]['delivered_ps'] for m in METHODS if not m.startswith('gradient'))
+        designs.append(dict(circuit=name,original_ps=gradient['original_ps'],noop_ps=gradient['noop_ps'],
+                       b_ps=gradient['b_ps'],native_litecut_ps=reference[name]['litecut_ps'],
+                       gradient_raw_ps=gradient['raw_ps'],gradient_area_pct=gradient['area_pct'],
+                       gradient_area_cap_5pct_ps=gradient['delivered_ps_if_area_cap_5pct'],
+                       **{m+'_delivered_ps':r['delivered_ps'] for m,r in arms.items()},
+                       best_nongradient_delivered_ps=best_control,
+                       gradient_vs_best_nongradient_pct=(gradient['delivered_ps']/best_control-1)*100))
+    for m in METHODS:
+        rows=[r for r in methods if r['method']==m]
+        def geo_change(base):
+            return 100*math.expm1(sum(math.log(r['delivered_ps']/r[base]) for r in rows)/len(rows))
+        aggregate.append(dict(method=m,designs=len(rows),accepted=sum(r['delivered_ps']<r['original_ps'] for r in rows),
+                         faster_than_b=sum(r['delivered_ps']<r['b_ps'] for r in rows),
+                         failed_proposals=sum(r['evaluation_status']!='PASS' for r in rows),
+                         gm_vs_original_pct=geo_change('original_ps'),gm_vs_b_pct=geo_change('b_ps'),
+                         median_search_s=median(r['search_seconds'] for r in rows)))
+    table(out/'development.csv',designs)
+    table(out/'aggregate.csv',aggregate)
+    owners=[]
+    for p in sorted(args.owners.glob('*/owners.json')):
+        data=read(p)
+        rows=data['measurements']
+        name=p.parent.name
+        for row in rows[2:]:
+            item=label(name,row,*rows[:2],float(reference[name]['baseline_b_ps']))
+            item['all_edited_owners']=len(data['edits_by_owner'])
+            owners.append(item)
+    table(out/'owners.csv',owners)
+    endpoints=[]
+    for p in sorted(args.endpoints.glob('*/endpoint_summary.json')):
+        data=read(p)
+        endpoints.extend(dict(circuit=p.parent.name,true_noop_critical_po=data['true_noop_critical_po'],
+                              proxy_noop_critical_po=data['proxy_noop_critical_po'],**r) for r in data['rows'])
+    table(out/'endpoints.csv',endpoints)
     table(out/'selectors.csv',methods)
     table(out/'nested.csv',nested)
     table(out/'size_pilot.csv',pilots)
@@ -164,7 +205,7 @@ def outputs(args):
 
 if __name__=='__main__':
     ap=argparse.ArgumentParser(description=__doc__)
-    for name in ('singles','pilot','frozen-system','coverage','panel','parsers','fixed','output'):
+    for name in ('singles','pilot','frozen-system','coverage','panel','parsers','fixed','owners','endpoints','output'):
         ap.add_argument('--'+name,type=Path,required=True)
     for name in ('selectors','runtime'):
         ap.add_argument('--'+name,type=Path,nargs='+',required=True)

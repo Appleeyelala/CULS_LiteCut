@@ -22,6 +22,10 @@ def family(path):
     stem = path.stem.lower()
     stem = re.sub(r'(_(orig|comb|opt|mapped|aig)|_v?\d+)+$', '', stem)
     word = re.sub('[^a-z0-9]', '', stem)
+    if re.fullmatch(r'x\d+dn',word):
+        return 'x'
+    if re.fullmatch(r'bc[a-d]',word):
+        return 'bc'
     word = re.sub(r'\d+[a-z]?$', '', word) or word
     aliases = {'multiplier':'mult','multiply':'mult','barrelshifter':'bar','priorityencoder':'priority',
                'divisor':'div','addition':'adder','decoder':'dec'}
@@ -97,6 +101,9 @@ def main(out, staged):
         if raw in hashes or checksum in structures:
             row['status']='prior_or_duplicate_structure'
             continue
+        if count < 100:
+            row['status']='below_100_ands'
+            continue
         hashes.add(raw)
         structures.add(checksum)
         groups.add(group)
@@ -107,10 +114,12 @@ def main(out, staged):
         save_json(out/'audit.json',audit)
         raise ValueError('Fewer than 24 eligible families')
     panel = []
-    for i in range(3):
-        group = ordered[len(ordered)*i//3:len(ordered)*(i+1)//3]
+    for lower,upper in ((100,300),(300,1000),(1000,float('inf'))):
+        group = [r for r in ordered if lower <= r['ands'] < upper]
+        if len(group) < 8:
+            raise ValueError('Insufficient families in size band '+str(lower))
         selected = sorted(group,key=lambda r:order(Path(r['source'])))[:8]
-        panel.extend(dict(**r,size_tertile=i+1) for r in selected)
+        panel.extend(dict(**r,size_band_min_ands=lower) for r in selected)
     save_json(out/'audit.json',audit)
     save_json(out/'panel.json',dict(rows=panel,original_rows=len(historical),eligible_families=len(ordered),
               import_abc_sha256=digest(binary),scope='No QoR labels used. Student training data ancestry is unverified.'))

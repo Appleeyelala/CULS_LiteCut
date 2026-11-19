@@ -40,12 +40,18 @@ def informed(bank,rule,case,scores,block):
                 best=trial;best_ps=ps
     return full,best,trace
 
-def run(name,out,device,offline=True):
+def run(name,out,device,offline=True,reference_work=None):
     start=time.monotonic()
-    case=FrozenCase(name,out/name)
+    case=FrozenCase(name,out/name,reference_work)
     rules=parse_library(ROOT/'projects/culs/src/algorithms/rewrite_library.inc')
     aig=parse_aig(case.source)
     rule=CandidateFeasibility(aig,case.cat,rules)
+    if not any(any(mask[1:]) for mask in rule.allowed()):
+        original = case.measure('original',None)
+        controls = ('gradient','gradient_no_litecut','local_greedy','global_prefix','global_block','greedy','random')
+        save_json(case.out/'selected.json',[original,case.measure('noop',case.zero)]+[dict(original,label=m) for m in controls])
+        save_json(case.out/'frozen.json',dict(no_legal_edits=True,methods={m:dict(selection=[],seconds=0,trace=[]) for m in controls}))
+        return
     scores=read(case.prep/'scores.json')['scores']
     bank=LoadBank(aig,case.cat,rule,scores,rules,Liberty(case.old/'original/tables',device),
                   case.tools['abc'],case.tools['liberty'],case.out/'bank',.5)
@@ -66,7 +72,9 @@ def run(name,out,device,offline=True):
     begin=time.monotonic()
     _,methods['global_block'],traces['global_block']=informed(bank,rule,case,scores,True)
     times['global_block']=time.monotonic()-begin
-    assert all(len(t)==8 for t in traces.values())
+    assert all(1<=len(t)<=8 for t in traces.values())
+    if reference_work is None:
+        assert all(len(t)==8 for t in traces.values())
     old=read(case.old/'proposal.json')
     parity=methods['gradient']==case.selected
     frozen={m:dict(selection=sparse(v),seconds=times[m],

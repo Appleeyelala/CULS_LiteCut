@@ -18,10 +18,12 @@ def read(path):
     return json.loads(path.read_text())
 
 class FrozenCase:
-    def __init__(self,name,out):
-        with (ROOT/'analysis/paper14_fullflow/results.csv').open() as stream:
-            self.reference=next(row for row in csv.DictReader(stream) if row['circuit']==name)
-        self.old=Path(self.reference['work'])
+    def __init__(self,name,out,reference_work=None):
+        if reference_work is None:
+            with (ROOT/'analysis/paper14_fullflow/results.csv').open() as stream:
+                record=next(row for row in csv.DictReader(stream) if row['circuit']==name)
+            reference_work=Path(record['work'])
+        self.old=Path(reference_work)
         self.out=out
         out.mkdir()
         self.inputs=read(self.old/'inputs.json')

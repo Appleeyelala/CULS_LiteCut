@@ -22,7 +22,7 @@ def size_for_step(limit, tried, incumbent):
 
 
 def optimize(bank, rule, method, budget, seconds, edit_limit, area_ratio, seed, record_priority=False,
-             adaptive_sizes=False, observed_po=None):
+             adaptive_sizes=False, observed_po=None, priority_target=None):
     start=time.monotonic()
     zero=[0]*len(rule.catalogue.decisions)
     z=torch.zeros(bank.states,device=bank.device,requires_grad=True)
@@ -106,6 +106,17 @@ def optimize(bank, rule, method, budget, seconds, edit_limit, area_ratio, seed, 
             rank=key;best=candidate.copy()
         visited.add(tuple(candidate))
         row=dict(step=step,vector=candidate,delay_ps=delay,area=area)
+        if method == "gradient" and priority_target is not None and step == priority_target[0]:
+            # Preserve the historical edit identities even if current CUDA ties change a choice.
+            target = priority_target[1]
+            ranked = []
+            start_index = 0
+            for group in bank.groups:
+                for position, (i, c) in enumerate(group[1:], 1):
+                    if target[i] == c:
+                        ranked.append((weights[start_index+position] - weights[start_index], i, c))
+                start_index += len(group)
+            row["target_order"] = sorted(ranked, key=lambda x: (-x[0],x[1],x[2]))
         if adaptive_sizes:
             row["edit_capacity"] = capacity if step else 0
         if record_priority:

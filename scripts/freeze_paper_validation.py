@@ -35,26 +35,23 @@ def identity(p):
     return checksum, aig.and_count
 
 
-def main(out):
+def main(out, staged):
     out.mkdir()
     groups = set()
     hashes = set()
     structures = set()
     historical = read(ROOT / 'benchmark905_manifest.json')['rows']
-    historical = [(Path(r['source']), r['sha256']) for r in historical]
+    historical = [(staged / r['relative_path'], r['sha256']) for r in historical]
     with (ROOT/'analysis/paper14_fullflow/results.csv').open() as stream:
         for row in csv.DictReader(stream):
             inputs = read(Path(row['work']) / 'inputs.json')
             historical.append((Path(inputs['original']), inputs['original_sha256']))
-    tmp = out / 'history.aig'
     for src, expected in historical:
         groups.add(family(src))
         if expected not in hashes:
-            shutil.copyfile(src,tmp)
-            assert digest(tmp)==expected
-            structures.add(identity(tmp)[0])
+            assert digest(src)==expected
+            structures.add(identity(src)[0])
             hashes.add(expected)
-    tmp.unlink()
     candidates = out / 'candidates'
     candidates.mkdir()
     binary = Path(read(ROOT/'config/load_rewrite_tools.json')['frozen_abc'])
@@ -123,4 +120,4 @@ def main(out):
 if __name__=='__main__':
     if 'SLURM_JOB_ID' not in os.environ:
         raise SystemExit('Slurm required')
-    main(Path(sys.argv[1]))
+    main(Path(sys.argv[1]),Path(sys.argv[2]))

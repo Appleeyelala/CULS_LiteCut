@@ -49,7 +49,7 @@ def design(args, original, out):
         tools={k:dict(path=str(p),sha256=digest(p)) for k,p in paths.items()},mode=args.mode,
         method=args.method,alpha=args.alpha,source_snapshot=str(ROOT),slurm_id=os.getenv('SLURM_JOB_ID'),
         seed=args.seed,steps=args.steps,seconds=args.seconds,max_edits=args.max_edits,
-        device=args.device,prepared=str(args.prepared) if args.prepared else None))
+        device=args.device,adaptive_sizes=args.adaptive_sizes,anchor_outputs=args.anchor_outputs,prepared=str(args.prepared) if args.prepared else None))
     if args.device=='cuda': torch.cuda.reset_peak_memory_stats()
     aig=stage('read_aig',parse_aig,original)
     if args.prepared:
@@ -95,7 +95,9 @@ def design(args, original, out):
         tech=stage('load_timing_tables',Liberty,tables,args.device)
         bank=stage('template_preparation',LoadBank,aig,cat,rule,scores,rules,tech,tools.abc,tools.liberty,out/'templates',args.alpha)
         nstates=bank.states;once=1
-        vector,trace=stage('search',optimize,bank,rule,args.method,args.steps,args.seconds,args.max_edits,area_limit,args.seed)
+        observed = [[po['rise_ps'],po['fall_ps']] for po in baseline['po_rise_fall']] if args.anchor_outputs else None
+        vector,trace=stage('search',optimize,bank,rule,args.method,args.steps,args.seconds,args.max_edits,area_limit,args.seed,
+                           adaptive_sizes=args.adaptive_sizes,observed_po=observed)
     save_json(out/'proposal.json',dict(vector=vector,**trace))
     call=SimpleNamespace(output=out,original=original,owners=owners,area_limit=area_limit,**paths)
     row=stage('final_replay_and_validation',evaluate_proposal,call,cat,rule,vector,baseline)
@@ -124,12 +126,14 @@ def main():
     p.add_argument('--method',choices=['gradient','greedy','random'],default='gradient')
     p.add_argument('--device',choices=['cpu','cuda'],default='cuda')
     p.add_argument('--alpha',choices=[0.,.5],type=float,default=0.)
+    p.add_argument('--adaptive-sizes',action='store_true',help='Explore edit capacities within the same gradient search budget')
+    p.add_argument('--anchor-outputs',action='store_true',help='Align no-edit PO rise/fall to direct ABC mapping before scoring changes')
     p.add_argument('--steps',type=int,default=8);p.add_argument('--seconds',type=float)
     p.add_argument('--seed',type=int,default=20261117);p.add_argument('--max-edits',type=int,default=16)
     a=p.parse_args()
     if (not os.getenv('SLURM_JOB_ID') or not a.output.resolve().is_relative_to('/data/wushangge')
             or a.steps<1 or a.max_edits<0 or (a.seconds is not None and a.seconds<=0)
-            or (a.prepared and len(a.original)!=1)):
+            or (a.adaptive_sizes and a.method!='gradient') or (a.prepared and len(a.original)!=1)):
         p.error('Use a dedicated /data Slurm output, positive budgets and one input for prepared mode')
     torch.set_num_threads(1)
     a.tools=read(a.tools);a.output=a.output.resolve()

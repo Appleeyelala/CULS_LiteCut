@@ -1,0 +1,36 @@
+{
+  "total": 14,
+  "completed": 14,
+  "accepted": 4,
+  "reference_run": "/data/wushangge/CULS_LiteCut/runs/20261119T022540Z-paper14-references-a05e1cbb",
+  "flow_runs": [
+    "/data/wushangge/CULS_LiteCut/runs/20261119T022536Z-paper14-a2-246ce353",
+    "/data/wushangge/CULS_LiteCut/runs/20261119T022538Z-paper14-b2-ba3bfef3",
+    "/data/wushangge/CULS_LiteCut/runs/20261119T035144Z-paper14-sc-cpu-retry-619fb9d9"
+  ],
+  "fallbacks": {
+    "ACCEPTED": 4,
+    "ORIGINAL": 4,
+    "ORIGINAL_AFTER_DELAY_CHECK": 6
+  },
+  "original_ps": {
+    "faster": 4,
+    "same": 10,
+    "slower": 0,
+    "geomean_ratio": 0.9919072396207832
+  },
+  "baseline_b_ps": {
+    "faster": 5,
+    "same": 0,
+    "slower": 9,
+    "geomean_ratio": 1.0874300051835886
+  },
+  "litecut_ps": {
+    "faster": 6,
+    "same": 0,
+    "slower": 8,
+    "geomean_ratio": 1.0530847962418262
+  },
+  "geomean_area_ratio": 1.0050116382188512,
+  "wall_s_median": 675.7819609513972
+}

@@ -1,0 +1,23 @@
+{
+  "root_cause": "PyTorch 1.13.1 scatter_reduce(amax) retained both full input and output activation vectors in each reverse timing stage.",
+  "first_sc_cpu_log": "/data/wushangge/CULS_LiteCut/runs/20261119T022538Z-paper14-b2-ba3bfef3/output/cases/sc_cpu.log",
+  "saved_tensor_instrumentation": "/data/wushangge/CULS_LiteCut/runs/20261119T034024Z-paper14-memprobe-feb3d65f/run.json",
+  "cpu_gradient_and_load_tests": "/data/wushangge/CULS_LiteCut/runs/20261119T034114Z-paper14-gradparity-2bc79407/run.json",
+  "cuda_controls": "/data/wushangge/CULS_LiteCut/runs/20261119T055435Z-paper14-gradient-control-03e8f17b/run.json",
+  "retry_from_raw": "/data/wushangge/CULS_LiteCut/runs/20261119T035144Z-paper14-sc-cpu-retry-619fb9d9/run.json",
+  "control_results": {
+    "c5315": {
+      "same_hard_vectors": 8,
+      "original_peak_cuda_allocated_bytes": 200772096,
+      "new_peak_cuda_allocated_bytes": 98178560,
+      "result_sha256": "5cdc82357a3619d70d12ac3354573ea8ade029a25235cd99543bb9a649989994"
+    },
+    "bc0": {
+      "same_hard_vectors": 8,
+      "original_peak_cuda_allocated_bytes": 108086784,
+      "new_peak_cuda_allocated_bytes": 62203392,
+      "result_sha256": "e3ea1a95eb80db6c1d66fc7ee599284172cb85cf81d251555749810d86dd6a7a"
+    }
+  },
+  "sc_cpu_peak_cuda_allocated_bytes": 2754105344
+}

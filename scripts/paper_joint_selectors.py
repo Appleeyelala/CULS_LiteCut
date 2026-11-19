@@ -40,7 +40,7 @@ def informed(bank,rule,case,scores,block):
                 best=trial;best_ps=ps
     return full,best,trace
 
-def run(name,out,device):
+def run(name,out,device,offline=True):
     start=time.monotonic()
     case=FrozenCase(name,out/name)
     rules=parse_library(ROOT/'projects/culs/src/algorithms/rewrite_library.inc')
@@ -79,7 +79,7 @@ def run(name,out,device):
     measurements=[case.measure('original',None),case.measure('noop',case.zero)]
     for m,v in methods.items():
         measurements.append(case.measure(m,v if any(v) else None))
-    if name=='systemcaes_comb':
+    if offline and name=='systemcaes_comb':
         match=next((x for x in traces['gradient'] if x['vector']==case.selected),None)
         if match is None: raise RuntimeError('Historical vector did not reproduce; cannot infer priority')
         order=match['priority']
@@ -90,6 +90,8 @@ def run(name,out,device):
             rule.validate(v)
             measurements.append(case.measure('nested_'+str(size),v))
     save_json(case.out/'selected.json',measurements)
+    if not offline:
+        return
     # Offline diagnostics only: labels do not participate in the selectors above.
     for m,trace in traces.items():
         rows=[case.measure(f'{m}_step{i}',x['vector'] if any(x['vector']) else None) for i,x in enumerate(trace)]
@@ -98,5 +100,7 @@ def run(name,out,device):
 if __name__=='__main__':
     out=Path(sys.argv[1]);out.mkdir()
     torch.set_num_threads(1)
-    for name in sys.argv[3:]:
-        run(name,out,sys.argv[2])
+    names=sys.argv[3:]
+    selected_only=names[0]=='--selected-only'
+    for name in names[int(selected_only):]:
+        run(name,out,sys.argv[2],offline=not selected_only)

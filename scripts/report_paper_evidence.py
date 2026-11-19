@@ -160,6 +160,13 @@ def outputs(args):
             item['all_edited_owners']=len(data['edits_by_owner'])
             owners.append(item)
     table(out/'owners.csv',owners)
+    audit=read(args.challenger)
+    assert all(audit['parity'].values()) and audit['method']=='global_marginal'
+    name=args.challenger.parent.name
+    trace=audit['measurements']
+    table(out/'challenger_ablation.csv',[dict(**label(name,r,*trace[:2],float(reference[name]['baseline_b_ps'])),
+                       edit_pairs=json.dumps(r['edits'])) for r in trace])
+
     endpoints=[]
     for p in sorted(args.endpoints.glob('*/endpoint_summary.json')):
         data=read(p)
@@ -238,7 +245,7 @@ def outputs(args):
 
 if __name__=='__main__':
     ap=argparse.ArgumentParser(description=__doc__)
-    for name in ('singles','pilot','frozen-system','coverage','panel','parsers','fixed','owners','endpoints','cone','marginals','output'):
+    for name in ('singles','pilot','frozen-system','coverage','panel','parsers','fixed','owners','endpoints','cone','marginals','challenger','output'):
         ap.add_argument('--'+name,type=Path,required=True)
     for name in ('selectors','runtime'):
         ap.add_argument('--'+name,type=Path,nargs='+',required=True)

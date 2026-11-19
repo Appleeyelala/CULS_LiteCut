@@ -1,6 +1,7 @@
 """Summarize the sealed panel once, keeping incomplete circuits and primary/control identities."""
 import argparse
 import math
+import json
 from pathlib import Path
 
 from paper_joint_evidence import digest, read
@@ -93,6 +94,15 @@ def main(out,panel,shards):
                       overtook_b=sum(r['delivered_ps']<r['b_ps']<=r['original_ps'] for r in paired),
                       gm_vs_original_pct=change(ok,'original_ps'),gm_vs_b_pct=change(paired,'b_ps')))
     table(out/'validation_aggregate.csv',summary)
+    sources=[]
+    for shard in shards:
+        manifest=next(parent/'run.json' for parent in shard.parents if (parent/'run.json').exists())
+        m=read(manifest)
+        sources.append(dict(manifest=str(manifest),job=m['slurm_job_id'],state=m['state'],commit=m['source_commit'],
+                            command=m['command'],resources=m['resources'],freeze=read(shard/'freeze.json')))
+    (out/'validation_sources.json').write_text(json.dumps(dict(panel=str(panel),panel_sha256=digest(panel),
+                                                sources=sources),indent=2)+'\n')
+
 
 
 if __name__=='__main__':

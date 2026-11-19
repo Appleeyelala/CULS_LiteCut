@@ -1,5 +1,7 @@
 # 新对话接续入口（2026-11-18，ABC 门级覆盖与原始 AIG 闭环）
 
+2026-11-19 论文实验已完成。最新研究分支为 `work/paper-joint-evidence`，从[论文实验总表](/data/wushangge/CULS_LiteCut/staging/paper-joint-evidence/analysis/paper_joint_evidence/README.md)、[24 个冻结外部电路](/data/wushangge/CULS_LiteCut/staging/paper-joint-evidence/analysis/paper_joint_evidence/validation.csv)和[跨 MFFC 案例归因](/data/wushangge/CULS_LiteCut/staging/paper-joint-evidence/analysis/paper_joint_evidence/CASE_STUDIES.md)接续。联合 Adam 在 14 个开发电路中改善 4 个，在 24 个外部电路中改善 17 个；相对一次 ABC Rewrite 的几何平均延迟分别高 8.74% 和低 1.28%。验证主臂、全局边际选块对照与额外离线消融分别记录。下一轮应关注真实重映射后的逐输出延迟增量及跨区域组合排序。
+
 研究分支 `work/abc-load-rewrite`。[实现、反例与验收](analysis/abc_load_rewrite/README.md)和[逐电路有／无 LiteCut 对照](analysis/abc_load_rewrite/development.csv)。固定网表的 CPU／GPU 逐输出到达时间复现 ABC。预估覆盖在 ID75 错选 PO124，在 ID421 漏掉改写后 PO1274 的时延跃升。新模型平均选优损失 20.463%、Top-1 为 1/12，未达到扩评条件。原始 AIG 入口、带面积约束的回退和实际交付路径均已验证。
 
 # 新对话接续入口（2026-11-18，ABC 时序分支）

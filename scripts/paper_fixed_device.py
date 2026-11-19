@@ -22,8 +22,11 @@ def measure(case, device, rules, rule, aig):
     sync()
     hard=[]
     with torch.no_grad():
-        for vector in (case.zero,case.selected):
+        for i,vector in enumerate((case.zero,case.selected)):
+            sync()
+            begin=time.perf_counter()
             hard.append(float(bank.forward(bank.hard(vector))[0]))
+            save_json(case.out/device/f'hard_{i}.json',dict(delay_ps=hard[-1],seconds=time.perf_counter()-begin))
     tensors=[]
     times=[]
     # Identical initial values on both devices, with and without exact logit ties.
@@ -41,6 +44,7 @@ def measure(case, device, rules, rule, aig):
         times.append(dict(forward=middle-start,backward=end-middle,delay=float(delay)))
         tensors.append(z.grad.detach().cpu().double())
         assert torch.isfinite(tensors[-1]).all()
+        save_json(case.out/device/f'soft_{len(times)-1}.json',dict(**times[-1],gradient_norm=float(tensors[-1].norm())))
     return dict(hard=hard,soft=times,peak_bytes=torch.cuda.max_memory_allocated() if device=='cuda' else None),tensors
 
 

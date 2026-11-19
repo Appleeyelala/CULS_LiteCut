@@ -68,6 +68,7 @@ def outputs(args):
             item=label(name,row,*rows[:2],float(reference[name]['baseline_b_ps']))
             item['edit_pairs']=json.dumps(row['edits'])
             singles.append(item)
+    assert len(singles)==38 and {r['circuit'] for r in singles}=={'c5315','intra_pred_PE'}
     table(out/'isolated.csv',singles)
 
     methods=[]
@@ -120,6 +121,8 @@ def outputs(args):
         assert (rows[2]['edits'] or [])==freeze['selection']
         methods.append(dict(**item,hard_calls=len(freeze['trace']),search_seconds=freeze['seconds']))
     assert len(set((r['circuit'],r['method']) for r in methods))==len(methods)
+    assert {r['circuit'] for r in methods}==set(reference) and len(reference)==14
+    assert len(nested)==4 and len(pilots)==16
     for name in {r['circuit'] for r in methods}:
         assert {r['method'] for r in methods if r['circuit']==name}==set(METHODS)
     designs=[]
@@ -178,7 +181,9 @@ def outputs(args):
     table(out/'nested.csv',nested)
     table(out/'size_pilot.csv',pilots)
     table(out/'offline_oracles.csv',ordinal)
-    table(out/'coverage.csv',[read(p) for p in sorted(args.coverage.glob('*.json'))])
+    cov=[read(p) for p in sorted(args.coverage.glob('*.json'))]
+    assert len(cov)==14 and {r['circuit'] for r in cov}==set(reference)
+    table(out/'coverage.csv',cov)
     panel=read(args.panel)['rows']
     assert len(panel)==len({r['family'] for r in panel})==len({r['ordered_cones_sha256'] for r in panel})==24
     table(out/'validation_manifest.csv',panel)
@@ -226,6 +231,7 @@ def outputs(args):
             assert a['sha256']==b['sha256'] and a['gates']==b['gates']
             parser_rows.append(dict(circuit=p.stem,file=filename,gates=a['gates'],ordered_sha256=a['sha256'],
                             old_s=a['seconds'],indexed_s=b['seconds'],speedup=a['seconds']/b['seconds']))
+    assert len(parser_rows)==4
     table(out/'parser.csv',parser_rows)
     fixed=[]
     for p in sorted(args.fixed.glob('*/devices.json')):
@@ -235,6 +241,7 @@ def outputs(args):
                 cpu_hard_ps=v['cpu']['hard'][i],cuda_hard_ps=v['cuda']['hard'][i],
                 **{d+'_'+k:x for d in ('cpu','cuda') for k,x in v[d]['soft'][i].items()},
                 **gr,cuda_peak_bytes=v['cuda']['peak_bytes'],work=str(p.parent)))
+    assert len(fixed)==6
     table(out/'devices_fixed.csv',fixed)
     cone=read(args.cone)
     replay=next(r for r in cone if r['label']=='noop')

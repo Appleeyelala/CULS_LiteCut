@@ -14,7 +14,11 @@ from global_timing.common import digest, save_json
 
 
 def run(out, task, references):
-    name, device = task.split('/')
+    parts = task.split('/')
+    name, device = parts[:2]
+    alpha = parts[2] if len(parts)==3 else '0.5'
+    if len(parts) not in (2,3) or alpha not in ('0','0.5'):
+        raise ValueError('Expected circuit/device[/alpha]')
     row = references[name]
     old = Path(row['work'])
     inputs = json.loads((old / 'inputs.json').read_text())
@@ -24,10 +28,10 @@ def run(out, task, references):
     for key, path in json.loads(tool_config.read_text()).items():
         if key in inputs['tools']:
             assert digest(Path(path)) == inputs['tools'][key]['sha256']
-    dest = out / (name + '_' + device)
+    dest = out / (name + '_' + device + ('_no_student' if alpha=='0' else ''))
     cmd = [sys.executable, '-B', str(ROOT / 'scripts/load_rewrite.py'), '--original', str(source),
            '--output', str(dest), '--tools', str(tool_config), '--method', 'gradient', '--mode', 'delay',
-           '--alpha', '0.5', '--steps', '8', '--seed', str(inputs['seed']), '--max-edits', '16',
+           '--alpha', alpha, '--steps', '8', '--seed', str(inputs['seed']), '--max-edits', '16',
            '--device', device]
     begin = time.perf_counter()
     with (out / (dest.name + '.log')).open('x') as stream:

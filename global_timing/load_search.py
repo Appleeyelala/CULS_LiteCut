@@ -5,7 +5,7 @@ import time
 import torch
 
 
-def optimize(bank, rule, method, budget, seconds, edit_limit, area_ratio, seed):
+def optimize(bank, rule, method, budget, seconds, edit_limit, area_ratio, seed, record_priority=False):
     start=time.monotonic()
     zero=[0]*len(rule.catalogue.decisions)
     z=torch.zeros(bank.states,device=bank.device,requires_grad=True)
@@ -30,6 +30,7 @@ def optimize(bank, rule, method, budget, seconds, edit_limit, area_ratio, seed):
     for step in range(budget):
         if step and seconds is not None and time.monotonic()-start>=seconds: break
         candidate=zero.copy()
+        priority=[]
         if step and method=='gradient':
             weights=z.detach().tolist()
             edits=[];offset=0
@@ -40,6 +41,9 @@ def optimize(bank, rule, method, budget, seconds, edit_limit, area_ratio, seed):
                     edits.append((weights[offset+k]-weights[offset],i,c))
                 offset+=len(g)
             candidate=rule.project(zero,edits,edit_limit)
+            if record_priority:
+                priority=[(i,c) for _,i,c in sorted(edits,key=lambda e:(-e[0],e[1],e[2]))
+                          if candidate[i]==c]
         elif step and method=='random':
             picks=[rng.choice(g[1:]) for g in bank.groups]
             candidate=rule.project(zero,[(rng.random(),i,c) for i,c in picks],
@@ -63,6 +67,8 @@ def optimize(bank, rule, method, budget, seconds, edit_limit, area_ratio, seed):
             rank=key;best=candidate.copy()
         visited.add(tuple(candidate))
         row=dict(step=step,vector=candidate,delay_ps=delay,area=area)
+        if record_priority:
+            row["priority"]=priority
         if optimizer is not None and step+1<budget:
             optimizer.zero_grad()
             weights=bank.soft(z)

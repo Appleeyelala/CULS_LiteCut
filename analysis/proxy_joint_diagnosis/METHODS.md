@@ -30,3 +30,15 @@
 `c5315`、`intra_pred_PE` 分别使用历史联合 Adam 选中的 16 处编辑。`cabac_ucontext` 使用历史全局边际贪心选中的 10 处编辑，并单列同一电路原 Adam 的结果。选择池只覆盖这三组已有逐编辑实测的方案。
 
 每个池内比较三种收益：真实单编辑回放，启用 LiteCut 的代理，以及关闭 LiteCut 的代理。收益均为该臂零编辑延迟减去单独安装此编辑的延迟。按同一合法性规则最大化收益之和，允许选空。先冻结选择，再用 ABC 测整个方案并检查功能等价。相同组合共用其测量。回放值用于分析编辑作用，交付值沿用真实延迟验收规则：空方案交付原图，变慢时同样交付原图。三个固定案例只能说明这些编辑在组合时的表现。
+
+| 电路 | 真实单编辑加和选出的组合 ps | 开 LiteCut 的代理加和 ps | 关 LiteCut 的代理加和 ps | 候选池来源的原组合 ps |
+|---|---:|---:|---:|---:|
+| c5315 | 450.51（空回放） | 446.49 | 446.49 | 428.28（Adam） |
+| intra_pred_PE | 1473.45 | 1293.35 | 1293.35 | 1330.87（Adam） |
+| cabac_ucontext | 7316.39 | 15395.09 | 15395.09 | 7238.77（全局边际贪心） |
+
+以上均为验收前回放实测，越低越好。开关 LiteCut 的单编辑评分在部分编辑上有差异，但这三个池的两个代理组逐一选出了相同编辑。在 `intra_pred_PE`，把 8 个单独有利的编辑放在一起，比零编辑回放慢了 104.96 ps。在 `cabac_ucontext`，使用真实单编辑值比两代理组选得好，而原池中最好的单编辑单独可达 6020.89 ps。该电路原 Adam 的 16 编辑提案是 15258.78 ps，验收后交付原图 14819.46 ps。[三组选择、交付值与组合偏差](oracle_arms.csv) · [候选身份及各自收益](oracle_single_edits.csv)
+
+## Slurm 作业
+
+旧记录分析对应 [66221](/data/wushangge/CULS_LiteCut/runs/20261120T024239Z-dx-archive-425a6955/run.json)。解析路径的三个小图测试对应 [66222](/data/wushangge/CULS_LiteCut/runs/20261120T024740Z-dx-path-tests-f5740a21/run.json)。四个电路的轨迹对应 [66223](/data/wushangge/CULS_LiteCut/runs/20261120T024743Z-dx-trace-small-08eafa35/run.json) 和 [66224](/data/wushangge/CULS_LiteCut/runs/20261120T024821Z-dx-trace-cabac-d590ce19/run.json)，逐项重算、合表对应 [66225](/data/wushangge/CULS_LiteCut/runs/20261120T025205Z-dx-trace-tables-fe4bdd4e/run.json)。单编辑三组测量及汇总对应 [66226](/data/wushangge/CULS_LiteCut/runs/20261120T025311Z-dx-oracle-three-5f74810f/run.json) 和 [66227](/data/wushangge/CULS_LiteCut/runs/20261120T025538Z-dx-oracle-tables-6cfe1847/run.json)。每个清单记录源码快照、命令、资源和退出状态。

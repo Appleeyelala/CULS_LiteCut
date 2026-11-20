@@ -21,6 +21,7 @@ def export(out, runs):
         assert len(rows) == (10 if name == 'cabac_ucontext' else 16)
         assert len(by_method) == len({a['group'] for a in by_method}) == 8
         assert all(a['circuit'] == name for a in rows + by_method)
+        real_gains = {(int(s['decision']), int(s['choice'])): float(s['real_gain_ps']) for s in rows}
         for arm in by_method:
             tag = arm['group']
             if tag in selected:
@@ -37,6 +38,13 @@ def export(out, runs):
             assert arm['cec'] == measurement['cec'] == 'PASS'
             assert float(arm['raw_ps']) == measurement['delay_ps']
             assert arm['input_sha256'] == measurement['input_sha256']
+            pairs = json.loads(arm['pairs'])
+            observed = float(arm['noop_ps']) - float(arm['raw_ps'])
+            within_pool = pairs is not None and all(tuple(p) in real_gains for p in pairs)
+            additive = fsum(real_gains[tuple(p)] for p in pairs) if within_pool else None
+            arm.update(observed_gain_over_noop_ps=observed if pairs is not None else None,
+                       sum_real_single_gains_ps=additive,
+                       interaction_residual_ps=observed-additive if within_pool else None)
         arms.extend(by_method)
         singles.extend(rows)
         sources.append(dict(circuit=name, work=str(work), manifest=str(manifest_path), job=manifest['slurm_job_id'],

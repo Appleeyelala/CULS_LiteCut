@@ -382,7 +382,7 @@ __device__ int Eval(int cur, int *match, int Class, Library *lib, int curId) {
 
 __global__ void EvaluateNode(int sz, int *bestout, int *selectedCutSlots, int *fanin0, int *fanin1, int *isC0, int *isC1, int *nodeLevels, Cut *cuts, Cut* selectedCuts, int *nRef,
                              Library *lib, TableNode* hashTable, int fUseZeros,
-                             unsigned char *candidateMasks, bool allowNonPositiveCandidates, unsigned long long *audit) {
+                             unsigned char *candidateMasks, bool allowNonPositiveCandidates, unsigned long long *audit, int *cutSaved) {
     if(blockIdx.x * blockDim.x + threadIdx.x >= sz) return;
     int id = 1 + blockIdx.x * blockDim.x + threadIdx.x, reduction = -1, bestLevel = 99999999, bestCut = -1, bestOut;
     int match[54], tableSize, tableId[TABLE_SIZE], tableNum[TABLE_SIZE];
@@ -395,6 +395,7 @@ __global__ void EvaluateNode(int sz, int *bestout, int *selectedCutSlots, int *f
             cut->leaves[cut->nLeaves++] = 0;
         tableSize = 0;
         int saved = CalcMFFC(id, cut, fanin0, fanin1, &tableSize, tableId, tableNum, nRef, id);
+        if (cutSaved) cutSaved[ID(id, i)] = saved;
         int uPhase = lib->pPhases[cut->truthtable];
         int Class = lib->pMap[cut->truthtable];
         int *pPerm = lib->pPerms4[lib->pPerms[cut->truthtable]];
@@ -445,7 +446,10 @@ __global__ void EvaluateNode(int sz, int *bestout, int *selectedCutSlots, int *f
             // Nonzero mask values retain ordinary boolean membership semantics.
             // Export sign without allocating a dense per-subgraph int buffer.
             const unsigned char signCode = gain > 0 ? 1 : (gain == 0 ? 2 : 3);
-            candidateMasks[(ID(id, i) * MAX_REWRITE_SUBGR) + out] = signCode;
+            // Library classes have at most 60 ANDs. Gate3C can retain the
+            // exact Eval count in the upper six bits of its private mask.
+            candidateMasks[(ID(id, i) * MAX_REWRITE_SUBGR) + out] =
+                cutSaved ? static_cast<unsigned char>((nodesAdded << 2) | signCode) : signCode;
             if (audit) atomicAdd(audit + 1 + signCode, 1ULL);
             if (saved - nodesAdded < reduction || (saved - nodesAdded == reduction && rtLevel >= bestLevel))
                 continue;
@@ -748,7 +752,13 @@ void GPUSolver::CopyLib(Library CPUlib) {
     cudaMemcpy(lib, &CPUlib, sizeof(Library), cudaMemcpyHostToDevice);
 }
 
-void GPUSolver::EnumerateAndPreEvaluate(int *level, const vector<int> &levelCount, int n, int *CPUfanin0, int *CPUfanin1, int *CPUref, bool fUseZeros, bool allowNonPositiveCandidates, unsigned long long *audit) {
+void GPUSolver::EnumerateAndPreEvaluate(int *level, const vector<int> &levelCount, int n, int *CPUfanin0, int *CPUfanin1, int *CPUref, bool fUseZeros, bool allowNonPositiveCandidates, unsigned long long *audit, int *cutSaved) {
+    int *deviceSaved = nullptr;
+    const size_t cutBytes = static_cast<size_t>(n + 1) * CUT_SET_SIZE * sizeof(int);
+    if (cutSaved) {
+        gpuErrchk(cudaMalloc((void **)&deviceSaved, cutBytes));
+        gpuErrchk(cudaMemset(deviceSaved, 0, cutBytes));
+    }
     unsigned long long *deviceAudit = nullptr;
     if (audit) {
         gpuErrchk(cudaMalloc((void **)&deviceAudit, 7 * sizeof(unsigned long long)));
@@ -779,7 +789,7 @@ void GPUSolver::EnumerateAndPreEvaluate(int *level, const vector<int> &levelCoun
     EvaluateNode<<<BLOCK_NUMBER(n, LARGE_BLOCK_SIZE), LARGE_BLOCK_SIZE>>> (
         n, bestSubgraph, selectedCutSlots, fanin0, fanin1, isComplement0, isComplement1,
         nodeLevels, cuts, selectedCuts, nRef, lib, hashTable, fUseZeros == true,
-        candidateMasks, allowNonPositiveCandidates, deviceAudit
+        candidateMasks, allowNonPositiveCandidates, deviceAudit, deviceSaved
     );
     gpuErrchk( cudaDeviceSynchronize() );
     std::cerr << cudaGetLastError() << " in EvaluateNode " << std::endl;
@@ -787,6 +797,10 @@ void GPUSolver::EnumerateAndPreEvaluate(int *level, const vector<int> &levelCoun
     if (audit) {
         gpuErrchk(cudaMemcpy(audit, deviceAudit, 7 * sizeof(unsigned long long), cudaMemcpyDeviceToHost));
         gpuErrchk(cudaFree(deviceAudit));
+    }
+    if (cutSaved) {
+        gpuErrchk(cudaMemcpy(cutSaved, deviceSaved, cutBytes, cudaMemcpyDeviceToHost));
+        gpuErrchk(cudaFree(deviceSaved));
     }
     EVAL_TIME += clock() - startTime;
 } 
@@ -1457,6 +1471,17 @@ void CPUSolver::Rewrite(bool fUseZeros, bool GPUReplace) {
 
     prt << "Finished eval and replace" << endl;
     startTime = clock();
+    // Capture signed aliases and logically deleted nodes before cleanup.
+    // Reorder() subsequently assigns the serialized AIGER IDs in order[].
+    std::vector<int> originalLiterals;
+    if (!rewriteAuditOptions.correspondencePath.empty()) {
+        const auto &original = rewriteAuditOptions.internalToOriginal;
+        originalLiterals.assign(original.size(), -1);
+        for (size_t internal = 0; internal < original.size(); ++internal) {
+            if (!isDeleted[internal])
+                originalLiterals.at(original[internal]) = Fanin(static_cast<int>(internal) * 2);
+        }
+    }
     for(int i = numInputs + 1; i <= n; i++) if(!isDeleted[i]) {
         if(!isRedundant(i)) {
             fanin0[i] = Fanin(fanin0[i]);
@@ -1469,6 +1494,18 @@ void CPUSolver::Rewrite(bool fUseZeros, bool GPUReplace) {
     REDUNDANCY_TIME += clock() - startTime;
     startTime = clock();
     Reorder(); // remove deleted nodes
+    if (!rewriteAuditOptions.correspondencePath.empty()) {
+        std::ofstream out(rewriteAuditOptions.correspondencePath);
+        if (!out) throw std::runtime_error("Cannot open replay correspondence");
+        out << "original_node,serialized_literal\n";
+        for (size_t old = 0; old < originalLiterals.size(); ++old) {
+            int lit = originalLiterals[old];
+            out << old << ',';
+            if (lit >= 0) out << (2 * order[id(lit)] + isC(lit));
+            out << '\n';
+        }
+        if (!out) throw std::runtime_error("Cannot write replay correspondence");
+    }
     prt << "Rewrite Iteration Ends" << endl;
     // printf("GPU expected: %d\n", GPUexpected);
     printf("real reduction: %d\n", expected);
@@ -2158,12 +2195,15 @@ int gate3cRewriteDecisionDump(const char * outputDir, const char * inputPath,
         gate3cLoadLibrary(lib);
         const char *candidateFlag = std::getenv("CULS_ALLOW_NONPOSITIVE_CANDIDATES");
         const bool allowCandidates = candidateFlag && std::string(candidateFlag) == "1";
+        const char *detailFlag = std::getenv("CULS_EXPORT_LEVEL_DETAILS");
+        const bool details = detailFlag && std::string(detailFlag) == "1";
+        std::vector<int> cutSaved(details ? static_cast<size_t>(n + 1) * CUT_SET_SIZE : 0);
         unsigned long long audit[7] = {};
         rw::GPUSolver gpuSolver(n);
         gpuSolver.CopyLib(lib);
         gpuSolver.EnumerateAndPreEvaluate(
             levels.data(), levelCount, n, fanin0.data(), fanin1.data(),
-            refs.data(), false, allowCandidates, audit
+            refs.data(), false, allowCandidates, audit, details ? cutSaved.data() : nullptr
         );
 
         std::vector<rw::Cut> cuts(static_cast<size_t>(n + 1) * CUT_SET_SIZE);
@@ -2203,14 +2243,18 @@ int gate3cRewriteDecisionDump(const char * outputDir, const char * inputPath,
 
                 int truth = cut.truthtable & 0xFFFF;
                 int Class = lib.pMap[truth];
-                std::vector<int> candidates, gainSigns;
+                if (details && saved != cutSaved[ID(gpuRoot, cutSlot)])
+                    throw std::runtime_error("GPU and host cut saved counts disagree");
+                std::vector<int> candidates, gainSigns, added;
                 for (int subgraphIndex = 0; subgraphIndex < lib.nSubgr[Class]; ++subgraphIndex) {
                     if (candidateMasks[(static_cast<size_t>(ID(gpuRoot, cutSlot)) *
                                         MAX_REWRITE_SUBGR) + subgraphIndex]) {
                         candidates.push_back(subgraphIndex);
                         const int code = candidateMasks[(static_cast<size_t>(ID(gpuRoot, cutSlot)) *
                                                         MAX_REWRITE_SUBGR) + subgraphIndex];
-                        gainSigns.push_back(code == 1 ? 1 : (code == 2 ? 0 : -1));
+                        const int sign = code & 3;
+                        gainSigns.push_back(sign == 1 ? 1 : (sign == 2 ? 0 : -1));
+                        if (details) added.push_back(code >> 2);
                     }
                 }
                 candidateCount += static_cast<int>(candidates.size());
@@ -2240,6 +2284,10 @@ int gate3cRewriteDecisionDump(const char * outputDir, const char * inputPath,
                 gate3cWriteIntArray(rawOut, candidates);
                 rawOut << ",\"candidate_gain_signs\":";
                 gate3cWriteIntArray(rawOut, gainSigns);
+                if (details) {
+                    rawOut << ",\"candidate_nodes_added\":";
+                    gate3cWriteIntArray(rawOut, added);
+                }
                 rawOut << ",\"removable_nodes\":";
                 gate3cWriteIntArray(rawOut, originalRemovable);
                 rawOut << ",\"removable_node_count\":" << originalRemovable.size()
@@ -2628,6 +2676,9 @@ int gate3eExecutionReplay(const char * outputDir, const char * inputPath,
             std::filesystem::path tracePath = root / "traces" / (config.id + ".jsonl");
             std::filesystem::path aigPath = root / "aigs" / (config.id + ".aig");
             options.tracePath = tracePath.string();
+            const char *mapFlag = std::getenv("CULS_EXPORT_REPLAY_CORRESPONDENCE");
+            if (mapFlag && std::string(mapFlag) == "1")
+                options.correspondencePath = (root / "traces" / (config.id + ".nodes.csv")).string();
 
             rw::CPUSolver solver;
             solver.ConfigureRewriteAudit(options);

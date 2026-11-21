@@ -54,7 +54,8 @@ public:
     void CopyLib(Library CPUlib);
     void EnumerateAndPreEvaluate(int *level, const std::vector<int> &levelCount, 
                                  int n, int *CPUfanin0, int *CPUfanin1, int *CPUref, bool fUseZeros,
-                                 bool allowNonPositiveCandidates = false, unsigned long long *audit = nullptr);
+                                 bool allowNonPositiveCandidates = false, unsigned long long *audit = nullptr,
+                                 int *cutSaved = nullptr);
     int EnumerateAndPreEvaluateWave(int currIter, int *level, const std::vector<int> &levelCount, 
                                     int n, int *CPUfanin0, int *CPUfanin1, int *CPUref, bool fUseZeros);
     int ReplaceSubgraphs(int n, int *CPUfanin0, int *CPUfanin1, int *CPUphase, int *CPUreplace);
@@ -110,6 +111,7 @@ struct RewriteAuditOptions {
     const PreparedReplayEnumeration *preparedReplay = nullptr;
     bool allowNonPositiveReplayGain = false;
     bool allowNonPositiveCandidates = false;
+    std::string correspondencePath;
 };
 
 class CPUSolver {

@@ -7,11 +7,11 @@ import os
 from pathlib import Path
 import re
 import shutil
-import sys
 import time
 import unittest
 
 from global_timing.common import ROOT, digest, run_tool, save_json, tool_path
+from global_timing.level_candidates import LibraryDepths, export_pool
 from global_timing.level_weights import propagate_levels
 from global_timing.structure import make_partition, parse_aig
 
@@ -110,7 +110,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--run', required=True, type=Path)
     parser.add_argument('--cohort', choices=['pilot', 'development', 'external'], required=True)
+    parser.add_argument('--through', type=int, choices=[1, 2], default=1)
+    parser.add_argument('--native-build', type=Path)
     args = parser.parse_args()
+    if args.through >= 2 and not args.native_build:
+        parser.error('--native-build is required for native candidate stages')
     run = args.run.resolve()
     if not os.getenv('SLURM_JOB_ID') or not run.is_relative_to('/data/wushangge') or ROOT != run / 'src':
         parser.error('Use the committed snapshot inside its /data Slurm job')
@@ -131,6 +135,26 @@ def main():
             result = original_levels(abc, case, path, out / case)
             print(case, 'D', result['D'], 'ABC', result['abc_D'], flush=True)
         passed.append(stage)
+        if args.through >= 2:
+            stage = 'candidate_dags'
+            build = args.native_build.resolve()
+            gpuls = build / 'build/culs/gpuls'
+            reference = Path(load(ROOT / 'config/load_rewrite_tools.json')['gpuls'])
+            if (load(build / 'run.json')['state'] != 'COMPLETED'
+                    or digest(gpuls) != (build / 'output/checksums.sha256').read_text().split()[0]):
+                raise ValueError('Native build has no matching successful binary digest')
+            for filename in ['rewrite.cu', 'rewrite.h', 'rewrite_library.inc']:
+                rel = Path('projects/culs/src/algorithms') / filename
+                if digest(ROOT / rel) != digest(build / 'src' / rel):
+                    raise ValueError(f'Native build source differs at {filename}')
+            save_json(out / 'native_tools.json', dict(build=str(build), gpuls=str(gpuls),
+                      gpuls_sha256=digest(gpuls), reference=str(reference), reference_sha256=digest(reference)))
+            library = LibraryDepths()
+            for case, path in staged.items():
+                result = export_pool(abc, gpuls, reference, path, make_partition(parse_aig(path)),
+                                     library, out / case / 'pool')
+                print(case, 'verified decisions', result['noops'], 'physical', result['physical'], flush=True)
+            passed.append(stage)
         save_json(out / 'gates.json', dict(status='PASS', gates_passed=passed))
     except Exception as exc:
         save_json(out / 'failure.json', dict(stage=stage, circuit=case, gates_passed=passed,

@@ -1,7 +1,7 @@
 import unittest
 from types import SimpleNamespace
 
-from global_timing.level_weights import candidate_root_level, propagate_levels
+from global_timing.level_weights import candidate_root_level, original_leaf_depths, propagate_levels
 
 
 def graph(pis, ands, outputs):
@@ -39,3 +39,18 @@ class LevelTest(unittest.TestCase):
         self.assertEqual(candidate_root_level([], []), 0)
         with self.assertRaises(ValueError):
             candidate_root_level([3], [])
+
+    def test_original_longest_reconvergent_path_and_open_boundary(self):
+        aig = graph(3, [(2, 4), (8, 6), (8, 10)], [12])
+        levels = propagate_levels(aig)
+        self.assertEqual(original_leaf_depths(aig, 6, [4, 3, 2], levels.level), ((2, 2, None), None))
+        self.assertEqual(original_leaf_depths(aig, 6, [3], levels.level), ((2,), 3))
+
+    def test_native_permuted_library_candidate_by_hand(self):
+        from global_timing.level_candidates import LibraryDepths
+        library = LibraryDepths()
+        decision = dict(root=151, cut_slot=5, cut_leaves=[21, 34, 145, 146], truth=26217, truth_class=219)
+        # Slots 0,1 are library inputs 2,3. Their longest paths are
+        # input -> v4/v5 -> v6 -> v8/v9 -> v10. Slots 2,3 go via v7, v8/v9.
+        self.assertEqual(library.get(decision, 0), (4, 4, 3, 3))
+        self.assertEqual(library.scalar_level(decision, 0, [0, 0, 6, 4]), 9)

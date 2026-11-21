@@ -41,3 +41,34 @@ def candidate_root_level(leaf_levels, depths):
         raise ValueError('Leaf levels and depths must share the ordered cut.')
     return max((level + depth for level, depth in zip(leaf_levels, depths)
                 if depth is not None), default=0)
+
+
+def original_leaf_depths(aig, root, leaves, levels):
+    """Reverse longest paths, stopping at the first cut leaf on each path.
+
+    Functional support minimization can leave structural paths outside the
+    exported leaves. Track their maximum absolute arrival separately so that
+    a partial boundary can be diagnosed against the original global levels.
+    """
+    boundary = set(leaves)
+    if not boundary or len(boundary) != len(leaves):
+        raise ValueError('Expected a nonempty cut of distinct nodes')
+    lowest = min(leaves)
+    interior = set()
+    pending = [root]
+    while pending:
+        node = pending.pop()
+        if node in boundary or node < lowest or node <= aig.pi_count or node in interior:
+            continue
+        interior.add(node)
+        pending.extend(lit >> 1 for lit in aig.fanin_literals[node])
+    distances = {root: 0}
+    for node in sorted(interior, reverse=True):
+        depth = distances.pop(node) + 1
+        for literal in aig.fanin_literals[node]:
+            pred = literal >> 1
+            distances[pred] = max(distances.get(pred, -1), depth)
+    depths = tuple(distances.get(leaf) for leaf in leaves)
+    outside = max((levels[node] + d for node, d in distances.items() if node not in boundary),
+                  default=None)
+    return depths, outside

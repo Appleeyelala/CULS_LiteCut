@@ -88,6 +88,8 @@ def catalogue_from_raw(rows, partition):
             raise ValueError('Cross-region removable cone requires an explicit multi-owner policy.')
         if 'candidate_gain_signs' in row:
             decision['candidate_gain_signs'] = row['candidate_gain_signs']
+        if 'candidate_nodes_added' in row:
+            decision['candidate_nodes_added'] = row['candidate_nodes_added']
         decision['noop'] = {'choice_index': 0, 'subgraph_index': None, 'semantics': 'ORIGINAL_AIG'}
         decisions.append(decision)
     conflicts = []
@@ -115,11 +117,15 @@ def catalogue_from_raw(rows, partition):
     return Catalogue(decisions, conflicts, by_region)
 
 
-def enumerate_candidates(gpuls, aig, partition, output, timeout=300, allow_nonpositive_candidates=False):
+def enumerate_candidates(gpuls, aig, partition, output, timeout=300, allow_nonpositive_candidates=False,
+                         export_level_details=False):
     output.mkdir(parents=True, exist_ok=False)
     raw = output / 'raw'
     env = dict(os.environ)
     env.pop('CULS_ALLOW_NONPOSITIVE_CANDIDATES', None)
+    env.pop('CULS_EXPORT_LEVEL_DETAILS', None)
+    if export_level_details:
+        env['CULS_EXPORT_LEVEL_DETAILS'] = '1'
     if allow_nonpositive_candidates:
         env['CULS_ALLOW_NONPOSITIVE_CANDIDATES'] = '1'
     run_tool([gpuls, '-c', f'read {tool_path(aig)}; gate3c_rewrite_decisions_dump -o {tool_path(raw)}'],
@@ -141,7 +147,7 @@ def enumerate_candidates(gpuls, aig, partition, output, timeout=300, allow_nonpo
 
 
 def replay(gpuls, aig, owner_csv, catalogue, choices, output, timeout=300, allow_nonpositive_gain=False,
-           allow_nonpositive_candidates=False):
+           allow_nonpositive_candidates=False, export_correspondence=False):
     requested = catalogue.requested(choices)  # reject conflicts BEFORE calling GPU
     output.mkdir(parents=True, exist_ok=False)
     config = output / 'choices.txt'
@@ -151,6 +157,9 @@ def replay(gpuls, aig, owner_csv, catalogue, choices, output, timeout=300, allow
               'order': 'ascending_original_root', 'installation_gain_policy': policy}
     env = dict(os.environ)
     env.pop('CULS_REPLAY_ALLOW_NONPOSITIVE_GAIN', None)
+    env.pop('CULS_EXPORT_REPLAY_CORRESPONDENCE', None)
+    if export_correspondence:
+        env['CULS_EXPORT_REPLAY_CORRESPONDENCE'] = '1'
     env.pop('CULS_ALLOW_NONPOSITIVE_CANDIDATES', None)
     if allow_nonpositive_candidates:
         if not allow_nonpositive_gain:

@@ -54,3 +54,15 @@ class LevelTest(unittest.TestCase):
         # input -> v4/v5 -> v6 -> v8/v9 -> v10. Slots 2,3 go via v7, v8/v9.
         self.assertEqual(library.get(decision, 0), (4, 4, 3, 3))
         self.assertEqual(library.scalar_level(decision, 0, [0, 0, 6, 4]), 9)
+
+    def test_direct_library_output_in_a_three_leaf_cut(self):
+        from unittest.mock import patch
+        from global_timing.level_candidates import LibraryDepths
+        truth = 0xcccc
+        lib = {'p_phases': {truth: 0}, 'p_perms': {truth: 0}, 'perms4': [[1, 2, 0, 3]],
+               'classes': {0: {'roots': [0], 'fanins': []}}}
+        decision = dict(root=20, cut_slot=1, cut_leaves=[3, 8, 9], truth=truth, truth_class=0)
+        with patch('global_timing.level_candidates.parse_library', return_value=lib):
+            library = LibraryDepths()
+        self.assertEqual(library.get(decision, 0), (None, 0, None))
+        self.assertEqual(library.scalar_level(decision, 0, [10, 2, 7]), 2)

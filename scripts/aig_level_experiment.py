@@ -30,27 +30,19 @@ def csv_rows(path, columns, rows):
         writer.writerows(rows)
 
 
-def inputs(run, cohort):
+def pilot_inputs(run):
     with (ROOT / 'analysis/paper14_fullflow/circuits.csv').open() as manifest:
         paper = {r['circuit']: (PAPER_INPUTS / r['filename'], r['sha256']) for r in csv.DictReader(manifest)}
-    if cohort == 'pilot':
-        paper['c1355'] = (run / 'input/design.aig', '2602b10f131a6ba5996521036ba130aab128a4aa15e3ab49ce44f2f02047f0b0')
-        return {name: paper[name] for name in PILOT}
-    if cohort == 'development':
-        return paper
-    freeze = load(ROOT / 'analysis/paper_joint_evidence/validation_freeze.json')
-    path = Path(freeze['panel'])
-    if digest(path) != freeze['panel_sha256']:
-        raise ValueError('External input panel digest mismatch')
-    return {Path(r['source']).stem: (Path(r['aig']), r['aig_sha256']) for r in load(path)['rows']}
+    paper['c1355'] = (run / 'input/design.aig', '2602b10f131a6ba5996521036ba130aab128a4aa15e3ab49ce44f2f02047f0b0')
+    return {name: paper[name] for name in PILOT}
 
 
-def stage_inputs(run, cohort):
+def stage_inputs(run):
     staged = {}
     inventory = []
     folder = run / 'input/circuits'
     folder.mkdir()
-    for name, (path, sha) in inputs(run, cohort).items():
+    for name, (path, sha) in pilot_inputs(run).items():
         target = folder / (name + '.aig')
         shutil.copyfile(path, target)
         if digest(target) != sha:
@@ -109,7 +101,8 @@ def original_levels(abc, name, path, output):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--run', required=True, type=Path)
-    parser.add_argument('--cohort', choices=['pilot', 'development', 'external'], required=True)
+    parser.add_argument('--cohort', choices=['pilot'], required=True,
+                        help='The development and external cohorts follow all five pilot gates.')
     parser.add_argument('--through', type=int, choices=[1, 2], default=1)
     parser.add_argument('--native-build', type=Path)
     args = parser.parse_args()
@@ -130,7 +123,7 @@ def main():
         abc, lib = frozen_tools(run)
         save_json(out / 'tools.json', {'abc': str(abc), 'abc_sha256': digest(abc),
             'liberty': str(lib), 'liberty_sha256': digest(lib), 'model': None})
-        staged = stage_inputs(run, args.cohort)
+        staged = stage_inputs(run)
         for case, path in staged.items():
             result = original_levels(abc, case, path, out / case)
             print(case, 'D', result['D'], 'ABC', result['abc_D'], flush=True)

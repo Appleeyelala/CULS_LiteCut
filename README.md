@@ -1,5 +1,7 @@
 # CULS LiteCut research workspace
 
+本分支的 AIG 层加权改写实验通过四电路原图深度核对，在 c5315 的候选 0 复原检查处停止。见[实验报告与反例](analysis/aig_level_weighted_rewrite/README.md)。
+
 **新对话先读：[对话交接报告](HANDOFF.md)。** 最新100电路可读数据在 [analysis/ste100](https://github.com/Appleeyelala/CULS_LiteCut/tree/main/analysis/ste100)。
 
 最新固定随机100电路已完成 **Softmax＋STE＋Adam**（40步）评估：A/B/Ours共300点全部成功；Ours/A、Ours/B配对Delay几何平均比为0.959272/1.001070，Runtime配对比中位数为5.281315/4.045126。相对原图有改善，但尚未优于B且仍更慢。新版仅付费原图Mapping＋至多一次最终候选Mapping，无中间反馈校准；见[100电路真实结果](docs/mffc_gpu/STE100_RESULTS.md)及[实现说明](docs/mffc_gpu/STE_ADAM_IMPLEMENTATION.md)。以下905和更早记录保留各自算法与实验范围。

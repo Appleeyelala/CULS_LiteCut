@@ -1,0 +1,91 @@
+{
+  "base": "28523b9a",
+  "pilot_status": "STOPPED_AT_GATE_2",
+  "runs": [
+    {
+      "task": "pilot_levels",
+      "status": "COMPLETED",
+      "run": "/data/wushangge/CULS_LiteCut/runs/20261121T053338Z-level-four-baselines-9506eb5c",
+      "manifest": "/data/wushangge/CULS_LiteCut/runs/20261121T053338Z-level-four-baselines-9506eb5c/run.json",
+      "commit": "b43292dfb3caebf3c8caac1d2b522864b1b40728",
+      "slurm_job_id": "66256",
+      "requested": {
+        "partition": "Compute",
+        "cpus_per_task": 2,
+        "memory_gib": 8,
+        "gpus": 0,
+        "walltime": "00:20:00",
+        "nodelist": null
+      },
+      "artifacts": {
+        "output/gates.json": "5cd9f18061a5e1e28923d0d10ba39d06cec83a582f7b9ad300267c7eb9ec20cb",
+        "input/circuits/inventory.json": "569da45db7817615d98b3bdb7ac6fdbbb793f1780a4b9ef80f9680724a63c4b8",
+        "output/tools.json": "5ada3b396f2c932ca5f7b7d173b70dfdc1787e8babcfcf4ec8ee252784263942"
+      }
+    },
+    {
+      "task": "native_build",
+      "status": "COMPLETED",
+      "run": "/data/wushangge/CULS_LiteCut/runs/20261121T053510Z-level-native-build-613196df",
+      "manifest": "/data/wushangge/CULS_LiteCut/runs/20261121T053510Z-level-native-build-613196df/run.json",
+      "commit": "ed0b36584e07f60d09b267904ab13239898a318f",
+      "slurm_job_id": "66257",
+      "requested": {
+        "partition": "Compute",
+        "cpus_per_task": 8,
+        "memory_gib": 32,
+        "gpus": 0,
+        "walltime": "00:45:00",
+        "nodelist": null
+      },
+      "artifacts": {
+        "output/checksums.sha256": "3bb224692db3ea20b9b9b0a73fdf929fc3011038a66231afd04af869a16b1aab"
+      }
+    },
+    {
+      "task": "pilot_candidate_gate",
+      "status": "FAILED",
+      "run": "/data/wushangge/CULS_LiteCut/runs/20261121T053811Z-level-four-candidates-14732d0f",
+      "manifest": "/data/wushangge/CULS_LiteCut/runs/20261121T053811Z-level-four-candidates-14732d0f/run.json",
+      "commit": "4105a0b2baa74c6c8910b1b700d42603ae370fe5",
+      "slurm_job_id": "66258",
+      "requested": {
+        "partition": "Compute",
+        "cpus_per_task": 3,
+        "memory_gib": 48,
+        "gpus": 1,
+        "walltime": "02:00:00",
+        "nodelist": "eda2"
+      },
+      "artifacts": {
+        "output/failure.json": "c2c2785b6fee27ee66c98a3255b518d6427e6afcc3e81a1579dfb9ed9d4d80d6",
+        "output/native_tools.json": "63bc143a3006eaba48c23095a8735dc33b6ad1e1cc9474e39bde6b2706fb7f23",
+        "output/c1355/pool/pool_check.json": "57324517ef74b856c5ec684b28ef3209c0707e2b938b23f63b12166f8748d244",
+        "output/c1355/pool/candidates.csv.gz": "076c617102337546a8d51616e48a7a8fff820cfa3af092eddf52693c4fbb06a4",
+        "output/c5315/pool/identity_counts.json": "c273a30bb4525cbf4e2358ae516894348af615b62b7305defc6f4bc45f9f1817",
+        "output/c5315/pool/noop_discrepancy.json": "32c3f86d5e62b404ef81e3d6548adc55bcccbc1ac146280a377afaba5497d04c",
+        "output/c5315/pool/candidates.csv.gz": "9288a46da9d20bb7e4555fe4bd1ecdb0c28ee665452c9c353bd7520981a4f751"
+      }
+    },
+    {
+      "task": "independent_failure_witness",
+      "status": "COMPLETED",
+      "run": "/data/wushangge/CULS_LiteCut/runs/20261121T054029Z-level-c5315-witness-2335d93b",
+      "manifest": "/data/wushangge/CULS_LiteCut/runs/20261121T054029Z-level-c5315-witness-2335d93b/run.json",
+      "commit": "ac0cbc538e09476fd2771827259e99c38ab6f42a",
+      "slurm_job_id": "66261",
+      "requested": {
+        "partition": "Compute",
+        "cpus_per_task": 1,
+        "memory_gib": 4,
+        "gpus": 0,
+        "walltime": "00:10:00",
+        "nodelist": null
+      },
+      "artifacts": {
+        "output/witness.json": "15687f534eabfa42e9e18f4e2b71390ca48d01567991cdc009ec3d97bfb7f207",
+        "output/abc_levels.log": "a360eae191cbcee0342fd478bf4a668356fcc1f61492a4b7dc4d2cfc252cb27d"
+      }
+    }
+  ]
+}

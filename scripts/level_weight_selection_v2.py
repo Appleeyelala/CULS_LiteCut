@@ -215,7 +215,7 @@ def run_circuit(name, aig_path, export_path, stats, step1_rows, v1_rows, out_dir
                                   lowered_acc0=0, ties=0) for scheme in SCHEMES}
     pairwise = {f'{a}|{b}': 0 for a, b in PAIRS}
     degenerate = {scheme: 0 for scheme in SOFT}
-    agreement = {scheme: dict(same=0, differ=0, examples=[]) for scheme in SOFT}
+    agreement = {scheme: dict(same=0, differ=0, tie=0, material=0, examples=[]) for scheme in SOFT}
     slack_zero_area = {scheme: dict(lowered=0, area_up=0) for scheme in WEIGHTED}
     v1_found = 0
     compared = 0
@@ -349,18 +349,24 @@ def run_circuit(name, aig_path, export_path, stats, step1_rows, v1_rows, out_dir
                 v1_found += 1
                 for scheme in SOFT:
                     v1_choice = int(v1_rows[decision_id][f'{scheme}_subgraph'])
-                    if v1_choice == rows[chosen[scheme]]['subgraph']:
+                    v2_index = chosen[scheme]
+                    if v1_choice == rows[v2_index]['subgraph']:
                         agreement[scheme]['same'] += 1
                     else:
                         agreement[scheme]['differ'] += 1
+                        left = v1_values[scheme][v1_choice]
+                        right = v1_values[scheme][v2_index]
+                        gap = abs(left - right) / max(1.0, abs(left), abs(right))
+                        kind = 'tie' if gap <= TOL else 'material'
+                        agreement[scheme][kind] += 1
                         if len(agreement[scheme]['examples']) < EXAMPLE_CAP:
                             agreement[scheme]['examples'].append(dict(
-                                decision=decision_id,
+                                decision=decision_id, kind=kind,
                                 v1_subgraph=v1_choice,
-                                v2_subgraph=rows[chosen[scheme]]['subgraph'],
+                                v2_subgraph=rows[v2_index]['subgraph'],
                                 slack=slacks, min_slack=min(slacks),
-                                v1_J=v1_values[scheme][v1_choice],
-                                v2_J=rows[chosen[scheme]]['values'][scheme]))
+                                v1_J=left, v1_J_other=right, v2_J=rows[v2_index]['values'][scheme],
+                                relative_gap=gap))
 
             selection = {}
             for scheme in SCHEMES:
@@ -462,6 +468,8 @@ def run_circuit(name, aig_path, export_path, stats, step1_rows, v1_rows, out_dir
         degenerate=degenerate,
         agreement={scheme: dict(same=agreement[scheme]['same'],
                                 differ=agreement[scheme]['differ'],
+                                tie=agreement[scheme]['tie'],
+                                material=agreement[scheme]['material'],
                                 examples=agreement[scheme]['examples']) for scheme in SOFT},
         slack_zero_area={scheme: dict(lowered=slack_zero_area[scheme]['lowered'],
                                       area_up=slack_zero_area[scheme]['area_up'])
@@ -662,11 +670,16 @@ def _totals(circuits):
     for scheme in SOFT:
         same = sum(row['agreement'][scheme]['same'] for row in circuits.values())
         differ = sum(row['agreement'][scheme]['differ'] for row in circuits.values())
+        tie = sum(row['agreement'][scheme]['tie'] for row in circuits.values())
+        material = sum(row['agreement'][scheme]['material'] for row in circuits.values())
         examples = []
         for name, row in circuits.items():
             examples += [dict(circuit=name, **item) for item in row['agreement'][scheme]['examples']]
-        agreement[scheme] = dict(same=same, differ=differ,
+        examples.sort(key=lambda item: (item['kind'] != 'material', -item['relative_gap']))
+        agreement[scheme] = dict(same=same, differ=differ, tie=tie, material=material,
                                  rate=same / (same + differ) if same + differ else None,
+                                 material_rate=(same + tie) / (same + differ)
+                                 if same + differ else None,
                                  examples=examples[:EXAMPLE_CAP])
     slack_zero_area = {scheme: dict(
         lowered=sum(row['slack_zero_area'][scheme]['lowered'] for row in circuits.values()),

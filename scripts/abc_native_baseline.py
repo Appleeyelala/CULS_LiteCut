@@ -12,6 +12,7 @@ Levels are recomputed with the step-1 ``propagate_levels`` and must match the
 import argparse
 import csv
 import hashlib
+import re
 import json
 import os
 import subprocess
@@ -49,17 +50,15 @@ def sha256(path):
 
 
 def parse_stats(text):
+    """ABC prints 'and =  N  lev = N' and sometimes 'lev =N' without a space."""
     ands = lev = None
     for line in text.splitlines():
-        if 'and =' in line and 'lev =' in line:
-            parts = line.split()
-            try:
-                and_index = parts.index('and')
-                lev_index = parts.index('lev')
-                ands = int(parts[and_index + 2].rstrip(','))
-                lev = int(parts[lev_index + 2].rstrip(','))
-            except (ValueError, IndexError):
-                continue
+        if 'and' not in line or 'lev' not in line:
+            continue
+        found_ands = re.search(r'\band\s*=\s*(\d+)', line)
+        found_lev = re.search(r'\blev\s*=\s*(\d+)', line)
+        if found_ands and found_lev:
+            ands, lev = int(found_ands.group(1)), int(found_lev.group(1))
     return ands, lev
 
 
@@ -131,6 +130,15 @@ def run_circuit(name, group, aig_path, abc, out_dir, log_dir):
                 baseline=baseline, rows=rows)
 
 
+def safe_run(name, group, path, abc, out_dir, log_dir):
+    try:
+        return run_circuit(name, group, path, abc, out_dir, log_dir)
+    except BaseException as exc:  # never let one circuit kill the cohort
+        return dict(circuit=name, group=group, status='FAILED',
+                    reason=str(exc)[:400].replace('\n', ' '), rows=[], ands=None,
+                    baseline=dict(depth=None))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--run', required=True, type=Path)
@@ -159,18 +167,16 @@ def main():
 
     results = []
     with ProcessPoolExecutor(max_workers=args.workers) as pool:
-        futures = [pool.submit(run_circuit, name, group, path, abc, out / 'aig', out / 'logs')
+        futures = [pool.submit(safe_run, name, group, path, abc, out / 'aig', out / 'logs')
                    for name, group, path in circuits]
-        for (name, group, _path), future in zip(circuits, futures):
-            try:
-                result = future.result()
-                results.append(result)
+        for future in futures:
+            result = future.result()
+            results.append(result)
+            if result.get('status') == 'FAILED':
+                print(f"{result['circuit']}: FAILED {result['reason'][:120]}", flush=True)
+            else:
                 print(f"{result['circuit']}: D={result['baseline']['depth']} "
                       f"ands={result['ands']} rows={len(result['rows'])}", flush=True)
-            except Exception as exc:  # record the failure and keep the cohort
-                results.append(dict(circuit=name, group=group, status='FAILED',
-                                    reason=str(exc)[:400], rows=[]))
-                print(f'{name}: FAILED {exc}', flush=True)
 
     passed = [row for row in results if row.get('status') != 'FAILED']
     summary = dict(step='3_v3', part='C', cohort_size=len(passed),

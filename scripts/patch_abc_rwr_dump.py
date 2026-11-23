@@ -251,6 +251,16 @@ int Rwr_DumpCandidate( Abc_Obj_t * pRoot, Dec_Graph_t * pGraph,
         s_nCutCand++ ? "," : "", iSub, AddedTrue, Self, Accepted, Structural, AbcLevel );
     for ( k = 0; k < nLeaves; k++ )
         fprintf( s_pDumpCuts, "%s%d", k ? "," : "", Depths[k] );
+    /* The raw graph lets an independent implementation re-derive leaf_depths. */
+    fprintf( s_pDumpCuts, "],\"n_leaves\":%d,\"n_size\":%d,\"root_node\":%d,\"root_compl\":%d,\"edges\":[",
+        pGraph->nLeaves, pGraph->nSize, (int)pGraph->eRoot.Node, (int)pGraph->eRoot.fCompl );
+    for ( k = pGraph->nLeaves; k < pGraph->nSize; k++ )
+    {
+        Dec_Node_t * pGraphNode = pGraph->pNodes + k;
+        fprintf( s_pDumpCuts, "%s[%d,%d,%d,%d]", k == pGraph->nLeaves ? "" : ",",
+            (int)pGraphNode->eEdge0.Node, (int)pGraphNode->eEdge0.fCompl,
+            (int)pGraphNode->eEdge1.Node, (int)pGraphNode->eEdge1.fCompl );
+    }
     fprintf( s_pDumpCuts, "]}" );
     return Accepted ? AddedTrue : -1;
 }

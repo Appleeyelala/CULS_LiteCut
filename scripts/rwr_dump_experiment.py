@@ -57,8 +57,14 @@ def stage_inputs(run):
     staged = []
     folder = run / 'input/circuits'
     folder.mkdir(parents=True, exist_ok=True)
+    available = {digest(path): path for path in sorted(PAPER_INPUTS.glob('*.aig'))}
     for name, sha in CIRCUITS:
-        source = run / 'input/design.aig' if name == 'c1355' else PAPER_INPUTS / f'{name}.aig'
+        if name == 'c1355':
+            source = run / 'input/design.aig'
+        else:
+            source = available.get(sha)
+            if source is None:
+                raise SystemExit(f'{name}: no file under {PAPER_INPUTS} matches {sha}')
         target = folder / f'{name}.aig'
         shutil.copyfile(source, target)
         if digest(target) != sha:

@@ -361,6 +361,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--run', required=True, type=Path)
     parser.add_argument('--cohort', required=True, type=Path)
+    parser.add_argument('--export-manifest', type=Path, default=None,
+                        help='export_manifest.json of the export run; defaults to this run')
     parser.add_argument('--workers', type=int, default=8)
     args = parser.parse_args()
     run = args.run.resolve()
@@ -369,7 +371,8 @@ def main():
     out = run / 'output'
     (out / 'stats').mkdir(parents=True, exist_ok=True)
     cohort = json.loads(args.cohort.read_text())
-    manifest = json.loads((out / 'export_manifest.json').read_text())
+    manifest_path = args.export_manifest or (out / 'export_manifest.json')
+    manifest = json.loads(Path(manifest_path).read_text())
 
     cohort_paths = {}
     for row in cohort['pilots'] + cohort['development_new'] + cohort['sampled']:

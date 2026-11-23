@@ -1,0 +1,36 @@
+{
+  "circuit": "c5315",
+  "aiger_root": 460,
+  "abc_node": 583,
+  "step1_decision": {
+    "cut_slot": 2,
+    "cut_leaves": [
+      83,
+      446,
+      450
+    ],
+    "cut_prediction": 6,
+    "actual_root_level": 7
+  },
+  "verification": {
+    "leaf_set_blocks_all_paths": false,
+    "first_pi_outside_boundary": 161,
+    "depths": [
+      4,
+      4,
+      2
+    ],
+    "rebuilt_level": 6,
+    "true_level": 7,
+    "outside_arrival_from_level_weights": 7
+  },
+  "abc_counters_at_node": {
+    "cuts_total": 6,
+    "cuts_lt4_leaves": 5,
+    "cuts_exported": 6,
+    "candidates": 10,
+    "candidates_accepted_by_default": 3,
+    "gain_best": 0
+  },
+  "conclusion": "该 3 叶子集合是 support 最小化的结果，不是原图的一个 cut：存在经 PI 161 绕过全部叶子的路径，因此按叶子重建得到 6 而真实为 7。ABC 的 4 输入 rewrite 对 pCut->nLeaves < 4 直接跳过，该决策永远不会进入导出集；本节点 5 个 4 叶子以下的 cut 全部记在 cuts_lt4_leaves 中。"
+}

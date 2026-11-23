@@ -1,148 +1,175 @@
-# Step 2：用插桩的 ABC 导出 rewrite 候选（c1355）
+# Step 2：用插桩的 ABC 导出 rewrite 候选（c1355、c5315、intra_pred_PE、cabac_ucontext）
 
-c1355 的全部 rewrite 候选：ABC 每评估一个替换子图就写一行，子图结构与层数一并导出。
-本轮只做 c1355，其余三个电路等检查通过后再跑。
+四个 pilot 电路的全部 rewrite 候选：ABC 每评估一个替换子图就写一条记录，子图结构与层数一并导出。
+本轮补齐 c5315、intra_pred_PE、cabac_ucontext，并按电路重新执行六项验收。
 
-## 做了什么
+## leaf_depths 的列顺序（必须按数组位置）
 
-在 `third_party/abc` 的 `/data` 副本上打补丁（原仓库文件未改），补丁见
-[`provenance/rwr_dump.patch`](../../../provenance/rwr_dump.patch)，生成器是
-[`scripts/patch_abc_rwr_dump.py`](../../../scripts/patch_abc_rwr_dump.py)。环境变量
-`CULS_RWR_DUMP=<dir>` 打开导出，**不设变量时行为与原版完全一致**。
+**`leaf_depths[i]` 对应 `cut["leaves"][i]`，即评估时的位置顺序，不是 `leaves[i]["slot"]` 的顺序。**
 
-补丁共四处：
+`slot` 记录的是 NPN 置换之前该叶子在原始 ABC cut 中的下标，只用于追溯，**不能用来重排深度**。
+按 `slot` 排序会把深度张冠李戴：用 c1355 样本核对过，按数组顺序有 2103 个候选满足
+`root_level == max(叶子 level + 深度)`，按 `slot` 只有 1468 个对得上——差额全部来自这个错位。
 
-1. **候选导出**（`rwrEva.c` 的 `Rwr_CutEvaluate`）：`Dec_GraphToNetworkCount` 改以
-   `NodeMax = LevelMax = ABC_INFINITY` 调用，因此"新增节点超过 `nNodesSaved`"和"超过
-   `Required` 层数"两类候选不会被 `continue` 丢掉。绕开了对应的 `assert`。
-2. **不替换节点**（`abcRewrite.c`）：导出模式下 `Rwr_NodeRewrite` 返回后直接 `continue`，
-   跳过 `Dec_GraphUpdateNetwork`。所有候选都在原图快照上枚举，而不是在不断被改写的图上。
-3. **`accepted_by_default`**：用无界调用拿到的真实 `nodes_added` 与 ABC 自己的新 root 到达层数，
-   分别与 `nNodesSaved` 和 `Required` 比较，复现默认判据。判据等价性：`Counter` 与 `LevelNew`
-   沿 DAG 单调不减，因此"任一节点越界"等价于"最终计数/root 层数越界"。
-4. **计数**：三处评估前剪枝、两处节点级跳过、每个节点一行汇总（含无 cut 的节点）。
+本轮把这条约束变成硬断言：对**每一个**候选，按数组顺序算出的
+`max(level[leaf_i] + leaf_depths[i])` 必须等于导出里的 `root_level`，不等就立即中止。四个电路
+一共断言了 958,897 个候选，全部通过，见下表 `asserted` 列。这条断言取代了上一轮"抽 20 个"的抽样检查，
+同时也覆盖了逐候选的 `leaf_depths` 复算（从 `edges` 重建图，不依赖 C 端遍历）。
 
-## 计数
+## 四个电路的汇总
 
-| 项 | 值 |
-|---|---:|
-| 被评估节点（`Abc_NtkForEachNode` 遍历到） | 512 |
-| 节点级跳过：persistant / 高扇出（>1000） | 0 / 0 |
-| 平凡 cut（节点自身，每节点各跳过 1 个） | 512 |
-| 非平凡 cut 总数 | **5,942** |
-| ├ 导出（4 输入 cut 且单扇出叶子 ≤ 2） | 3,300 |
-| ├ 叶子不足 4 个被跳过 | 2,220 |
-| ├ 单扇出叶子超过 2 个被跳过 | 422 |
-| └ 叶子查不到对象被跳过 | 0 |
-| 候选总数 | 11,114 |
-| ├ 默认规则会接受 | 1,392 |
-| └ 自替换（新 root 就是原 root，`Dec_GraphToNetworkCount` 返回 -1） | 768 |
+| 电路 | 节点 | 有 cut | 非平凡 cut | 导出 | 叶子<4 | 单扇出>2 | 空叶 | 候选 | 默认接受 | 自替换 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| c1355 | 512 | 376 | 5,942 | 3,300 | 2,220 | 422 | 0 | 11,114 | 1,392 | 768 |
+| c5315 | 1,613 | 1,165 | 11,622 | 5,276 | 4,938 | 1,408 | 0 | 18,701 | 4,509 | 3,005 |
+| intra_pred_PE | 5,407 | 5,110 | 39,523 | 17,647 | 15,989 | 5,887 | 0 | 77,681 | 8,109 | 12,915 |
+| cabac_ucontext | 37,490 | 35,870 | 252,042 | 122,055 | 104,396 | 25,591 | 0 | 851,401 | 54,706 | 109,847 |
+| **合计** | 45,022 | 42,521 | 309,129 | 148,278 | 127,543 | 33,308 | 0 | **958,897** | 68,716 | 126,535 |
 
-`counters.json` 里的 `cuts_total` 只在进入导出路径时递增，因此等于 `cuts_exported = 3300`；
-非平凡 cut 总数必须按 3300 + 2220 + 422 + 0 计算。`stats.json` 的 `counters.derived` 已给出换算。
+节点级跳过（`Abc_NodeIsPersistant`、高扇出 >1000）四个电路都是 0；平凡 cut（节点自身）每个被评估
+节点各跳过一次，共 45,022 次。
 
-512 个节点里只有 **376 个**有导出 cut，其余 136 个的所有 cut 都被上述三类剪枝排除。
-`c1355.nodes.jsonl` 逐节点记录了原因计数，覆盖率可审计。
+`counters.json` 的 `cuts_total` 只在进入导出路径时递增，因此等于 `cuts_exported`；"非平凡 cut"一列
+按 `导出 + 叶子<4 + 单扇出>2 + 空叶` 计算，`stats.json` 的 `counters.derived` 里有同样的换算。
 
 ## 编号对齐
 
-ABC 的对象编号顺序是 PI → PO → AND，AIGER 是 PI → AND。因此 AND 编号整体偏移一个常量，
-**偏移量等于 PO 数**：
+ABC 的对象编号顺序是 PI → PO → AND，AIGER 是 PI → AND，因此 AND 编号整体偏移一个常量，**偏移量等于 PO 数**：
 
 ```
-abc_and_id = aiger_and_id + po_count        # c1355: +32
-abc_lit    = aiger_lit                      # PI 与常量 0 不变
-abc_lit    = aiger_lit - 2 * po_count       # AND 字面量
+abc_and_id = aiger_and_id + po_count
+abc_lit    = aiger_lit                  # PI 与常量 0 不变
+abc_lit    = aiger_lit - 2 * po_count   # AND 字面量
 ```
 
-这条规则是**逐节点验证**出来的，不是假设：512/512 个 AND 的扇入字面量在偏移后与
-`parse_aig` 完全一致（其中 512 个的扇入顺序被 ABC 交换，属正常）。验证函数
-`identifier_mapping` 在偏移不唯一或任一节点对不上时直接中止，不会产出错位的分析。
+逐节点验证，不是假设：
 
-同一份数据里还验证了 PO 侧：AIGER `po_literals` 与 ABC 的 PO 扇入一致。
+| 电路 | offset | PO 数 | 验证节点 | 扇入顺序被 ABC 交换 |
+|---|---:|---:|---:|---:|
+| c1355 | 32 | 32 | 512 / 512 | 512 |
+| c5315 | 123 | 123 | 1,613 / 1,613 | 1,613 |
+| intra_pred_PE | 60 | 60 | 5,407 / 5,407 | 5,407 |
+| cabac_ucontext | 3,170 | 3,170 | 37,490 / 37,490 | 37,490 |
 
-## 六项验收
+四个电路的偏移量都等于各自的 PO 数，支持这条规则；**所有** AND 的扇入顺序都被 ABC 左右互换
+（内容一致）。验证函数在偏移不唯一或任一节点对不上时直接中止。
 
-| 验收 | 结果 |
-|---|---|
-| 1 默认模式回归 | 4/4 电路：打补丁与不打补丁的 `read_aiger; rewrite` 输出**节点数、level、结构摘要全等**，CEC 全部 equivalent |
-| 2 快照不被修改 | 导出后 `print_stats` 仍为 `and = 512  lev = 29`，与导出前逐字段相同 |
-| 3 对账 | 376 个有 cut 的节点，`gain_best` 与"导出集 + `accepted_by_default` 过滤后重算的最大增益"**0 处不一致** |
-| 4 cut 有效 | 3,300 个 cut 全部满足：从 root 到任何 PI 的路径都经过叶子；**0 个非法** |
-| 5 层数核对 | 随机 20 个候选按 `edges` 重算 `leaf_depths` **0 处不一致**；全量 11,114 个候选的 `root_level` 也 **0 处不一致** |
-| 6 原结构层数重建 | c1355 上 **0/3300 不可重建** |
+## 六项验收（每个电路独立执行，未复用 c1355 结论）
 
-**验收 6 的说明**：第 1 步 README 记录的不可重建案例在 **c5315 的 root 460**，c1355 本来就没有
-这类 cut，所以本轮 0 是预期结果，不构成对该现象的验证。要统计它必须跑 c5315 的导出。
+| 验收 | c1355 | c5315 | intra_pred_PE | cabac_ucontext |
+|---|---|---|---|---|
+| 1 默认模式回归 | 通过 | 通过 | 通过 | 通过 |
+| 2 快照不被修改 | 通过 | 通过 | 通过 | 通过 |
+| 3 对账（gain 不一致数） | 0 | 0 | 0 | 0 |
+| 4 cut 有效（非法数） | 0 | 0 | 0 | 0 |
+| 5 断言（候选数 / 不一致） | 11,114 / 0 | 18,701 / 0 | 77,681 / 0 | 851,401 / 0 |
+| 6 原结构层数重建 | 0 / 3,300 | 0 / 5,276 | 0 / 17,647 | 0 / 122,055 |
 
-**验收 1 的对照基准**：主对照是同源未打补丁构建（`7ab8dca8…`），不是冻结二进制。冻结二进制
-（`5327dacd…`）只作次级记录——它的构建链没有源码快照和校验和，且带 CULS 映射补丁，无法把差异
-归因到本次补丁。本轮它的 rewrite 输出与同源构建**完全一致**，作为附加信息记录。
+**验收 1**：打补丁与不打补丁的同源构建，对每个电路执行 `read_aiger; rewrite`，节点数、level、
+`aig_structure_digest` 全等，CEC 全部 `equivalent`。冻结二进制（`5327dacd…`）作为次级记录，
+四个电路也都一致——但它没有源码快照和校验和，不作为主对照。
+
+**验收 2**：导出后 `print_stats` 与导出前逐字段相同（c1355 `512/29`、c5315 `1613/38`、
+intra_pred_PE `5407/71`、cabac_ucontext `37490/77`）。
+
+## 验收 6：为什么四个电路都是 0
+
+这是本轮最需要说清的一条，因为它和计划预期不同，**不是漏跑，也不是过滤**。
+
+**c5315 的 root 460 不在导出里，因为它不是 4 叶子 cut。** 第 1 步记录的决策
+（cut slot 2，叶子 `{83, 446, 450}`）只有 **3 个叶子**。ABC 的 rewrite 在
+`rwrEva.c` 里对 `pCut->nLeaves < 4` 直接 `continue`，所以这个决策永远不会被评估，也永远不会进入
+导出集。该节点（ABC 编号 583）的计数是 `cuts_lt4_leaves = 5`、`cuts_exported = 6`，
+5 个 4 叶子以下的 cut 全部记在剪枝计数里。
+
+我另外验证了这组叶子本身的性质（证据见 [`c5315.root460.json`](c5315.root460.json)）：
+**它不是原图的一个 cut**——存在一条经 PI 161 绕过全部三个叶子的路径，因此按叶子重建得到
+**6**，真实是 **7**，与 `level_weights.original_leaf_depths` 给出的边界外到达 7 一致。
+
+**为什么合法的 4 叶子 cut 一定重建正确**：对一个真正的 cut，从 root 到任何 PI 的每条路径恰好
+穿过一个叶子，于是 `max(叶子 level + 叶子到 root 的深度)` 按定义就等于 `level[root]`。验收 4 已确认
+148,278 个导出 cut **全部**是合法 cut（0 个非法），所以验收 6 在导出集上必然为 0——它是验收 4 的
+推论，不是独立的经验发现。
+
+**对第 3 步的含义**：这个"层数不可重建"现象属于 **support 最小化后的原生（gpuls）枚举**，
+不属于 ABC 自己的 cut 集合。第 3 步在 ABC 导出的 cut 上做加权选择时不会遇到它；如果要在这一层
+讨论该现象，必须回到原生枚举那条路径，而不是这份导出。其余三个电路同样为 0。
 
 ## 体量
 
-| 文件 | 大小 |
-|---|---:|
-| `cuts.jsonl`（3,300 行，11,114 候选） | 3.5 MB |
-| `nodes.jsonl`（512 行） | 128 KB |
-| `nodes.tsv` | 12 KB |
+| 电路 | `cuts.jsonl` | 处理 |
+|---|---:|---|
+| c1355 | 3,575,552 B | 原样 |
+| c5315 | 5,829,716 B | 原样 |
+| intra_pred_PE | 22,499,277 B | 原样 |
+| cabac_ucontext | 218,019,849 B | 原样（未超 1 GiB 阈值，无需 gzip） |
 
-远低于计划设的 5 GB 阈值，无需 gzip 或分文件。按节点数线性外推，cabac_ucontext（37,490 AND）
-约 250 MB，仍可直接落地。完整导出留在 `/data`：
-
-```
-/data/wushangge/CULS_LiteCut/runs/20261123T042529Z-rwr-dump-c1355b-41071bcc/output/dump/c1355/cuts.jsonl
-bytes = 3575552
-sha256 = 451b1abe360f063970ae07201723587443ca8b67bbbbbfddec141a229c5f8b75
-```
+完整导出都留在 `/data`，路径与 SHA-256 见 `stats.json` 的 `full_export`。仓库里每个电路只放前
+1,000 行样本。cabac 实测 218 MB，低于计划预留的 1 GiB 压缩阈值，因此没有触发 gzip；若后续更大
+电路需要压缩，`compress_if_needed` 会自动 gzip 并保留原始摘要。
 
 ## 溯源
 
 | 项 | 值 |
 |---|---|
-| 构建 run | `20261123T041932Z-rwr-dump-build2-3c2894f0`，Slurm 66305，COMPLETED，8 CPU / 32 GiB / 0 GPU / 45 min |
-| 实验 run | `20261123T042529Z-rwr-dump-c1355b-41071bcc`，Slurm 66307，COMPLETED，4 CPU / 16 GiB / 0 GPU / 60 min |
+| 实验 run | `20261123T051432Z-rwr-dump-four-f29ceabd`，Slurm 66308，COMPLETED，21 s |
+| 资源 | 8 CPU / 32 GiB / 0 GPU / 2 h，未指定 nodelist |
+| 实验源码 commit | `4af50077` |
+| 构建 run | `20261123T041932Z-rwr-dump-build2-3c2894f0`，Slurm 66305 |
 | 构建源码 commit | `f5fd14ecfc9df18f4d0ea3c6e1ac4bf34597a878` |
-| 实验源码 commit | `37a15bde134604bd99bf212b87b5c884cf69709e` |
-| ABC 源码 | `third_party/abc` @ `f5fd14ec`（原仓库文件未改，补丁只作用于 `/data` 副本） |
+| ABC 源码 | `third_party/abc` @ `f5fd14ec`，原仓库文件未改，补丁只作用于 `/data` 副本 |
 | abc 未打补丁 | `7ab8dca842988ffff6b8f14559c3ba7718018a85317b84be7eab4cfbc81311f0` |
 | abc 打补丁 | `2b5119455ac4970dd706c0118c71bb36dcd98ed716bb5512f07509ec855a1ad8` |
 | 冻结 abc（次级） | `5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb` |
-| 输入 c1355 | `2602b10f131a6ba5996521036ba130aab128a4aa15e3ab49ce44f2f02047f0b0` |
 
-其余三个电路的输入 SHA-256 与第 1 步一致，已逐个核对：c5315 `d1c0cea5…`、intra_pred_PE
-`889b40b4…`、cabac_ucontext `77fdf62a…`。
+输入 SHA-256（与第 1 步 `summary.json` 一致，逐个核对）：
 
-构建与实验都以 `--export=NONE` 提交，PATH 与所有缓存目录手动指回 run 目录；未指定 nodelist
-（纯 CPU 任务，交给 Slurm 放置，避免占用 GPU 节点）。
+| 电路 | SHA-256 |
+|---|---|
+| c1355 | `2602b10f131a6ba5996521036ba130aab128a4aa15e3ab49ce44f2f02047f0b0` |
+| c5315 | `d1c0cea55baf5a407495d82eb4385a9ddea8528cde21a762f46bb0774fc93afd` |
+| intra_pred_PE | `889b40b408ff0e3333a81f73e99887ee379fb60c6e8c1b5f23d1056ce7c088a4` |
+| cabac_ucontext | `77fdf62aa46fa9a5bdb67a49ede156bff75bc8ea121faff67b74fa89a2a78707` |
+
+执行命令：
+
+```
+/home/share/process/anaconda3/bin/python -B src/scripts/rwr_dump_experiment.py \
+  --run <run> --build <build2 run> --frozen <frozen abc>
+```
+
+四个电路在同一次 Slurm 作业内依次导出，`--circuits` 默认即四个。
 
 ## 文件
 
 | 文件 | 内容 |
 |---|---|
-| `stats.json` | 汇总：六项验收、计数（含 derived 换算）、编号映射、覆盖率、完整导出路径与 SHA256、每个打包文件的 SHA256 |
-| `c1355.sample.jsonl` | 完整导出的前 1,000 行 |
-| `c1355.nodes.jsonl` | 512 个节点的逐节点汇总（含 reason、三类剪枝计数、增益） |
-| `c1355.nodes.tsv` | ABC 节点表：编号、类型、两个扇入字面量、level、扇出 |
-| `c1355.counters.json` | 二进制自己写出的原始计数，原样保留 |
-| `c1355.export_check.json` | 验收 2 的原始记录（导出前后 `print_stats`） |
+| `stats.json` | 四电路汇总：各项计数、覆盖率、编号映射、六项验收、完整导出路径与 SHA256、每个打包文件的 SHA256 |
+| `<电路>.sample.jsonl` | 完整导出的前 1,000 行 |
+| `<电路>.nodes.jsonl` | 逐节点汇总（reason、三类剪枝计数、增益） |
+| `<电路>.nodes.tsv` | ABC 节点表：编号、类型、两个扇入字面量、level、扇出 |
+| `<电路>.counters.json` | 二进制写出的原始计数，原样保留 |
+| `<电路>.export_check.json` | 验收 2 的原始记录 |
+| `c5315.root460.json` | 第 1 步反例的归因证据：叶子集不是 cut、绕行 PI、重建 6 vs 真实 7、该节点的剪枝计数 |
+
+仓库内 step2 目录合计约 18 MB，其中 cabac_ucontext 的 `nodes.jsonl` 占 9.2 MB。
 
 ## 与计划的差异
 
-1. **未在本轮跑其余三个电路**，按计划"先完成 c1355 并上传、等我检查后再跑"。因此验收 6 的
-   c5315 反例统计缺失，见上。
-2. **额外导出了 `edges`、`n_leaves`、`n_size`、`root_node`。** 计划只要求 `leaf_depths`，
-   但没有图结构就无法独立复算层数，验收 5 只能变成自证。代价是行变长，c1355 上仍只有 3.5 MB。
-3. **额外记录了 `abc_level`。** `root_level` 是按 `max(叶子 level + 深度)` 结构算的（第 3 步要用），
-   `abc_level` 是 ABC 内部经过 AIG 节点复用与常量折叠后的到达层数，两者可能不同；验收 3 的
-   `accepted_by_default` 用后者，第 3 步的目标函数用前者。分开记录避免混淆。
-4. **`cuts_total` 命名有歧义**，语义见上文换算说明；未改名以免重跑一轮构建。
-5. 计划要求"记录剪枝的位置和条件"：三处位置为 `rwrEva.c` 的 `pCut->nLeaves < 4`、
-   `Abc_NtkObj(...) == NULL`、单扇出叶子 `Counter > 2`；节点级为 `Abc_NodeIsPersistant` 与
-   `Abc_ObjFanoutNum(pNode) > 1000`。
+1. **c1355 在本轮被重新导出**，以便四个电路由同一次 Slurm 作业、同一个二进制产出，口径完全一致。
+   重导结果与原发布件**逐字节相同**（`cuts.jsonl` SHA-256 `451b1abe…`），顺带确认了导出是确定性的。
+2. **验收 5 从抽样升级为全量断言**（本轮要求），四个电路共断言 958,897 个候选。
+3. **验收 6 的结果与计划预期不同**：四个电路都是 0，原因是反例属于 3 叶子 cut，ABC 不评估。
+   详见上一节，未做任何过滤或跳过。
+4. **额外导出 `edges`、`n_leaves`、`n_size`、`root_node`**（沿用上一轮）：没有图结构就无法独立
+   复算层数，断言只能是自证。
+5. **额外记录 `abc_level`**：`root_level` 是结构算的（`max(叶子 level + 深度)`，第 3 步要用），
+   `abc_level` 是 ABC 经节点复用后的到达层数；`accepted_by_default` 用后者。
+6. **`cuts_total` 命名沿用未改**，语义换算见上文与 `stats.json`。
 
 ## 失败与负例
 
-无电路失败。768 个自替换候选与 8,954 个默认规则不接受但已导出的候选全部保留，未过滤。
+无电路失败，无导出失败。126,535 个自替换候选与 763,646 个默认规则不接受但已导出的候选全部保留，
+未过滤。
 
-下一步：c5315 的导出（用于验收 6 的反例统计），以及另两个电路的回归与导出。
+第 3 步未开始。

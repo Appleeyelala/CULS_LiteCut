@@ -1,402 +1,1506 @@
 {
-  "acceptance": {
-    "check1_regression": [
-      {
-        "cec_orig_vs_dump": true,
-        "circuit": "c1355",
-        "dump": {
-          "after": {
-            "ands": 445,
-            "io": [
-              41,
-              32
-            ],
-            "lat": 0,
-            "lev": 26
-          },
-          "before": {
-            "ands": 512,
-            "io": [
-              41,
-              32
-            ],
-            "lat": 0,
-            "lev": 29
-          },
-          "digest": "2d458e04bced94d61a68f7db6abd67c10f750abc4abf2965bf693111b3ae5b80",
-          "returncode": 0
-        },
-        "frozen": {
-          "after": {
-            "ands": 445,
-            "io": [
-              41,
-              32
-            ],
-            "lat": 0,
-            "lev": 26
-          },
-          "before": {
-            "ands": 512,
-            "io": [
-              41,
-              32
-            ],
-            "lat": 0,
-            "lev": 29
-          },
-          "digest": "2d458e04bced94d61a68f7db6abd67c10f750abc4abf2965bf693111b3ae5b80",
-          "returncode": 0
-        },
-        "frozen_matches_dump": true,
-        "input_sha256": "2602b10f131a6ba5996521036ba130aab128a4aa15e3ab49ce44f2f02047f0b0",
-        "orig": {
-          "after": {
-            "ands": 445,
-            "io": [
-              41,
-              32
-            ],
-            "lat": 0,
-            "lev": 26
-          },
-          "before": {
-            "ands": 512,
-            "io": [
-              41,
-              32
-            ],
-            "lat": 0,
-            "lev": 29
-          },
-          "digest": "2d458e04bced94d61a68f7db6abd67c10f750abc4abf2965bf693111b3ae5b80",
-          "returncode": 0
-        },
-        "primary_match": true
-      },
-      {
-        "cec_orig_vs_dump": true,
-        "circuit": "c5315",
-        "dump": {
-          "after": {
-            "ands": 1406,
-            "io": [
-              178,
-              123
-            ],
-            "lat": 0,
-            "lev": 38
-          },
-          "before": {
-            "ands": 1613,
-            "io": [
-              178,
-              123
-            ],
-            "lat": 0,
-            "lev": 38
-          },
-          "digest": "84e1cd5a9527b93d74a601c6a7ca2e0a341756e99cf5c0cc70bc23a048039a32",
-          "returncode": 0
-        },
-        "frozen": {
-          "after": {
-            "ands": 1406,
-            "io": [
-              178,
-              123
-            ],
-            "lat": 0,
-            "lev": 38
-          },
-          "before": {
-            "ands": 1613,
-            "io": [
-              178,
-              123
-            ],
-            "lat": 0,
-            "lev": 38
-          },
-          "digest": "84e1cd5a9527b93d74a601c6a7ca2e0a341756e99cf5c0cc70bc23a048039a32",
-          "returncode": 0
-        },
-        "frozen_matches_dump": true,
-        "input_sha256": "d1c0cea55baf5a407495d82eb4385a9ddea8528cde21a762f46bb0774fc93afd",
-        "orig": {
-          "after": {
-            "ands": 1406,
-            "io": [
-              178,
-              123
-            ],
-            "lat": 0,
-            "lev": 38
-          },
-          "before": {
-            "ands": 1613,
-            "io": [
-              178,
-              123
-            ],
-            "lat": 0,
-            "lev": 38
-          },
-          "digest": "84e1cd5a9527b93d74a601c6a7ca2e0a341756e99cf5c0cc70bc23a048039a32",
-          "returncode": 0
-        },
-        "primary_match": true
-      },
-      {
-        "cec_orig_vs_dump": true,
-        "circuit": "intra_pred_PE",
-        "dump": {
-          "after": {
-            "ands": 5084,
-            "io": [
-              572,
-              60
-            ],
-            "lat": 0,
-            "lev": 71
-          },
-          "before": {
-            "ands": 5407,
-            "io": [
-              572,
-              60
-            ],
-            "lat": 0,
-            "lev": 71
-          },
-          "digest": "c12e254462814a5e5064f5cec7538c91135c3344dc8ad714f4575bf24d10278f",
-          "returncode": 0
-        },
-        "frozen": {
-          "after": {
-            "ands": 5084,
-            "io": [
-              572,
-              60
-            ],
-            "lat": 0,
-            "lev": 71
-          },
-          "before": {
-            "ands": 5407,
-            "io": [
-              572,
-              60
-            ],
-            "lat": 0,
-            "lev": 71
-          },
-          "digest": "c12e254462814a5e5064f5cec7538c91135c3344dc8ad714f4575bf24d10278f",
-          "returncode": 0
-        },
-        "frozen_matches_dump": true,
-        "input_sha256": "889b40b408ff0e3333a81f73e99887ee379fb60c6e8c1b5f23d1056ce7c088a4",
-        "orig": {
-          "after": {
-            "ands": 5084,
-            "io": [
-              572,
-              60
-            ],
-            "lat": 0,
-            "lev": 71
-          },
-          "before": {
-            "ands": 5407,
-            "io": [
-              572,
-              60
-            ],
-            "lat": 0,
-            "lev": 71
-          },
-          "digest": "c12e254462814a5e5064f5cec7538c91135c3344dc8ad714f4575bf24d10278f",
-          "returncode": 0
-        },
-        "primary_match": true
-      },
-      {
-        "cec_orig_vs_dump": true,
-        "circuit": "cabac_ucontext",
-        "dump": {
-          "after": {
-            "ands": 36767,
-            "io": [
-              2763,
-              3170
-            ],
-            "lat": 0,
-            "lev": 75
-          },
-          "before": {
-            "ands": 37490,
-            "io": [
-              2763,
-              3170
-            ],
-            "lat": 0,
-            "lev": 77
-          },
-          "digest": "9f8ae3b38eeb70647522d5d2d2a638035fbea79c2716a3e14ff444535a238a34",
-          "returncode": 0
-        },
-        "frozen": {
-          "after": {
-            "ands": 36767,
-            "io": [
-              2763,
-              3170
-            ],
-            "lat": 0,
-            "lev": 75
-          },
-          "before": {
-            "ands": 37490,
-            "io": [
-              2763,
-              3170
-            ],
-            "lat": 0,
-            "lev": 77
-          },
-          "digest": "9f8ae3b38eeb70647522d5d2d2a638035fbea79c2716a3e14ff444535a238a34",
-          "returncode": 0
-        },
-        "frozen_matches_dump": true,
-        "input_sha256": "77fdf62aa46fa9a5bdb67a49ede156bff75bc8ea121faff67b74fa89a2a78707",
-        "orig": {
-          "after": {
-            "ands": 36767,
-            "io": [
-              2763,
-              3170
-            ],
-            "lat": 0,
-            "lev": 75
-          },
-          "before": {
-            "ands": 37490,
-            "io": [
-              2763,
-              3170
-            ],
-            "lat": 0,
-            "lev": 77
-          },
-          "digest": "9f8ae3b38eeb70647522d5d2d2a638035fbea79c2716a3e14ff444535a238a34",
-          "returncode": 0
-        },
-        "primary_match": true
-      }
-    ],
-    "check2_untouched": {
-      "after": {
-        "ands": 512,
-        "io": [
-          41,
-          32
-        ],
-        "lat": 0,
-        "lev": 29
-      },
-      "before": {
-        "ands": 512,
-        "io": [
-          41,
-          32
-        ],
-        "lat": 0,
-        "lev": 29
-      },
-      "circuit": "c1355",
-      "returncode": 0,
-      "untouched": true
-    },
-    "check3_gain_mismatches": 0,
-    "check4_invalid_cuts": 0,
-    "check5_depth_mismatches": 0,
-    "check5_root_level_mismatches": 0,
-    "check5_sampled": 20,
-    "check6_note": "c1355 \u4e0a\u4e3a 0\uff1b\u7b2c 1 \u6b65 README \u8bb0\u5f55\u7684\u4e0d\u53ef\u91cd\u5efa\u6848\u4f8b\u5728 c5315 root 460,\u9700\u8981 c5315 \u7684\u5bfc\u51fa\u624d\u80fd\u7edf\u8ba1\u3002",
-    "check6_unrebuildable_cuts": 0
-  },
   "binaries": {
     "dump_sha256": "2b5119455ac4970dd706c0118c71bb36dcd98ed716bb5512f07509ec855a1ad8",
     "frozen_sha256": "5327dacd8df3b98caf6cea3ab4f01134413c0a8dc8dcda6a181a59e2c83f2bbb",
     "orig_sha256": "7ab8dca842988ffff6b8f14559c3ba7718018a85317b84be7eab4cfbc81311f0"
   },
   "build_run": "20261123T041932Z-rwr-dump-build2-3c2894f0",
-  "counters": {
-    "candidates": 11114,
-    "candidates_accepted_by_default": 1392,
-    "candidates_self_replacement": 768,
-    "cuts_exported": 3300,
-    "cuts_lt4_leaves": 2220,
-    "cuts_null_leaf": 0,
-    "cuts_single_fanout_gt2": 422,
-    "cuts_total": 3300,
-    "cuts_trivial_skipped": 512,
-    "derived": {
-      "cuts_examined_nontrivial": 5942,
-      "note": "counters.json \u7684 cuts_total \u53ea\u5728\u8fdb\u5165\u5bfc\u51fa\u8def\u5f84\u65f6\u9012\u589e\uff0c\u56e0\u6b64\u7b49\u4e8e cuts_exported\uff1b\u975e\u5e73\u51e1 cut \u603b\u6570\u7531\u4e0a\u5f0f\u8ba1\u7b97\uff1b\u5e73\u51e1 cut\uff08\u8282\u70b9\u81ea\u8eab\uff09\u6bcf\u4e2a\u88ab\u8bc4\u4f30\u8282\u70b9\u5404\u8df3\u8fc7\u4e00\u6b21\u3002"
+  "circuits": {
+    "c1355": {
+      "checks": {
+        "check1_regression": {
+          "cec_orig_vs_dump": true,
+          "circuit": "c1355",
+          "dump": {
+            "after": {
+              "ands": 445,
+              "io": [
+                41,
+                32
+              ],
+              "lat": 0,
+              "lev": 26
+            },
+            "before": {
+              "ands": 512,
+              "io": [
+                41,
+                32
+              ],
+              "lat": 0,
+              "lev": 29
+            },
+            "digest": "2d458e04bced94d61a68f7db6abd67c10f750abc4abf2965bf693111b3ae5b80",
+            "returncode": 0
+          },
+          "frozen": {
+            "after": {
+              "ands": 445,
+              "io": [
+                41,
+                32
+              ],
+              "lat": 0,
+              "lev": 26
+            },
+            "before": {
+              "ands": 512,
+              "io": [
+                41,
+                32
+              ],
+              "lat": 0,
+              "lev": 29
+            },
+            "digest": "2d458e04bced94d61a68f7db6abd67c10f750abc4abf2965bf693111b3ae5b80",
+            "returncode": 0
+          },
+          "frozen_matches_dump": true,
+          "input_sha256": "2602b10f131a6ba5996521036ba130aab128a4aa15e3ab49ce44f2f02047f0b0",
+          "orig": {
+            "after": {
+              "ands": 445,
+              "io": [
+                41,
+                32
+              ],
+              "lat": 0,
+              "lev": 26
+            },
+            "before": {
+              "ands": 512,
+              "io": [
+                41,
+                32
+              ],
+              "lat": 0,
+              "lev": 29
+            },
+            "digest": "2d458e04bced94d61a68f7db6abd67c10f750abc4abf2965bf693111b3ae5b80",
+            "returncode": 0
+          },
+          "primary_match": true
+        },
+        "check2_untouched": {
+          "after": {
+            "ands": 512,
+            "io": [
+              41,
+              32
+            ],
+            "lat": 0,
+            "lev": 29
+          },
+          "before": {
+            "ands": 512,
+            "io": [
+              41,
+              32
+            ],
+            "lat": 0,
+            "lev": 29
+          },
+          "circuit": "c1355",
+          "returncode": 0,
+          "untouched": true
+        },
+        "check3_gain_mismatches": 0,
+        "check4_invalid_cuts": 0,
+        "check5_asserted_candidates": 11114,
+        "check5_depth_mismatches": 0,
+        "check5_root_level_mismatches": 0,
+        "check5_sample": [
+          {
+            "leaf_depths": [
+              3,
+              2,
+              1,
+              3
+            ],
+            "node": 463,
+            "root_level": 25,
+            "subgraph": 9
+          },
+          {
+            "leaf_depths": [
+              4,
+              3,
+              4,
+              4
+            ],
+            "node": 401,
+            "root_level": 29,
+            "subgraph": 2
+          },
+          {
+            "leaf_depths": [
+              5,
+              5,
+              4,
+              4
+            ],
+            "node": 434,
+            "root_level": 29,
+            "subgraph": 0
+          },
+          {
+            "leaf_depths": [
+              4,
+              4,
+              1,
+              2
+            ],
+            "node": 438,
+            "root_level": 26,
+            "subgraph": 2
+          },
+          {
+            "leaf_depths": [
+              1,
+              3,
+              2,
+              3
+            ],
+            "node": 417,
+            "root_level": 18,
+            "subgraph": 12
+          },
+          {
+            "leaf_depths": [
+              5,
+              3,
+              5,
+              1
+            ],
+            "node": 100,
+            "root_level": 8,
+            "subgraph": 1
+          },
+          {
+            "leaf_depths": [
+              3,
+              3,
+              1,
+              2
+            ],
+            "node": 508,
+            "root_level": 26,
+            "subgraph": 4
+          },
+          {
+            "leaf_depths": [
+              5,
+              5,
+              3,
+              1
+            ],
+            "node": 119,
+            "root_level": 13,
+            "subgraph": 0
+          },
+          {
+            "leaf_depths": [
+              3,
+              3,
+              1,
+              2
+            ],
+            "node": 563,
+            "root_level": 29,
+            "subgraph": 2
+          },
+          {
+            "leaf_depths": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "node": 469,
+            "root_level": 24,
+            "subgraph": 0
+          },
+          {
+            "leaf_depths": [
+              5,
+              5,
+              3,
+              4
+            ],
+            "node": 348,
+            "root_level": 10,
+            "subgraph": 1
+          },
+          {
+            "leaf_depths": [
+              3,
+              3,
+              2,
+              1
+            ],
+            "node": 364,
+            "root_level": 4,
+            "subgraph": 1
+          },
+          {
+            "leaf_depths": [
+              4,
+              4,
+              3,
+              1
+            ],
+            "node": 227,
+            "root_level": 9,
+            "subgraph": 0
+          },
+          {
+            "leaf_depths": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "node": 567,
+            "root_level": 27,
+            "subgraph": 0
+          },
+          {
+            "leaf_depths": [
+              4,
+              4,
+              2,
+              1
+            ],
+            "node": 208,
+            "root_level": 15,
+            "subgraph": 0
+          },
+          {
+            "leaf_depths": [
+              2,
+              3,
+              1,
+              3
+            ],
+            "node": 491,
+            "root_level": 25,
+            "subgraph": 11
+          },
+          {
+            "leaf_depths": [
+              5,
+              5,
+              4,
+              2
+            ],
+            "node": 106,
+            "root_level": 10,
+            "subgraph": 1
+          },
+          {
+            "leaf_depths": [
+              5,
+              5,
+              4,
+              3
+            ],
+            "node": 484,
+            "root_level": 29,
+            "subgraph": 25
+          },
+          {
+            "leaf_depths": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "node": 438,
+            "root_level": 25,
+            "subgraph": 0
+          },
+          {
+            "leaf_depths": [
+              4,
+              4,
+              4,
+              4
+            ],
+            "node": 550,
+            "root_level": 28,
+            "subgraph": 17
+          }
+        ],
+        "check6_examples": [],
+        "check6_truncated": false,
+        "check6_unrebuildable_cuts": 0,
+        "check6_unrebuildable_roots": []
+      },
+      "counters": {
+        "candidates": 11114,
+        "candidates_accepted_by_default": 1392,
+        "candidates_self_replacement": 768,
+        "cuts_exported": 3300,
+        "cuts_lt4_leaves": 2220,
+        "cuts_null_leaf": 0,
+        "cuts_single_fanout_gt2": 422,
+        "cuts_total": 3300,
+        "cuts_trivial_skipped": 512,
+        "derived": {
+          "cuts_examined_nontrivial": 5942,
+          "note": "counters.json \u7684 cuts_total \u53ea\u5728\u8fdb\u5165\u5bfc\u51fa\u8def\u5f84\u65f6\u9012\u589e\uff0c\u56e0\u6b64\u7b49\u4e8e cuts_exported\uff1b\u975e\u5e73\u51e1 cut \u603b\u6570\u7531\u4e0a\u5f0f\u8ba1\u7b97\uff1b\u5e73\u51e1 cut\uff08\u8282\u70b9\u81ea\u8eab\uff09\u6bcf\u4e2a\u88ab\u8bc4\u4f30\u8282\u70b9\u5404\u8df3\u8fc7\u4e00\u6b21\u3002"
+        },
+        "nodes_evaluated": 512,
+        "nodes_high_fanout": 0,
+        "nodes_persistent": 0
+      },
+      "coverage": {
+        "candidates": 11114,
+        "candidates_accepted": 1392,
+        "candidates_self": 768,
+        "cuts": 3300,
+        "nodes_exported": 512,
+        "nodes_with_cuts": 376
+      },
+      "full_export": {
+        "bytes": 3575552,
+        "lines": 3300,
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261123T051432Z-rwr-dump-four-f29ceabd/output/dump/c1355/cuts.jsonl",
+        "sha256": "451b1abe360f063970ae07201723587443ca8b67bbbbbfddec141a229c5f8b75"
+      },
+      "identifier_mapping": {
+        "and_nodes": 512,
+        "circuit": "c1355",
+        "fanin_order_swapped": 512,
+        "offset": 32,
+        "po_count": 32,
+        "verified": 512
+      },
+      "input_sha256": "2602b10f131a6ba5996521036ba130aab128a4aa15e3ab49ce44f2f02047f0b0"
     },
-    "nodes_evaluated": 512,
-    "nodes_high_fanout": 0,
-    "nodes_persistent": 0
-  },
-  "coverage": {
-    "candidates": 11114,
-    "candidates_accepted": 1392,
-    "candidates_self": 768,
-    "nodes_exported": 512,
-    "nodes_with_cuts": 376
-  },
-  "full_export": {
-    "bytes": 3575552,
-    "lines": 3300,
-    "path": "/data/wushangge/CULS_LiteCut/runs/20261123T042529Z-rwr-dump-c1355b-41071bcc/output/dump/c1355/cuts.jsonl",
-    "sha256": "451b1abe360f063970ae07201723587443ca8b67bbbbbfddec141a229c5f8b75"
-  },
-  "identifier_mapping": {
-    "and_nodes": 512,
-    "circuit": "c1355",
-    "fanin_order_swapped": 512,
-    "offset": 32,
-    "po_count": 32,
-    "verified": 512
-  },
-  "inputs": [
-    {
-      "circuit": "c1355",
-      "path": "/data/wushangge/CULS_LiteCut/runs/20261123T042529Z-rwr-dump-c1355b-41071bcc/input/circuits/c1355.aig",
-      "sha256": "2602b10f131a6ba5996521036ba130aab128a4aa15e3ab49ce44f2f02047f0b0",
-      "source": "/data/wushangge/CULS_LiteCut/runs/20261123T042529Z-rwr-dump-c1355b-41071bcc/input/design.aig"
+    "c5315": {
+      "checks": {
+        "check1_regression": {
+          "cec_orig_vs_dump": true,
+          "circuit": "c5315",
+          "dump": {
+            "after": {
+              "ands": 1406,
+              "io": [
+                178,
+                123
+              ],
+              "lat": 0,
+              "lev": 38
+            },
+            "before": {
+              "ands": 1613,
+              "io": [
+                178,
+                123
+              ],
+              "lat": 0,
+              "lev": 38
+            },
+            "digest": "84e1cd5a9527b93d74a601c6a7ca2e0a341756e99cf5c0cc70bc23a048039a32",
+            "returncode": 0
+          },
+          "frozen": {
+            "after": {
+              "ands": 1406,
+              "io": [
+                178,
+                123
+              ],
+              "lat": 0,
+              "lev": 38
+            },
+            "before": {
+              "ands": 1613,
+              "io": [
+                178,
+                123
+              ],
+              "lat": 0,
+              "lev": 38
+            },
+            "digest": "84e1cd5a9527b93d74a601c6a7ca2e0a341756e99cf5c0cc70bc23a048039a32",
+            "returncode": 0
+          },
+          "frozen_matches_dump": true,
+          "input_sha256": "d1c0cea55baf5a407495d82eb4385a9ddea8528cde21a762f46bb0774fc93afd",
+          "orig": {
+            "after": {
+              "ands": 1406,
+              "io": [
+                178,
+                123
+              ],
+              "lat": 0,
+              "lev": 38
+            },
+            "before": {
+              "ands": 1613,
+              "io": [
+                178,
+                123
+              ],
+              "lat": 0,
+              "lev": 38
+            },
+            "digest": "84e1cd5a9527b93d74a601c6a7ca2e0a341756e99cf5c0cc70bc23a048039a32",
+            "returncode": 0
+          },
+          "primary_match": true
+        },
+        "check2_untouched": {
+          "after": {
+            "ands": 1613,
+            "io": [
+              178,
+              123
+            ],
+            "lat": 0,
+            "lev": 38
+          },
+          "before": {
+            "ands": 1613,
+            "io": [
+              178,
+              123
+            ],
+            "lat": 0,
+            "lev": 38
+          },
+          "circuit": "c5315",
+          "returncode": 0,
+          "untouched": true
+        },
+        "check3_gain_mismatches": 0,
+        "check4_invalid_cuts": 0,
+        "check5_asserted_candidates": 18701,
+        "check5_depth_mismatches": 0,
+        "check5_root_level_mismatches": 0,
+        "check5_sample": [
+          {
+            "leaf_depths": [
+              3,
+              3,
+              1,
+              2
+            ],
+            "node": 843,
+            "root_level": 6,
+            "subgraph": 2
+          },
+          {
+            "leaf_depths": [
+              5,
+              3,
+              5,
+              4
+            ],
+            "node": 1310,
+            "root_level": 6,
+            "subgraph": 1
+          },
+          {
+            "leaf_depths": [
+              5,
+              5,
+              4,
+              2
+            ],
+            "node": 806,
+            "root_level": 21,
+            "subgraph": 1
+          },
+          {
+            "leaf_depths": [
+              5,
+              3,
+              5,
+              4
+            ],
+            "node": 1307,
+            "root_level": 6,
+            "subgraph": 1
+          },
+          {
+            "leaf_depths": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "node": 786,
+            "root_level": 11,
+            "subgraph": 1
+          },
+          {
+            "leaf_depths": [
+              3,
+              3,
+              2,
+              1
+            ],
+            "node": 332,
+            "root_level": 8,
+            "subgraph": 3
+          },
+          {
+            "leaf_depths": [
+              2,
+              3,
+              3,
+              1
+            ],
+            "node": 920,
+            "root_level": 3,
+            "subgraph": 2
+          },
+          {
+            "leaf_depths": [
+              3,
+              3,
+              1,
+              2
+            ],
+            "node": 363,
+            "root_level": 3,
+            "subgraph": 2
+          },
+          {
+            "leaf_depths": [
+              4,
+              4,
+              3,
+              2
+            ],
+            "node": 1419,
+            "root_level": 8,
+            "subgraph": 2
+          },
+          {
+            "leaf_depths": [
+              3,
+              3,
+              3,
+              2
+            ],
+            "node": 853,
+            "root_level": 10,
+            "subgraph": 8
+          },
+          {
+            "leaf_depths": [
+              3,
+              2,
+              3,
+              1
+            ],
+            "node": 602,
+            "root_level": 6,
+            "subgraph": 5
+          },
+          {
+            "leaf_depths": [
+              5,
+              4,
+              5,
+              4
+            ],
+            "node": 1426,
+            "root_level": 8,
+            "subgraph": 6
+          },
+          {
+            "leaf_depths": [
+              2,
+              3,
+              3,
+              3
+            ],
+            "node": 1279,
+            "root_level": 9,
+            "subgraph": 20
+          },
+          {
+            "leaf_depths": [
+              3,
+              3,
+              2,
+              1
+            ],
+            "node": 1392,
+            "root_level": 8,
+            "subgraph": 0
+          },
+          {
+            "leaf_depths": [
+              2,
+              3,
+              3,
+              1
+            ],
+            "node": 1801,
+            "root_level": 17,
+            "subgraph": 7
+          },
+          {
+            "leaf_depths": [
+              4,
+              3,
+              4,
+              4
+            ],
+            "node": 1350,
+            "root_level": 13,
+            "subgraph": 2
+          },
+          {
+            "leaf_depths": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "node": 1630,
+            "root_level": 15,
+            "subgraph": 0
+          },
+          {
+            "leaf_depths": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "node": 873,
+            "root_level": 14,
+            "subgraph": 0
+          },
+          {
+            "leaf_depths": [
+              3,
+              2,
+              1,
+              3
+            ],
+            "node": 1325,
+            "root_level": 7,
+            "subgraph": 9
+          },
+          {
+            "leaf_depths": [
+              3,
+              3,
+              2,
+              1
+            ],
+            "node": 1097,
+            "root_level": 4,
+            "subgraph": 1
+          }
+        ],
+        "check6_examples": [],
+        "check6_truncated": false,
+        "check6_unrebuildable_cuts": 0,
+        "check6_unrebuildable_roots": []
+      },
+      "counters": {
+        "candidates": 18701,
+        "candidates_accepted_by_default": 4509,
+        "candidates_self_replacement": 3005,
+        "cuts_exported": 5276,
+        "cuts_lt4_leaves": 4938,
+        "cuts_null_leaf": 0,
+        "cuts_single_fanout_gt2": 1408,
+        "cuts_total": 5276,
+        "cuts_trivial_skipped": 1613,
+        "derived": {
+          "cuts_examined_nontrivial": 11622,
+          "note": "counters.json \u7684 cuts_total \u53ea\u5728\u8fdb\u5165\u5bfc\u51fa\u8def\u5f84\u65f6\u9012\u589e\uff0c\u56e0\u6b64\u7b49\u4e8e cuts_exported\uff1b\u975e\u5e73\u51e1 cut \u603b\u6570\u7531\u4e0a\u5f0f\u8ba1\u7b97\uff1b\u5e73\u51e1 cut\uff08\u8282\u70b9\u81ea\u8eab\uff09\u6bcf\u4e2a\u88ab\u8bc4\u4f30\u8282\u70b9\u5404\u8df3\u8fc7\u4e00\u6b21\u3002"
+        },
+        "nodes_evaluated": 1613,
+        "nodes_high_fanout": 0,
+        "nodes_persistent": 0
+      },
+      "coverage": {
+        "candidates": 18701,
+        "candidates_accepted": 4509,
+        "candidates_self": 3005,
+        "cuts": 5276,
+        "nodes_exported": 1613,
+        "nodes_with_cuts": 1165
+      },
+      "full_export": {
+        "bytes": 5829716,
+        "lines": 5276,
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261123T051432Z-rwr-dump-four-f29ceabd/output/dump/c5315/cuts.jsonl",
+        "sha256": "e3d3b92de3b8ef0e9a191ca5ef6321dc43ddd1a0cb6704ac297af85e24f1b783"
+      },
+      "identifier_mapping": {
+        "and_nodes": 1613,
+        "circuit": "c5315",
+        "fanin_order_swapped": 1613,
+        "offset": 123,
+        "po_count": 123,
+        "verified": 1613
+      },
+      "input_sha256": "d1c0cea55baf5a407495d82eb4385a9ddea8528cde21a762f46bb0774fc93afd"
     },
-    {
-      "circuit": "c5315",
-      "path": "/data/wushangge/CULS_LiteCut/runs/20261123T042529Z-rwr-dump-c1355b-41071bcc/input/circuits/c5315.aig",
-      "sha256": "d1c0cea55baf5a407495d82eb4385a9ddea8528cde21a762f46bb0774fc93afd",
-      "source": "/data/wushangge/CULS_LiteCut/runs/20261119T020347Z-litecut-ours14-af7ccd61/input/circuits/c5315_orig.aig"
+    "cabac_ucontext": {
+      "checks": {
+        "check1_regression": {
+          "cec_orig_vs_dump": true,
+          "circuit": "cabac_ucontext",
+          "dump": {
+            "after": {
+              "ands": 36767,
+              "io": [
+                2763,
+                3170
+              ],
+              "lat": 0,
+              "lev": 75
+            },
+            "before": {
+              "ands": 37490,
+              "io": [
+                2763,
+                3170
+              ],
+              "lat": 0,
+              "lev": 77
+            },
+            "digest": "9f8ae3b38eeb70647522d5d2d2a638035fbea79c2716a3e14ff444535a238a34",
+            "returncode": 0
+          },
+          "frozen": {
+            "after": {
+              "ands": 36767,
+              "io": [
+                2763,
+                3170
+              ],
+              "lat": 0,
+              "lev": 75
+            },
+            "before": {
+              "ands": 37490,
+              "io": [
+                2763,
+                3170
+              ],
+              "lat": 0,
+              "lev": 77
+            },
+            "digest": "9f8ae3b38eeb70647522d5d2d2a638035fbea79c2716a3e14ff444535a238a34",
+            "returncode": 0
+          },
+          "frozen_matches_dump": true,
+          "input_sha256": "77fdf62aa46fa9a5bdb67a49ede156bff75bc8ea121faff67b74fa89a2a78707",
+          "orig": {
+            "after": {
+              "ands": 36767,
+              "io": [
+                2763,
+                3170
+              ],
+              "lat": 0,
+              "lev": 75
+            },
+            "before": {
+              "ands": 37490,
+              "io": [
+                2763,
+                3170
+              ],
+              "lat": 0,
+              "lev": 77
+            },
+            "digest": "9f8ae3b38eeb70647522d5d2d2a638035fbea79c2716a3e14ff444535a238a34",
+            "returncode": 0
+          },
+          "primary_match": true
+        },
+        "check2_untouched": {
+          "after": {
+            "ands": 37490,
+            "io": [
+              2763,
+              3170
+            ],
+            "lat": 0,
+            "lev": 77
+          },
+          "before": {
+            "ands": 37490,
+            "io": [
+              2763,
+              3170
+            ],
+            "lat": 0,
+            "lev": 77
+          },
+          "circuit": "cabac_ucontext",
+          "returncode": 0,
+          "untouched": true
+        },
+        "check3_gain_mismatches": 0,
+        "check4_invalid_cuts": 0,
+        "check5_asserted_candidates": 851401,
+        "check5_depth_mismatches": 0,
+        "check5_root_level_mismatches": 0,
+        "check5_sample": [
+          {
+            "leaf_depths": [
+              2,
+              3,
+              1,
+              3
+            ],
+            "node": 19326,
+            "root_level": 3,
+            "subgraph": 11
+          },
+          {
+            "leaf_depths": [
+              1,
+              2,
+              3,
+              3
+            ],
+            "node": 32679,
+            "root_level": 53,
+            "subgraph": 14
+          },
+          {
+            "leaf_depths": [
+              1,
+              3,
+              3,
+              2
+            ],
+            "node": 22430,
+            "root_level": 14,
+            "subgraph": 8
+          },
+          {
+            "leaf_depths": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "node": 29579,
+            "root_level": 18,
+            "subgraph": 2
+          },
+          {
+            "leaf_depths": [
+              2,
+              1,
+              3,
+              3
+            ],
+            "node": 24662,
+            "root_level": 26,
+            "subgraph": 13
+          },
+          {
+            "leaf_depths": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "node": 18917,
+            "root_level": 12,
+            "subgraph": 2
+          },
+          {
+            "leaf_depths": [
+              3,
+              1,
+              2,
+              3
+            ],
+            "node": 10846,
+            "root_level": 3,
+            "subgraph": 10
+          },
+          {
+            "leaf_depths": [
+              3,
+              3,
+              1,
+              2
+            ],
+            "node": 41418,
+            "root_level": 76,
+            "subgraph": 4
+          },
+          {
+            "leaf_depths": [
+              3,
+              2,
+              3,
+              1
+            ],
+            "node": 20712,
+            "root_level": 7,
+            "subgraph": 5
+          },
+          {
+            "leaf_depths": [
+              3,
+              1,
+              3,
+              2
+            ],
+            "node": 20247,
+            "root_level": 29,
+            "subgraph": 6
+          },
+          {
+            "leaf_depths": [
+              3,
+              3,
+              1,
+              2
+            ],
+            "node": 21552,
+            "root_level": 43,
+            "subgraph": 2
+          },
+          {
+            "leaf_depths": [
+              3,
+              1,
+              2,
+              3
+            ],
+            "node": 27173,
+            "root_level": 3,
+            "subgraph": 10
+          },
+          {
+            "leaf_depths": [
+              3,
+              3,
+              1,
+              2
+            ],
+            "node": 7394,
+            "root_level": 4,
+            "subgraph": 4
+          },
+          {
+            "leaf_depths": [
+              3,
+              3,
+              2,
+              1
+            ],
+            "node": 32234,
+            "root_level": 38,
+            "subgraph": 1
+          },
+          {
+            "leaf_depths": [
+              3,
+              2,
+              3,
+              1
+            ],
+            "node": 25825,
+            "root_level": 37,
+            "subgraph": 5
+          },
+          {
+            "leaf_depths": [
+              3,
+              3,
+              2,
+              1
+            ],
+            "node": 14369,
+            "root_level": 8,
+            "subgraph": 1
+          },
+          {
+            "leaf_depths": [
+              3,
+              2,
+              3,
+              1
+            ],
+            "node": 40143,
+            "root_level": 76,
+            "subgraph": 1
+          },
+          {
+            "leaf_depths": [
+              4,
+              4,
+              2,
+              3
+            ],
+            "node": 38050,
+            "root_level": 37,
+            "subgraph": 3
+          },
+          {
+            "leaf_depths": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "node": 28237,
+            "root_level": 19,
+            "subgraph": 1
+          },
+          {
+            "leaf_depths": [
+              3,
+              1,
+              3,
+              2
+            ],
+            "node": 43089,
+            "root_level": 73,
+            "subgraph": 6
+          }
+        ],
+        "check6_examples": [],
+        "check6_truncated": false,
+        "check6_unrebuildable_cuts": 0,
+        "check6_unrebuildable_roots": []
+      },
+      "counters": {
+        "candidates": 851401,
+        "candidates_accepted_by_default": 54706,
+        "candidates_self_replacement": 109847,
+        "cuts_exported": 122055,
+        "cuts_lt4_leaves": 104396,
+        "cuts_null_leaf": 0,
+        "cuts_single_fanout_gt2": 25591,
+        "cuts_total": 122055,
+        "cuts_trivial_skipped": 37489,
+        "derived": {
+          "cuts_examined_nontrivial": 252042,
+          "note": "counters.json \u7684 cuts_total \u53ea\u5728\u8fdb\u5165\u5bfc\u51fa\u8def\u5f84\u65f6\u9012\u589e\uff0c\u56e0\u6b64\u7b49\u4e8e cuts_exported\uff1b\u975e\u5e73\u51e1 cut \u603b\u6570\u7531\u4e0a\u5f0f\u8ba1\u7b97\uff1b\u5e73\u51e1 cut\uff08\u8282\u70b9\u81ea\u8eab\uff09\u6bcf\u4e2a\u88ab\u8bc4\u4f30\u8282\u70b9\u5404\u8df3\u8fc7\u4e00\u6b21\u3002"
+        },
+        "nodes_evaluated": 37489,
+        "nodes_high_fanout": 1,
+        "nodes_persistent": 0
+      },
+      "coverage": {
+        "candidates": 851401,
+        "candidates_accepted": 54706,
+        "candidates_self": 109847,
+        "cuts": 122055,
+        "nodes_exported": 37490,
+        "nodes_with_cuts": 35870
+      },
+      "full_export": {
+        "bytes": 218019849,
+        "lines": 122055,
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261123T051432Z-rwr-dump-four-f29ceabd/output/dump/cabac_ucontext/cuts.jsonl",
+        "sha256": "72c8876349c5f4b02939e3021bee58fffc85ead294bbcb01ecb32f4e4aae6353"
+      },
+      "identifier_mapping": {
+        "and_nodes": 37490,
+        "circuit": "cabac_ucontext",
+        "fanin_order_swapped": 37490,
+        "offset": 3170,
+        "po_count": 3170,
+        "verified": 37490
+      },
+      "input_sha256": "77fdf62aa46fa9a5bdb67a49ede156bff75bc8ea121faff67b74fa89a2a78707"
     },
-    {
-      "circuit": "intra_pred_PE",
-      "path": "/data/wushangge/CULS_LiteCut/runs/20261123T042529Z-rwr-dump-c1355b-41071bcc/input/circuits/intra_pred_PE.aig",
-      "sha256": "889b40b408ff0e3333a81f73e99887ee379fb60c6e8c1b5f23d1056ce7c088a4",
-      "source": "/data/wushangge/CULS_LiteCut/runs/20261119T020347Z-litecut-ours14-af7ccd61/input/circuits/intra_pred_PE.aig"
-    },
-    {
-      "circuit": "cabac_ucontext",
-      "path": "/data/wushangge/CULS_LiteCut/runs/20261123T042529Z-rwr-dump-c1355b-41071bcc/input/circuits/cabac_ucontext.aig",
-      "sha256": "77fdf62aa46fa9a5bdb67a49ede156bff75bc8ea121faff67b74fa89a2a78707",
-      "source": "/data/wushangge/CULS_LiteCut/runs/20261119T020347Z-litecut-ours14-af7ccd61/input/circuits/cabac_ucontext.aig"
+    "intra_pred_PE": {
+      "checks": {
+        "check1_regression": {
+          "cec_orig_vs_dump": true,
+          "circuit": "intra_pred_PE",
+          "dump": {
+            "after": {
+              "ands": 5084,
+              "io": [
+                572,
+                60
+              ],
+              "lat": 0,
+              "lev": 71
+            },
+            "before": {
+              "ands": 5407,
+              "io": [
+                572,
+                60
+              ],
+              "lat": 0,
+              "lev": 71
+            },
+            "digest": "c12e254462814a5e5064f5cec7538c91135c3344dc8ad714f4575bf24d10278f",
+            "returncode": 0
+          },
+          "frozen": {
+            "after": {
+              "ands": 5084,
+              "io": [
+                572,
+                60
+              ],
+              "lat": 0,
+              "lev": 71
+            },
+            "before": {
+              "ands": 5407,
+              "io": [
+                572,
+                60
+              ],
+              "lat": 0,
+              "lev": 71
+            },
+            "digest": "c12e254462814a5e5064f5cec7538c91135c3344dc8ad714f4575bf24d10278f",
+            "returncode": 0
+          },
+          "frozen_matches_dump": true,
+          "input_sha256": "889b40b408ff0e3333a81f73e99887ee379fb60c6e8c1b5f23d1056ce7c088a4",
+          "orig": {
+            "after": {
+              "ands": 5084,
+              "io": [
+                572,
+                60
+              ],
+              "lat": 0,
+              "lev": 71
+            },
+            "before": {
+              "ands": 5407,
+              "io": [
+                572,
+                60
+              ],
+              "lat": 0,
+              "lev": 71
+            },
+            "digest": "c12e254462814a5e5064f5cec7538c91135c3344dc8ad714f4575bf24d10278f",
+            "returncode": 0
+          },
+          "primary_match": true
+        },
+        "check2_untouched": {
+          "after": {
+            "ands": 5407,
+            "io": [
+              572,
+              60
+            ],
+            "lat": 0,
+            "lev": 71
+          },
+          "before": {
+            "ands": 5407,
+            "io": [
+              572,
+              60
+            ],
+            "lat": 0,
+            "lev": 71
+          },
+          "circuit": "intra_pred_PE",
+          "returncode": 0,
+          "untouched": true
+        },
+        "check3_gain_mismatches": 0,
+        "check4_invalid_cuts": 0,
+        "check5_asserted_candidates": 77681,
+        "check5_depth_mismatches": 0,
+        "check5_root_level_mismatches": 0,
+        "check5_sample": [
+          {
+            "leaf_depths": [
+              3,
+              3,
+              1,
+              2
+            ],
+            "node": 4968,
+            "root_level": 7,
+            "subgraph": 4
+          },
+          {
+            "leaf_depths": [
+              2,
+              3,
+              1,
+              3
+            ],
+            "node": 3850,
+            "root_level": 6,
+            "subgraph": 11
+          },
+          {
+            "leaf_depths": [
+              3,
+              3,
+              2,
+              1
+            ],
+            "node": 1140,
+            "root_level": 12,
+            "subgraph": 1
+          },
+          {
+            "leaf_depths": [
+              3,
+              4,
+              4,
+              4
+            ],
+            "node": 1650,
+            "root_level": 22,
+            "subgraph": 3
+          },
+          {
+            "leaf_depths": [
+              4,
+              5,
+              5,
+              4
+            ],
+            "node": 5546,
+            "root_level": 46,
+            "subgraph": 2
+          },
+          {
+            "leaf_depths": [
+              1,
+              3,
+              2,
+              3
+            ],
+            "node": 658,
+            "root_level": 10,
+            "subgraph": 12
+          },
+          {
+            "leaf_depths": [
+              2,
+              1,
+              3,
+              3
+            ],
+            "node": 1339,
+            "root_level": 8,
+            "subgraph": 13
+          },
+          {
+            "leaf_depths": [
+              3,
+              3,
+              2,
+              1
+            ],
+            "node": 4677,
+            "root_level": 17,
+            "subgraph": 0
+          },
+          {
+            "leaf_depths": [
+              3,
+              3,
+              1,
+              2
+            ],
+            "node": 1793,
+            "root_level": 16,
+            "subgraph": 2
+          },
+          {
+            "leaf_depths": [
+              4,
+              4,
+              3,
+              1
+            ],
+            "node": 1228,
+            "root_level": 20,
+            "subgraph": 0
+          },
+          {
+            "leaf_depths": [
+              2,
+              3,
+              3,
+              1
+            ],
+            "node": 3158,
+            "root_level": 22,
+            "subgraph": 2
+          },
+          {
+            "leaf_depths": [
+              1,
+              3,
+              2,
+              3
+            ],
+            "node": 3530,
+            "root_level": 7,
+            "subgraph": 12
+          },
+          {
+            "leaf_depths": [
+              3,
+              3,
+              3,
+              2
+            ],
+            "node": 2633,
+            "root_level": 12,
+            "subgraph": 0
+          },
+          {
+            "leaf_depths": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "node": 1759,
+            "root_level": 10,
+            "subgraph": 0
+          },
+          {
+            "leaf_depths": [
+              3,
+              3,
+              2,
+              1
+            ],
+            "node": 2972,
+            "root_level": 10,
+            "subgraph": 1
+          },
+          {
+            "leaf_depths": [
+              3,
+              3,
+              3,
+              2
+            ],
+            "node": 3398,
+            "root_level": 6,
+            "subgraph": 0
+          },
+          {
+            "leaf_depths": [
+              3,
+              3,
+              2,
+              1
+            ],
+            "node": 1973,
+            "root_level": 13,
+            "subgraph": 1
+          },
+          {
+            "leaf_depths": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "node": 4317,
+            "root_level": 8,
+            "subgraph": 2
+          },
+          {
+            "leaf_depths": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "node": 1683,
+            "root_level": 3,
+            "subgraph": 0
+          },
+          {
+            "leaf_depths": [
+              3,
+              3,
+              1,
+              2
+            ],
+            "node": 3879,
+            "root_level": 11,
+            "subgraph": 2
+          }
+        ],
+        "check6_examples": [],
+        "check6_truncated": false,
+        "check6_unrebuildable_cuts": 0,
+        "check6_unrebuildable_roots": []
+      },
+      "counters": {
+        "candidates": 77681,
+        "candidates_accepted_by_default": 8109,
+        "candidates_self_replacement": 12915,
+        "cuts_exported": 17647,
+        "cuts_lt4_leaves": 15989,
+        "cuts_null_leaf": 0,
+        "cuts_single_fanout_gt2": 5887,
+        "cuts_total": 17647,
+        "cuts_trivial_skipped": 5407,
+        "derived": {
+          "cuts_examined_nontrivial": 39523,
+          "note": "counters.json \u7684 cuts_total \u53ea\u5728\u8fdb\u5165\u5bfc\u51fa\u8def\u5f84\u65f6\u9012\u589e\uff0c\u56e0\u6b64\u7b49\u4e8e cuts_exported\uff1b\u975e\u5e73\u51e1 cut \u603b\u6570\u7531\u4e0a\u5f0f\u8ba1\u7b97\uff1b\u5e73\u51e1 cut\uff08\u8282\u70b9\u81ea\u8eab\uff09\u6bcf\u4e2a\u88ab\u8bc4\u4f30\u8282\u70b9\u5404\u8df3\u8fc7\u4e00\u6b21\u3002"
+        },
+        "nodes_evaluated": 5407,
+        "nodes_high_fanout": 0,
+        "nodes_persistent": 0
+      },
+      "coverage": {
+        "candidates": 77681,
+        "candidates_accepted": 8109,
+        "candidates_self": 12915,
+        "cuts": 17647,
+        "nodes_exported": 5407,
+        "nodes_with_cuts": 5110
+      },
+      "full_export": {
+        "bytes": 22499277,
+        "lines": 17647,
+        "path": "/data/wushangge/CULS_LiteCut/runs/20261123T051432Z-rwr-dump-four-f29ceabd/output/dump/intra_pred_PE/cuts.jsonl",
+        "sha256": "31ca3a9c618c4e2b96bd6ca7c2705594e90e4c3dc55ded2656a66b1ba087880e"
+      },
+      "identifier_mapping": {
+        "and_nodes": 5407,
+        "circuit": "intra_pred_PE",
+        "fanin_order_swapped": 5407,
+        "offset": 60,
+        "po_count": 60,
+        "verified": 5407
+      },
+      "input_sha256": "889b40b408ff0e3333a81f73e99887ee379fb60c6e8c1b5f23d1056ce7c088a4"
     }
-  ],
+  },
+  "leaf_depth_ordering": "leaf_depths[i] \u5bf9\u5e94 cut[\"leaves\"][i]\uff0c\u5373\u8bc4\u4f30\u65f6\u7684\u4f4d\u7f6e\u987a\u5e8f\uff0c\u4e0d\u662f slot \u5b57\u6bb5\u987a\u5e8f\u3002slot \u8bb0\u5f55\u7684\u662f NPN \u7f6e\u6362\u524d\u8be5\u53f6\u5b50\u5728\u539f\u59cb cut \u4e2d\u7684\u4e0b\u6807\uff0c\u53ea\u7528\u4e8e\u8ffd\u6eaf\u3002",
   "packaged_files": {
+    "README.md": {
+      "bytes": 10170,
+      "sha256": "97af149ce88f5fe74f48165fb4794d19a86860c14cd3b36a28a2695484614923"
+    },
     "c1355.counters.json": {
       "bytes": 344,
       "sha256": "423d243d518d01c8a2baaf135a581cf5e7ce00ff76ed45feb4737960896ad950"
@@ -416,9 +1520,85 @@
     "c1355.sample.jsonl": {
       "bytes": 800055,
       "sha256": "db96b5bb5244ad43fd6c1f348106cc013fd017ed26240b07fd4a2110f95de4bd"
+    },
+    "c5315.counters.json": {
+      "bytes": 348,
+      "sha256": "8eaf66f7c05bc866f69cad7ffbb3ece1c55eef0fe4101b4142720ab8a0f74cef"
+    },
+    "c5315.export_check.json": {
+      "bytes": 274,
+      "sha256": "9ecd08780fda1c1f54d83df3179d3419b8cbf75a3aac1f9b9386f125734b49c7"
+    },
+    "c5315.nodes.jsonl": {
+      "bytes": 411479,
+      "sha256": "18c57f4ad837d538a848930eb2364c60eb4094577439fa2aa133612ce5550049"
+    },
+    "c5315.nodes.tsv": {
+      "bytes": 40835,
+      "sha256": "289f57d29fee7e99fa8e96c6b9d36694550c26cb1f76f97a04bbde4ad1f79969"
+    },
+    "c5315.root460.json": {
+      "bytes": 1015,
+      "sha256": "3b6f49e411ebe5e5c99c004f4c822b6a80e60c0539963ebb706fa8a0f425a5c0"
+    },
+    "c5315.sample.jsonl": {
+      "bytes": 1147837,
+      "sha256": "4d50cc9eb8fa4ce142ea2e8a3d8bde4c9b7ebd8d164b9ea1627401f3f59cf6be"
+    },
+    "cabac_ucontext.counters.json": {
+      "bytes": 361,
+      "sha256": "787c16652c9e392656d7f6401cadbecb495c7ff2d04dba748aa966074106f63c"
+    },
+    "cabac_ucontext.export_check.json": {
+      "bytes": 289,
+      "sha256": "5e0eba1260da1711cb59cec22f8558c719c915fc845ce1c17a61df810b26d8fd"
+    },
+    "cabac_ucontext.nodes.jsonl": {
+      "bytes": 9631660,
+      "sha256": "1a50e28aa863c3c19b79b5f9d0a63bc63cd655c0a12dfa8501b6b42a977d1d20"
+    },
+    "cabac_ucontext.nodes.tsv": {
+      "bytes": 1094492,
+      "sha256": "7d251fa05f74811528b6a207cf111fd4967b4313b1ca592f2fdb54610b2a5853"
+    },
+    "cabac_ucontext.sample.jsonl": {
+      "bytes": 1978563,
+      "sha256": "16e61edc795f4d70f6b5358c703df8e9f5249e0c1348eec377c37825a28c885f"
+    },
+    "intra_pred_PE.counters.json": {
+      "bytes": 352,
+      "sha256": "eecf1137fcf3918e44f1fc57f0273b70fc8f21af2ea208e420d8f98d201a5818"
+    },
+    "intra_pred_PE.export_check.json": {
+      "bytes": 280,
+      "sha256": "bfed302beeff6c6a2cc434a384e5a37289bd9ad69984cd5bfbfa727e95630a35"
+    },
+    "intra_pred_PE.nodes.jsonl": {
+      "bytes": 1383259,
+      "sha256": "c3464bc1beb0313299e646a6b52ceafbd5bc98d85952b93668a1c6b002d0c1c5"
+    },
+    "intra_pred_PE.nodes.tsv": {
+      "bytes": 138404,
+      "sha256": "209bb23366260ff707afaa32dd3108859b6d2d1b1326d8af980960fcde5f003d"
+    },
+    "intra_pred_PE.sample.jsonl": {
+      "bytes": 1394566,
+      "sha256": "1a0d26f724e63c9fcfc0a3c41731dd36f29083fd86a686334b2cf5d4444ed7ae"
+    },
+    "stats.json": {
+      "bytes": 39684,
+      "sha256": "0d093e186909360aa9425c21bf24806c6fd9089b6025327bd36e6876b74be90a"
     }
   },
-  "slurm_job_id": "66307",
-  "source_commit": "37a15bde134604bd99bf212b87b5c884cf69709e",
-  "source_run": "20261123T042529Z-rwr-dump-c1355b-41071bcc"
+  "resources": {
+    "cpus_per_task": 8,
+    "gpus": 0,
+    "memory_gib": 32,
+    "nodelist": null,
+    "partition": "Compute",
+    "walltime": "02:00:00"
+  },
+  "slurm_job_id": "66308",
+  "source_commit": "4af5007752a659234baa5681bcb85594f2309dc8",
+  "source_run": "20261123T051432Z-rwr-dump-four-f29ceabd"
 }

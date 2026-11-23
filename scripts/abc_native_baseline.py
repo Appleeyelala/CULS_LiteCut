@@ -53,11 +53,13 @@ def parse_stats(text):
     for line in text.splitlines():
         if 'and =' in line and 'lev =' in line:
             parts = line.split()
-            for index, token in enumerate(parts):
-                if token == 'and' and index + 1 < len(parts):
-                    ands = int(parts[index + 2].rstrip(',')) if parts[index + 1] == '=' else ands
-                if token == 'lev' and index + 1 < len(parts):
-                    lev = int(parts[index + 2].rstrip(','))
+            try:
+                and_index = parts.index('and')
+                lev_index = parts.index('lev')
+                ands = int(parts[and_index + 2].rstrip(','))
+                lev = int(parts[lev_index + 2].rstrip(','))
+            except (ValueError, IndexError):
+                continue
     return ands, lev
 
 
@@ -93,6 +95,8 @@ def run_circuit(name, group, aig_path, abc, out_dir, log_dir):
     original_stats = log_dir / f'{name}.original.log'
     proc, elapsed = run_abc(abc, f'read_aiger {aig_path}; print_stats', original_stats)
     _, abc_lev = parse_stats(proc.stdout + proc.stderr)
+    if abc_lev is None:
+        raise SystemExit(f'{name}: ABC printed no statistics for the original')
     if abc_lev != depth:
         raise SystemExit(f'{name}: ABC lev {abc_lev} != propagate_levels {depth}')
 
@@ -105,6 +109,8 @@ def run_circuit(name, group, aig_path, abc, out_dir, log_dir):
         if proc.returncode != 0 or not output.exists():
             raise SystemExit(f'{name}/{tag}: ABC failed with {proc.returncode}')
         _, abc_lev = parse_stats(proc.stdout + proc.stderr)
+        if abc_lev is None:
+            raise SystemExit(f'{name}/{tag}: ABC printed no statistics')
         metrics = output_metrics(output, depth)
         if abc_lev != metrics['depth']:
             raise SystemExit(f'{name}/{tag}: ABC lev {abc_lev} != recomputed {metrics["depth"]}')
@@ -155,13 +161,20 @@ def main():
     with ProcessPoolExecutor(max_workers=args.workers) as pool:
         futures = [pool.submit(run_circuit, name, group, path, abc, out / 'aig', out / 'logs')
                    for name, group, path in circuits]
-        for future in futures:
-            result = future.result()
-            results.append(result)
-            print(f"{result['circuit']}: D={result['baseline']['depth']} "
-                  f"ands={result['ands']} rows={len(result['rows'])}", flush=True)
+        for (name, group, _path), future in zip(circuits, futures):
+            try:
+                result = future.result()
+                results.append(result)
+                print(f"{result['circuit']}: D={result['baseline']['depth']} "
+                      f"ands={result['ands']} rows={len(result['rows'])}", flush=True)
+            except Exception as exc:  # record the failure and keep the cohort
+                results.append(dict(circuit=name, group=group, status='FAILED',
+                                    reason=str(exc)[:400], rows=[]))
+                print(f'{name}: FAILED {exc}', flush=True)
 
-    summary = dict(step='3_v3', part='C', cohort_size=len(results),
+    passed = [row for row in results if row.get('status') != 'FAILED']
+    summary = dict(step='3_v3', part='C', cohort_size=len(passed),
+                   failures=[row for row in results if row.get('status') == 'FAILED'],
                    abc=dict(path=str(abc), sha256=sha256(abc)),
                    commands=[dict(tag=tag, sequence=sequence) for tag, sequence in COMMANDS],
                    results=results, slurm_job_id=os.getenv('SLURM_JOB_ID'))
@@ -171,7 +184,7 @@ def main():
                   'tns1', 'tns2', 'tns3', 'over1', 'over2', 'over3', 'runtime_s', 'cec']
         writer = csv.DictWriter(sink, fieldnames=fields, delimiter='\t', extrasaction='ignore')
         writer.writeheader()
-        for result in results:
+        for result in passed:
             for row in result['rows']:
                 writer.writerow(row)
     print('done', len(results), flush=True)

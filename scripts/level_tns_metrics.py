@@ -377,6 +377,8 @@ def main():
 
     prepared = []
     for row in manifest['results']:
+        if row.get('status') != 'PASS':
+            continue
         name = row['circuit']
         prepared.append((name, row['group'], Path(cohort_paths[name]),
                          Path(row['export']) / 'cuts.jsonl', out, out / 'decisions'))

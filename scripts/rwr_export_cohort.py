@@ -243,24 +243,31 @@ def main():
             raise SystemExit(f'{name}: input missing at {path}')
         if file_digest(path) != job['sha']:
             raise SystemExit(f'{name}: input digest changed at {path}')
-        if job['group'] == 'pilot':
-            folder = PILOT_EXPORT / name
-            result = dict(circuit=name, group=job['group'], export=str(folder), reused=True,
-                          input_sha256=job['sha'], ands=aig_ands(path))
-        else:
-            folder = export_candidates(run, abc_dump, path, name)
-            info = json.loads((folder / 'export_check.json').read_text())
-            aig = parse_aig(path)
-            mapping = identifier_mapping(folder / 'nodes.tsv', aig, name)
-            checks = check_circuit(folder, path, mapping['offset'], name)
-            close = close_checks(run, abc_orig, abc_dump, path, name, folder)
-            result = dict(circuit=name, group=job['group'], export=str(folder), reused=False,
-                          input_sha256=job['sha'], ands=aig_ands(path), untouched=info['untouched'],
-                          mapping=mapping, checks=checks, close=close)
-            (run / 'output' / f'{name}.checks.json').write_text(
+        try:
+            if job['group'] == 'pilot':
+                folder = PILOT_EXPORT / name
+                result = dict(circuit=name, group=job['group'], export=str(folder), reused=True,
+                              status='PASS', input_sha256=job['sha'], ands=aig_ands(path))
+            else:
+                folder = export_candidates(run, abc_dump, path, name)
+                info = json.loads((folder / 'export_check.json').read_text())
+                aig = parse_aig(path)
+                mapping = identifier_mapping(folder / 'nodes.tsv', aig, name)
+                checks = check_circuit(folder, path, mapping['offset'], name)
+                close = close_checks(run, abc_orig, abc_dump, path, name, folder)
+                result = dict(circuit=name, group=job['group'], export=str(folder), reused=False,
+                              status='PASS', input_sha256=job['sha'], ands=aig_ands(path),
+                              untouched=info['untouched'], mapping=mapping, checks=checks, close=close)
+                (run / 'output' / f'{name}.checks.json').write_text(
+                    json.dumps(result, ensure_ascii=False, indent=2) + '\n')
+        except (SystemExit, Exception) as exc:
+            result = dict(circuit=name, group=job['group'], status='FAILED',
+                          reason=str(exc)[:400], input_sha256=job['sha'])
+            (run / 'output' / f'{name}.failure.json').write_text(
                 json.dumps(result, ensure_ascii=False, indent=2) + '\n')
         results.append(result)
-        print(f"{name}: ands={result['ands']} reused={result['reused']}", flush=True)
+        print(f"{name}: status={result.get('status')} ands={result.get('ands')} "
+              f"reused={result.get('reused')}", flush=True)
         (run / 'output/export_manifest.json').write_text(
             json.dumps(dict(cohort=dict(total=cohort['total_unique']), results=results),
                        ensure_ascii=False, indent=2) + '\n')

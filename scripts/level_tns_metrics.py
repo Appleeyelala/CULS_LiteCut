@@ -288,10 +288,11 @@ def run_circuit(name, group, aig_path, export_path, out_dir, csv_dir):
             writer.writerow([name, decision_id, node_abc, root, label, node_slack,
                              len(candidates), record['n_nodes_saved'], keep]
                             + [value for scheme in SCHEMES
-                               for value in (selection[scheme]['subgraph'],
-                                             selection[scheme]['root_level'],
-                                             selection[scheme]['delta_and'])
-                               + [selection[scheme]['tns'][k] - orig_tns[k] for k in KS]])
+                               for value in ([selection[scheme]['subgraph'],
+                                              selection[scheme]['root_level'],
+                                              selection[scheme]['delta_and']]
+                                             + [selection[scheme]['tns'][k] - orig_tns[k]
+                                                for k in KS])])
 
     need(assertions['rebuild'] == counts['decisions'], f'{name}: rebuild coverage')
     need(assertions['mffc'] == counts['decisions'], f'{name}: MFFC coverage')

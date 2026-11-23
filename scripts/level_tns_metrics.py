@@ -237,8 +237,10 @@ def run_circuit(name, group, aig_path, export_path, out_dir, csv_dir):
             selection = {}
             for scheme in SCHEMES:
                 if chosen[scheme] is None:
+                    # abc_default keeps the original structure: its TNS is the original TNS.
                     selection[scheme] = dict(subgraph='', root_level=node_level, delta_and=0,
-                                             tns={k: 0 for k in KS}, n={k: 0 for k in KS})
+                                             tns={k: orig_tns[k] for k in KS},
+                                             n={k: orig_n[k] for k in KS})
                     continue
                 row = rows[chosen[scheme]]
                 tns = {k: sum(max(0, a - (required - k)) for a in row['paths']) for k in KS}
@@ -365,6 +367,7 @@ def main():
     parser.add_argument('--export-manifest', type=Path, default=None,
                         help='export_manifest.json of the export run; defaults to this run')
     parser.add_argument('--workers', type=int, default=8)
+    parser.add_argument('--limit', type=int, default=None, help='debug: only the first N circuits')
     args = parser.parse_args()
     run = args.run.resolve()
     if not os.getenv('SLURM_JOB_ID'):
@@ -380,7 +383,7 @@ def main():
         cohort_paths[row['name']] = row['path']
 
     prepared = []
-    for row in manifest['results']:
+    for row in (manifest['results'][:args.limit] if args.limit else manifest['results']):
         if row.get('status') != 'PASS':
             continue
         name = row['circuit']

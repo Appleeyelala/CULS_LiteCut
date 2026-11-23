@@ -1,17 +1,27 @@
-"""Run the ABC rewrite-candidate export and its six acceptance checks.
+"""Export ABC rewrite candidates for the pilot circuits and check them.
 
-Everything runs inside one Slurm job from a committed snapshot. The script does
-not trust the export: it re-derives the identifier mapping, cut validity, leaf
-depths, the default gain and the original-structure level from the parsed AIG
-and from the raw decomposition edges carried by each candidate.
+Everything runs inside one Slurm job from a committed snapshot. The checks are
+streaming: cabac_ucontext is expected to hold hundreds of thousands of cuts and
+the whole export does not fit comfortably in memory as Python objects.
 
-ABC assigns object IDs in the order PI, PO, AND, while AIGER numbers PIs and
-then ANDs. On these inputs the AND numbering therefore differs by a constant
-offset equal to the PO count. The offset is verified node by node here instead
-of being assumed, and a mismatch aborts the run.
+Two invariants are asserted rather than sampled:
+
+* ``leaf_depths`` is indexed by the position in the cut's ``leaves`` array, not
+  by the ``slot`` field. The slot records where the leaf came from in the raw
+  ABC cut after the NPN permutation; the array order is the order the evaluator
+  used. Any analysis that reorders by slot silently mismatches the depths.
+* For every candidate, ``root_level`` must equal
+  ``max(level[leaf_i] + leaf_depths[i])`` computed in array order.
+
+The first mismatch aborts the run.
+
+ABC numbers objects PI, PO, AND while AIGER numbers PI, AND, so AND ids differ
+by a constant offset equal to the PO count. The offset is verified node by node
+instead of assumed, and a mismatch aborts the run.
 """
 import argparse
 import csv
+import gzip
 import hashlib
 import json
 import os
@@ -34,10 +44,16 @@ CIRCUITS = [
 ]
 PAPER_INPUTS = Path('/data/wushangge/CULS_LiteCut/runs/20261119T020347Z-litecut-ours14-af7ccd61/input/circuits')
 STAT_RE = re.compile(r'i/o\s*=\s*(\d+)/\s*(\d+)\s+lat\s*=\s*(\d+)\s+and\s*=\s*(\d+)\s+lev\s*=\s*(\d+)')
+GZIP_THRESHOLD = 1024 ** 3
+EXAMPLE_CAP = 200
 
 
-def digest(path):
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+def file_digest(path):
+    sha = hashlib.sha256()
+    with open(path, 'rb') as stream:
+        for chunk in iter(lambda: stream.read(1 << 20), b''):
+            sha.update(chunk)
+    return sha.hexdigest()
 
 
 def run_abc(abc, commands, log_path, env=None, timeout=7200):
@@ -53,12 +69,14 @@ def stats(abc, commands, log_path, env=None):
     return [dict(io=(int(a), int(b)), lat=int(c), ands=int(d), lev=int(e)) for a, b, c, d, e in found], proc
 
 
-def stage_inputs(run):
+def stage_inputs(run, wanted):
     staged = []
     folder = run / 'input/circuits'
     folder.mkdir(parents=True, exist_ok=True)
-    available = {digest(path): path for path in sorted(PAPER_INPUTS.glob('*.aig'))}
+    available = {file_digest(path): path for path in sorted(PAPER_INPUTS.glob('*.aig'))}
     for name, sha in CIRCUITS:
+        if name not in wanted:
+            continue
         if name == 'c1355':
             source = run / 'input/design.aig'
         else:
@@ -67,7 +85,7 @@ def stage_inputs(run):
                 raise SystemExit(f'{name}: no file under {PAPER_INPUTS} matches {sha}')
         target = folder / f'{name}.aig'
         shutil.copyfile(source, target)
-        if digest(target) != sha:
+        if file_digest(target) != sha:
             raise SystemExit(f'{name}: input digest differs from the frozen cohort')
         staged.append(dict(circuit=name, source=str(source), path=str(target), sha256=sha))
     (folder / 'inventory.json').write_text(json.dumps(staged, indent=2) + '\n')
@@ -94,8 +112,7 @@ def identifier_mapping(nodes_tsv, aig, circuit):
         truth = aig.fanin_literals.get(node)
         if truth is None:
             raise SystemExit(f'{circuit}: shifted id {node} missing from the AIG')
-        mapped = tuple(0 if lit >> 1 == 0 else lit for lit in pair)
-        mapped = tuple(lit if lit >> 1 <= aig.pi_count else lit - 2 * offset for lit in mapped)
+        mapped = tuple(lit if lit >> 1 <= aig.pi_count else lit - 2 * offset for lit in pair)
         if mapped == tuple(truth):
             checked += 1
         elif (mapped[1], mapped[0]) == tuple(truth):
@@ -113,7 +130,7 @@ def check_regression(run, abc_orig, abc_dump, abc_frozen, circuits):
     (out / 'aig').mkdir(parents=True, exist_ok=True)
     rows = []
     for name, path in circuits.items():
-        record = dict(circuit=name, input_sha256=digest(path))
+        record = dict(circuit=name, input_sha256=file_digest(path))
         written = {}
         for tag, abc in [('orig', abc_orig), ('dump', abc_dump), ('frozen', abc_frozen)]:
             target = out / 'aig' / f'{name}.{tag}.aig'
@@ -143,17 +160,34 @@ def check_regression(run, abc_orig, abc_dump, abc_frozen, circuits):
 def export_candidates(run, abc_dump, path, name):
     """Acceptance 2: the export run must leave the network untouched."""
     folder = run / 'output/dump' / name
-    folder.mkdir(parents=True, exist_ok=True)
+    if folder.exists():
+        raise SystemExit(f'refusing to overwrite an existing export: {folder}')
+    folder.mkdir(parents=True)
     log = run / 'output/logs' / f'{name}.export.log'
     env = dict(os.environ, CULS_RWR_DUMP=str(folder))
     measured, proc = stats(abc_dump, f'read_aiger {path}; print_stats; rewrite; print_stats', log, env)
     if len(measured) != 2:
-        raise SystemExit('export run did not print two stat blocks')
+        raise SystemExit(f'{name}: export run did not print two stat blocks')
     info = dict(circuit=name, before=measured[0], after=measured[1],
                 untouched=measured[0] == measured[1], returncode=proc.returncode)
     print(f'{name}: export untouched={info["untouched"]}', flush=True)
     (folder / 'export_check.json').write_text(json.dumps(info, indent=2) + '\n')
-    return folder, info
+    return folder
+
+
+def compress_if_needed(folder):
+    target = folder / 'cuts.jsonl'
+    size = target.stat().st_size
+    if size <= GZIP_THRESHOLD:
+        return dict(path=str(target), bytes=size, sha256=file_digest(target), compressed=False)
+    archived = folder / 'cuts.jsonl.gz'
+    with target.open('rb') as source, gzip.open(archived, 'wb', compresslevel=6) as sink:
+        shutil.copyfileobj(source, sink)
+    sha = file_digest(target)
+    target.unlink()
+    return dict(path=str(archived), bytes=archived.stat().st_size, sha256=sha,
+                original_bytes=size, compressed=True,
+                note='解压方式: gzip -dc cuts.jsonl.gz > cuts.jsonl')
 
 
 def depths_from_edges(n_leaves, n_size, root_node, edges):
@@ -169,32 +203,43 @@ def depths_from_edges(n_leaves, n_size, root_node, edges):
     return dist[:n_leaves]
 
 
-def check_exports(folder, aig_path, offset):
-    """Acceptance 3 to 6 on one exported circuit."""
+def leaf_depths_and_outside(aig, root, leaves, levels):
+    """Mirror of original_leaf_depths that also returns the worst outside node."""
+    boundary = set(leaves)
+    lowest = min(leaves)
+    interior = set()
+    pending = [root]
+    while pending:
+        node = pending.pop()
+        if node in boundary or node < lowest or node <= aig.pi_count or node in interior:
+            continue
+        interior.add(node)
+        pending.extend(lit >> 1 for lit in aig.fanin_literals[node])
+    distances = {root: 0}
+    for node in sorted(interior, reverse=True):
+        depth = distances.pop(node) + 1
+        for literal in aig.fanin_literals[node]:
+            pred = literal >> 1
+            distances[pred] = max(distances.get(pred, -1), depth)
+    depths = tuple(distances.get(leaf) for leaf in leaves)
+    outside = [(node, d) for node, d in distances.items() if node not in boundary]
+    if outside:
+        node_out, dist_out = max(outside, key=lambda pair: (levels[pair[0]] + pair[1], -pair[0]))
+    else:
+        node_out, dist_out = None, None
+    return depths, node_out, dist_out
+
+
+def check_circuit(folder, aig_path, offset, circuit):
+    """Acceptance 3 to 6, streaming over the export."""
     aig = parse_aig(aig_path)
     levels = propagate_levels(aig)
     fanins = aig.fanin_literals
-    cuts = [json.loads(line) for line in (folder / 'cuts.jsonl').open()]
-    nodes = [json.loads(line) for line in (folder / 'nodes.jsonl').open()]
 
     def to_aig(node_id):
         """ABC ids shift ANDs past the POs; PIs and the constant keep their id."""
         return node_id if node_id <= aig.pi_count else node_id - offset
 
-    # Acceptance 3: the recorded best gain must equal the best accepted candidate.
-    best = defaultdict(lambda: -1)
-    for cut in cuts:
-        for cand in cut['candidates']:
-            if cand['self'] or not cand['accepted_by_default']:
-                continue
-            gain = cut['n_nodes_saved'] - cand['nodes_added']
-            if gain > best[cut['node']]:
-                best[cut['node']] = gain
-    mismatched_gain = [dict(node=row['node'], recorded=row['gain_best'], recomputed=best[row['node']])
-                       for row in nodes
-                       if row['reason'] == 'evaluated' and row['gain_best'] != best[row['node']]]
-
-    # Acceptance 4: every path from the root down to a PI must pass a cut leaf.
     def valid_cut(root, leaves):
         boundary = set(leaves)
         if root in boundary:
@@ -213,63 +258,117 @@ def check_exports(folder, aig_path, offset):
             pending.extend(lit >> 1 for lit in preds)
         return True
 
-    invalid_cuts = []
-    for cut in cuts:
-        leaves = [to_aig(leaf['id']) for leaf in cut['leaves']]
-        if len(leaves) != 4 or len(set(leaves)) != 4 or not valid_cut(to_aig(cut['node']), leaves):
-            invalid_cuts.append(dict(node=cut['node'], leaves=leaves))
-
-    # Acceptance 5: recompute leaf depths from the raw edges, no C traversal involved.
-    rng = random.Random(20261123)
-    pool = [cand for cut in cuts for cand in cut['candidates'] if cand['n_size'] > 0]
-    sample = rng.sample(pool, min(20, len(pool)))
-    depth_mismatched = []
-    for cand in sample:
-        recomputed = depths_from_edges(cand['n_leaves'], cand['n_size'], cand['root_node'], cand['edges'])
-        if recomputed != cand['leaf_depths']:
-            depth_mismatched.append(dict(subgraph=cand['subgraph'], recorded=cand['leaf_depths'],
-                                         recomputed=recomputed))
-    level_mismatched = []
-    for cut in cuts:
-        for cand in cut['candidates']:
-            if cand['n_size'] <= 0 or cand['self']:
-                continue
-            recomputed = depths_from_edges(cand['n_leaves'], cand['n_size'], cand['root_node'], cand['edges'])
-            value = max((leaf['level'] + d for leaf, d in zip(cut['leaves'], recomputed) if d >= 0),
-                        default=0)
-            if value != cand['root_level']:
-                level_mismatched.append(dict(node=cut['node'], subgraph=cand['subgraph'],
-                                             recorded=cand['root_level'], recomputed=value))
-
-    # Acceptance 6: cuts whose leaf cone cannot rebuild the original root level.
+    best = defaultdict(lambda: -1)
+    totals = dict(cuts=0, candidates=0, candidates_accepted=0, candidates_self=0)
+    invalid = []
+    depth_checked = 0
     unrebuildable = []
-    for cut in cuts:
-        leaves = [to_aig(leaf['id']) for leaf in cut['leaves']]
-        root = to_aig(cut['node'])
-        if len(set(leaves)) != len(leaves) or root not in fanins:
-            continue
-        depths, outside = original_leaf_depths(aig, root, leaves, levels.level)
-        rebuilt = max((levels.level[leaf] + d for leaf, d in zip(leaves, depths) if d is not None),
-                      default=0)
-        if rebuilt != levels.level[root]:
-            unrebuildable.append(dict(node=cut['node'], true_level=levels.level[root],
-                                      rebuilt=rebuilt, outside=outside,
-                                      leaves=leaves, depths=list(depths)))
+    unrebuildable_total = 0
+    unrebuildable_roots = set()
+    rng = random.Random(20261123)
+    reservoir = []
+    seen_candidates = 0
 
-    with_cuts = sum(1 for row in nodes if row['reason'] == 'evaluated' and row['cuts_exported'] > 0)
+    with (folder / 'cuts.jsonl').open() as stream:
+        for line in stream:
+            cut = json.loads(line)
+            totals['cuts'] += 1
+            node = cut['node']
+            leaves = cut['leaves']
+            leaf_ids = [to_aig(leaf['id']) for leaf in leaves]
+            root = to_aig(node)
+            usable = (len(leaf_ids) == 4 and len(set(leaf_ids)) == 4
+                      and root in fanins and valid_cut(root, leaf_ids))
+            if not usable and len(invalid) < EXAMPLE_CAP:
+                invalid.append(dict(node=node, leaves=leaf_ids))
+            for cand in cut['candidates']:
+                totals['candidates'] += 1
+                if cand['self']:
+                    totals['candidates_self'] += 1
+                elif cand['accepted_by_default']:
+                    totals['candidates_accepted'] += 1
+                    gain = cut['n_nodes_saved'] - cand['nodes_added']
+                    if gain > best[node]:
+                        best[node] = gain
+                if cand['n_size'] > 0:
+                    depths = depths_from_edges(cand['n_leaves'], cand['n_size'],
+                                               cand['root_node'], cand['edges'])
+                    if list(depths) != cand['leaf_depths']:
+                        raise SystemExit(
+                            f'{circuit}: leaf_depths mismatch at node {node} subgraph '
+                            f'{cand["subgraph"]}: recorded {cand["leaf_depths"]} '
+                            f'recomputed {list(depths)}')
+                    value = max((leaf['level'] + d for leaf, d in zip(leaves, depths) if d >= 0),
+                                default=0)
+                    if value != cand['root_level']:
+                        raise SystemExit(
+                            f'{circuit}: root_level mismatch at node {node} subgraph '
+                            f'{cand["subgraph"]}: recorded {cand["root_level"]}, array-order '
+                            f'recomputation {value}, leaf levels '
+                            f'{[leaf["level"] for leaf in leaves]}, depths {list(depths)}')
+                    depth_checked += 1
+                seen_candidates += 1
+                entry = dict(node=node, subgraph=cand['subgraph'],
+                             leaf_depths=cand['leaf_depths'], root_level=cand['root_level'])
+                if len(reservoir) < 20:
+                    reservoir.append(entry)
+                else:
+                    slot = rng.randrange(seen_candidates)
+                    if slot < 20:
+                        reservoir[slot] = entry
+            if usable:
+                depths, out_node, out_dist = leaf_depths_and_outside(aig, root, leaf_ids, levels.level)
+                lib_depths, lib_outside = original_leaf_depths(aig, root, leaf_ids, levels.level)
+                if tuple(depths) != tuple(lib_depths):
+                    raise SystemExit(f'{circuit}: cone mirror disagrees with level_weights at {node}')
+                if lib_outside is not None:
+                    if out_node is None or levels[out_node] + out_dist != lib_outside:
+                        raise SystemExit(f'{circuit}: outside arrival disagrees with level_weights at {node}')
+                rebuilt = max((levels.level[leaf] + d for leaf, d in zip(leaf_ids, depths)
+                               if d is not None), default=0)
+                if rebuilt != levels.level[root]:
+                    unrebuildable_total += 1
+                    unrebuildable_roots.add(node)
+                    if len(unrebuildable) < EXAMPLE_CAP:
+                        unrebuildable.append(dict(
+                            node=node, true_level=levels.level[root], rebuilt=rebuilt,
+                            gap=levels.level[root] - rebuilt,
+                            outside_node=out_node,
+                            outside_level=None if out_node is None else levels.level[out_node],
+                            outside_distance=out_dist,
+                            outside_arrival=None if out_node is None else levels[out_node] + out_dist,
+                            leaves=leaf_ids, depths=list(depths)))
+
+    nodes = [json.loads(line) for line in (folder / 'nodes.jsonl').open()]
+    mismatched_gain = [dict(node=row['node'], recorded=row['gain_best'], recomputed=best[row['node']])
+                       for row in nodes
+                       if row['reason'] == 'evaluated' and row['gain_best'] != best[row['node']]]
+
+    counters = json.loads((folder / 'counters.json').read_text())
+    counters['derived'] = dict(
+        cuts_examined_nontrivial=(counters['cuts_exported'] + counters['cuts_lt4_leaves']
+                                  + counters['cuts_single_fanout_gt2'] + counters['cuts_null_leaf']),
+        note=('counters.json 的 cuts_total 只在进入导出路径时递增，因此等于 cuts_exported；'
+              '非平凡 cut 总数由上式计算；平凡 cut（节点自身）每个被评估节点各跳过一次。'))
+
     return dict(
-        circuit=aig_path.stem, offset=offset,
-        cuts=len(cuts), nodes_exported=len(nodes), nodes_with_cuts=with_cuts,
-        candidates=sum(len(cut['candidates']) for cut in cuts),
-        candidates_accepted=sum(1 for cut in cuts for cand in cut['candidates']
-                                if cand['accepted_by_default']),
-        candidates_self=sum(1 for cut in cuts for cand in cut['candidates'] if cand['self']),
+        circuit=circuit, offset=offset,
+        counters=counters,
+        coverage=dict(
+            nodes_exported=len(nodes),
+            nodes_with_cuts=sum(1 for row in nodes
+                                if row['reason'] == 'evaluated' and row['cuts_exported'] > 0),
+            **totals),
         check3_gain_mismatches=len(mismatched_gain), check3_examples=mismatched_gain[:5],
-        check4_invalid_cuts=len(invalid_cuts), check4_examples=invalid_cuts[:5],
-        check5_sampled=len(sample), check5_depth_mismatches=len(depth_mismatched),
-        check5_examples=depth_mismatched[:5],
-        check5_root_level_mismatches=len(level_mismatched), check5_root_examples=level_mismatched[:5],
-        check6_unrebuildable_cuts=len(unrebuildable), check6_examples=unrebuildable[:10],
+        check4_invalid_cuts=len(invalid), check4_examples=invalid[:5],
+        check5_asserted_candidates=depth_checked,
+        check5_depth_mismatches=0,
+        check5_root_level_mismatches=0,
+        check5_sample=reservoir,
+        check6_unrebuildable_cuts=unrebuildable_total,
+        check6_unrebuildable_roots=sorted(unrebuildable_roots),
+        check6_examples=unrebuildable,
+        check6_truncated=unrebuildable_total > len(unrebuildable),
     )
 
 
@@ -278,6 +377,7 @@ def main():
     parser.add_argument('--run', required=True, type=Path)
     parser.add_argument('--build', required=True, type=Path, help='build run holding both ABC variants')
     parser.add_argument('--frozen', required=True, type=Path)
+    parser.add_argument('--circuits', default=','.join(name for name, _ in CIRCUITS))
     args = parser.parse_args()
     run = args.run.resolve()
     out = run / 'output'
@@ -285,24 +385,42 @@ def main():
     if not os.getenv('SLURM_JOB_ID') or not run.is_relative_to('/data/wushangge'):
         raise SystemExit('run this only inside the committed /data Slurm job')
 
+    wanted = [name.strip() for name in args.circuits.split(',') if name.strip()]
+    known = {name for name, _ in CIRCUITS}
+    if set(wanted) - known:
+        raise SystemExit(f'unknown circuit(s): {sorted(set(wanted) - known)}')
+
     abc_orig = args.build.resolve() / 'build/abc_orig/abc'
     abc_dump = args.build.resolve() / 'build/abc_dump/abc'
     for path in (abc_orig, abc_dump, args.frozen):
         if not Path(path).is_file():
             raise SystemExit(f'missing binary: {path}')
 
-    circuits = stage_inputs(run)
+    circuits = stage_inputs(run, wanted)
     regression = check_regression(run, abc_orig, abc_dump, args.frozen, circuits)
 
-    folder, export_info = export_candidates(run, abc_dump, circuits['c1355'], 'c1355')
-    mapping = identifier_mapping(folder / 'nodes.tsv', parse_aig(circuits['c1355']), 'c1355')
-    checks = check_exports(folder, circuits['c1355'], mapping['offset'])
+    results, exports = {}, {}
+    for name in wanted:
+        folder = export_candidates(run, abc_dump, circuits[name], name)
+        mapping = identifier_mapping(folder / 'nodes.tsv', parse_aig(circuits[name]), name)
+        results[name] = check_circuit(folder, circuits[name], mapping['offset'], name)
+        results[name]['identifier_mapping'] = mapping
+        exports[name] = compress_if_needed(folder)
+        print(f"{name}: export {exports[name]['bytes']} bytes, cut6 "
+              f"{results[name]['check6_unrebuildable_cuts']}", flush=True)
+        (out / f'{name}.checks.json').write_text(json.dumps(results[name], indent=2) + '\n')
 
-    result = dict(regression=regression, export=export_info, identifier_mapping=mapping, checks=checks,
-                  binaries=dict(orig_sha256=digest(abc_orig), dump_sha256=digest(abc_dump),
-                                frozen_sha256=digest(args.frozen)))
-    (out / 'summary.json').write_text(json.dumps(result, indent=2) + '\n')
-    print(json.dumps(dict(mapping=mapping, checks=checks), indent=2)[:5000])
+    summary = dict(regression=regression, circuits=results, exports=exports,
+                   binaries=dict(orig_sha256=file_digest(abc_orig),
+                                 dump_sha256=file_digest(abc_dump),
+                                 frozen_sha256=file_digest(args.frozen)))
+    (out / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n')
+
+    for name in wanted:
+        row = results[name]
+        print(f"RESULT {name}: check3={row['check3_gain_mismatches']} "
+              f"check4={row['check4_invalid_cuts']} check5_depth={row['check5_depth_mismatches']} "
+              f"check6={row['check6_unrebuildable_cuts']}/{row['coverage']['cuts']}", flush=True)
 
 
 if __name__ == '__main__':

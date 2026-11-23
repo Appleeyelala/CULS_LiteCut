@@ -194,10 +194,10 @@ def run_circuit(name, aig_path, export_path, stats, step1_rows, out_dir, example
     schemes = {scheme: empty_scheme_stats() for scheme in SCHEMES}
     pairwise = {pairs_key(a, b): 0 for a, b in PAIRS}
     strata = {
-        'region_root': dict(decisions=0, ties=0, diff=Counter()),
-        'internal': dict(decisions=0, ties=0, diff=Counter()),
-        'slack_zero': dict(decisions=0, ties=0, diff=Counter()),
-        'slack_positive': dict(decisions=0, ties=0, diff=Counter()),
+        'region_root': dict(decisions=0, nonempty=0, ties=0, diff=Counter()),
+        'internal': dict(decisions=0, nonempty=0, ties=0, diff=Counter()),
+        'slack_zero': dict(decisions=0, nonempty=0, ties=0, diff=Counter()),
+        'slack_positive': dict(decisions=0, nonempty=0, ties=0, diff=Counter()),
     }
     per_node = Counter()
     assertion = dict(rebuild_checked=0, candidate_order_checked=0,
@@ -253,16 +253,20 @@ def run_circuit(name, aig_path, export_path, stats, step1_rows, out_dir, example
             node_level = levels.level[root]
             node_slack = required - node_level
             is_root = root in roots
+            strata_keys = ('region_root' if is_root else 'internal',
+                           'slack_zero' if node_slack == 0 else 'slack_positive')
             totals['region_root_decisions' if is_root else 'internal_decisions'] += 1
             totals['zero_slack_decisions' if node_slack == 0 else 'positive_slack_decisions'] += 1
-            strata['region_root' if is_root else 'internal']['decisions'] += 1
-            strata['slack_zero' if node_slack == 0 else 'slack_positive']['decisions'] += 1
+            for key in strata_keys:
+                strata[key]['decisions'] += 1
 
             candidates = record['candidates']
             totals['candidates'] += len(candidates)
             if not candidates:
                 totals['empty_decisions'] += 1
                 continue
+            for key in strata_keys:
+                strata[key]['nonempty'] += 1
 
             weights = {scheme: scheme_weights(scheme, slacks) for scheme in SCHEMES}
             base = {scheme: sum(w * d for w, d in zip(weights[scheme], depths))
@@ -337,11 +341,9 @@ def run_circuit(name, aig_path, export_path, stats, step1_rows, out_dir, example
             uniform_pick = chosen['uniform']['candidate']['subgraph']
             for scheme in WEIGHTED:
                 if chosen[scheme]['candidate']['subgraph'] != uniform_pick:
-                    for key in ('region_root' if is_root else 'internal',
-                                'slack_zero' if node_slack == 0 else 'slack_positive'):
+                    for key in strata_keys:
                         strata[key]['diff'][scheme] += 1
-            for key in ('region_root' if is_root else 'internal',
-                        'slack_zero' if node_slack == 0 else 'slack_positive'):
+            for key in strata_keys:
                 if ties['uniform'] > 1:
                     strata[key]['ties'] += 1
 
@@ -438,12 +440,15 @@ def _scheme_summary(schemes, totals):
 
 
 def _strata_summary(strata, totals):
-    decisions = totals['decisions'] - totals['empty_decisions']
     summary = {}
     for key, row in strata.items():
-        summary[key] = dict(decisions=row['decisions'],
-                            tie_fraction=row['ties'] / decisions,
-                            diff_vs_uniform={scheme: row['diff'][scheme] / decisions
+        denominator = row['nonempty']
+        summary[key] = dict(decisions=row['decisions'], nonempty=row['nonempty'],
+                            ties=row['ties'],
+                            tie_fraction=row['ties'] / denominator if denominator else None,
+                            diff_counts={scheme: row['diff'][scheme] for scheme in WEIGHTED},
+                            diff_vs_uniform={scheme: (row['diff'][scheme] / denominator
+                                                      if denominator else None)
                                              for scheme in WEIGHTED})
     return summary
 

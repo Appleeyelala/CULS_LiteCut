@@ -109,7 +109,8 @@ def run_circuit(name, group, aig_path, abc, out_dir, log_dir):
         if abc_lev != metrics['depth']:
             raise SystemExit(f'{name}/{tag}: ABC lev {abc_lev} != recomputed {metrics["depth"]}')
         cec_log = log_dir / f'{name}.{tag}.cec.log'
-        cec_proc, cec_elapsed = run_abc(abc, f'read_aiger {aig_path}; cec {output}', cec_log)
+        # write_aiger drops PI symbols; compare the networks without names.
+        cec_proc, cec_elapsed = run_abc(abc, f'read_aiger {aig_path}; cec -n {output}', cec_log)
         text = cec_log.read_text().lower()
         cec = ('equivalent' in text) and ('not equivalent' not in text)
         if not cec:

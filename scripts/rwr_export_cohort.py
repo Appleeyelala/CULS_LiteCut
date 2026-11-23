@@ -59,7 +59,7 @@ def rank_key(row):
     return hashlib.sha256(f'{SEED}:{row["sha256"]}'.encode()).hexdigest()
 
 
-def build_cohort():
+def build_cohort(sample_dir=None):
     pilots = []
     for path in sorted(PILOT_DIR.glob('*.aig')):
         pilots.append(dict(name=path.stem, path=str(path), sha256=sha256(path),
@@ -128,8 +128,15 @@ def build_cohort():
     sampled = []
     for item in selections:
         row = item['row']
+        path = row['staged_path']
+        if sample_dir:
+            staged = Path(sample_dir) / f"{row['index']:04d}.aig"
+            if staged.is_file():
+                path = str(staged)
+        if not Path(path).is_file() and Path(row['source']).is_file():
+            path = row['source']
         sampled.append(dict(name=Path(row['relative_path']).stem,
-                            path=row['staged_path'], sha256=row['sha256'],
+                            path=path, sha256=row['sha256'],
                             ands=row['and_count'], group='sample905', band=item['band'],
                             substitute=item['substitute'],
                             relative_path=row['relative_path'], source=row['source']))
@@ -193,6 +200,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--run', required=True, type=Path)
     parser.add_argument('--build', required=True, type=Path)
+    parser.add_argument('--sample-dir', default=None,
+                        help='directory holding the staged sampled AIGs (index-named)')
     parser.add_argument('--limit', type=int, default=None, help='debug: only the first N circuits')
     parser.add_argument('--only', default=None, help='debug: comma-separated circuit names')
     args = parser.parse_args()
@@ -202,7 +211,7 @@ def main():
     if not run.is_relative_to('/data/wushangge'):
         raise SystemExit('run this only under /data/wushangge')
     (run / 'output/logs').mkdir(parents=True, exist_ok=True)
-    cohort = build_cohort()
+    cohort = build_cohort(args.sample_dir)
     (run / 'output/cohort.json').write_text(json.dumps(cohort, ensure_ascii=False, indent=2) + '\n')
     print('cohort:', cohort['total_unique'], 'pilots', len(cohort['pilots']),
           'dev_new', len(cohort['development_new']), 'sampled', len(cohort['sampled']), flush=True)

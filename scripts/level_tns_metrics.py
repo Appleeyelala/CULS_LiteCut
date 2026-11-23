@@ -325,6 +325,10 @@ def run_circuit(name, group, aig_path, export_path, out_dir, csv_dir):
                 assertions=assertions,
                 bins={label: {scheme: {k: _cell_json(cells[label][scheme][k]) for k in KS}
                               for scheme in SCHEMES} for label, _, _ in BINS},
+                hists={label: {scheme: {k: dict(tns=dict(cells[label][scheme][k]['tns_hist']),
+                                                n=dict(cells[label][scheme][k]['n_hist']))
+                                        for k in KS} for scheme in SCHEMES}
+                       for label, _, _ in BINS},
                 compare={scheme: {label: {k: _compare_json(compare[scheme][label][k])
                                           for k in KS} for label, _, _ in BINS}
                          for scheme in WEIGHTED},
@@ -349,7 +353,8 @@ def _compare_json(bucket):
                 tns_smaller=bucket['smaller'], tns_equal=bucket['equal'],
                 tns_larger=bucket['larger'],
                 and_smaller=bucket['and_smaller'], and_equal=bucket['and_equal'],
-                and_larger=bucket['and_larger'], and_median=median_of(bucket['and_hist']))
+                and_larger=bucket['and_larger'], and_median=median_of(bucket['and_hist']),
+                and_hist={str(key): value for key, value in bucket['and_hist'].items()})
 
 
 def main():
@@ -387,7 +392,62 @@ def main():
             print(f"{result['circuit']}: cuts={result['counts']['decisions']} "
                   f"csv={result['csv']['bytes']}", flush=True)
 
-    summary = dict(step='3_v3', part='A', circuits=results,
+    totals = {}
+    for label, _, _ in BINS:
+        totals[label] = {}
+        for scheme in SCHEMES:
+            totals[label][scheme] = {}
+            for k in KS:
+                tns = Counter()
+                nov = Counter()
+                for result in results:
+                    tns.update({int(key): value for key, value in
+                                result['hists'][label][scheme][k]['tns'].items()})
+                    nov.update({int(key): value for key, value in
+                                result['hists'][label][scheme][k]['n'].items()})
+                count = sum(tns.values())
+                if not count:
+                    totals[label][scheme][k] = dict(n=0)
+                    continue
+                total = sum(value * weight for value, weight in tns.items())
+                totals[label][scheme][k] = dict(
+                    n=count, tns_mean=total / count, tns_median=median_of(tns),
+                    tns_smaller=sum(w for v, w in tns.items() if v < 0),
+                    tns_equal=tns.get(0, 0),
+                    tns_larger=sum(w for v, w in tns.items() if v > 0),
+                    n_mean=sum(v * w for v, w in nov.items()) / count,
+                    n_median=median_of(nov),
+                    n_smaller=sum(w for v, w in nov.items() if v < 0),
+                    n_equal=nov.get(0, 0),
+                    n_larger=sum(w for v, w in nov.items() if v > 0))
+
+    compare_totals = {}
+    for scheme in WEIGHTED:
+        compare_totals[scheme] = {}
+        for label, _, _ in BINS:
+            compare_totals[scheme][label] = {}
+            for k in KS:
+                merged = dict(n=0, same_candidate=0, tns_smaller=0, tns_equal=0, tns_larger=0,
+                              and_smaller=0, and_equal=0, and_larger=0, hist=Counter())
+                for result in results:
+                    cell = result['compare'][scheme][label][k]
+                    if not cell.get('n'):
+                        continue
+                    merged['n'] += cell['n']
+                    merged['same_candidate'] += cell['same_candidate']
+                    for key in ('tns_smaller', 'tns_equal', 'tns_larger',
+                                'and_smaller', 'and_equal', 'and_larger'):
+                        merged[key] += cell[key]
+                    merged['hist'].update({int(v): w for v, w in cell['and_hist'].items()})
+                compare_totals[scheme][label][k] = dict(
+                    n=merged['n'], same_candidate=merged['same_candidate'],
+                    tns_smaller=merged['tns_smaller'], tns_equal=merged['tns_equal'],
+                    tns_larger=merged['tns_larger'], and_smaller=merged['and_smaller'],
+                    and_equal=merged['and_equal'], and_larger=merged['and_larger'],
+                    and_median=median_of(merged['hist']) if merged['n'] else None)
+
+    summary = dict(step='3_v3', part='A', circuits=results, totals=totals,
+                   compare_totals=compare_totals,
                    cohort=dict(total=cohort['total_unique'], shortfalls=cohort['shortfalls'],
                                skipped=cohort['skipped'], seed=cohort['seed']),
                    slurm_job_id=os.getenv('SLURM_JOB_ID'))

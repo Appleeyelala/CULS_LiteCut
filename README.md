@@ -1,52 +1,33 @@
-# CULS LiteCut research workspace
+# CULS LiteCut 研究工作区
 
-本分支的 AIG 层加权改写实验通过四电路原图深度核对，在 c5315 的候选 0 复原检查处停止。见[实验报告与反例](analysis/aig_level_weighted_rewrite/README.md)。
+当前工作分支为 `work/abc-candidate-export`，聚焦于 **AIG 层 level 加权 rewrite 候选选择**。
 
-**新对话先读：[对话交接报告](HANDOFF.md)。** 最新100电路可读数据在 [analysis/ste100](https://github.com/Appleeyelala/CULS_LiteCut/tree/main/analysis/ste100)。
+- **新对话交接与研究现状**：先读 [交接文档：AIG 层 level 加权 rewrite 选择](docs/交接文档：AIG%20层%20level%20加权%20rewrite%20选择（交给%20Gemini）.md)。
+- **当前方向实验产物**：[analysis/level_weighted/](analysis/level_weighted/)
+  - [Step 1：原图 unit-AND level 与 root slack](analysis/level_weighted/step1/README.md)（另见原生 3 叶子反例说明 [analysis/aig_level_weighted_rewrite/README.md](analysis/aig_level_weighted_rewrite/README.md)）
+  - [Step 2：插桩 ABC 导出 4 叶子 rewrite 候选](analysis/level_weighted/step2/README.md)
+  - [Step 3 v2：平移软权重与按 slack 分层对比（4 试点）](analysis/level_weighted/step3_v2/README.md)
+  - [Step 3 v3：近临界路径 TNS 指标与 44 电路扩展](analysis/level_weighted/step3_v3/README.md)
+  - [ABC 原生命令全局基线（44 电路）](analysis/level_weighted/abc_native/README.md)
+- **旧方向（LiteCut + 全局可微时序代理 + 联合梯度选择）最终结题归档**：[analysis/paper_joint_evidence/README.md](analysis/paper_joint_evidence/README.md)（旧方向完整过程代码与阶段文档保留在本地分支 `work/paper-joint-evidence` 及初始基线 `main`）。
 
-最新固定随机100电路已完成 **Softmax＋STE＋Adam**（40步）评估：A/B/Ours共300点全部成功；Ours/A、Ours/B配对Delay几何平均比为0.959272/1.001070，Runtime配对比中位数为5.281315/4.045126。相对原图有改善，但尚未优于B且仍更慢。新版仅付费原图Mapping＋至多一次最终候选Mapping，无中间反馈校准；见[100电路真实结果](docs/mffc_gpu/STE100_RESULTS.md)及[实现说明](docs/mffc_gpu/STE_ADAM_IMPLEMENTATION.md)。以下905和更早记录保留各自算法与实验范围。
+## 目录说明
 
-这里集中管理梯度下降与 LiteCut 研究的源码、证据和项目历史，研究对象是 AIG rewriting、strict maximal MFFC、候选局部 delay 与映射后 timing。长期目标是形成论文。此前完整优化框架的实现与全量验证已完成；[逐项验收](docs/global_timing/REQUIREMENTS_AUDIT.md)记录完成证据和明确遗漏，[运行记录](docs/global_timing/RUN_LOG.md)区分历史证据与新实验。工程完成不等于论文结论或算法优势已经确立。
-
-联合梯度选择与单电路 GPU 改进已完成正式432方法点、补充48方法点与独立审计，见[最终结果与边界](docs/gpu_joint/FINAL_RESULTS.md)。对旧版QoR非劣门槛通过，但总体中位加速仅1.0355倍，未达到预定1.5倍；9设计27对实际CUDA工作量对照中位加速1.3262倍。梯度相对随机/关闭内层更新的优势未成立；四设计控制未支持局部分数或显式pair的总体收益，保留修复有质量作用。来源/规模/阶段汇总和四组PNG/PDF已完成，见[交付审查](docs/gpu_joint/GOAL_DELIVERY_AUDIT.md)与[复现索引](docs/gpu_joint/REPRODUCIBILITY.md)。原905结果保持原样；本轮交付不等于论文性能目标已达成。
-
-源码工作区是 `/home/wushangge/CULS_LiteCut`，运行与数据根目录是 `/data/wushangge/CULS_LiteCut`。
-
-GitHub 项目与最新正式 905 数据目录见[阅读索引](docs/GITHUB_DATA_INDEX.md)。线上 `main` 包含 `analysis/benchmark905/` 的可读实验明细；本地源码工作区的大型数据仍留在 `/data`，原始实验文件不变。
-
-当前MFFC级GPU改造位于 `work/mffc-gpu-905`：完整候选聚合/Region DAG设备队列前反传播、全局梯度联合块和候选复用预检已实现；41项冻结检查及完整905×3=2715点正式评估、5750份真实测量审计和成本分析均完成。A/Ours各905 PASS，B为901 PASS/4 FAIL；Ours相对A/B的Delay比几何均值为0.944392/0.998084，胜平负544/360/1与354/184/363，配对基线/Ours时间比中位0.135011/0.166129。**工程交付完成，但整体Delay–Runtime优势未成立**；Ours内部2个CUDA失败请求也保留。见[全量结论与图表](BENCHMARK905_RESULTS.md)、[2715点CSV](BENCHMARK905_RESULTS.csv)、[统计JSON](BENCHMARK905_SUMMARY.json)、[逐项验收](docs/mffc_gpu/DELIVERY_AUDIT.md)、[实际实现](docs/mffc_gpu/IMPLEMENTATION.md)与[梯度闭环状态](GRADIENT_OPTIMIZATION_STATUS.md)。旧905和432/48结果保持原范围，不与新版正式结果混算。
-
-新增框架的构建与运行方法见 [使用说明](docs/global_timing/USAGE.md)，数学与真实执行边界见 [模型契约](docs/global_timing/MODEL_AND_EXECUTION.md)，源码与报告的对应关系见 [证据索引](docs/global_timing/EVIDENCE_INDEX.md)。此前完整框架的旧版905输入主实验为901 PASS、4项native对照缺失的PARTIAL；全部905设计的有效测量完成路径采集和原始证据复核，13981份映射、16696个成功引用、最终审计错误0。[全量结果](docs/global_timing/FULL905_SEARCH_RESULTS.md)包含各baseline与original/no-op对照，尚未建立稳定优于同预算随机搜索的优势。
-
-完整 AIG 数据集现位于本仓库的 [open-sourceDataset](open-sourceDataset/)，包含 938 个文件（905 个 AIG/AAG），不进入 Git。后续统一从此目录选择输入；默认设计为 `OpenABC/c1355_orig.aig`，路径配置在 `config/workspace.json`。原 `/home/wushangge/cutLibOrigin/open-sourceDataset` 保留指向新目录的兼容链接，迁移记录见 [dataset_migration.json](provenance/dataset_migration.json)。实际运行前，准备工具会把选定设计复制到 `/data` 的运行目录并记录 SHA256。
-
-建议先读 [已有工作整理](docs/WORK_HISTORY.md)，再读 [代码与数据流](docs/PROJECT_MAP.md) 和 [结论边界与已知问题](docs/KNOWN_LIMITATIONS.md)。后续运行和版本管理遵循 [Git 与 Slurm 工作规范](docs/OPERATIONS.md)。
-
-| 目录 | 内容 |
+| 目录 / 文件 | 内容 |
 |---|---|
-| `projects/culs/` | CULS 当前源码、Gate3A 至 Gate3F 工具，以及后续 path delay 实验脚本和补丁 |
-| `projects/litecut/` | LiteCut 特征、Teacher/Student 源码、推理 bridge、Gate2 工具 |
-| `legacy/gate1_aigrewrite/` | 实际完成 Gate1 的工作副本源码及脚本 |
-| `third_party/abc/` | 已核对 commit 的干净 ABC 源码，保留上游版权文件 |
-| `history/abc_variants/` | 历史 ABC 实验副本相对干净基线的实际修改文件 |
-| `evidence/` | 小型历史报告、JSON/CSV 和图；完整原始产物保存在数据区 |
-| `provenance/` | 文件来源及 SHA256、原仓库 commit/状态/差异、资产及历史运行索引 |
-| `scripts/` | 导入核验、未来运行目录准备工具，不自动执行实验 |
-| `config/` | 数据根目录、工程位置和资源上限 |
-| `global_timing/` | 新增分区、候选、批量推理、时序代理、梯度搜索与真实验证闭环 |
-| `tests/` | 结构参照、数值梯度、候选可行性及真实 CULS/ABC 回归 |
-| `framework/abc/` | 独立 ABC 构建的只读 Liberty 端点报告插桩 |
+| `analysis/level_weighted/` | 当前 AIG 层加权 rewrite 选择各步报告、统计表与小体积 CSV |
+| `analysis/paper_joint_evidence/` | 旧方向 14 开发电路与 24 外部验证电路结题汇总表及图表 |
+| `global_timing/` | AIG 结构解析、MFFC 分区、level/slack 传播、候选冲突与验证基础模块 |
+| `scripts/` | 运行目录准备（`prepare_run.py`）、基线校验（`verify_import.py`）与当前实验脚本 |
+| `tests/` | 核心结构、层数加权、候选可行性与进程管理单元测试 |
+| `projects/`、`third_party/abc/`、`legacy/`、`history/`、`framework/` | 导入的 CULS、LiteCut、干净 ABC 基线及历史参考源码 |
+| `evidence/`、`provenance/` | 初始 Gate1–Gate3F 历史小证据、文件哈希溯源与 `rwr_dump.patch` |
+| `config/`、`benchmark905_manifest.json` | 工作区路径/资源配置与 905 电路清单 |
+| `open-sourceDataset/` | 905 个 AIG/AAG 电路数据集（Git 忽略） |
 
-历史证据覆盖 Gate1、Gate2、Gate3A 至 Gate3F，以及后续 timing 标签更正、source-restricted timing、R9 机制分析和局部 mapper arrival 验证。Gate3F 的四组结果、R9 单案例与局部 arrival 验证具有不同测量目标，不能合并为一个已验证的全局优化算法。
+## 运行与管理规范
 
-可直接进行轻量文件核验：
-
-```bash
-python -B scripts/verify_import.py
-```
-
-本仓库的历史脚本保留原样，其中仍有旧绝对路径。它们是有来源的源码快照，不表示所有历史命令已经迁移为可直接执行的统一入口。构建、推理、实验和输出必须在 `/data` 的独立 Slurm 工作目录进行。
-
-上游 CULS、Gate1、ABC 的许可证随源码保留。LiteCut 源目录未找到独立许可证文件；这里记录本地研究来源，未执行对外发布。模型、ASAP7 库和二进制不进入 Git，位置与哈希见 [资产清单](provenance/assets.json)。
-
-生成产物的清理范围、保留数据及删除清单见[运行产物清理记录](docs/GENERATED_ARTIFACT_CLEANUP.md)。历史缓存路径可能已清理，完整候选分数与实验原始证据仍保留。
+- 源码工作区：`/home/wushangge/CULS_LiteCut`
+- 数据与运行根目录：`/data/wushangge/CULS_LiteCut`（编译、大规模导出、实验和输出均须在 `/data` 下独立目录通过 Slurm 执行，详见 [docs/OPERATIONS.md](docs/OPERATIONS.md) 与 [AGENTS.md](AGENTS.md)）。
+- **盲测集红线**：外部 24 个验证电路仅用于方法与参数完全冻结后的最终一次性验证，开发与调参阶段严禁读取或统计。
+- 基础背景文档：[已有科研工作整理](docs/WORK_HISTORY.md) · [代码职责与数据流](docs/PROJECT_MAP.md) · [结论边界与已知问题](docs/KNOWN_LIMITATIONS.md)

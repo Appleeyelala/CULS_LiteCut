@@ -42,17 +42,17 @@ PO11 例子的 strict region path 是 R6 → R9 → R24 → R36 → R37 → R38�
 
 后续 ABC 副本中没有 `.git` 元数据。整理时将其实际源码与 `third_party/abc` 对比，保存完整的修改文件而非猜测补丁叠加顺序。每个变体的 changed/extra/missing 文件清单在 [abc_variants.json](../provenance/abc_variants.json)。在未来 `/data` 工作区中先复制基线，再覆盖选定变体，才是对应源码；不能把多个变体叠加。干净基线与 Gate3F 冻结二进制具有日期和源码关联证据，但历史二进制的精确构建链未完全记录。
 
-## Joint-gradient v3 研究入口
+## AIG 层 level 加权改写研究入口
 
-以下是后续研究分支实现，不替代上方历史处理顺序或生产STE入口。
+以下是当前分支（`work/abc-candidate-export`）的核心模块与脚本入口：
 
 | 文件 | 职责 |
 |---|---|
-| `global_timing/phase_ports.py` | literal正/反相通道，候选边界相位组合 |
-| `global_timing/conditional_arrival.py` | 条件端口DAG的分层GPU前向和一阶反向 |
-| `global_timing/learned_ports.py` | 冻结LiteCut特征、共享候选端口网络和全局残差 |
-| `scripts/joint_gradient_learning_data.py` | 家族隔离、冻结合法组合、受控测量及历史标签复用 |
-| `scripts/train_joint_gradient_ports.py` | 离线PO/critical delta与排序学习 |
-| `scripts/evaluate_joint_gradient_v3.py` | 不读取候选真实标签的固定预算搜索对照 |
-| `scripts/audit_replay_noop_v3.py` | 原图与serialized no-op结构指纹审计 |
-| `analysis/joint_gradient_v3/` | 实现、原始记录索引、失败质量门槛和后续决定 |
+| `global_timing/structure.py` | AIG 解析、strict maximal MFFC 分区、Region DAG 与结构摘要 |
+| `global_timing/level_weights.py` | 原图正向 level、反向 required、cut 叶子路径深度与加权目标计算 |
+| `global_timing/candidates.py`、`feasibility.py`、`evaluation.py` | 候选结构、冲突检测参考与 ABC CEC/映射工具封装 |
+| `scripts/aig_level_experiment.py`、`audit_level_noop.py` | Step 1 原图层数/slack 核验及 `c5315` 3 叶子反例独立复核 |
+| `scripts/patch_abc_rwr_dump.py`、`rwr_dump_experiment.py`、`rwr_export_cohort.py` | ABC `rwrEva.c` 候选导出补丁、4 试点及 44 电路导出与六项验收 |
+| `scripts/level_weight_selection_v2.py`、`level_tns_metrics.py` | 七种 cut 内选择方案（平移软权重、硬权重、不加权、`rootlevel`、`abc_default`）与近临界路径 TNS 统计 |
+| `scripts/abc_native_baseline.py` | 七条未打补丁 ABC 原生命令序列的全局层数、输出 TNS 与 CEC 对照 |
+| `analysis/level_weighted/` | Step 1、Step 2、Step 3 v2/v3 与 ABC 原生基线的完整报告及可读结果表 |

@@ -1,6 +1,6 @@
 # 已有科研工作整理
 
-本页保存初始导入时的历史阶段结论，下文“当前证据”指该阶段，不替代后来新增框架的结果。完整实现、905输入验证和保留的限制见[全量结果](global_timing/FULL905_SEARCH_RESULTS.md)与[逐项验收](global_timing/REQUIREMENTS_AUDIT.md)；历史报告和原始日志未回写。
+本页保存初始导入时的历史阶段结论（Gate1–Gate3F 与 R9 机制分析）。旧方向（LiteCut + 全局可微时序代理 + 联合梯度选择）的最终总结见 [analysis/paper_joint_evidence/README.md](../analysis/paper_joint_evidence/README.md)（完整过程代码与文档归档在本地分支 `work/paper-joint-evidence`）；当前 AIG 层 level 加权方向见 [交接文档](交接文档：AIG%20层%20level%20加权%20rewrite%20选择（交给%20Gemini）.md) 与 [analysis/level_weighted/](../analysis/level_weighted/)。历史报告和原始日志未回写。
 
 当前工作已经形成从候选提取、MFFC 分组、局部推理到顺序 replay、CEC、真实 mapping/timing 的证据链。后续工作还修正了 PI/PO timing 标签，并深入验证了一个 R9 案例。下表按工作依赖顺序整理已有结论，不将单案例、旧标签或局部指标扩大为通用预测及优化结果。
 
@@ -42,13 +42,6 @@ R9 机制案例的 corrected MIO pair delay 为194.169998→193.519989 ps。关�
 
 R9 local-arrival 原型使用14个PI闭合的TFI，分别计算49/47个AND；仍构建完整subject graph以保留对象序、结构引用等上下文。正相位mode0 arrival为109.239990→106.219986 ps，两侧与保存的full-map参考一致，delta为−3.020004 ps，见 [validation](../evidence/path_delay_model/R9_LOCAL_ARRIVAL_VALIDATION.json)。它没有实现仅13/11节点窗口的精确增量更新，也没有验证final cover、下游pin决策、端点或global delay。当前证据没有建立通用跨MFFC联合优化器或梯度下降方法。
 
-## 2026-11-17 后续研究：joint-gradient v3
+## 2026-11-19 旧方向结题归档
 
-上述段落保留初始导入阶段口径。后续已实现相位端口GPU可微传播、冻结
-LiteCut特征上的共享候选端口学习、全局残差与固定预算联合梯度对照。
-旧39个结构不一致已定位并修复；12训练＋12验证的216次离线Mapping全部
-成功，但三种子学习的排序/方向门槛失败，停止扩大到独立24/100/905。
-旧12电路开发搜索达到小域代理最优仍未实现受面积约束的整体优于B。
-serialized no-op暴露了需进一步控制的输入编码/Mapping漂移混杂。
-见 [v3完整交付](../analysis/joint_gradient_v3/README.md)，不以本轮结果
-覆盖历史STE100、非正gain905或v2记录。
+上述段落保留初始导入阶段口径。后续围绕相位端口传播、LiteCut 局部修正、门级负载时序及联合 Adam / 全局边际选块的完整探索与 14 开发电路 + 24 外部电路结题总结，已归档至 [analysis/paper_joint_evidence/README.md](../analysis/paper_joint_evidence/README.md)（完整过程分支保留在 `work/paper-joint-evidence`）。

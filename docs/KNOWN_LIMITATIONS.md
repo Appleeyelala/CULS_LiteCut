@@ -1,6 +1,6 @@
 # 结论边界与已知问题
 
-本页主要记录初始历史导入的解释边界；后续MFFC GPU完整905的当前状态见[正式结果](../BENCHMARK905_RESULTS.md)和[梯度闭环报告](../GRADIENT_OPTIMIZATION_STATUS.md)。现有结果的主要风险是指标、输入快照和节点身份混用。整理保留原始文件，通过本文件记录解释更正，不回写历史日志和报告。
+本页主要记录初始历史导入的解释边界；旧方向最终归档见 [analysis/paper_joint_evidence/README.md](../analysis/paper_joint_evidence/README.md)，当前 AIG 层 level 加权方向的边界见 [交接文档](交接文档：AIG%20层%20level%20加权%20rewrite%20选择（交给%20Gemini）.md)。现有结果的主要风险是指标、输入快照和节点身份混用。整理保留原始文件，通过本文件记录解释更正，不回写历史日志和报告。
 
 | 项目 | 当前解释 |
 |---|---|

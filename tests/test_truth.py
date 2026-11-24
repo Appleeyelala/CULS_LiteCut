@@ -1,6 +1,6 @@
 import unittest
 
-from global_timing.litecut import verify_cut_truth
+from global_timing.boolean_candidates import verify_cut_truth
 from global_timing.truth import BDD
 from test_structure import fixture
 

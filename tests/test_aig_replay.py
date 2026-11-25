@@ -8,6 +8,7 @@ from global_timing.aig_replay import (
     apply_and_write_aig,
     bounded_mffc_nodes,
     candidate_output_complement,
+    compute_adaptive_tau,
     global_po_sensitivity,
     original_cone_timing_and_refs,
     original_cone_truth,
@@ -173,3 +174,21 @@ class AigReplayTests(unittest.TestCase):
         expected_ext_5 = math.exp((dp.level[5] - dp.depth) / 1.0)
         self.assertAlmostEqual(sens_other[0], expected_ext_5, places=9)
         self.assertAlmostEqual(sens_other[1], 0.0, places=9)
+
+    def test_compute_adaptive_tau_scales_with_po_spread(self):
+        # Uniform POs (depth 1 & 1) -> clamped to min_tau=1.0
+        aig_flat = fixture(2, [(2, 4)], [6, 6])
+        dp_flat = propagate_fanout_delays(aig_flat, fanout_alpha=0.2)
+        self.assertEqual(compute_adaptive_tau(aig_flat, dp_flat), 1.0)
+
+        # Wide spread: PO0 depth=1, PO1 depth=1, PO2 depth=1, PO3 fanout-loaded -> spread > 0
+        # Build deep chain so depth=21 vs q75=1 -> spread=20 -> 0.2*20=4.0
+        gates = [(2, 4)]  # node 3 depth 1
+        prev = 6
+        for idx in range(20):
+            gates.append((prev, 2))
+            prev = 2 * (4 + idx)
+        aig_wide = fixture(2, gates, [6, 6, 6, prev])
+        dp_wide = propagate_fanout_delays(aig_wide, fanout_alpha=0.0)
+        self.assertAlmostEqual(compute_adaptive_tau(aig_wide, dp_wide), 4.0, places=9)
+        self.assertAlmostEqual(compute_adaptive_tau(aig_wide, dp_wide, scale=2.0), 6.0, places=9)

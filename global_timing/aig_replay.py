@@ -379,6 +379,24 @@ def original_cone_timing_and_refs(
     return leaf_delays, tuple(orig_refs), sens_other
 
 
+def compute_adaptive_tau(
+    aig,
+    levels: Levels | DelayProfile,
+    min_tau: float = 1.0,
+    max_tau: float = 6.0,
+    spread_coeff: float = 0.2,
+    scale: float = 1.0,
+) -> float:
+    """Choose smooth softmax temperature `tau` from top-quartile PO delay spread."""
+    if not aig.po_literals:
+        return min_tau
+    po_arrs = sorted(float(levels.level[lit >> 1]) for lit in aig.po_literals)
+    q75 = po_arrs[(3 * (len(po_arrs) - 1)) // 4]
+    spread = max(0.0, float(levels.depth) - q75)
+    raw = max(min_tau, min(max_tau, spread_coeff * spread)) * scale
+    return max(min_tau, min(max_tau, raw))
+
+
 def global_po_sensitivity(aig, levels: Levels | DelayProfile, tau: float = 1.0) -> tuple[float, list[float]]:
     """O(|V|) forward/backward pass aggregating all PI->PO paths into per-node global sensitivity.
 

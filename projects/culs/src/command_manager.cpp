@@ -105,6 +105,7 @@ int rw4bHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals) {
     float slewBeta = 0.005f;
     float lamArea = 0.05f;
     bool condBalance = false;
+    bool structMacro = false;
 
     CLI::App parser("Perform GPU fanout-aware global sensitivity 4B rewrite");
     parser.add_option("-r", rounds, descWithDefault("number of rounds", rounds));
@@ -113,13 +114,15 @@ int rw4bHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals) {
     parser.add_option("-s", slewBeta, descWithDefault("slew coupling beta", slewBeta));
     parser.add_option("-l", lamArea, descWithDefault("area penalty lambda", lamArea));
     parser.add_flag("-b", condBalance, descWithDefault("conditional v3-gated GPU balance", condBalance));
+    parser.add_flag("-m", structMacro, descWithDefault("v3-gated GPU struct macro {orig,bal,rfz,bal_rfz}", structMacro));
     parser.add_option("-v", aigman.verbose, descWithDefault("verbose level", aigman.verbose));
 
     int ret;
     if ((ret = parseCmd(parser, vLiterals)) < 2)
         return ret;
 
-    aigman.rw4b(rounds, fanoutAlpha, piFanoutAlpha, slewBeta, lamArea, condBalance);
+    int macroMode = structMacro ? 2 : (condBalance ? 1 : 0);
+    aigman.rw4b(rounds, fanoutAlpha, piFanoutAlpha, slewBeta, lamArea, macroMode);
     return 0;
 }
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Benchmark GPU CULS rw4b (pure & conditional GPU balance) on the 16-circuit target panel."""
+"""Benchmark full-featured GPU CULS rw4b (pure, cond-bal, struct-macro) on the 16-circuit target panel."""
 from __future__ import annotations
 
 import argparse
@@ -49,24 +49,23 @@ def _run_gpuls(gpuls_bin: Path, in_aig: Path, out_aig: Path, rw4b_flags: str, lo
             "gpu_eval_s": float(m.group(4)) / 1000.0,
             "cpu_sel_rebuild_s": float(m.group(5)) / 1000.0,
         }
-    return {
-        "wall_s": wall_s,
-        "breakdown": breakdown,
-    }
+    return {"wall_s": wall_s, "breakdown": breakdown}
 
 
-def _eval_pair(item: tuple[str, str, str, str]) -> dict:
-    rel_path, out_pure_str, out_bal_str, eval_root_str = item
+def _eval_triplet(item: tuple[str, str, str, str, str]) -> dict:
+    rel_path, out_pure_str, out_bal_str, out_str_str, eval_root_str = item
     orig_p = DS_ROOT / rel_path
     eval_root = Path(eval_root_str)
     eval_root.mkdir(parents=True, exist_ok=True)
     m_pure = _eval_aig(orig_p, Path(out_pure_str), eval_root / "map_gpu_rw4b")
     m_bal = _eval_aig(orig_p, Path(out_bal_str), eval_root / "map_gpu_bal_rw4b")
+    m_str = _eval_aig(orig_p, Path(out_str_str), eval_root / "map_gpu_struct_rw4b")
     shutil.rmtree(eval_root, ignore_errors=True)
     return {
         "relative_path": rel_path,
         "gpu_rw4b": m_pure,
         "gpu_bal_rw4b": m_bal,
+        "gpu_struct_rw4b": m_str,
     }
 
 
@@ -98,13 +97,13 @@ def main() -> int:
         for r in json.loads(PREV_FINAL_V4_SUMMARY.read_text())["circuits"]
     }
 
-    # 1. Warmup GPU context once on c1355
+    # 1. Warmup GPU context once
     warm_aig = DS_ROOT / TARGET_PANEL[0]
-    _run_gpuls(gpuls_bin, warm_aig, work_dir / "_warm.aig", "-r 1", work_dir / "_warm.log")
+    _run_gpuls(gpuls_bin, warm_aig, work_dir / "_warm.aig", "-r 1 -v 0", work_dir / "_warm.log")
 
-    # 2. Sequential GPU execution on all 16 circuits (uncontended GPU timing)
+    # 2. Sequential uncontended GPU execution on all 16 circuits
     gpu_runs: dict[str, dict] = {}
-    eval_items: list[tuple[str, str, str, str]] = []
+    eval_items: list[tuple[str, str, str, str, str]] = []
     for rel in TARGET_PANEL:
         orig_p = DS_ROOT / rel
         slug = rel.replace("/", "__").removesuffix(".aig")
@@ -113,20 +112,23 @@ def main() -> int:
 
         out_pure = c_dir / "gpu_rw4b.aig"
         out_bal = c_dir / "gpu_bal_rw4b.aig"
+        out_str = c_dir / "gpu_struct_rw4b.aig"
         t_pure = _run_gpuls(gpuls_bin, orig_p, out_pure, "-r 3 -v 1", c_dir / "gpu_rw4b.log")
         t_bal = _run_gpuls(gpuls_bin, orig_p, out_bal, "-b -r 3 -v 1", c_dir / "gpu_bal_rw4b.log")
-        gpu_runs[rel] = {"gpu_rw4b": t_pure, "gpu_bal_rw4b": t_bal}
+        t_str = _run_gpuls(gpuls_bin, orig_p, out_str, "-m -r 3 -v 1", c_dir / "gpu_struct_rw4b.log")
+        gpu_runs[rel] = {"gpu_rw4b": t_pure, "gpu_bal_rw4b": t_bal, "gpu_struct_rw4b": t_str}
         print(
-            f"[GPU] {rel:34s} | pure wall={t_pure['wall_s']:6.3f}s (core={t_pure['breakdown'].get('rw4b_total_s', 0):5.3f}s) | "
-            f"bal wall={t_bal['wall_s']:6.3f}s (core={t_bal['breakdown'].get('rw4b_total_s', 0):5.3f}s)",
+            f"[GPU] {rel:34s} | pure={t_pure['wall_s']:5.2f}s({t_pure['breakdown'].get('rw4b_total_s', 0):5.3f}s) | "
+            f"bal={t_bal['wall_s']:5.2f}s({t_bal['breakdown'].get('rw4b_total_s', 0):5.3f}s) | "
+            f"struct={t_str['wall_s']:5.2f}s({t_str['breakdown'].get('rw4b_total_s', 0):5.3f}s)",
             flush=True,
         )
-        eval_items.append((rel, str(out_pure), str(out_bal), str(c_dir / "eval")))
+        eval_items.append((rel, str(out_pure), str(out_bal), str(out_str), str(c_dir / "eval")))
 
     # 3. Parallel ABC CEC + ASAP7 mapping on CPU workers
     eval_results: dict[str, dict] = {}
     with ProcessPoolExecutor(max_workers=args.workers) as pool:
-        for res in pool.map(_eval_pair, eval_items):
+        for res in pool.map(_eval_triplet, eval_items):
             eval_results[res["relative_path"]] = res
 
     rows = []
@@ -136,31 +138,32 @@ def main() -> int:
             **prev[rel],
             "gpu_rw4b": eval_results[rel]["gpu_rw4b"],
             "gpu_bal_rw4b": eval_results[rel]["gpu_bal_rw4b"],
+            "gpu_struct_rw4b": eval_results[rel]["gpu_struct_rw4b"],
         }
         gt = gpu_runs[rel]
         rows.append({"relative_path": rel, "mapping": mp, "gpu_timing": gt})
         print(
             f"{rel:34s} | orig={mp['orig']['delay_ps']:8.1f} resyn2={mp['abc_resyn2']['delay_ps']:8.1f} | "
-            f"py_v4s={mp['4B_v4_slew']['delay_ps']:8.1f} gpu_4b={mp['gpu_rw4b']['delay_ps']:8.1f} ({gt['gpu_rw4b']['wall_s']:5.2f}s) | "
-            f"py_bal={mp['bal_v3g_v4s']['delay_ps']:8.1f} gpu_bal={mp['gpu_bal_rw4b']['delay_ps']:8.1f} ({gt['gpu_bal_rw4b']['wall_s']:5.2f}s) | "
-            f"cec={mp['gpu_rw4b']['cec']}/{mp['gpu_bal_rw4b']['cec']}",
+            f"py_4b={mp['4B_v4_slew']['delay_ps']:8.1f} gpu_4b={mp['gpu_rw4b']['delay_ps']:8.1f} | "
+            f"py_str={mp['struct_v3g_v4s']['delay_ps']:8.1f} gpu_str={mp['gpu_struct_rw4b']['delay_ps']:8.1f} | "
+            f"cec={mp['gpu_rw4b']['cec']}/{mp['gpu_bal_rw4b']['cec']}/{mp['gpu_struct_rw4b']['cec']}",
             flush=True,
         )
 
     print("\n=== Aggregate across 16-circuit target panel ===", flush=True)
-    for m in ("abc_resyn2", "4B_v4_slew", "gpu_rw4b", "bal_v3g_v4s", "gpu_bal_rw4b"):
+    for m in ("abc_resyn2", "4B_v4_slew", "gpu_rw4b", "bal_v3g_v4s", "gpu_bal_rw4b", "struct_v3g_v4s", "gpu_struct_rw4b"):
         dr = [r["mapping"][m]["delay_ps"] / r["mapping"]["orig"]["delay_ps"] for r in rows]
         ar = [r["mapping"][m]["area"] / r["mapping"]["orig"]["area"] for r in rows]
         w_orig = sum(1 for x in dr if x < 1.0 - 1e-6)
         w_res = sum(1 for r in rows if r["mapping"][m]["delay_ps"] < r["mapping"]["abc_resyn2"]["delay_ps"] - 1e-6)
         cec_ok = sum(1 for r in rows if r["mapping"][m]["cec"] == "PASS")
         extra = ""
-        if m in ("gpu_rw4b", "gpu_bal_rw4b"):
+        if m.startswith("gpu_"):
             ws = [r["gpu_timing"][m]["wall_s"] for r in rows]
             cs = [r["gpu_timing"][m]["breakdown"].get("rw4b_total_s", 0.0) for r in rows]
             extra = f", wall_med={statistics.median(ws):.3f}s, wall_sum={sum(ws):.2f}s, core_sum={sum(cs):.2f}s"
         print(
-            f"  {m:14s}: delay={_gm(dr):.4f}x ({(_gm(dr)-1)*100:+6.2f}%), "
+            f"  {m:16s}: delay={_gm(dr):.4f}x ({(_gm(dr)-1)*100:+6.2f}%), "
             f"area={_gm(ar):.4f}x ({(_gm(ar)-1)*100:+6.2f}%), "
             f"wins_orig={w_orig}/16, wins_resyn2={w_res}/16, cec={cec_ok}/16{extra}",
             flush=True,

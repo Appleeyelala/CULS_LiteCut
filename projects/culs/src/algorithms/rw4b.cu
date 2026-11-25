@@ -876,18 +876,19 @@ __global__ void evaluateNode4BKernel(
                 jCand = cvLse[rt];
             }
 
-            if (maxArrAbs > req + 1e-6f) continue;
+            if (maxArrAbs > req + 1e-5f) continue;
             int da = nodesAdded - saved;
             float deltaJ = jOrig - jCand;
             float effDelta = sRoot * deltaJ - side - reg - slewCost;
             float score;
             if (da <= 0) {
-                if (deltaJ < -1e-6f || effDelta < -1e-6f) continue;
-                score = effDelta + 1e-5f * static_cast<float>(-da) + 1e-8f;
+                if (deltaJ < -1e-5f || effDelta < -1e-5f) continue;
+                if (da == 0 && effDelta <= 1e-5f) continue; // avoid float32 zero-gain churn
+                score = effDelta + 1e-4f * static_cast<float>(-da);
             } else {
                 score = effDelta - lamArea * static_cast<float>(da);
             }
-            if (score > bestScore) {
+            if (score > bestScore && score > 1e-6f) {
                 bestScore = score;
                 bestRes = {score, maxArrAbs, da, slot, out};
             }

@@ -20,8 +20,8 @@ PREV_FINAL_V4_SUMMARY = Path(
     "/data/wushangge/CULS_LiteCut/runs/20261125T072836Z-step6-final-v4-e5081d9a/output/summary.json"
 )
 TOTAL_RE = re.compile(
-    r"\[rw4b\] total=([0-9.]+)s \(gpu_timing=([0-9.]+)s gpu_enum=([0-9.]+)s "
-    r"gpu_eval=([0-9.]+)s cpu_sel_rebuild=([0-9.]+)s\)"
+    r"rw4b SUMMARY:.*?total=([0-9.]+)ms \(gpu_timing=([0-9.]+)ms gpu_enum=([0-9.]+)ms "
+    r"gpu_eval=([0-9.]+)ms cpu_sel_rebuild=([0-9.]+)ms\)"
 )
 
 
@@ -43,11 +43,11 @@ def _run_gpuls(gpuls_bin: Path, in_aig: Path, out_aig: Path, rw4b_flags: str, lo
     m = TOTAL_RE.search(proc.stdout)
     if m:
         breakdown = {
-            "rw4b_total_s": float(m.group(1)),
-            "gpu_timing_s": float(m.group(2)),
-            "gpu_enum_s": float(m.group(3)),
-            "gpu_eval_s": float(m.group(4)),
-            "cpu_sel_rebuild_s": float(m.group(5)),
+            "rw4b_total_s": float(m.group(1)) / 1000.0,
+            "gpu_timing_s": float(m.group(2)) / 1000.0,
+            "gpu_enum_s": float(m.group(3)) / 1000.0,
+            "gpu_eval_s": float(m.group(4)) / 1000.0,
+            "cpu_sel_rebuild_s": float(m.group(5)) / 1000.0,
         }
     return {
         "wall_s": wall_s,

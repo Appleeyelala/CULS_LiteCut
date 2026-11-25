@@ -19,7 +19,7 @@ from scripts.step4_adaptive_tau_pilot import run_adaptive_arm
 from scripts.step4_fanout_pilot import ABC_EVAL, LIB_ASAP7
 from scripts.step4_pilot_replay import ABC_DUMP, ABC_ORIG, run_abc_dump
 
-DATASET_ROOT = Path("/home/wushangge/CULS_LiteCut/open-sourceDataset")
+DATASET_ROOT = Path("/data/wushangge/CULS_LiteCut/assets/inputs/paper_audit_905")
 
 
 def _read_aig_header(path: Path) -> tuple[int, int, int, int, int]:
@@ -245,20 +245,24 @@ def summarize(rows: list[dict]) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run", required=True, type=Path)
+    parser.add_argument("--dataset-root", type=Path, default=DATASET_ROOT)
     parser.add_argument("--workers", type=int, default=60)
     parser.add_argument("--timeout", type=int, default=600)
     args = parser.parse_args()
     run = args.run.resolve()
+    dataset_root = args.dataset_root.resolve()
     if not os.getenv("SLURM_JOB_ID"):
         raise SystemExit("Must run inside a Slurm job")
 
     out_dir = run / "output"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    aigs = sorted(DATASET_ROOT.rglob("*.aig"))
+    aigs = sorted(dataset_root.rglob("*.aig"))
+    if not aigs:
+        raise SystemExit(f"No .aig files found under {dataset_root}")
     sized = []
     for p in aigs:
-        rel = str(p.relative_to(DATASET_ROOT))
+        rel = str(p.relative_to(dataset_root))
         try:
             _, _, _, _, ands = _read_aig_header(p)
         except Exception:

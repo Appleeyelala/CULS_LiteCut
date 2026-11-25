@@ -37,7 +37,7 @@ def _run_gpuls(gpuls_bin: Path, in_aig: Path, out_aig: Path, rw4b_flags: str, lo
     )
     wall_s = time.perf_counter() - t0
     log_path.write_text(proc.stdout, encoding="utf-8", errors="replace")
-    if proc.returncode != 0 or not out_aig.exists():
+    if proc.returncode != 0 or not out_aig.exists() or "not recognized" in proc.stdout:
         raise RuntimeError(f"gpuls failed (rc={proc.returncode}) on {in_aig}: {proc.stdout[-800:]}")
     breakdown = {}
     m = TOTAL_RE.search(proc.stdout)
@@ -113,8 +113,8 @@ def main() -> int:
 
         out_pure = c_dir / "gpu_rw4b.aig"
         out_bal = c_dir / "gpu_bal_rw4b.aig"
-        t_pure = _run_gpuls(gpuls_bin, orig_p, out_pure, "-r 3 -v", c_dir / "gpu_rw4b.log")
-        t_bal = _run_gpuls(gpuls_bin, orig_p, out_bal, "-b -r 3 -v", c_dir / "gpu_bal_rw4b.log")
+        t_pure = _run_gpuls(gpuls_bin, orig_p, out_pure, "-r 3 -v 1", c_dir / "gpu_rw4b.log")
+        t_bal = _run_gpuls(gpuls_bin, orig_p, out_bal, "-b -r 3 -v 1", c_dir / "gpu_bal_rw4b.log")
         gpu_runs[rel] = {"gpu_rw4b": t_pure, "gpu_bal_rw4b": t_bal}
         print(
             f"[GPU] {rel:34s} | pure wall={t_pure['wall_s']:6.3f}s (core={t_pure['breakdown'].get('rw4b_total_s', 0):5.3f}s) | "

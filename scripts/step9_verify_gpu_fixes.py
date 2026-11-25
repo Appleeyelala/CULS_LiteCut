@@ -79,7 +79,7 @@ def main() -> int:
         print(f"  STILL FAIL: {rel} | {st} | {tail}", flush=True)
 
     # 2. Test Top-7 regression circuits + 16-circuit panel (deduplicated)
-    eval_list = list(dict.fromkeys(TOP10_REGRESSIONS + TARGET_PANEL))
+    eval_list = list(dict.fromkeys(list(TOP10_REGRESSIONS) + list(TARGET_PANEL)))
     items = []
     ginfo_map = {}
     for rel in eval_list:

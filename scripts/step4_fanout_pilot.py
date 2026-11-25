@@ -101,7 +101,7 @@ def select_4b_fanout(
         for line in fh:
             rec = json.loads(line)
             cands = rec["candidates"]
-            if not cands:
+            if not cands or not any(not c["self"] for c in cands):
                 continue
             root = to_aig(rec["node"])
             req = delay.required[root]

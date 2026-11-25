@@ -35,6 +35,7 @@ def run_adaptive_arm(
     max_tau: float = 6.0,
     lam: float = 0.05,
     fanout_reg: float = 0.0005,
+    verify_each_round: bool = True,
 ) -> dict:
     t0 = time.perf_counter()
     work_dir.mkdir(parents=True, exist_ok=True)
@@ -73,7 +74,7 @@ def run_adaptive_arm(
             break
         next_aig_path = work_dir / f"{name}.{arm}.r{rnd}.aig"
         next_aig = apply_and_write_aig(cur_aig, ops, next_aig_path)
-        cec_ok = verify_cec(ABC_ORIG, orig_aig_path, next_aig_path, work_dir / f"{arm}.r{rnd}.cec.log")
+        cec_ok = verify_cec(ABC_ORIG, orig_aig_path, next_aig_path, work_dir / f"{arm}.r{rnd}.cec.log") if verify_each_round else True
         cec_all = cec_all and cec_ok
         next_lv = propagate_levels(next_aig)
         next_fo = references(next_aig)

@@ -98,6 +98,31 @@ int rewriteHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals) 
     return 0;
 }
 
+int rw4bHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals) {
+    int rounds = 3;
+    float fanoutAlpha = 0.20f;
+    float piFanoutAlpha = 0.10f;
+    float slewBeta = 0.005f;
+    float lamArea = 0.05f;
+    bool condBalance = false;
+
+    CLI::App parser("Perform GPU fanout-aware global sensitivity 4B rewrite");
+    parser.add_option("-r", rounds, descWithDefault("number of rounds", rounds));
+    parser.add_option("-a", fanoutAlpha, descWithDefault("AND fanout alpha", fanoutAlpha));
+    parser.add_option("-p", piFanoutAlpha, descWithDefault("PI fanout alpha", piFanoutAlpha));
+    parser.add_option("-s", slewBeta, descWithDefault("slew coupling beta", slewBeta));
+    parser.add_option("-l", lamArea, descWithDefault("area penalty lambda", lamArea));
+    parser.add_flag("-b", condBalance, descWithDefault("conditional v3-gated GPU balance", condBalance));
+    parser.add_option("-v", aigman.verbose, descWithDefault("verbose level", aigman.verbose));
+
+    int ret;
+    if ((ret = parseCmd(parser, vLiterals)) < 2)
+        return ret;
+
+    aigman.rw4b(rounds, fanoutAlpha, piFanoutAlpha, slewBeta, lamArea, condBalance);
+    return 0;
+}
+
 int refactorHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals) {
     bool fUseZeros = false, fAlgMFFC = true;
     int cutSize = 12;
@@ -365,6 +390,7 @@ void CmdMan::registerAllCommands() {
     registerCommand("balance", balanceHandler);
     registerCommand("rw", rewriteHandler);
     registerCommand("rewrite", rewriteHandler);
+    registerCommand("rw4b", rw4bHandler);
     registerCommand("rf", refactorHandler);
     registerCommand("refactor", refactorHandler);
     registerCommand("gate3a_mffc_partition_dump", gate3aMFFCPartitionDumpHandler);

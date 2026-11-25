@@ -12,6 +12,7 @@
 #include "aig/strash.cuh"
 #include "algorithms/balance.h"
 #include "algorithms/resub.h"
+#include "algorithms/rw4b.h"
 
 int getFileSize(const char * path);
 unsigned aigDecodeBinary(char **ppPos);
@@ -669,6 +670,27 @@ prevFullTime = clock() - startFullTime;
 totalFullTime += prevFullTime;
 printf("rewrite: alg time %.2lf, full time %.2lf\n", 
        (double)prevAlgTime / CLOCKS_PER_SEC, (double)prevFullTime / CLOCKS_PER_SEC);
+}
+
+void AIGMan::rw4b(int rounds, float fanoutAlpha, float piFanoutAlpha,
+                  float slewBeta, float lamArea, bool condBalance) {
+    if (!aigCreated) {
+        printf("rw4b: AIG is null!\n");
+        return;
+    }
+    if (nNodes == 0) return;
+    clock_t startFullTime = clock();
+    rw4b::Rw4BParams p;
+    p.rounds = rounds;
+    p.fanoutAlpha = fanoutAlpha;
+    p.piFanoutAlpha = piFanoutAlpha;
+    p.slewBeta = slewBeta;
+    p.lamArea = lamArea;
+    p.condBalance = condBalance;
+    p.verbose = verbose;
+    rw4b::runRw4B(*this, p);
+    prevFullTime = clock() - startFullTime;
+    totalFullTime += prevFullTime;
 }
 
 __global__ void updateDeviceStats(const int nEntries, const int nPIs, int * pnNodes, int * pnObjs) {

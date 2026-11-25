@@ -304,7 +304,10 @@ __global__ void factorFromTruth(int * pOverflow, const int * vCuts, const int * 
                 // expand a new row
                 lastRowIdx = currRowIdx;
                 currRowIdx = atomicAdd(pSubgTableNext, 1);
-                assert(currRowIdx < 4 * nResyn - 1);
+                if (currRowIdx >= 4 * nResyn - 1) {
+                    atomicExch(pOverflow, 1);
+                    break;
+                }
                 assert(vSubgLinks[currRowIdx] == -1);
                 
                 vSubgLinks[lastRowIdx] = currRowIdx;

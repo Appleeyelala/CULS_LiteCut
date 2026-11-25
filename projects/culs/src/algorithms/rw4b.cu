@@ -1366,7 +1366,7 @@ static void selectBestPreMacroGPU(AIGMan & aigman, const Rw4BParams & params) {
     }
 
     // 2. bal_rfz (continue from bal before restoring orig)
-    aigman.refactor(true, true, 12);
+    aigman.refactor(true, true, 10);
     aigman.strash(false, true);
     std::vector<int> brF0, brF1, brOuts;
     AigStats brS = snapshotCurrent(brF0, brF1, brOuts);
@@ -1376,7 +1376,7 @@ static void selectBestPreMacroGPU(AIGMan & aigman, const Rw4BParams & params) {
 
     // 3. rfz (from orig)
     copyHostToAigMan(aigman, nPIs, nPOs, origF0, origF1, origOuts);
-    aigman.refactor(true, true, 12);
+    aigman.refactor(true, true, 10);
     aigman.strash(false, true);
     std::vector<int> rfF0, rfF1, rfOuts;
     AigStats rfS = snapshotCurrent(rfF0, rfF1, rfOuts);

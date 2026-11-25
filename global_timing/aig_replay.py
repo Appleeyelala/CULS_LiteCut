@@ -263,17 +263,76 @@ def apply_and_write_aig(aig, ops: list[ReplacementOp], out_path: Path):
 
 @dataclass
 class DelayProfile:
-    """Continuous fanout-aware arrival/required/depth profile duck-typing `Levels`."""
+    """Continuous fanout-aware arrival/required/depth profile duck-typing `Levels`.
+
+    Optional fields (all `None`/0 for the legacy linear model):
+    - `neg_extra[pi]`: extra arrival seen through a *complemented* edge of a PI.  Under the
+      ASAP7 `map; stime` contract PIs are ideal drivers (zero delay/slew for any load), and
+      only the inverter the mapper inserts for the complemented phase pays a load delay.
+    - `out_slew[v]`: slew proxy of node `v`'s output in fanout units (`max(0, fo - 1)`).
+    - `neg_slew[pi]`: slew proxy of a PI's inverter output (`max(0, neg_fo - 1)`).
+    - `slew_arg[v]`: index (0/1) of the fanin edge providing the max input slew of AND `v`.
+    """
 
     level: list[float]
     required: list[float | None]
     depth: float
     gate_delay: list[float]
     fanouts: Counter[int]
+    neg_extra: list[float] | None = None
+    out_slew: list[float] | None = None
+    neg_slew: list[float] | None = None
+    slew_in: list[float] | None = None
+    slew_arg: list[int] | None = None
+    required_neg: list[float | None] | None = None
+    neg_fanouts: Counter[int] | None = None
+    fanout_alpha: float = 0.0
+    pi_fanout_alpha: float = 0.0
+    slew_beta: float = 0.0
+    pi_phase_aware: bool = False
 
     def slack(self, node: int) -> float | None:
         req = self.required[node]
         return None if req is None else req - self.level[node]
+
+    def neg_slack(self, pi: int) -> float | None:
+        if self.required_neg is None or self.neg_extra is None:
+            return self.slack(pi)
+        req = self.required_neg[pi]
+        return None if req is None else req - (self.level[pi] + self.neg_extra[pi])
+
+
+def edge_arrival(levels, lit: int) -> float:
+    """Arrival seen by a consumer through literal `lit` (adds the PI inverter delay if modelled)."""
+    node = lit >> 1
+    arr = levels.level[node]
+    neg_extra = getattr(levels, "neg_extra", None)
+    if neg_extra is not None and (lit & 1):
+        arr += neg_extra[node]
+    return arr
+
+
+def edge_slew(delay: DelayProfile, lit: int, pi_count: int) -> float:
+    """Slew proxy (fanout units) seen by a consumer through literal `lit`; PIs are ideal drivers."""
+    node = lit >> 1
+    if node <= pi_count:
+        if delay.neg_slew is not None and (lit & 1):
+            return delay.neg_slew[node]
+        return 0.0
+    return delay.out_slew[node] if delay.out_slew is not None else 0.0
+
+
+def negative_references(aig) -> Counter[int]:
+    """Count complemented uses (AND fanins and PO literals) of every node."""
+    neg: Counter[int] = Counter()
+    for node in range(aig.pi_count + 1, aig.maximum_variable + 1):
+        for lit in aig.fanin_literals[node]:
+            if lit & 1:
+                neg[lit >> 1] += 1
+    for lit in aig.po_literals:
+        if lit & 1:
+            neg[lit >> 1] += 1
+    return neg
 
 
 def propagate_fanout_delays(
@@ -281,46 +340,154 @@ def propagate_fanout_delays(
     fanouts: Counter[int] | None = None,
     fanout_alpha: float = 0.0,
     pi_fanout_alpha: float = 0.0,
+    slew_beta: float = 0.0,
+    pi_phase_aware: bool = False,
+    neg_fanouts: Counter[int] | None = None,
 ) -> DelayProfile:
-    """Propagate arrival/required delays with linear fanout load `(1 + alpha * max(0, fo - 1))`.
+    """Propagate arrival/required delays with fanout load.
 
-    With `fanout_alpha=0.0` and `pi_fanout_alpha=0.0`, arrivals and required bounds
-    match `propagate_levels(aig)` numerically.
+    AND gate delay: `1 + alpha * L(v) * (1 + beta * S_in(v))` with `L(v) = max(0, fo(v) - 1)` and
+    `S_in(v)` the max slew proxy over its two fanin edges (ASAP7 stage delay is ~bilinear in output
+    load and input slew; slew grows with the driver's load).  PI model:
+    - legacy (`pi_phase_aware=False`): PI arrival `pi_alpha * L(pi)` on every edge;
+    - phase-aware: positive edges are ideal (0), complemented edges pay `pi_alpha * L_neg(pi)`.
+
+    With `fanout_alpha=pi_fanout_alpha=slew_beta=0` and `pi_phase_aware=False`, arrivals and required
+    bounds match `propagate_levels(aig)` numerically; with `slew_beta=0` and `pi_phase_aware=False`
+    the result equals the legacy linear model exactly.
     """
     if fanouts is None:
         fanouts = references(aig)
     n_vars = aig.maximum_variable + 1
+    pi_count = aig.pi_count
     gate_delay = [0.0] * n_vars
-    if pi_fanout_alpha > 0.0:
-        for node in range(1, aig.pi_count + 1):
+    neg_extra: list[float] | None = None
+    neg_slew: list[float] | None = None
+    if pi_phase_aware:
+        if neg_fanouts is None:
+            neg_fanouts = negative_references(aig)
+        neg_extra = [0.0] * n_vars
+        neg_slew = [0.0] * n_vars
+        for node in range(1, pi_count + 1):
+            l_neg = max(0, neg_fanouts[node] - 1)
+            neg_extra[node] = pi_fanout_alpha * l_neg
+            neg_slew[node] = float(l_neg)
+    elif pi_fanout_alpha > 0.0:
+        for node in range(1, pi_count + 1):
             gate_delay[node] = pi_fanout_alpha * max(0, fanouts[node] - 1)
     level = list(gate_delay)
-    for node in range(aig.pi_count + 1, n_vars):
-        d = 1.0 + fanout_alpha * max(0, fanouts[node] - 1)
-        gate_delay[node] = d
+    use_slew = slew_beta > 0.0
+    out_slew = [0.0] * n_vars
+    slew_in = [0.0] * n_vars if use_slew else None
+    slew_arg = [-1] * n_vars if use_slew else None
+
+    def _slew(lit: int) -> float:
+        n = lit >> 1
+        if n <= pi_count:
+            return neg_slew[n] if (neg_slew is not None and (lit & 1)) else 0.0
+        return out_slew[n]
+
+    for node in range(pi_count + 1, n_vars):
+        load = max(0, fanouts[node] - 1)
         l0, l1 = aig.fanin_literals[node]
+        if use_slew:
+            s0, s1 = _slew(l0), _slew(l1)
+            s_in, arg = (s0, 0) if s0 >= s1 else (s1, 1)
+            slew_in[node] = s_in
+            slew_arg[node] = arg
+            d = 1.0 + fanout_alpha * load * (1.0 + slew_beta * s_in)
+        else:
+            d = 1.0 + fanout_alpha * load
+        out_slew[node] = float(load)
+        gate_delay[node] = d
         a0, a1 = level[l0 >> 1], level[l1 >> 1]
+        if neg_extra is not None:
+            if l0 & 1:
+                a0 += neg_extra[l0 >> 1]
+            if l1 & 1:
+                a1 += neg_extra[l1 >> 1]
         level[node] = d + (a0 if a0 >= a1 else a1)
 
-    outputs = [lit >> 1 for lit in aig.po_literals]
-    depth = max((level[node] for node in outputs), default=0.0)
+    def _extra(lit: int) -> float:
+        return neg_extra[lit >> 1] if (neg_extra is not None and (lit & 1)) else 0.0
+
+    depth = max((level[lit >> 1] + _extra(lit) for lit in aig.po_literals), default=0.0)
     required: list[float | None] = [None] * n_vars
-    for node in outputs:
-        required[node] = depth
-    for node in range(aig.maximum_variable, aig.pi_count, -1):
+    required_neg: list[float | None] | None = [None] * n_vars if neg_extra is not None else None
+
+    def _bound_pred(lit: int, bound: float) -> None:
+        pred = lit >> 1
+        if required_neg is not None and (lit & 1) and pred <= pi_count:
+            prev_n = required_neg[pred]
+            if prev_n is None or bound < prev_n:
+                required_neg[pred] = bound
+        b = bound - _extra(lit)
+        prev = required[pred]
+        if prev is None or b < prev:
+            required[pred] = b
+
+    for lit in aig.po_literals:
+        _bound_pred(lit, depth)
+    for node in range(aig.maximum_variable, pi_count, -1):
         req_node = required[node]
         if req_node is None:
             continue
         bound = req_node - gate_delay[node]
         for lit in aig.fanin_literals[node]:
-            pred = lit >> 1
-            prev = required[pred]
-            if prev is None or bound < prev:
-                required[pred] = bound
-    return DelayProfile(level, required, depth, gate_delay, fanouts)
+            _bound_pred(lit, bound)
+    return DelayProfile(
+        level, required, depth, gate_delay, fanouts,
+        neg_extra=neg_extra, out_slew=out_slew, neg_slew=neg_slew, slew_in=slew_in, slew_arg=slew_arg,
+        required_neg=required_neg, neg_fanouts=neg_fanouts,
+        fanout_alpha=fanout_alpha, pi_fanout_alpha=pi_fanout_alpha, slew_beta=slew_beta,
+        pi_phase_aware=pi_phase_aware,
+    )
 
 
-def original_cone_timing_and_refs(
+def slew_coupling_coefficients(aig, delay: DelayProfile, sens: list[float]) -> tuple[list[float], list[float]]:
+    """Per-node cost of one extra unit of output slew through the slew-coupled gate delays.
+
+    For every AND `g` whose max input slew comes from edge `e`, increasing the slew on `e` by one
+    fanout unit raises `gate_delay[g]` by `alpha * L(g) * beta`; weighted by `sens[g]`.
+    Returns `(coef, coef_neg)` where `coef_neg[pi]` collects the PI inverter (complemented) edges.
+    """
+    n_vars = aig.maximum_variable + 1
+    coef = [0.0] * n_vars
+    coef_neg = [0.0] * n_vars
+    if delay.slew_beta <= 0.0 or delay.slew_arg is None:
+        return coef, coef_neg
+    ab = delay.fanout_alpha * delay.slew_beta
+    for g in range(aig.pi_count + 1, n_vars):
+        s = sens[g]
+        if s == 0.0:
+            continue
+        load = max(0, delay.fanouts[g] - 1)
+        if load == 0:
+            continue
+        lit = aig.fanin_literals[g][delay.slew_arg[g]]
+        src = lit >> 1
+        c = s * ab * load
+        if src <= aig.pi_count:
+            if delay.neg_slew is not None and (lit & 1):
+                coef_neg[src] += c
+        else:
+            coef[src] += c
+    return coef, coef_neg
+
+
+@dataclass
+class ConeContext:
+    """Per-cut original-cone timing context shared by the 4B selectors."""
+
+    interior: frozenset[int]
+    leaf_delays: tuple[float | None, ...]
+    orig_refs: tuple[int, ...]
+    orig_refs_neg: tuple[int, ...]
+    sens_other: tuple[float, ...]
+    local_sens: dict[int, float]
+
+
+def original_cone_context(
     aig,
     root: int,
     leaves: list[int],
@@ -328,8 +495,12 @@ def original_cone_timing_and_refs(
     rem_all: frozenset[int],
     sens: list[float],
     tau: float = 1.0,
-) -> tuple[tuple[float | None, ...], tuple[int, ...], tuple[float, ...]]:
-    """Return `(leaf_path_delays, orig_leaf_refs_in_mffc, external_leaf_sensitivities)`."""
+) -> ConeContext:
+    """Cone timing, MFFC leaf references (total and complemented) and external sensitivities.
+
+    The local back-split of `sens[root]` uses exactly the same edge arrivals and temperature as
+    `global_po_sensitivity`, so `sens_other` strips the via-root share without double counting.
+    """
     boundary = set(leaves)
     lowest = min(leaves)
     interior: set[int] = set()
@@ -342,23 +513,29 @@ def original_cone_timing_and_refs(
         for lit in aig.fanin_literals[node]:
             pending.append(lit >> 1)
 
+    neg_extra = delay.neg_extra
     distances: dict[int, float] = {root: delay.gate_delay[root]}
     for node in sorted(interior, reverse=True):
         d_base = distances.pop(node)
         for lit in aig.fanin_literals[node]:
             pred = lit >> 1
             d_step = d_base + (delay.gate_delay[pred] if pred in interior else 0.0)
+            if neg_extra is not None and (lit & 1):
+                d_step += neg_extra[pred]
             if d_step > distances.get(pred, -1.0):
                 distances[pred] = d_step
     leaf_delays = tuple(distances.get(lf) for lf in leaves)
 
     leaf_idx = {lf: idx for idx, lf in enumerate(leaves)}
     orig_refs = [0] * len(leaves)
+    orig_refs_neg = [0] * len(leaves)
     for node in rem_all:
         for lit in aig.fanin_literals[node]:
             idx = leaf_idx.get(lit >> 1)
             if idx is not None:
                 orig_refs[idx] += 1
+                if lit & 1:
+                    orig_refs_neg[idx] += 1
 
     local_sens: dict[int, float] = {root: sens[root]}
     for node in sorted(interior, reverse=True):
@@ -367,7 +544,7 @@ def original_cone_timing_and_refs(
             continue
         l0, l1 = aig.fanin_literals[node]
         n0, n1 = l0 >> 1, l1 >> 1
-        lv0, lv1 = delay.level[n0], delay.level[n1]
+        lv0, lv1 = edge_arrival(delay, l0), edge_arrival(delay, l1)
         m = lv0 if lv0 >= lv1 else lv1
         w0 = math.exp((lv0 - m) / tau)
         w1 = math.exp((lv1 - m) / tau)
@@ -376,7 +553,21 @@ def original_cone_timing_and_refs(
         local_sens[n1] = local_sens.get(n1, 0.0) + su * (w1 / denom)
 
     sens_other = tuple(max(0.0, sens[lf] - local_sens.get(lf, 0.0)) for lf in leaves)
-    return leaf_delays, tuple(orig_refs), sens_other
+    return ConeContext(frozenset(interior), leaf_delays, tuple(orig_refs), tuple(orig_refs_neg), sens_other, local_sens)
+
+
+def original_cone_timing_and_refs(
+    aig,
+    root: int,
+    leaves: list[int],
+    delay: DelayProfile,
+    rem_all: frozenset[int],
+    sens: list[float],
+    tau: float = 1.0,
+) -> tuple[tuple[float | None, ...], tuple[int, ...], tuple[float, ...]]:
+    """Return `(leaf_path_delays, orig_leaf_refs_in_mffc, external_leaf_sensitivities)`."""
+    ctx = original_cone_context(aig, root, leaves, delay, rem_all, sens, tau)
+    return ctx.leaf_delays, ctx.orig_refs, ctx.sens_other
 
 
 def compute_adaptive_tau(
@@ -390,7 +581,7 @@ def compute_adaptive_tau(
     """Choose smooth softmax temperature `tau` from top-quartile PO delay spread."""
     if not aig.po_literals:
         return min_tau
-    po_arrs = sorted(float(levels.level[lit >> 1]) for lit in aig.po_literals)
+    po_arrs = sorted(float(edge_arrival(levels, lit)) for lit in aig.po_literals)
     q75 = po_arrs[(3 * (len(po_arrs) - 1)) // 4]
     spread = max(0.0, float(levels.depth) - q75)
     raw = max(min_tau, min(max_tau, spread_coeff * spread)) * scale
@@ -409,7 +600,7 @@ def global_po_sensitivity(aig, levels: Levels | DelayProfile, tau: float = 1.0) 
     phi = 0.0
     for lit in aig.po_literals:
         drv = lit >> 1
-        w = math.exp((levels.level[drv] - depth) / tau)
+        w = math.exp((edge_arrival(levels, lit) - depth) / tau)
         phi += w
         sens[drv] += w
 
@@ -419,7 +610,7 @@ def global_po_sensitivity(aig, levels: Levels | DelayProfile, tau: float = 1.0) 
             continue
         l0, l1 = aig.fanin_literals[node]
         n0, n1 = l0 >> 1, l1 >> 1
-        lv0, lv1 = levels.level[n0], levels.level[n1]
+        lv0, lv1 = edge_arrival(levels, l0), edge_arrival(levels, l1)
         m = lv0 if lv0 >= lv1 else lv1
         w0 = math.exp((lv0 - m) / tau)
         w1 = math.exp((lv1 - m) / tau)

@@ -9,13 +9,16 @@ from global_timing.aig_replay import (
     bounded_mffc_nodes,
     candidate_output_complement,
     compute_adaptive_tau,
+    edge_arrival,
     global_po_sensitivity,
     original_cone_timing_and_refs,
     original_cone_truth,
     propagate_fanout_delays,
     select_nonconflicting,
+    slew_coupling_coefficients,
     write_binary_aig,
 )
+from global_timing.select4b import Select4BConfig, select_4b_v4
 from global_timing.level_weights import propagate_levels
 from global_timing.structure import aig_structure_digest, parse_aig, references
 from test_structure import fixture
@@ -192,3 +195,68 @@ class AigReplayTests(unittest.TestCase):
         dp_wide = propagate_fanout_delays(aig_wide, fanout_alpha=0.0)
         self.assertAlmostEqual(compute_adaptive_tau(aig_wide, dp_wide), 4.0, places=9)
         self.assertAlmostEqual(compute_adaptive_tau(aig_wide, dp_wide, scale=2.0), 6.0, places=9)
+
+    def test_v4_pi_phase_aware_and_slew_coupling(self):
+        # x1 (lit 2/3) used positively twice and negatively 3 times (neg_fo=3 -> l_neg=2)
+        # node 3 = (~x1 & x2), node 4 = (~x1 & x2) [diff phase: x1 & x2], node 5 = (node3 & ~x1), node 6 = (node5 & x2)
+        aig = fixture(2, [(3, 4), (2, 4), (6, 3), (10, 4)], [3, 8, 12])
+        dp = propagate_fanout_delays(aig, fanout_alpha=0.2, pi_fanout_alpha=0.5, slew_beta=0.1, pi_phase_aware=True)
+        # Positive x1 has 0 arrival, complemented ~x1 has 0.5 * (3 - 1) = 1.0
+        self.assertAlmostEqual(edge_arrival(dp, 2), 0.0, places=9)
+        self.assertAlmostEqual(edge_arrival(dp, 3), 1.0, places=9)
+        # Node 3 = (~x1 & x2) has load=0 (fo=1), arrival = 1.0 + 1.0 = 2.0
+        self.assertAlmostEqual(dp.level[3], 2.0, places=9)
+        # Adaptive tau uses edge_arrival for complemented PO lit=3 without error
+        tau = compute_adaptive_tau(aig, dp)
+        self.assertGreaterEqual(tau, 1.0)
+        # Slew coupling coefficients non-negative and zero on unused/load-0 gates
+        _, sens = global_po_sensitivity(aig, dp, tau=1.0)
+        coef, coef_neg = slew_coupling_coefficients(aig, dp, sens)
+        self.assertEqual(len(coef), aig.maximum_variable + 1)
+        self.assertEqual(len(coef_neg), aig.maximum_variable + 1)
+        self.assertTrue(all(x >= 0.0 for x in coef + coef_neg))
+
+    def test_select_4b_v4_legacy_equivalence_and_budget_guard(self):
+        import json
+        from scripts.step4_fanout_pilot import select_4b_fanout
+
+        # Build simple AIG: x1..x4; node 5=(x1&x2), node 6=(node5&x3), node 7=(node6&x4), PO=[node7]
+        aig = fixture(4, [(2, 4), (10, 6), (12, 8)], [14])
+        dp = propagate_fanout_delays(aig, fanout_alpha=0.2)
+        _, sens = global_po_sensitivity(aig, dp, tau=1.0)
+        # abc_dump IDs: PIs 1..4, PO=5 (offset=1), ANDs 6,7,8 -> root=8 (aig 7) with leaves [1,2,3,4]
+        rec = {
+            "node": 8,
+            "leaves": [{"id": i, "compl": 0} for i in (1, 2, 3, 4)],
+            "n_nodes_saved": 3,
+            "candidates": [{
+                "subgraph": 1,
+                "self": False,
+                "n_leaves": 4,
+                "n_size": 7,
+                "nodes_added": 3,
+                "root_node": 6,
+                "root_compl": 0,
+                "leaf_depths": [2, 2, 2, 2],
+                "edges": [[0, 0, 1, 0], [2, 0, 3, 0], [4, 0, 5, 0]],
+            }],
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            cuts = Path(tmp) / "cuts.jsonl"
+            cuts.write_text(json.dumps(rec) + "\n")
+            ops_old = select_4b_fanout(aig, dp, sens, cuts, lam_area=0.05, fanout_alpha=0.2, tau=1.0)
+            cfg_legacy = Select4BConfig(lam_area=0.05, fanout_alpha=0.2)
+            ops_new = select_4b_v4(aig, dp, sens, cuts, tau=1.0, cfg=cfg_legacy)
+            self.assertEqual([(o.root, o.cand["subgraph"], o.flip) for o in ops_old],
+                             [(o.root, o.cand["subgraph"], o.flip) for o in ops_new])
+            # Also verify full v4 switches run cleanly and produce equivalent AIG
+            dp_v4 = propagate_fanout_delays(aig, fanout_alpha=0.2, pi_fanout_alpha=0.1, slew_beta=0.005, pi_phase_aware=True)
+            _, sens_v4 = global_po_sensitivity(aig, dp_v4, tau=1.0)
+            cfg_v4 = Select4BConfig(
+                lam_area=0.05, fanout_alpha=0.2, pi_fanout_alpha=0.1,
+                strash_aware=True, per_root_k=2, fanout_budget=True,
+            )
+            ops_v4 = select_4b_v4(aig, dp_v4, sens_v4, cuts, tau=1.0, cfg=cfg_v4)
+            self.assertEqual(len(ops_v4), 1)
+            new_aig = apply_and_write_aig(aig, ops_v4, Path(tmp) / "v4.aig")
+            self.assertEqual(eval_aig_all_inputs(new_aig), eval_aig_all_inputs(aig))

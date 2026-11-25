@@ -9,7 +9,9 @@ from global_timing.aig_replay import (
     bounded_mffc_nodes,
     candidate_output_complement,
     global_po_sensitivity,
+    original_cone_timing_and_refs,
     original_cone_truth,
+    propagate_fanout_delays,
     select_nonconflicting,
     write_binary_aig,
 )
@@ -121,3 +123,53 @@ class AigReplayTests(unittest.TestCase):
         # node 5 has level 1, x3 has level 0 -> split exp(0)/(exp(0)+exp(-1))
         w5 = 1.0 / (1.0 + math.exp(-1.0))
         self.assertAlmostEqual(sens[5], 2.0 * w5, places=9)
+
+    def test_propagate_fanout_delays_zero_alpha_matches_levels(self):
+        aig = fixture(4, [(2, 4), (10, 6), (6, 8), (12, 14)], [12, 16])
+        lv = propagate_levels(aig)
+        dp = propagate_fanout_delays(aig, fanout_alpha=0.0)
+        self.assertEqual(dp.depth, float(lv.depth))
+        self.assertEqual(dp.level, [float(x) for x in lv.level])
+        self.assertEqual(dp.required, [None if r is None else float(r) for r in lv.required])
+
+    def test_propagate_fanout_delays_shifts_sensitivity_to_high_fanout(self):
+        # Node 5 = (x1 & x2) fans out to nodes 6, 7, 8 (fanout=3).
+        # Node 9 = (x3 & x4), Node 10 = (node9 & x1), Node 11 = (node10 & x2) (fanout=1, structural depth 3).
+        # POs: [node6 (struct depth 2, fo-loaded), node11 (struct depth 3, fo=1)].
+        aig = fixture(
+            4,
+            [(2, 4), (10, 6), (10, 8), (10, 2), (6, 8), (18, 2), (20, 4)],
+            [12, 14, 16, 22],
+        )
+        # Check unit timing first: PO node 11 has depth 3 > node 6 depth 2 -> sens[11] > sens[6]
+        lv = propagate_levels(aig)
+        _, sens_unit = global_po_sensitivity(aig, lv, tau=1.0)
+        self.assertGreater(sens_unit[11], sens_unit[6])
+
+        # With fanout_alpha=1.0: node 5 has fanout=3 -> gate_delay[5] = 3.0 -> node 6 arrival = 4.0 > node 11 = 3.0!
+        dp = propagate_fanout_delays(aig, fanout_alpha=1.0)
+        self.assertEqual(dp.gate_delay[5], 3.0)
+        self.assertEqual(dp.depth, 4.0)
+        _, sens_fo = global_po_sensitivity(aig, dp, tau=1.0)
+        self.assertGreater(sens_fo[6], sens_fo[11])
+        expected_w = 1.0 / (1.0 + math.exp(-3.0))
+        self.assertAlmostEqual(sens_fo[5], 3.0 * expected_w, places=9)
+
+    def test_original_cone_timing_and_refs_splits_external_sensitivity(self):
+        # x1..x4; node 5=(x1&x2) [fanout=2: node 6 & PO], node 6=(node5&x3), node 7=(node6&x4).
+        # Cut at root=7 with leaves=[5, 3, 4, 1] (node 5 is both a cut leaf and directly a PO!).
+        aig = fixture(4, [(2, 4), (10, 6), (12, 8)], [10, 14])
+        dp = propagate_fanout_delays(aig, fanout_alpha=0.5)
+        _, sens = global_po_sensitivity(aig, dp, tau=1.0)
+        rem_all, _ = bounded_mffc_nodes(7, [5, 3, 4, 1], aig, dp.fanouts)
+        leaf_delays, orig_refs, sens_other = original_cone_timing_and_refs(
+            aig, 7, [5, 3, 4, 1], dp, rem_all, sens, tau=1.0
+        )
+        self.assertEqual(rem_all, frozenset({6, 7}))
+        self.assertEqual(orig_refs, (1, 1, 1, 0))
+        # Path delay from leaf 5 through nodes 6 (gd=1.0) and 7 (gd=1.0) is 2.0.
+        self.assertAlmostEqual(leaf_delays[0], 2.0, places=9)
+        # PO directly on node 5 gives external sensitivity exp((level[5] - depth) / 1.0) outside rem_all.
+        expected_ext_5 = math.exp((dp.level[5] - dp.depth) / 1.0)
+        self.assertAlmostEqual(sens_other[0], expected_ext_5, places=9)
+        self.assertAlmostEqual(sens_other[1], 0.0, places=9)

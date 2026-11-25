@@ -3,12 +3,13 @@ from __future__ import annotations
 
 import math
 import subprocess
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
 
 from .level_weights import Levels, propagate_levels
-from .structure import parse_aig
+from .structure import parse_aig, references
 
 
 def _write_varint(buf: bytearray, value: int) -> None:
@@ -260,7 +261,125 @@ def apply_and_write_aig(aig, ops: list[ReplacementOp], out_path: Path):
     return parse_aig(out_path)
 
 
-def global_po_sensitivity(aig, levels: Levels, tau: float = 1.0) -> tuple[float, list[float]]:
+@dataclass
+class DelayProfile:
+    """Continuous fanout-aware arrival/required/depth profile duck-typing `Levels`."""
+
+    level: list[float]
+    required: list[float | None]
+    depth: float
+    gate_delay: list[float]
+    fanouts: Counter[int]
+
+    def slack(self, node: int) -> float | None:
+        req = self.required[node]
+        return None if req is None else req - self.level[node]
+
+
+def propagate_fanout_delays(
+    aig,
+    fanouts: Counter[int] | None = None,
+    fanout_alpha: float = 0.0,
+    pi_fanout_alpha: float = 0.0,
+) -> DelayProfile:
+    """Propagate arrival/required delays with linear fanout load `(1 + alpha * max(0, fo - 1))`.
+
+    With `fanout_alpha=0.0` and `pi_fanout_alpha=0.0`, arrivals and required bounds
+    match `propagate_levels(aig)` numerically.
+    """
+    if fanouts is None:
+        fanouts = references(aig)
+    n_vars = aig.maximum_variable + 1
+    gate_delay = [0.0] * n_vars
+    if pi_fanout_alpha > 0.0:
+        for node in range(1, aig.pi_count + 1):
+            gate_delay[node] = pi_fanout_alpha * max(0, fanouts[node] - 1)
+    level = list(gate_delay)
+    for node in range(aig.pi_count + 1, n_vars):
+        d = 1.0 + fanout_alpha * max(0, fanouts[node] - 1)
+        gate_delay[node] = d
+        l0, l1 = aig.fanin_literals[node]
+        a0, a1 = level[l0 >> 1], level[l1 >> 1]
+        level[node] = d + (a0 if a0 >= a1 else a1)
+
+    outputs = [lit >> 1 for lit in aig.po_literals]
+    depth = max((level[node] for node in outputs), default=0.0)
+    required: list[float | None] = [None] * n_vars
+    for node in outputs:
+        required[node] = depth
+    for node in range(aig.maximum_variable, aig.pi_count, -1):
+        req_node = required[node]
+        if req_node is None:
+            continue
+        bound = req_node - gate_delay[node]
+        for lit in aig.fanin_literals[node]:
+            pred = lit >> 1
+            prev = required[pred]
+            if prev is None or bound < prev:
+                required[pred] = bound
+    return DelayProfile(level, required, depth, gate_delay, fanouts)
+
+
+def original_cone_timing_and_refs(
+    aig,
+    root: int,
+    leaves: list[int],
+    delay: DelayProfile,
+    rem_all: frozenset[int],
+    sens: list[float],
+    tau: float = 1.0,
+) -> tuple[tuple[float | None, ...], tuple[int, ...], tuple[float, ...]]:
+    """Return `(leaf_path_delays, orig_leaf_refs_in_mffc, external_leaf_sensitivities)`."""
+    boundary = set(leaves)
+    lowest = min(leaves)
+    interior: set[int] = set()
+    pending = [root]
+    while pending:
+        node = pending.pop()
+        if node in boundary or node < lowest or node <= aig.pi_count or node in interior:
+            continue
+        interior.add(node)
+        for lit in aig.fanin_literals[node]:
+            pending.append(lit >> 1)
+
+    distances: dict[int, float] = {root: delay.gate_delay[root]}
+    for node in sorted(interior, reverse=True):
+        d_base = distances.pop(node)
+        for lit in aig.fanin_literals[node]:
+            pred = lit >> 1
+            d_step = d_base + (delay.gate_delay[pred] if pred in interior else 0.0)
+            if d_step > distances.get(pred, -1.0):
+                distances[pred] = d_step
+    leaf_delays = tuple(distances.get(lf) for lf in leaves)
+
+    leaf_idx = {lf: idx for idx, lf in enumerate(leaves)}
+    orig_refs = [0] * len(leaves)
+    for node in rem_all:
+        for lit in aig.fanin_literals[node]:
+            idx = leaf_idx.get(lit >> 1)
+            if idx is not None:
+                orig_refs[idx] += 1
+
+    local_sens: dict[int, float] = {root: sens[root]}
+    for node in sorted(interior, reverse=True):
+        su = local_sens.get(node, 0.0)
+        if su == 0.0:
+            continue
+        l0, l1 = aig.fanin_literals[node]
+        n0, n1 = l0 >> 1, l1 >> 1
+        lv0, lv1 = delay.level[n0], delay.level[n1]
+        m = lv0 if lv0 >= lv1 else lv1
+        w0 = math.exp((lv0 - m) / tau)
+        w1 = math.exp((lv1 - m) / tau)
+        denom = w0 + w1
+        local_sens[n0] = local_sens.get(n0, 0.0) + su * (w0 / denom)
+        local_sens[n1] = local_sens.get(n1, 0.0) + su * (w1 / denom)
+
+    sens_other = tuple(max(0.0, sens[lf] - local_sens.get(lf, 0.0)) for lf in leaves)
+    return leaf_delays, tuple(orig_refs), sens_other
+
+
+def global_po_sensitivity(aig, levels: Levels | DelayProfile, tau: float = 1.0) -> tuple[float, list[float]]:
     """O(|V|) forward/backward pass aggregating all PI->PO paths into per-node global sensitivity.
 
     Global objective: Phi = sum_{po} exp((level[po] - D) / tau).

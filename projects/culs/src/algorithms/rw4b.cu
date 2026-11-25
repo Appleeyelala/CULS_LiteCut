@@ -1075,10 +1075,18 @@ struct AigStats {
     long long excessFo2;
 };
 
-static bool hasMultiInputAndCover(int nPIs, int nObjs, const int * f0, const int * f1) {
+static bool hasMultiInputAndCover(int nPIs, int nPOs, int nObjs, const int * f0, const int * f1, const int * outs) {
+    std::vector<int> fo(nObjs, 0);
+    for (int i = nPIs + 1; i < nObjs; ++i) {
+        fo[f0[i] >> 1]++;
+        fo[f1[i] >> 1]++;
+    }
+    for (int i = 0; i < nPOs; ++i) fo[outs[i] >> 1]++;
     for (int i = nPIs + 1; i < nObjs; ++i) {
         int l0 = f0[i], l1 = f1[i];
-        if (((l0 & 1) == 0 && (l0 >> 1) > nPIs) || ((l1 & 1) == 0 && (l1 >> 1) > nPIs)) {
+        int c0 = l0 >> 1, c1 = l1 >> 1;
+        if (((l0 & 1) == 0 && c0 > nPIs && fo[c0] == 1) ||
+            ((l1 & 1) == 0 && c1 > nPIs && fo[c1] == 1)) {
             return true;
         }
     }
@@ -1377,7 +1385,7 @@ static bool conditionalBalanceV3(AIGMan & aigman, const Rw4BParams & params, con
         aigman.toHost();
         aigman.clearDevice();
     }
-    if (!hasMultiInputAndCover(aigman.nPIs, aigman.nObjs, aigman.pFanin0, aigman.pFanin1)) {
+    if (!hasMultiInputAndCover(aigman.nPIs, aigman.nPOs, aigman.nObjs, aigman.pFanin0, aigman.pFanin1, aigman.pOuts)) {
         return false;
     }
     AigStats s0 = computeV3StatsHost(aigman.nPIs, aigman.nPOs, aigman.nObjs,
@@ -1401,9 +1409,7 @@ static bool conditionalBalanceV3(AIGMan & aigman, const Rw4BParams & params, con
                                      params.fanoutAlpha, params.piFanoutAlpha, params.slewBeta);
     bool accept = (s1.maxFo <= std::max(64, s0.maxFo)) &&
                   (s1.excessFo2 <= std::max(1000LL, s0.excessFo2)) &&
-                  (s1.depth <= s0.depth - 2.0f) &&
-                  (s1.depth <= s0.depth * 0.95f) &&
-                  (s1.depthPhSlew <= s0.depthPhSlew - 1.0f);
+                  (s1.depth <= s0.depth - 1.0f);
     if (!accept) {
         copyHostToAigMan(aigman, aigman.nPIs, aigman.nPOs, bakF0, bakF1, bakOuts);
     }
@@ -1435,9 +1441,7 @@ static void selectBestPreMacroGPU(AIGMan & aigman, const Rw4BParams & params) {
     auto passesV3 = [&](const AigStats & s) {
         return (s.maxFo <= std::max(64, origS.maxFo)) &&
                (s.excessFo2 <= std::max(1000LL, origS.excessFo2)) &&
-               (s.depth <= origS.depth - 2.0f) &&
-               (s.depth <= origS.depth * 0.95f) &&
-               (s.depthPhSlew <= origS.depthPhSlew - 1.0f);
+               (s.depth <= origS.depth - 1.0f);
     };
     auto betterThanBest = [&](const AigStats & s) {
         if (s.depth < bestS.depth - 1e-4f) return true;
@@ -1461,7 +1465,7 @@ static void selectBestPreMacroGPU(AIGMan & aigman, const Rw4BParams & params) {
     aigman.verbose = 0;
 
     AigStats balS = origS, brS = origS, rfS = origS;
-    bool canBal = hasMultiInputAndCover(nPIs, aigman.nObjs, aigman.pFanin0, aigman.pFanin1);
+    bool canBal = hasMultiInputAndCover(nPIs, nPOs, aigman.nObjs, aigman.pFanin0, aigman.pFanin1, aigman.pOuts);
 
     // 1. bal
     if (canBal) {

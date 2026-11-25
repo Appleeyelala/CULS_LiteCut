@@ -36,6 +36,8 @@ def run_adaptive_arm(
     lam: float = 0.05,
     fanout_reg: float = 0.0005,
     verify_each_round: bool = True,
+    pi_fanout_alpha: float = 0.0,
+    allow_slack_area: bool = False,
 ) -> dict:
     t0 = time.perf_counter()
     work_dir.mkdir(parents=True, exist_ok=True)
@@ -54,7 +56,9 @@ def run_adaptive_arm(
                 ABC_DUMP, cur_aig_path, work_dir / f"round{rnd}_dump", work_dir / f"round{rnd}_dump.log"
             )
         fanouts = references(cur_aig)
-        delay = propagate_fanout_delays(cur_aig, fanouts=fanouts, fanout_alpha=fanout_alpha)
+        delay = propagate_fanout_delays(
+            cur_aig, fanouts=fanouts, fanout_alpha=fanout_alpha, pi_fanout_alpha=pi_fanout_alpha
+        )
         tau = compute_adaptive_tau(cur_aig, delay, min_tau=1.0, max_tau=max_tau, spread_coeff=0.2, scale=scale)
         _, sens = global_po_sensitivity(cur_aig, delay, tau=tau)
         ops = select_4b_fanout(
@@ -66,6 +70,8 @@ def run_adaptive_arm(
             fanout_alpha=fanout_alpha,
             fanout_reg=fanout_reg,
             tau=tau,
+            pi_fanout_alpha=pi_fanout_alpha,
+            allow_slack_area=allow_slack_area,
         )
         if not ops:
             cur_lv = propagate_levels(cur_aig)

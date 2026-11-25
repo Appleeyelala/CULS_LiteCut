@@ -89,6 +89,8 @@ def select_4b_fanout(
     fanout_reg: float = 0.0005,
     fanout_pivot: int = 6,
     tau: float = 1.0,
+    pi_fanout_alpha: float = 0.0,
+    allow_slack_area: bool = False,
 ) -> list[ReplacementOp]:
     """Fanout-aware 4B: PI->PO global sensitivity + leaf fanout reaction + wire-dump guard."""
     from global_timing.aig_replay import select_nonconflicting
@@ -147,11 +149,12 @@ def select_4b_fanout(
                 fanout_reg_cost = 0.0
                 for i, lf in enumerate(leaves):
                     dfo = delta_fo[i]
-                    if dfo == 0 or lf <= aig.pi_count:
+                    alpha_lf = fanout_alpha if lf > aig.pi_count else pi_fanout_alpha
+                    if dfo == 0 or alpha_lf <= 0.0:
                         continue
                     old_fo = delay.fanouts[lf]
                     new_fo = max(0, old_fo + dfo)
-                    dd = fanout_alpha * (max(0, new_fo - 1) - max(0, old_fo - 1))
+                    dd = alpha_lf * (max(0, new_fo - 1) - max(0, old_fo - 1))
                     leaf_delta_delay[i] = dd
                     fanout_side_cost += sens_other[i] * dd
                     if fanout_reg > 0.0:
@@ -168,7 +171,16 @@ def select_4b_fanout(
                 da = c["nodes_added"] - saved
                 delta_j = j_orig - j_cand
                 eff_delta = s_root * delta_j - fanout_side_cost - fanout_reg_cost
-                if da <= 0:
+                if allow_slack_area:
+                    if da < 0:
+                        score = eff_delta + lam_area * (-da)
+                    elif da == 0:
+                        if eff_delta <= 1e-9:
+                            continue
+                        score = eff_delta
+                    else:
+                        score = eff_delta - lam_area * da
+                elif da <= 0:
                     if delta_j < -1e-9 or eff_delta < -1e-9:
                         continue
                     score = eff_delta + 1e-5 * (-da) + 1e-8

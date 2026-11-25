@@ -57,7 +57,7 @@ def main() -> int:
 
     prev905 = json.loads(PREV_905_SUMMARY.read_text())
     crash_list = [f["relative_path"] for f in prev905["failures"]]
-    base_map = {c["relative_path"]: c["mapping"] for c in json.loads(STEP4_FULL905_SUMMARY.read_text())["circuits"]}
+    base_map = {c["relative_path"]: c.get("mapping", {}) for c in json.loads(STEP4_FULL905_SUMMARY.read_text())["circuits"]}
 
     # 1. Test all 28 previously-crashing circuits
     print(f"=== 1. Testing {len(crash_list)} previously-crashing circuits ===", flush=True)

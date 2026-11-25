@@ -1070,9 +1070,20 @@ static void loadLibrary(rw::Library & lib) {
 
 struct AigStats {
     float depth;
+    float depthPhSlew;
     int maxFo;
     long long excessFo2;
 };
+
+static bool hasMultiInputAndCover(int nPIs, int nObjs, const int * f0, const int * f1) {
+    for (int i = nPIs + 1; i < nObjs; ++i) {
+        int l0 = f0[i], l1 = f1[i];
+        if (((l0 & 1) == 0 && (l0 >> 1) > nPIs) || ((l1 & 1) == 0 && (l1 >> 1) > nPIs)) {
+            return true;
+        }
+    }
+    return false;
+}
 
 // Reorder AIG into contiguous unit-level buckets: 0=const, 1..nPIs=PIs, nPIs+1..nObjs-1 sorted by unit level
 static void reorderByLevel(int nPIs, int nPOs, int nObjs,
@@ -1099,6 +1110,7 @@ static void reorderByLevel(int nPIs, int nPOs, int nObjs,
         int nid = old2new[i];
         int l0 = (old2new[f0[i] >> 1] << 1) | (f0[i] & 1);
         int l1 = (old2new[f1[i] >> 1] << 1) | (f1[i] & 1);
+        if (l0 > l1) std::swap(l0, l1);
         nf0[nid] = l0;
         nf1[nid] = l1;
     }
@@ -1109,15 +1121,67 @@ static void reorderByLevel(int nPIs, int nPOs, int nObjs,
     f1.swap(nf1);
 }
 
+// Reorder reachable AND nodes in DFS post-order (preserves ABC map cut locality & guarantees l0 <= l1)
+static void reorderDfsPostOrder(int nPIs, int nPOs,
+                                std::vector<int> & f0, std::vector<int> & f1, std::vector<int> & outs) {
+    int nObjs = static_cast<int>(f0.size());
+    if (nObjs <= nPIs + 1) return;
+    std::vector<uint8_t> state(nObjs, 0); // 0=unvisited, 1=visiting, 2=done
+    std::vector<int> old2new(nObjs, 0);
+    for (int i = 0; i <= nPIs; ++i) { state[i] = 2; old2new[i] = i; }
+
+    std::vector<int> nf0(nPIs + 1, 0), nf1(nPIs + 1, 0);
+    nf0.reserve(nObjs);
+    nf1.reserve(nObjs);
+    std::vector<int> stk;
+    stk.reserve(nObjs);
+
+    for (int i = 0; i < nPOs; ++i) {
+        int root = outs[i] >> 1;
+        if (root <= nPIs || state[root] == 2) continue;
+        stk.push_back(root);
+        while (!stk.empty()) {
+            int u = stk.back();
+            if (state[u] == 2) { stk.pop_back(); continue; }
+            if (state[u] == 0) {
+                state[u] = 1;
+                int s1 = f1[u] >> 1, s0 = f0[u] >> 1;
+                if (s1 > nPIs && state[s1] == 0) stk.push_back(s1);
+                if (s0 > nPIs && state[s0] == 0) stk.push_back(s0);
+            } else {
+                stk.pop_back();
+                state[u] = 2;
+                int nid = static_cast<int>(nf0.size());
+                old2new[u] = nid;
+                int l0 = (old2new[f0[u] >> 1] << 1) | (f0[u] & 1);
+                int l1 = (old2new[f1[u] >> 1] << 1) | (f1[u] & 1);
+                if (l0 > l1) std::swap(l0, l1);
+                nf0.push_back(l0);
+                nf1.push_back(l1);
+            }
+        }
+    }
+    for (int i = 0; i < nPOs; ++i) {
+        outs[i] = (old2new[outs[i] >> 1] << 1) | (outs[i] & 1);
+    }
+    f0.swap(nf0);
+    f1.swap(nf1);
+}
+
 static AigStats computeV3StatsHost(int nPIs, int nPOs, int nObjs,
                                    const int * f0, const int * f1, const int * outs,
-                                   float alpha = 0.20f, float piAlpha = 0.10f) {
-    std::vector<int> fo(nObjs, 0);
+                                   float alpha = 0.20f, float piAlpha = 0.10f, float slewBeta = 0.005f) {
+    std::vector<int> fo(nObjs, 0), nfo(nObjs, 0);
     for (int i = nPIs + 1; i < nObjs; ++i) {
-        fo[f0[i] >> 1]++;
-        fo[f1[i] >> 1]++;
+        fo[f0[i] >> 1]++; fo[f1[i] >> 1]++;
+        if (f0[i] & 1) nfo[f0[i] >> 1]++;
+        if (f1[i] & 1) nfo[f1[i] >> 1]++;
     }
-    for (int i = 0; i < nPOs; ++i) fo[outs[i] >> 1]++;
+    for (int i = 0; i < nPOs; ++i) {
+        fo[outs[i] >> 1]++;
+        if (outs[i] & 1) nfo[outs[i] >> 1]++;
+    }
+    // 1. Non-phase fanout depth (v3)
     std::vector<float> arr(nObjs, 0.0f);
     for (int i = 1; i <= nPIs; ++i) arr[i] = piAlpha * (fo[i] > 1 ? float(fo[i] - 1) : 0.0f);
     for (int i = nPIs + 1; i < nObjs; ++i) {
@@ -1126,6 +1190,33 @@ static AigStats computeV3StatsHost(int nPIs, int nPOs, int nObjs,
     }
     float depth = 0.0f;
     for (int i = 0; i < nPOs; ++i) depth = std::max(depth, arr[outs[i] >> 1]);
+
+    // 2. Phase-aware + slew depth (v4_slew)
+    std::vector<float> arrP(nObjs, 0.0f), negEx(nPIs + 1, 0.0f), outSl(nObjs, 0.0f), negSl(nPIs + 1, 0.0f);
+    for (int i = 1; i <= nPIs; ++i) {
+        float ln = nfo[i] > 1 ? float(nfo[i] - 1) : 0.0f;
+        negEx[i] = piAlpha * ln;
+        negSl[i] = ln;
+    }
+    auto eArrP = [&](int l) {
+        int u = l >> 1;
+        return arrP[u] + ((u <= nPIs && (l & 1)) ? negEx[u] : 0.0f);
+    };
+    auto eSlP = [&](int l) {
+        int u = l >> 1;
+        if (u <= nPIs) return (l & 1) ? negSl[u] : 0.0f;
+        return outSl[u];
+    };
+    for (int i = nPIs + 1; i < nObjs; ++i) {
+        float ld = fo[i] > 1 ? float(fo[i] - 1) : 0.0f;
+        float sIn = std::max(eSlP(f0[i]), eSlP(f1[i]));
+        float gd = 1.0f + alpha * ld * (1.0f + slewBeta * sIn);
+        outSl[i] = ld;
+        arrP[i] = gd + std::max(eArrP(f0[i]), eArrP(f1[i]));
+    }
+    float depthPhSlew = 0.0f;
+    for (int i = 0; i < nPOs; ++i) depthPhSlew = std::max(depthPhSlew, eArrP(outs[i]));
+
     int maxFo = 0;
     long long ex2 = 0;
     for (int i = 1; i < nObjs; ++i) {
@@ -1135,7 +1226,7 @@ static AigStats computeV3StatsHost(int nPIs, int nPOs, int nObjs,
             ex2 += h * h;
         }
     }
-    return {depth, maxFo, ex2};
+    return {depth, depthPhSlew, maxFo, ex2};
 }
 
 static uint16_t computeConeTruth(int root, const int leaves[4], int nPIs,
@@ -1259,6 +1350,11 @@ static void copyHostToAigMan(AIGMan & aigman, int nPIs, int nPOs,
     aigman.allocHost();
     std::memcpy(aigman.pFanin0, f0.data(), aigman.nObjs * sizeof(int));
     std::memcpy(aigman.pFanin1, f1.data(), aigman.nObjs * sizeof(int));
+    for (int i = nPIs + 1; i < aigman.nObjs; ++i) {
+        if (aigman.pFanin0[i] > aigman.pFanin1[i]) {
+            std::swap(aigman.pFanin0[i], aigman.pFanin1[i]);
+        }
+    }
     std::memcpy(aigman.pOuts, outs.data(), nPOs * sizeof(int));
     std::memset(aigman.pNumFanouts, 0, aigman.nObjs * sizeof(int));
     for (int i = nPIs + 1; i < aigman.nObjs; ++i) {
@@ -1281,9 +1377,12 @@ static bool conditionalBalanceV3(AIGMan & aigman, const Rw4BParams & params, con
         aigman.toHost();
         aigman.clearDevice();
     }
+    if (!hasMultiInputAndCover(aigman.nPIs, aigman.nObjs, aigman.pFanin0, aigman.pFanin1)) {
+        return false;
+    }
     AigStats s0 = computeV3StatsHost(aigman.nPIs, aigman.nPOs, aigman.nObjs,
                                      aigman.pFanin0, aigman.pFanin1, aigman.pOuts,
-                                     params.fanoutAlpha, params.piFanoutAlpha);
+                                     params.fanoutAlpha, params.piFanoutAlpha, params.slewBeta);
     std::vector<int> bakF0(aigman.pFanin0, aigman.pFanin0 + aigman.nObjs);
     std::vector<int> bakF1(aigman.pFanin1, aigman.pFanin1 + aigman.nObjs);
     std::vector<int> bakOuts(aigman.pOuts, aigman.pOuts + aigman.nPOs);
@@ -1299,16 +1398,18 @@ static bool conditionalBalanceV3(AIGMan & aigman, const Rw4BParams & params, con
 
     AigStats s1 = computeV3StatsHost(aigman.nPIs, aigman.nPOs, aigman.nObjs,
                                      aigman.pFanin0, aigman.pFanin1, aigman.pOuts,
-                                     params.fanoutAlpha, params.piFanoutAlpha);
+                                     params.fanoutAlpha, params.piFanoutAlpha, params.slewBeta);
     bool accept = (s1.maxFo <= std::max(64, s0.maxFo)) &&
-                  (s1.excessFo2 <= std::max(1000LL, static_cast<long long>(s0.excessFo2 * 1.02))) &&
-                  (s1.depth <= s0.depth - 1.0f);
+                  (s1.excessFo2 <= std::max(1000LL, s0.excessFo2)) &&
+                  (s1.depth <= s0.depth - 2.0f) &&
+                  (s1.depth <= s0.depth * 0.95f) &&
+                  (s1.depthPhSlew <= s0.depthPhSlew - 1.0f);
     if (!accept) {
         copyHostToAigMan(aigman, aigman.nPIs, aigman.nPOs, bakF0, bakF1, bakOuts);
     }
     if (params.verbose >= 1) {
-        printf("rw4b [%s]: D=%.1f->%.1f maxFo=%d->%d ex2=%lld->%lld -> %s\n",
-               tag, s0.depth, s1.depth, s0.maxFo, s1.maxFo, s0.excessFo2, s1.excessFo2,
+        printf("rw4b [%s]: D=%.1f->%.1f Dp=%.1f->%.1f maxFo=%d->%d ex2=%lld->%lld -> %s\n",
+               tag, s0.depth, s1.depth, s0.depthPhSlew, s1.depthPhSlew, s0.maxFo, s1.maxFo, s0.excessFo2, s1.excessFo2,
                accept ? "ACCEPT" : "REJECT");
     }
     return accept;
@@ -1322,7 +1423,7 @@ static void selectBestPreMacroGPU(AIGMan & aigman, const Rw4BParams & params) {
     int nPIs = aigman.nPIs, nPOs = aigman.nPOs;
     AigStats origS = computeV3StatsHost(nPIs, nPOs, aigman.nObjs,
                                         aigman.pFanin0, aigman.pFanin1, aigman.pOuts,
-                                        params.fanoutAlpha, params.piFanoutAlpha);
+                                        params.fanoutAlpha, params.piFanoutAlpha, params.slewBeta);
     std::vector<int> origF0(aigman.pFanin0, aigman.pFanin0 + aigman.nObjs);
     std::vector<int> origF1(aigman.pFanin1, aigman.pFanin1 + aigman.nObjs);
     std::vector<int> origOuts(aigman.pOuts, aigman.pOuts + nPOs);
@@ -1333,8 +1434,10 @@ static void selectBestPreMacroGPU(AIGMan & aigman, const Rw4BParams & params) {
 
     auto passesV3 = [&](const AigStats & s) {
         return (s.maxFo <= std::max(64, origS.maxFo)) &&
-               (s.excessFo2 <= std::max(1000LL, static_cast<long long>(origS.excessFo2 * 1.02))) &&
-               (s.depth <= origS.depth - 1.0f);
+               (s.excessFo2 <= std::max(1000LL, origS.excessFo2)) &&
+               (s.depth <= origS.depth - 2.0f) &&
+               (s.depth <= origS.depth * 0.95f) &&
+               (s.depthPhSlew <= origS.depthPhSlew - 1.0f);
     };
     auto betterThanBest = [&](const AigStats & s) {
         if (s.depth < bestS.depth - 1e-4f) return true;
@@ -1351,35 +1454,40 @@ static void selectBestPreMacroGPU(AIGMan & aigman, const Rw4BParams & params) {
         outs.assign(aigman.pOuts, aigman.pOuts + nPOs);
         return computeV3StatsHost(nPIs, nPOs, aigman.nObjs,
                                   aigman.pFanin0, aigman.pFanin1, aigman.pOuts,
-                                  params.fanoutAlpha, params.piFanoutAlpha);
+                                  params.fanoutAlpha, params.piFanoutAlpha, params.slewBeta);
     };
 
     int savedVerb = aigman.verbose;
     aigman.verbose = 0;
 
-    // 1. bal
-    aigman.balance(1, true);
-    std::vector<int> balF0, balF1, balOuts;
-    AigStats balS = snapshotCurrent(balF0, balF1, balOuts);
-    if (passesV3(balS) && betterThanBest(balS)) {
-        bestTag = "bal"; bestS = balS; bestF0 = balF0; bestF1 = balF1; bestOuts = balOuts;
-    }
+    AigStats balS = origS, brS = origS, rfS = origS;
+    bool canBal = hasMultiInputAndCover(nPIs, aigman.nObjs, aigman.pFanin0, aigman.pFanin1);
 
-    // 2. bal_rfz (continue from bal before restoring orig)
-    aigman.refactor(true, true, 10);
-    aigman.strash(false, true);
-    std::vector<int> brF0, brF1, brOuts;
-    AigStats brS = snapshotCurrent(brF0, brF1, brOuts);
-    if (passesV3(brS) && betterThanBest(brS)) {
-        bestTag = "bal_rfz"; bestS = brS; bestF0 = std::move(brF0); bestF1 = std::move(brF1); bestOuts = std::move(brOuts);
+    // 1. bal
+    if (canBal) {
+        aigman.balance(1, true);
+        std::vector<int> balF0, balF1, balOuts;
+        balS = snapshotCurrent(balF0, balF1, balOuts);
+        if (passesV3(balS) && betterThanBest(balS)) {
+            bestTag = "bal"; bestS = balS; bestF0 = balF0; bestF1 = balF1; bestOuts = balOuts;
+        }
+
+        // 2. bal_rfz (continue from bal before restoring orig)
+        aigman.refactor(true, true, 10);
+        aigman.strash(false, true);
+        std::vector<int> brF0, brF1, brOuts;
+        brS = snapshotCurrent(brF0, brF1, brOuts);
+        if (passesV3(brS) && betterThanBest(brS)) {
+            bestTag = "bal_rfz"; bestS = brS; bestF0 = std::move(brF0); bestF1 = std::move(brF1); bestOuts = std::move(brOuts);
+        }
+        copyHostToAigMan(aigman, nPIs, nPOs, origF0, origF1, origOuts);
     }
 
     // 3. rfz (from orig)
-    copyHostToAigMan(aigman, nPIs, nPOs, origF0, origF1, origOuts);
     aigman.refactor(true, true, 10);
     aigman.strash(false, true);
     std::vector<int> rfF0, rfF1, rfOuts;
-    AigStats rfS = snapshotCurrent(rfF0, rfF1, rfOuts);
+    rfS = snapshotCurrent(rfF0, rfF1, rfOuts);
     if (passesV3(rfS) && betterThanBest(rfS)) {
         bestTag = "rfz"; bestS = rfS; bestF0 = std::move(rfF0); bestF1 = std::move(rfF1); bestOuts = std::move(rfOuts);
     }
@@ -2045,6 +2153,7 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
             remap[i] = nid;
             int l0 = (remap[builder.f0[i] >> 1] << 1) | (builder.f0[i] & 1);
             int l1 = (remap[builder.f1[i] >> 1] << 1) | (builder.f1[i] & 1);
+            if (l0 > l1) std::swap(l0, l1);
             nextF0.push_back(l0);
             nextF1.push_back(l1);
         }
@@ -2065,6 +2174,7 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
     }
 
     cudaFree(d_lib);
+    reorderDfsPostOrder(nPIs, nPOs, f0, f1, outs);
     copyHostToAigMan(aigman, nPIs, nPOs, f0, f1, outs);
 
     if (params.macroMode >= 1) {

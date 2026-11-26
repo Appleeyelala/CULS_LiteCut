@@ -27,7 +27,11 @@ namespace {
 
 namespace rw4b {
 
-static constexpr int kCutSetSize = 8;
+static constexpr int kCutSetSize = 12;   // slot 0: trivial 1-leaf; slots 1..5: timing-priority; slots 6..11: area-priority
+static constexpr int kTimingSlotStart = 1;
+static constexpr int kTimingSlotEnd = 6; // [1, 6) -> 5 timing-priority slots
+static constexpr int kAreaSlotStart = 6;
+static constexpr int kAreaSlotEnd = 12;  // [6, 12) -> 6 native area/sharing slots
 static constexpr int kBlockSize = 256;
 static constexpr int kMaxMffc = 24;
 static constexpr int kTopK = 2;
@@ -36,6 +40,8 @@ static constexpr float kInf = 1e30f;
 struct Cut4B {
     int sign;
     int leaves[4];
+    float maxArr;
+    float sumArr;
     unsigned short truthtable;
     unsigned short value;
     unsigned char nLeaves;
@@ -360,20 +366,21 @@ __device__ inline int cutVal(const Cut4B & c, const int * fo) {
 
 __device__ inline int popcnt32(unsigned x) { return __popc(x); }
 
-__device__ inline int findCutSlot(Cut4B * cuts) {
-    for (int i = 0; i < kCutSetSize; ++i)
-        if (!cuts[i].used) return i;
-    int ans = -1;
-    for (int pass = 0; pass < 3 && ans == -1; ++pass) {
-        for (int i = 0; i < kCutSetSize; ++i) {
-            bool ok = (pass == 0 && cuts[i].nLeaves > 2) ||
-                      (pass == 1 && cuts[i].nLeaves == 2) ||
-                      (pass == 2 && cuts[i].nLeaves < 2);
-            if (ok && (ans == -1 || cuts[i].value < cuts[ans].value)) ans = i;
-        }
+__device__ inline void computeCutTiming(Cut4B & c, const float * d_arr) {
+    float mx = -1.0f, sm = 0.0f;
+    for (int i = 0; i < c.nLeaves; ++i) {
+        float a = d_arr[c.leaves[i]];
+        if (a > mx) mx = a;
+        sm += a;
     }
-    cuts[ans].used = 0;
-    return ans;
+    c.maxArr = mx;
+    c.sumArr = sm;
+}
+
+__device__ inline bool timingBetter(const Cut4B & a, const Cut4B & b) {
+    if (a.maxArr < b.maxArr - 1e-5f) return true;
+    if (a.maxArr > b.maxArr + 1e-5f) return false;
+    return a.sumArr < b.sumArr - 1e-5f;
 }
 
 __device__ inline int mergeCutOrd(const Cut4B & a, const Cut4B & b, Cut4B * out) {
@@ -416,20 +423,58 @@ __device__ inline int cutDom(const Cut4B & a, const Cut4B & b) {
     return 1;
 }
 
-__device__ inline int cutFilter(Cut4B * cuts, int slot) {
+__device__ inline int cutFilterCand(Cut4B * cuts, const Cut4B & cand) {
     for (int i = 0; i < kCutSetSize; ++i) {
-        if (i == slot || !cuts[i].used) continue;
-        if (cuts[i].nLeaves > cuts[slot].nLeaves) {
-            if ((cuts[i].sign & cuts[slot].sign) == cuts[slot].sign && cutDom(cuts[slot], cuts[i]))
+        if (!cuts[i].used) continue;
+        if (cuts[i].nLeaves > cand.nLeaves) {
+            if ((cuts[i].sign & cand.sign) == cand.sign && cutDom(cand, cuts[i]))
                 cuts[i].used = 0;
         } else {
-            if ((cuts[i].sign & cuts[slot].sign) == cuts[i].sign && cutDom(cuts[i], cuts[slot])) {
-                cuts[slot].used = 0;
-                return 1;
-            }
+            if ((cuts[i].sign & cand.sign) == cuts[i].sign && cutDom(cuts[i], cand))
+                return 1; // cand is dominated by existing cut i
         }
     }
     return 0;
+}
+
+__device__ inline void insertHybridCut(Cut4B * cuts, Cut4B cand) {
+    // Partition 1: Timing-priority slots [kTimingSlotStart, kTimingSlotEnd)
+    int freeT = -1, worstT = -1;
+    for (int i = kTimingSlotStart; i < kTimingSlotEnd; ++i) {
+        if (!cuts[i].used) { freeT = i; break; }
+        if (worstT == -1 || timingBetter(cuts[worstT], cuts[i])) worstT = i;
+    }
+    if (freeT >= 0) {
+        cuts[freeT] = cand;
+        return;
+    }
+    if (worstT >= 0 && timingBetter(cand, cuts[worstT])) {
+        Cut4B evicted = cuts[worstT];
+        cuts[worstT] = cand;
+        cand = evicted; // cascade evicted cut to area partition
+    }
+
+    // Partition 2: Native area/sharing-priority slots [kAreaSlotStart, kAreaSlotEnd)
+    int freeA = -1;
+    for (int i = kAreaSlotStart; i < kAreaSlotEnd; ++i) {
+        if (!cuts[i].used) { freeA = i; break; }
+    }
+    if (freeA >= 0) {
+        cuts[freeA] = cand;
+        return;
+    }
+    int worstA = -1;
+    for (int pass = 0; pass < 3 && worstA == -1; ++pass) {
+        for (int i = kAreaSlotStart; i < kAreaSlotEnd; ++i) {
+            bool ok = (pass == 0 && cuts[i].nLeaves > 2) ||
+                      (pass == 1 && cuts[i].nLeaves == 2) ||
+                      (pass == 2 && cuts[i].nLeaves < 2);
+            if (ok && (worstA == -1 || cuts[i].value < cuts[worstA].value)) worstA = i;
+        }
+    }
+    if (worstA >= 0 && cand.value > cuts[worstA].value) {
+        cuts[worstA] = cand;
+    }
 }
 
 __device__ inline int ttSwap(int u, int v) {
@@ -490,7 +535,7 @@ __device__ inline int minCutSupport(Cut4B * c) {
     return 1;
 }
 
-__global__ void initCutInputsKernel(int nPIs, const int * d_fo, Cut4B * d_cuts) {
+__global__ void initCutInputsKernel(int nPIs, const int * d_fo, const float * d_arr, Cut4B * d_cuts) {
     int id = blockIdx.x * blockDim.x + threadIdx.x + 1;
     if (id > nPIs) return;
     Cut4B * c = d_cuts + static_cast<size_t>(id) * kCutSetSize;
@@ -500,10 +545,11 @@ __global__ void initCutInputsKernel(int nPIs, const int * d_fo, Cut4B * d_cuts) 
     c->nLeaves = 1;
     c->leaves[0] = id;
     c->value = static_cast<unsigned short>(cutVal(*c, d_fo));
+    computeCutTiming(*c, d_arr);
 }
 
 __global__ void cutEnumLevelKernel(int startId, int count, const int * d_f0, const int * d_f1,
-                                   const int * d_fo, Cut4B * d_cuts) {
+                                   const int * d_fo, const float * d_arr, Cut4B * d_cuts) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx >= count) return;
     int id = startId + idx;
@@ -514,6 +560,7 @@ __global__ void cutEnumLevelKernel(int startId, int count, const int * d_f0, con
     myCuts[0].nLeaves = 1;
     myCuts[0].leaves[0] = id;
     myCuts[0].value = static_cast<unsigned short>(cutVal(myCuts[0], d_fo));
+    computeCutTiming(myCuts[0], d_arr);
 
     int l0 = d_f0[id], l1 = d_f1[id];
     int in0 = l0 >> 1, in1 = l1 >> 1;
@@ -528,17 +575,20 @@ __global__ void cutEnumLevelKernel(int startId, int count, const int * d_f0, con
             if (!cuts1[j].used) continue;
             Cut4B b = cuts1[j];
             if (popcnt32(static_cast<unsigned>(a.sign | b.sign)) > 4) continue;
-            int slot = findCutSlot(myCuts);
-            if (!mergeCut(a, b, &myCuts[slot])) continue;
-            if (cutFilter(myCuts, slot)) continue;
+            Cut4B cand;
+            if (!mergeCut(a, b, &cand)) continue;
             int tt0 = c0 ? ~static_cast<int>(a.truthtable) : static_cast<int>(a.truthtable);
             int tt1 = c1 ? ~static_cast<int>(b.truthtable) : static_cast<int>(b.truthtable);
-            tt0 = ttStretch(tt0, a.nLeaves, cutPhase(a, myCuts[slot]));
-            tt1 = ttStretch(tt1, b.nLeaves, cutPhase(b, myCuts[slot]));
-            myCuts[slot].truthtable = static_cast<unsigned short>((tt0 & tt1) & 0xFFFF);
-            if (minCutSupport(&myCuts[slot])) cutFilter(myCuts, slot);
-            myCuts[slot].value = static_cast<unsigned short>(cutVal(myCuts[slot], d_fo));
-            if (myCuts[slot].nLeaves < 2) return;
+            tt0 = ttStretch(tt0, a.nLeaves, cutPhase(a, cand));
+            tt1 = ttStretch(tt1, b.nLeaves, cutPhase(b, cand));
+            cand.truthtable = static_cast<unsigned short>((tt0 & tt1) & 0xFFFF);
+            minCutSupport(&cand);
+            if (cand.nLeaves < 1) continue;
+            if (cutFilterCand(myCuts, cand)) continue;
+            cand.value = static_cast<unsigned short>(cutVal(cand, d_fo));
+            computeCutTiming(cand, d_arr);
+            insertHybridCut(myCuts, cand);
+            if (cand.nLeaves < 2) return;
         }
     }
 }
@@ -1709,15 +1759,15 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
         auto t1 = std::chrono::steady_clock::now();
         msTiming += std::chrono::duration<double, std::milli>(t1 - t0).count();
 
-        // 2. GPU 4-cut enumeration
+        // 2. GPU hybrid 12-slot 4-cut enumeration (1 trivial + 5 timing-priority + 6 area-priority)
         if (nPIs > 0) {
-            initCutInputsKernel<<<(nPIs + kBlockSize - 1) / kBlockSize, kBlockSize>>>(nPIs, d_fo, d_cuts);
+            initCutInputsKernel<<<(nPIs + kBlockSize - 1) / kBlockSize, kBlockSize>>>(nPIs, d_fo, d_arr, d_cuts);
         }
         for (int l = 1; l <= maxLv; ++l) {
             int cnt = lvOff[l + 1] - lvOff[l];
             if (cnt <= 0) continue;
             cutEnumLevelKernel<<<(cnt + kBlockSize - 1) / kBlockSize, kBlockSize>>>(
-                lvOff[l], cnt, d_f0, d_f1, d_fo, d_cuts);
+                lvOff[l], cnt, d_f0, d_f1, d_fo, d_arr, d_cuts);
         }
         CHECK_CUDA(cudaDeviceSynchronize());
         auto t2 = std::chrono::steady_clock::now();

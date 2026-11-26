@@ -108,6 +108,7 @@ int rw4bHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals) {
     bool structMacro = false;
     bool noBudget = false;
     bool legacyV1 = false;
+    int foCap = 16;
 
     CLI::App parser("Perform GPU fanout-aware global sensitivity 4B rewrite");
     parser.add_option("-r", rounds, descWithDefault("number of rounds", rounds));
@@ -115,6 +116,7 @@ int rw4bHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals) {
     parser.add_option("-p", piFanoutAlpha, descWithDefault("PI fanout alpha", piFanoutAlpha));
     parser.add_option("-s", slewBeta, descWithDefault("slew coupling beta", slewBeta));
     parser.add_option("-l", lamArea, descWithDefault("area penalty lambda", lamArea));
+    parser.add_option("--fo-cap", foCap, descWithDefault("fanout-capped strash limit (0=unlimited)", foCap));
     parser.add_flag("-b", condBalance, descWithDefault("conditional v3-gated GPU balance", condBalance));
     parser.add_flag("-m", structMacro, descWithDefault("v3-gated GPU struct macro {orig,bal,rfz,bal_rfz}", structMacro));
     parser.add_flag("--no-budget", noBudget, descWithDefault("disable slack_other hard fanout budget guard", noBudget));
@@ -126,7 +128,7 @@ int rw4bHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals) {
         return ret;
 
     int macroMode = structMacro ? 2 : (condBalance ? 1 : 0);
-    aigman.rw4b(rounds, fanoutAlpha, piFanoutAlpha, slewBeta, lamArea, macroMode, noBudget, legacyV1);
+    aigman.rw4b(rounds, fanoutAlpha, piFanoutAlpha, slewBeta, lamArea, macroMode, noBudget, legacyV1, foCap);
     return 0;
 }
 

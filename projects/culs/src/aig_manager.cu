@@ -674,7 +674,7 @@ printf("rewrite: alg time %.2lf, full time %.2lf\n",
 
 void AIGMan::rw4b(int rounds, float fanoutAlpha, float piFanoutAlpha,
                   float slewBeta, float lamArea, int macroMode,
-                  bool noBudget, bool legacyV1) {
+                  bool noBudget, bool legacyV1, int foCap) {
     if (!aigCreated) {
         printf("rw4b: AIG is null!\n");
         return;
@@ -688,6 +688,7 @@ void AIGMan::rw4b(int rounds, float fanoutAlpha, float piFanoutAlpha,
     p.slewBeta = slewBeta;
     p.lamArea = lamArea;
     p.macroMode = macroMode;
+    p.foCap = foCap;
     if (noBudget) {
         p.fanoutBudget = false;
     }

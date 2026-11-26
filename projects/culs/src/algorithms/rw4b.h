@@ -22,6 +22,7 @@ struct Rw4BParams {
     bool fanoutBudget = true;
     int perRootK = 2;
     float budgetTol = 1e-4f;
+    int foCap = 16;    // Fanout-capped strash limit (0 = unlimited)
     int macroMode = 0; // 0: pure rw4b, 1: v3-gated GPU balance (-b), 2: v3-gated GPU struct {orig,bal,rfz,bal_rfz} (-m)
     int verbose = 1;
 };

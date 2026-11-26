@@ -987,7 +987,7 @@ __global__ void evaluateNode4BKernel(
                 float dd = coef * static_cast<float>(dl);
                 if (fanoutBudget && dd > 1e-6f) {
                     float so = querySlackOtherDev(
-                        lf, negOnly, nObjs, depth, piPhaseAware, remIds, remCnt,
+                        lf, negOnly, nObjs, depth, piPhaseAware, coneIds, coneCnt,
                         d_foOff, d_foEdge, d_arr, d_req, d_gateDelay, d_negExtra, d_top3, d_negTop3);
                     if (so < kInf * 0.5f && dd > (so > 0.0f ? so : 0.0f) + budgetTol) {
                         budgetOk = false;
@@ -1405,18 +1405,21 @@ static void collectBoundedMffcHost(int root, const int leaves[4], int nPIs,
 
 struct StrashRebuild {
     int nPIs;
-    std::vector<int> f0, f1;
+    int foCap;
+    std::vector<int> f0, f1, foCnt;
     robin_hood::unordered_flat_map<uint64_t, int> ht;
 
-    explicit StrashRebuild(int nPIs_, int reserveNodes) : nPIs(nPIs_) {
+    explicit StrashRebuild(int nPIs_, int reserveNodes, int foCap_ = 0) : nPIs(nPIs_), foCap(foCap_) {
         f0.assign(nPIs + 1, 0);
         f1.assign(nPIs + 1, 0);
+        foCnt.assign(nPIs + 1, 0);
         f0.reserve(nPIs + reserveNodes + 64);
         f1.reserve(nPIs + reserveNodes + 64);
+        foCnt.reserve(nPIs + reserveNodes + 64);
         ht.reserve(reserveNodes * 2 + 64);
     }
 
-    int andLit(int l0, int l1) {
+    int andLit(int l0, int l1, bool allowDup = false) {
         if (l0 == 0 || l1 == 0) return 0;
         if (l0 == 1) return l1;
         if (l1 == 1) return l0;
@@ -1426,11 +1429,19 @@ struct StrashRebuild {
         uint64_t key = (static_cast<uint64_t>(static_cast<uint32_t>(l0)) << 32) |
                        static_cast<uint32_t>(l1);
         auto it = ht.find(key);
-        if (it != ht.end()) return it->second << 1;
+        if (it != ht.end()) {
+            int hit = it->second;
+            if (!(allowDup && foCap > 0 && foCnt[hit] >= foCap)) {
+                return hit << 1;
+            }
+        }
         int nid = static_cast<int>(f0.size());
         f0.push_back(l0);
         f1.push_back(l1);
-        ht.emplace(key, nid);
+        foCnt.push_back(0);
+        foCnt[l0 >> 1]++;
+        foCnt[l1 >> 1]++;
+        ht[key] = nid;
         return nid << 1;
     }
 };
@@ -2032,6 +2043,22 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
                     }
                 }
 
+                std::vector<int> coneAll;
+                {
+                    auto isLf = [&](int n) {
+                        return n == leaves[0] || n == leaves[1] || n == leaves[2] || n == leaves[3];
+                    };
+                    coneAll.push_back(root);
+                    for (size_t ci = 0; ci < coneAll.size() && coneAll.size() < kMaxCone; ++ci) {
+                        int u = coneAll[ci];
+                        for (int pred : {f0[u] >> 1, f1[u] >> 1}) {
+                            if (pred <= nPIs || isLf(pred)) continue;
+                            if (std::find(coneAll.begin(), coneAll.end(), pred) == coneAll.end()) {
+                                coneAll.push_back(pred);
+                            }
+                        }
+                    }
+                }
                 std::vector<TouchEntry> touched;
                 for (int j = 0; j < 4; ++j) {
                     int lf = leaves[j];
@@ -2043,7 +2070,7 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
                     if (coef <= 0.0f) continue;
                     int base = negOnly ? hNegFo[lf] : hFo[lf];
                     float so = (d > 0 && params.fanoutBudget)
-                        ? querySlackOtherHost(lf, negOnly, nObjs, depth, params.piPhaseAware, remAll,
+                        ? querySlackOtherHost(lf, negOnly, nObjs, depth, params.piPhaseAware, coneAll,
                                               hFoOff, hFoEdge, hArr, hReq, hGd, hNegExtra, hTop3, hNegTop3)
                         : kInf;
                     touched.push_back({lf, negOnly, d, coef, base, so});
@@ -2182,8 +2209,8 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
         }
         totalApplied += static_cast<int>(chosenIdx.size());
 
-        // Exact topological strashed rebuild + PO reachability pruning
-        StrashRebuild builder(nPIs, nNodes);
+        // Exact topological strashed rebuild (with fanout-capped dedup) + PO reachability pruning
+        StrashRebuild builder(nPIs, nNodes, params.foCap);
         std::vector<int> litMap(nObjs, 0);
         for (int i = 0; i <= nPIs; ++i) litMap[i] = i << 1;
 
@@ -2192,7 +2219,7 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
             if (it == chosenIdx.end()) {
                 int nl0 = litMap[f0[id] >> 1] ^ (f0[id] & 1);
                 int nl1 = litMap[f1[id] >> 1] ^ (f1[id] & 1);
-                litMap[id] = builder.andLit(nl0, nl1);
+                litMap[id] = builder.andLit(nl0, nl1, false);
             } else {
                 const SelectedItem & op = entries[it->second];
                 int localLit[54];
@@ -2212,7 +2239,7 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
                     int i0 = hLib.fanin0[op.cls][j - 4], i1 = hLib.fanin1[op.cls][j - 4];
                     int nl0 = localLit[i0] ^ (hLib.isC0[op.cls][j - 4] ? 1 : 0);
                     int nl1 = localLit[i1] ^ (hLib.isC1[op.cls][j - 4] ? 1 : 0);
-                    localLit[j] = builder.andLit(nl0, nl1);
+                    localLit[j] = builder.andLit(nl0, nl1, true);
                 }
                 litMap[id] = localLit[op.rt] ^ op.flip;
             }

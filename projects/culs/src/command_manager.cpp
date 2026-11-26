@@ -112,6 +112,12 @@ int rw4bHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals) {
     float adpW = 2.0f;
     float slackKappa = 2.0f;
     int foCap = 0;
+    bool jointGrad = false;
+    int gradSteps = 25;
+    bool gradCheck = false;
+    float tnsRho = 0.85f;
+    float discLam = 0.60f;
+    float gradLr = 0.25f;
 
     CLI::App parser("Perform GPU fanout-aware global sensitivity 4B rewrite");
     parser.add_option("-r", rounds, descWithDefault("number of rounds", rounds));
@@ -123,6 +129,12 @@ int rw4bHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals) {
     parser.add_option("--adp-w", adpW, descWithDefault("ADP delay weight w in w*dD/D - da/A", adpW));
     parser.add_option("--kappa", slackKappa, descWithDefault("near-critical slack gate kappa*tau", slackKappa));
     parser.add_flag("--no-adp", noAdp, descWithDefault("disable ADP scoring and use legacy lamArea", noAdp));
+    parser.add_flag("--joint-grad", jointGrad, descWithDefault("Stage B: GPU multi-region joint gradient optimization", jointGrad));
+    parser.add_option("--steps", gradSteps, descWithDefault("Stage B: inner joint gradient steps per round", gradSteps));
+    parser.add_flag("--grad-check", gradCheck, descWithDefault("Stage B: run finite-difference gradient verification", gradCheck));
+    parser.add_option("--tns-rho", tnsRho, descWithDefault("Stage B: TNS target ratio rho * D0", tnsRho));
+    parser.add_option("--disc-lam", discLam, descWithDefault("Stage B: final Gini discretization magnet weight", discLam));
+    parser.add_option("--lr", gradLr, descWithDefault("Stage B: Adam learning rate for logits", gradLr));
     parser.add_flag("-b", condBalance, descWithDefault("conditional v3-gated GPU balance", condBalance));
     parser.add_flag("-m", structMacro, descWithDefault("v3-gated GPU struct macro {orig,bal,rfz,bal_rfz}", structMacro));
     parser.add_flag("--no-budget", noBudget, descWithDefault("disable slack_other hard fanout budget guard", noBudget));
@@ -134,7 +146,8 @@ int rw4bHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals) {
         return ret;
 
     int macroMode = structMacro ? 2 : (condBalance ? 1 : 0);
-    aigman.rw4b(rounds, fanoutAlpha, piFanoutAlpha, slewBeta, lamArea, macroMode, noBudget, legacyV1, foCap, !noAdp, adpW, slackKappa);
+    aigman.rw4b(rounds, fanoutAlpha, piFanoutAlpha, slewBeta, lamArea, macroMode, noBudget, legacyV1, foCap,
+                !noAdp, adpW, slackKappa, jointGrad, gradSteps, gradCheck, tnsRho, discLam, gradLr);
     return 0;
 }
 

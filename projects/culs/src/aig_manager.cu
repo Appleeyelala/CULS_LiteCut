@@ -675,7 +675,9 @@ printf("rewrite: alg time %.2lf, full time %.2lf\n",
 void AIGMan::rw4b(int rounds, float fanoutAlpha, float piFanoutAlpha,
                   float slewBeta, float lamArea, int macroMode,
                   bool noBudget, bool legacyV1, int foCap,
-                  bool adpScore, float adpW, float slackKappa) {
+                  bool adpScore, float adpW, float slackKappa,
+                  bool jointGrad, int gradSteps, bool gradCheck,
+                  float tnsRho, float discLam, float gradLr) {
     if (!aigCreated) {
         printf("rw4b: AIG is null!\n");
         return;
@@ -693,6 +695,12 @@ void AIGMan::rw4b(int rounds, float fanoutAlpha, float piFanoutAlpha,
     p.adpScore = adpScore;
     p.adpW = adpW;
     p.slackKappa = slackKappa;
+    p.jointGrad = jointGrad;
+    p.gradSteps = gradSteps;
+    p.gradCheck = gradCheck;
+    p.tnsRho = tnsRho;
+    p.discLam = discLam;
+    p.gradLr = gradLr;
     if (noBudget) {
         p.fanoutBudget = false;
     }

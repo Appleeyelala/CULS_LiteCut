@@ -25,7 +25,9 @@ public:
     void rw4b(int rounds = 3, float fanoutAlpha = 0.20f, float piFanoutAlpha = 0.10f,
               float slewBeta = 0.005f, float lamArea = 0.05f, int macroMode = 0,
               bool noBudget = false, bool legacyV1 = false, int foCap = 0,
-              bool adpScore = true, float adpW = 2.0f, float slackKappa = 2.0f);
+              bool adpScore = true, float adpW = 2.0f, float slackKappa = 2.0f,
+              bool jointGrad = false, int gradSteps = 25, bool gradCheck = false,
+              float tnsRho = 0.85f, float discLam = 0.60f, float gradLr = 0.25f);
     void refactor(bool fAlgMFFC = false, bool fUseZeros = false, int cutSize = 12);
     void resub(bool fUseZeros = false, bool fUseConstr = true, bool fUpdateLevel = false, int cutSize = 8, int addNodes = 1);
 

@@ -18,6 +18,7 @@
 #include "aig_manager.h"
 #include "algorithms/rewrite.h"
 #include "algorithms/rw4b.h"
+#include "algorithms/rw4b_grad.h"
 #include "common.h"
 #include "robin_hood.h"
 
@@ -1148,6 +1149,390 @@ __global__ void evaluateNode4BKernel(
     d_out[root * kTopK + 1] = topCand[1];
 }
 
+// ---------------- Stage B: GPU Stratified Pareto Menu Extraction Kernel ----------------
+
+struct MenuSlot {
+    float score;
+    float deltaJ;
+    float posFoInc;
+    int da;
+    int cutSlot;
+    int subgr;
+};
+
+__global__ void evaluateNode4BMenuKernel(
+    int nPIs, int nObjs, int P, float depth, float phi,
+    const int * d_f0, const int * d_f1, const int * d_fo, const int * d_negFo,
+    const int * d_nodeLv, const float * d_arr, const float * d_req, const float * d_gateDelay,
+    const float * d_negExtra, const float * d_outSlew, const float * d_negSlew,
+    const float * d_slewIn, const float * d_sens, const float * d_slewCoef, const float * d_slewCoefNeg,
+    const Cut4B * d_cuts, const rw::Library * lib, const TableNode4B * d_ht,
+    float alpha, float piAlpha, float beta, float regW, int pivot, float tau,
+    bool piPhaseAware, bool strashAware, float adpW, float tnsRho,
+    MenuSlot * d_menuOut) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int nNodes = nObjs - nPIs - 1;
+    if (idx >= nNodes) return;
+    int root = nPIs + 1 + idx;
+    for (int s = 0; s < 4; ++s) {
+        d_menuOut[root * 4 + s] = {-kInf, -kInf, kInf, 999999, -1, -1};
+    }
+
+    float req = d_req[root];
+    if (req >= kInf * 0.5f) return;
+    float sRoot = d_sens[root];
+    float nodeLv = d_arr[root];
+    int rootFo = d_fo[root];
+    int rootUnitLv = d_nodeLv[root];
+    float slackRoot = req - nodeLv;
+    float poolSlackLimit = fmaxf(3.0f * tau, (1.0f - tnsRho) * depth);
+    bool inVision = (slackRoot <= poolSlackLimit + 1e-5f);
+
+    const Cut4B * myCuts = d_cuts + static_cast<size_t>(root) * kCutSetSize;
+    MenuSlot bestSpeed = {-kInf, -kInf, kInf, 999999, -1, -1};
+    MenuSlot bestAdp   = {-kInf, -kInf, kInf, 999999, -1, -1};
+    MenuSlot bestArea  = {-kInf, -kInf, kInf, 999999, -1, -1};
+    MenuSlot bestLowFo = {-kInf, -kInf, kInf, 999999, -1, -1};
+
+    int remIds[kMaxMffc], trkIds[kMaxMffc], trkRem[kMaxMffc], coneIds[kMaxCone], match[54];
+    float cvMax[54], cvLse[54], cvSlew[54];
+    float invDepth = 1.0f / fmaxf(depth, 1.0f);
+    float invArea = 1.0f / fmaxf(static_cast<float>(nNodes), 1.0f);
+
+    for (int slot = 0; slot < kCutSetSize; ++slot) {
+        Cut4B cut = myCuts[slot];
+        if (!cut.used || cut.nLeaves < 3) continue;
+        if (cut.nLeaves == 3) cut.leaves[3] = 0;
+
+        int uPhase = lib->pPhases[cut.truthtable];
+        int cls = lib->pMap[cut.truthtable];
+        const int * perm = lib->pPerms4[lib->pPerms[cut.truthtable]];
+        if (lib->nSubgr[cls] == 0) continue;
+
+        int leaves[4], leavesCompl[4];
+        for (int j = 0; j < 4; ++j) {
+            leaves[j] = cut.leaves[perm[j]];
+            leavesCompl[j] = (uPhase >> j) & 1;
+        }
+
+        // Bounded MFFC discovery
+        int remCnt = 0, tracked = 0;
+        remIds[remCnt++] = root;
+        int qHead = 0;
+        while (qHead < remCnt) {
+            int u = remIds[qHead++];
+            int lits[2] = {d_f0[u], d_f1[u]};
+            for (int k = 0; k < 2; ++k) {
+                int src = lits[k] >> 1;
+                if (src <= nPIs || isLeafIdx(src, leaves) >= 0) continue;
+                int pos = -1;
+                for (int t = 0; t < tracked; ++t) {
+                    if (trkIds[t] == src) { pos = t; break; }
+                }
+                int r;
+                if (pos >= 0) {
+                    r = --trkRem[pos];
+                } else {
+                    if (tracked >= kMaxMffc) continue;
+                    trkIds[tracked] = src;
+                    r = d_fo[src] - 1;
+                    trkRem[tracked] = r;
+                    pos = tracked++;
+                }
+                if (r == 0 && remCnt < kMaxMffc && !inList(src, remIds, remCnt)) {
+                    trkIds[pos] = trkIds[tracked - 1];
+                    trkRem[pos] = trkRem[tracked - 1];
+                    tracked--;
+                    remIds[remCnt++] = src;
+                }
+            }
+        }
+        int saved = remCnt;
+
+        int origRefs[4] = {0, 0, 0, 0}, origRefsNeg[4] = {0, 0, 0, 0};
+        for (int a = 0; a < remCnt; ++a) {
+            int u = remIds[a];
+            int lits[2] = {d_f0[u], d_f1[u]};
+            for (int k = 0; k < 2; ++k) {
+                int li = isLeafIdx(lits[k] >> 1, leaves);
+                if (li >= 0) {
+                    origRefs[li]++;
+                    if (lits[k] & 1) origRefsNeg[li]++;
+                }
+            }
+        }
+
+        // Full 4-cut interior cone (coneIds) for leafDelays, jOrig, leafLocalSens
+        int coneCnt = 0;
+        coneIds[coneCnt++] = root;
+        int cHead = 0;
+        while (cHead < coneCnt) {
+            int u = coneIds[cHead++];
+            int lits[2] = {d_f0[u], d_f1[u]};
+            for (int k = 0; k < 2; ++k) {
+                int pred = lits[k] >> 1;
+                if (pred <= nPIs || isLeafIdx(pred, leaves) >= 0) continue;
+                if (coneCnt < kMaxCone && !inList(pred, coneIds, coneCnt)) coneIds[coneCnt++] = pred;
+            }
+        }
+        for (int a = 1; a < coneCnt; ++a) {
+            int key = coneIds[a], b = a - 1;
+            while (b >= 0 && coneIds[b] < key) { coneIds[b + 1] = coneIds[b]; --b; }
+            coneIds[b + 1] = key;
+        }
+        float coneDist[kMaxCone], coneSens[kMaxCone];
+        for (int a = 0; a < coneCnt; ++a) { coneDist[a] = -1.0f; coneSens[a] = 0.0f; }
+        coneDist[0] = d_gateDelay[root];
+        coneSens[0] = sRoot;
+        float leafDelays[4] = {-1.0f, -1.0f, -1.0f, -1.0f};
+        float leafLocalSens[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+        for (int a = 0; a < coneCnt; ++a) {
+            int u = coneIds[a];
+            float du = coneDist[a], su = coneSens[a];
+            int l0 = d_f0[u], l1 = d_f1[u];
+            float a0 = edgeArr(l0, d_arr, d_negExtra, piPhaseAware);
+            float a1 = edgeArr(l1, d_arr, d_negExtra, piPhaseAware);
+            float m = a0 >= a1 ? a0 : a1;
+            float w0 = expf((a0 - m) / tau), w1 = expf((a1 - m) / tau);
+            float denom = w0 + w1;
+            int lits[2] = {l0, l1};
+            float ws[2] = {w0 / denom, w1 / denom};
+            for (int k = 0; k < 2; ++k) {
+                int lit = lits[k], pred = lit >> 1;
+                float extra = (piPhaseAware && (lit & 1) && d_negExtra) ? d_negExtra[pred] : 0.0f;
+                int li = isLeafIdx(pred, leaves);
+                if (li >= 0) {
+                    if (du >= 0.0f && du + extra > leafDelays[li]) leafDelays[li] = du + extra;
+                    leafLocalSens[li] += su * ws[k];
+                } else {
+                    for (int b = a + 1; b < coneCnt; ++b) {
+                        if (coneIds[b] == pred) {
+                            if (du >= 0.0f && du + d_gateDelay[pred] + extra > coneDist[b])
+                                coneDist[b] = du + d_gateDelay[pred] + extra;
+                            coneSens[b] += su * ws[k];
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        float maxOrigRel = -kInf, origRel[4];
+        int usedOrig = 0;
+        for (int i = 0; i < 4; ++i) {
+            if (leafDelays[i] >= 0.0f) {
+                origRel[usedOrig] = d_arr[leaves[i]] + leafDelays[i] - nodeLv;
+                if (origRel[usedOrig] > maxOrigRel) maxOrigRel = origRel[usedOrig];
+                usedOrig++;
+            }
+        }
+        float jOrig = -nodeLv;
+        if (usedOrig > 0) {
+            float sumE = 0.0f;
+            for (int i = 0; i < usedOrig; ++i) sumE += expf((origRel[i] - maxOrigRel) / tau);
+            jOrig = maxOrigRel + tau * logf(sumE);
+        }
+        float sensOther[4];
+        for (int i = 0; i < 4; ++i) {
+            float s = d_sens[leaves[i]] - leafLocalSens[i];
+            sensOther[i] = s > 0.0f ? s : 0.0f;
+        }
+
+        // Strash-aware match enforcing strict level(hit) < level(root) (Stage B Invariant 3)
+        uint64_t isC = 0;
+        for (int j = 0; j < 54; ++j) match[j] = -1;
+        for (int j = 0; j < 4; ++j) {
+            match[j] = leaves[j];
+            if (leavesCompl[j]) isC |= (1ULL << j);
+        }
+        int nLibNodes = lib->nNodes[cls];
+        for (int j = 0; j < nLibNodes; ++j) {
+            int num = j + 4;
+            if (!strashAware) continue;
+            int in0 = lib->fanin0[cls][j], in1 = lib->fanin1[cls][j];
+            if (match[in0] == -1 || match[in1] == -1 || match[in0] == root || match[in1] == root) continue;
+            int c0 = ((isC >> in0) & 1) ^ lib->isC0[cls][j];
+            int c1 = ((isC >> in1) & 1) ^ lib->isC1[cls][j];
+            int hit = lookupHash((match[in0] << 1) | c0, (match[in1] << 1) | c1, P, d_ht, d_f0, d_f1);
+            if (hit != -1 && d_nodeLv[hit] < rootUnitLv && !inList(hit, remIds, remCnt)) {
+                match[num] = hit;
+            }
+        }
+
+        int nSubgr = lib->nSubgr[cls];
+        for (int out = 0; out < nSubgr; ++out) {
+            int rt = lib->pSubgr[cls][out];
+            if (match[rt] == root) continue;
+
+            uint64_t usedMask = 1ULL << rt;
+            for (int j = rt; j >= 4; --j) {
+                if ((usedMask >> j) & 1ULL) {
+                    if (match[j] != -1) continue;
+                    usedMask |= (1ULL << lib->fanin0[cls][j - 4]);
+                    usedMask |= (1ULL << lib->fanin1[cls][j - 4]);
+                }
+            }
+
+            int nodesAdded = 0;
+            int candRefs[4] = {0, 0, 0, 0}, candRefsNeg[4] = {0, 0, 0, 0};
+            int eFo[54];
+            for (int j = 4; j <= rt; ++j) eFo[j] = 0;
+            int hitIds[8], hitDelta[8], hitCnt = 0;
+            auto addHit = [&](int u, int d) {
+                if (u <= 0) return;
+                for (int t = 0; t < hitCnt; ++t) if (hitIds[t] == u) { hitDelta[t] += d; return; }
+                if (hitCnt < 8) { hitIds[hitCnt] = u; hitDelta[hitCnt] = d; hitCnt++; }
+            };
+
+            if (rt < 4) {
+                candRefs[rt] += rootFo;
+                if (piPhaseAware && leaves[rt] > 0 && leaves[rt] <= nPIs) {
+                    int rNeg = d_negFo[root], rPos = rootFo - rNeg;
+                    candRefsNeg[rt] += (rNeg > rPos ? rNeg : rPos);
+                }
+            } else if (match[rt] != -1) {
+                addHit(match[rt], rootFo);
+            } else {
+                for (int j = 4; j <= rt; ++j) {
+                    if (!((usedMask >> j) & 1ULL) || match[j] != -1) continue;
+                    nodesAdded++;
+                    int ins[2] = {lib->fanin0[cls][j - 4], lib->fanin1[cls][j - 4]};
+                    int cs[2] = {lib->isC0[cls][j - 4], lib->isC1[cls][j - 4]};
+                    for (int k = 0; k < 2; ++k) {
+                        int en = ins[k];
+                        if (en < 4) {
+                            candRefs[en]++;
+                            if (leavesCompl[en] ^ cs[k]) candRefsNeg[en]++;
+                        } else if (match[en] != -1) {
+                            addHit(match[en], 1);
+                        } else {
+                            eFo[en]++;
+                        }
+                    }
+                }
+            }
+            if (nodesAdded > kGradMaxSubGates) continue;
+
+            int da = nodesAdded - saved;
+            if (!inVision && da > 0) continue; // Module 1.1 stratified filter
+
+            float leafDd[4] = {0, 0, 0, 0};
+            int leafDl[4] = {0, 0, 0, 0};
+            float side = 0.0f, reg = 0.0f, slewCost = 0.0f, posFoInc = 0.0f;
+            for (int i = 0; i < 4; ++i) {
+                int lf = leaves[i];
+                if (lf <= 0) continue;
+                bool isPI = (lf <= nPIs), negOnly = (isPI && piPhaseAware);
+                int dfo = negOnly ? (candRefsNeg[i] - origRefsNeg[i]) : (candRefs[i] - origRefs[i]);
+                if (dfo > 0) posFoInc += static_cast<float>(dfo);
+                if (dfo == 0) continue;
+                float coef = isPI ? piAlpha : (beta > 0.0f ? alpha * (1.0f + beta * d_slewIn[lf]) : alpha);
+                if (coef <= 0.0f) continue;
+                int baseCnt = negOnly ? d_negFo[lf] : d_fo[lf];
+                int newCnt = baseCnt + dfo;
+                if (newCnt < 0) newCnt = 0;
+                int dl = loadI(newCnt) - loadI(baseCnt);
+                float dd = coef * static_cast<float>(dl);
+                leafDd[i] = dd;
+                leafDl[i] = dl;
+                side += sensOther[i] * dd;
+                if (regW > 0.0f) reg += regW * static_cast<float>(hqI(newCnt, pivot) - hqI(baseCnt, pivot));
+                if (beta > 0.0f && dl != 0) {
+                    float sc = negOnly ? d_slewCoefNeg[lf] : d_slewCoef[lf];
+                    if (sc > 0.0f) slewCost += sc * static_cast<float>(dl);
+                }
+            }
+            for (int t = 0; t < hitCnt; ++t) {
+                int u = hitIds[t], dfo = hitDelta[t];
+                if (dfo > 0) posFoInc += static_cast<float>(dfo);
+                if (dfo == 0 || u <= nPIs) continue;
+                float coef = beta > 0.0f ? alpha * (1.0f + beta * d_slewIn[u]) : alpha;
+                int baseCnt = d_fo[u], newCnt = baseCnt + dfo;
+                if (newCnt < 0) newCnt = 0;
+                int dl = loadI(newCnt) - loadI(baseCnt);
+                float dd = coef * static_cast<float>(dl);
+                side += d_sens[u] * dd;
+                if (regW > 0.0f) reg += regW * static_cast<float>(hqI(newCnt, pivot) - hqI(baseCnt, pivot));
+                if (beta > 0.0f && dl != 0 && d_slewCoef[u] > 0.0f) slewCost += d_slewCoef[u] * static_cast<float>(dl);
+            }
+
+            for (int i = 0; i < 4; ++i) {
+                int lf = leaves[i];
+                if (lf == 0) { cvMax[i] = 0.0f; cvLse[i] = -nodeLv; cvSlew[i] = 0.0f; }
+                else {
+                    float a = d_arr[lf] + ((lf <= nPIs && piPhaseAware) ? 0.0f : leafDd[i]);
+                    cvMax[i] = a; cvLse[i] = a - nodeLv;
+                    cvSlew[i] = (lf <= nPIs) ? 0.0f : (d_outSlew[lf] + static_cast<float>(leafDl[i]));
+                }
+            }
+            auto getIn = [&](int en, int ec, float & aOut, float & rOut, float & sOut) {
+                if (en < 4) {
+                    int lf = leaves[en];
+                    if (lf == 0) { aOut = 0.0f; rOut = -nodeLv; sOut = 0.0f; return; }
+                    if (lf <= nPIs && piPhaseAware) {
+                        int ph = leavesCompl[en] ^ ec;
+                        aOut = d_arr[lf] + (ph ? (d_negExtra[lf] + leafDd[en]) : 0.0f);
+                        rOut = aOut - nodeLv;
+                        sOut = ph ? (d_negSlew[lf] + static_cast<float>(leafDl[en])) : 0.0f;
+                        return;
+                    }
+                    aOut = cvMax[en]; rOut = cvLse[en]; sOut = cvSlew[en];
+                    return;
+                }
+                if (match[en] != -1) {
+                    int u = match[en], dlU = 0;
+                    for (int t = 0; t < hitCnt; ++t) if (hitIds[t] == u) { dlU = loadI(d_fo[u] + hitDelta[t]) - loadI(d_fo[u]); break; }
+                    float coef = beta > 0.0f ? alpha * (1.0f + beta * d_slewIn[u]) : alpha;
+                    aOut = d_arr[u] + coef * static_cast<float>(dlU);
+                    rOut = aOut - nodeLv;
+                    sOut = d_outSlew[u] + static_cast<float>(dlU);
+                    return;
+                }
+                aOut = cvMax[en]; rOut = cvLse[en]; sOut = cvSlew[en];
+            };
+            float maxArrAbs, jCand;
+            if (rt < 4 || match[rt] != -1) {
+                float sTmp;
+                getIn(rt, 0, maxArrAbs, jCand, sTmp);
+            } else {
+                for (int j = 4; j <= rt; ++j) {
+                    if (!((usedMask >> j) & 1ULL) || match[j] != -1) continue;
+                    float a0, r0, s0, a1, r1, s1;
+                    getIn(lib->fanin0[cls][j - 4], lib->isC0[cls][j - 4], a0, r0, s0);
+                    getIn(lib->fanin1[cls][j - 4], lib->isC1[cls][j - 4], a1, r1, s1);
+                    float sIn = s0 >= s1 ? s0 : s1;
+                    float ld = (j == rt) ? loadF(rootFo) : loadF(eFo[j]);
+                    float gd = (beta > 0.0f) ? (1.0f + alpha * ld * (1.0f + beta * sIn))
+                                             : ((j == rt) ? d_gateDelay[root] : (1.0f + alpha * ld));
+                    cvMax[j] = gd + (a0 >= a1 ? a0 : a1);
+                    cvLse[j] = gd + lse2(r0, r1, tau);
+                    cvSlew[j] = ld;
+                }
+                maxArrAbs = cvMax[rt];
+                jCand = cvLse[rt];
+            }
+            if (maxArrAbs > req + (inVision ? 0.5f * tau : 1e-5f)) continue;
+
+            float deltaJ = jOrig - jCand;
+            if (!inVision && !(da < 0 || (da == 0 && deltaJ > 1e-4f))) continue;
+            if (inVision && !(deltaJ > 1e-4f || da < 0)) continue;
+
+            float rawTiming = sRoot * deltaJ - side - slewCost;
+            float adpScore = adpW * ((rawTiming / phi) * invDepth) - (reg * invDepth) - static_cast<float>(da) * invArea;
+            MenuSlot cur = {adpScore, deltaJ, posFoInc, da, slot, out};
+
+            if (deltaJ > bestSpeed.deltaJ || (deltaJ == bestSpeed.deltaJ && adpScore > bestSpeed.score)) bestSpeed = cur;
+            if (adpScore > bestAdp.score) bestAdp = cur;
+            if (da < bestArea.da || (da == bestArea.da && deltaJ > bestArea.deltaJ)) bestArea = cur;
+            if (deltaJ > 1e-4f && (posFoInc < bestLowFo.posFoInc || (posFoInc == bestLowFo.posFoInc && deltaJ > bestLowFo.deltaJ)))
+                bestLowFo = cur;
+        }
+    }
+    d_menuOut[root * 4 + 0] = bestSpeed;
+    d_menuOut[root * 4 + 1] = bestAdp;
+    d_menuOut[root * 4 + 2] = bestArea;
+    d_menuOut[root * 4 + 3] = bestLowFo;
+}
+
 // ---------------- Host helpers ----------------
 
 static bool isPrime(int x) {
@@ -1853,8 +2238,516 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
         auto t2 = std::chrono::steady_clock::now();
         msEnum += std::chrono::duration<double, std::milli>(t2 - t1).count();
 
-        // 3. GPU strash table + 4B evaluation (Top-2 per root + slack_other guard)
+        // 3. GPU strash table + evaluation (Stage B joint-grad path OR Stage A greedy path)
         buildHashKernel<<<(nNodes + kBlockSize - 1) / kBlockSize, kBlockSize>>>(nPIs, nObjs, P, d_f0, d_f1, d_ht);
+
+        if (params.jointGrad) {
+            std::vector<int> hNodeLv(nObjs, 0);
+            for (int l = 1; l <= maxLv; ++l) {
+                for (int id = lvOff[l]; id < lvOff[l + 1]; ++id) hNodeLv[id] = l;
+            }
+            int * d_nodeLv = nullptr;
+            MenuSlot * d_menuOut = nullptr;
+            CHECK_CUDA(cudaMalloc(&d_nodeLv, nObjs * sizeof(int)));
+            CHECK_CUDA(cudaMalloc(&d_menuOut, static_cast<size_t>(nObjs) * 4 * sizeof(MenuSlot)));
+            CHECK_CUDA(cudaMemcpy(d_nodeLv, hNodeLv.data(), nObjs * sizeof(int), cudaMemcpyHostToDevice));
+
+            evaluateNode4BMenuKernel<<<(nNodes + kBlockSize - 1) / kBlockSize, kBlockSize>>>(
+                nPIs, nObjs, P, depth, phi, d_f0, d_f1, d_fo, d_negFo, d_nodeLv,
+                d_arr, d_req, d_gd, d_negExtra, d_outSlew, d_negSlew, d_slewIn, d_sens, d_slewCoef, d_slewCoefNeg,
+                d_cuts, d_lib, d_ht, params.fanoutAlpha, params.piFanoutAlpha, params.slewBeta,
+                params.fanoutReg, params.fanoutPivot, tau, params.piPhaseAware, params.strashAware,
+                params.adpW, params.tnsRho, d_menuOut);
+            CHECK_CUDA(cudaDeviceSynchronize());
+            auto t3 = std::chrono::steady_clock::now();
+            msEval += std::chrono::duration<double, std::milli>(t3 - t2).count();
+
+            std::vector<MenuSlot> hMenu(static_cast<size_t>(nObjs) * 4);
+            std::vector<int> hFo(nObjs), hNegFo(nObjs);
+            std::vector<float> hArr(nObjs), hReq(nObjs);
+            std::vector<Cut4B> hCuts(static_cast<size_t>(nObjs) * kCutSetSize);
+            CHECK_CUDA(cudaMemcpy(hMenu.data(), d_menuOut, static_cast<size_t>(nObjs) * 4 * sizeof(MenuSlot), cudaMemcpyDeviceToHost));
+            CHECK_CUDA(cudaMemcpy(hFo.data(), d_fo, nObjs * sizeof(int), cudaMemcpyDeviceToHost));
+            CHECK_CUDA(cudaMemcpy(hNegFo.data(), d_negFo, nObjs * sizeof(int), cudaMemcpyDeviceToHost));
+            CHECK_CUDA(cudaMemcpy(hArr.data(), d_arr, nObjs * sizeof(float), cudaMemcpyDeviceToHost));
+            CHECK_CUDA(cudaMemcpy(hReq.data(), d_req, nObjs * sizeof(float), cudaMemcpyDeviceToHost));
+            CHECK_CUDA(cudaMemcpy(hCuts.data(), d_cuts, static_cast<size_t>(nObjs) * kCutSetSize * sizeof(Cut4B), cudaMemcpyDeviceToHost));
+
+            cudaFree(d_nodeLv); cudaFree(d_menuOut);
+            cudaFree(d_f0); cudaFree(d_f1); cudaFree(d_outs); cudaFree(d_fo); cudaFree(d_negFo); cudaFree(d_slewArg);
+            cudaFree(d_foOff); cudaFree(d_foCursor); cudaFree(d_foEdge);
+            cudaFree(d_arr); cudaFree(d_req); cudaFree(d_reqNeg); cudaFree(d_gd);
+            cudaFree(d_negExtra); cudaFree(d_outSlew); cudaFree(d_negSlew); cudaFree(d_slewIn);
+            cudaFree(d_sens); cudaFree(d_slewCoef); cudaFree(d_slewCoefNeg); cudaFree(d_poArr); cudaFree(d_phi);
+            cudaFree(d_top3); cudaFree(d_negTop3);
+            cudaFree(d_cuts); cudaFree(d_ht); cudaFree(d_candOut);
+
+            robin_hood::unordered_flat_map<uint64_t, int> origStrash;
+            if (params.strashAware) {
+                origStrash.reserve(nNodes * 2 + 64);
+                for (int id = nPIs + 1; id < nObjs; ++id) {
+                    int l0 = f0[id], l1 = f1[id];
+                    if (l0 > l1) std::swap(l0, l1);
+                    uint64_t key = (static_cast<uint64_t>(static_cast<uint32_t>(l0)) << 32) | static_cast<uint32_t>(l1);
+                    origStrash.emplace(key, id);
+                }
+            }
+
+            struct GradCandHost {
+                int cls, rt, uPhase, flip, deltaAnd, wireLit;
+                int leaves[4];
+                int match[54];
+                int hitCnt, hitIds[8];
+                std::vector<int> remAll, remStrict;
+                std::vector<SubGate> subGates;
+                std::vector<std::pair<int, int>> foDeltas; // external (node, delta)
+            };
+            struct GradRegionHost {
+                int root;
+                float weight;
+                std::vector<GradCandHost> cands; // non-noop candidates (1..4)
+                std::vector<int> remStrictUnion;
+                std::vector<int> refsUnion;
+            };
+
+            std::vector<GradRegionHost> candRegions;
+            candRegions.reserve(nNodes / 4 + 16);
+
+            auto addUnique = [](std::vector<int> & v, int x) {
+                if (x <= 0) return;
+                for (int y : v) if (y == x) return;
+                v.push_back(x);
+            };
+
+            for (int root = nPIs + 1; root < nObjs; ++root) {
+                MenuSlot slots[4];
+                int nRaw = 0;
+                for (int s = 0; s < 4; ++s) {
+                    const MenuSlot & ms = hMenu[static_cast<size_t>(root) * 4 + s];
+                    if (ms.cutSlot < 0 || ms.subgr < 0) continue;
+                    bool dup = false;
+                    for (int prev = 0; prev < nRaw; ++prev) {
+                        if (slots[prev].cutSlot == ms.cutSlot && slots[prev].subgr == ms.subgr) { dup = true; break; }
+                    }
+                    if (!dup) slots[nRaw++] = ms;
+                }
+                if (nRaw == 0) continue;
+
+                GradRegionHost reg;
+                reg.root = root;
+                reg.weight = 0.0f;
+                float bestAdp = -kInf, bestDj = 0.0f;
+                for (int s = 0; s < nRaw; ++s) {
+                    const MenuSlot & ms = slots[s];
+                    Cut4B cut = hCuts[static_cast<size_t>(root) * kCutSetSize + ms.cutSlot];
+                    if (!cut.used || cut.nLeaves < 3) continue;
+                    if (cut.nLeaves == 3) cut.leaves[3] = 0;
+
+                    int uPhase = hLib.pPhases[cut.truthtable];
+                    int cls = hLib.pMap[cut.truthtable];
+                    const int * perm = hLib.pPerms4[hLib.pPerms[cut.truthtable]];
+                    int leaves[4];
+                    for (int j = 0; j < 4; ++j) leaves[j] = cut.leaves[perm[j]];
+                    int rt = hLib.pSubgr[cls][ms.subgr];
+
+                    bool ttOk = false;
+                    uint16_t origTT = computeConeTruth(root, leaves, nPIs, f0, f1, ttOk);
+                    int flip = 0;
+                    if (!ttOk || !verifyCandFlip(origTT, cls, rt, uPhase, hLib, flip)) continue;
+
+                    std::vector<int> remAll, remStrict;
+                    collectBoundedMffcHost(root, leaves, nPIs, f0, f1, hFo, remAll, remStrict);
+
+                    int match[54];
+                    uint64_t isC = 0;
+                    for (int j = 0; j < 54; ++j) match[j] = -1;
+                    for (int j = 0; j < 4; ++j) {
+                        match[j] = leaves[j];
+                        if ((uPhase >> j) & 1) isC |= (1ULL << j);
+                    }
+                    auto inRemAll = [&](int u) {
+                        for (int r : remAll) if (r == u) return true;
+                        return false;
+                    };
+                    if (params.strashAware) {
+                        int nLibN = hLib.nNodes[cls];
+                        for (int j = 0; j < nLibN; ++j) {
+                            int num = j + 4;
+                            int i0 = hLib.fanin0[cls][j], i1 = hLib.fanin1[cls][j];
+                            if (match[i0] == -1 || match[i1] == -1 || match[i0] == root || match[i1] == root) continue;
+                            int c0 = ((isC >> i0) & 1) ^ hLib.isC0[cls][j];
+                            int c1 = ((isC >> i1) & 1) ^ hLib.isC1[cls][j];
+                            int l0 = (match[i0] << 1) | c0, l1 = (match[i1] << 1) | c1;
+                            if (l0 > l1) std::swap(l0, l1);
+                            uint64_t key = (static_cast<uint64_t>(static_cast<uint32_t>(l0)) << 32) | static_cast<uint32_t>(l1);
+                            auto it = origStrash.find(key);
+                            if (it != origStrash.end() && hNodeLv[it->second] < hNodeLv[root] && !inRemAll(it->second)) {
+                                match[num] = it->second;
+                            }
+                        }
+                    }
+
+                    // Build compact micro-subgraph & external fanout deltas
+                    int origRefs[4] = {0, 0, 0, 0}, origRefsNeg[4] = {0, 0, 0, 0};
+                    for (int u : remAll) {
+                        int lits[2] = {f0[u], f1[u]};
+                        for (int l : lits) {
+                            int src = l >> 1;
+                            for (int j = 0; j < 4; ++j) {
+                                if (leaves[j] == src) {
+                                    origRefs[j]++;
+                                    if (l & 1) origRefsNeg[j]++;
+                                }
+                            }
+                        }
+                    }
+                    int candRefs[4] = {0, 0, 0, 0}, candRefsNeg[4] = {0, 0, 0, 0};
+                    int hitIds[8], hitDelta[8], hitCnt = 0;
+                    auto addHit = [&](int u, int d) {
+                        if (u <= 0) return;
+                        for (int t = 0; t < hitCnt; ++t) if (hitIds[t] == u) { hitDelta[t] += d; return; }
+                        if (hitCnt < 8) { hitIds[hitCnt] = u; hitDelta[hitCnt] = d; hitCnt++; }
+                    };
+
+                    GradCandHost gc;
+                    gc.cls = cls; gc.rt = rt; gc.uPhase = uPhase; gc.flip = flip;
+                    gc.wireLit = -1;
+                    for (int j = 0; j < 4; ++j) gc.leaves[j] = leaves[j];
+                    for (int j = 0; j < 54; ++j) gc.match[j] = match[j];
+
+                    int nodesAdded = 0;
+                    if (rt < 4) {
+                        int p = (((uPhase >> rt) & 1) ^ flip);
+                        gc.wireLit = (leaves[rt] << 1) | p;
+                        candRefs[rt] += hFo[root];
+                        if (leaves[rt] > 0 && leaves[rt] <= nPIs && params.piPhaseAware) {
+                            int rNeg = hNegFo[root];
+                            candRefsNeg[rt] += (p == 0) ? rNeg : (hFo[root] - rNeg);
+                        }
+                    } else if (match[rt] != -1) {
+                        gc.wireLit = (match[rt] << 1) | flip;
+                        addHit(match[rt], hFo[root]);
+                    } else {
+                        uint64_t um = 1ULL << rt;
+                        for (int j = rt; j >= 4; --j) {
+                            if ((um >> j) & 1ULL) {
+                                if (match[j] != -1) continue;
+                                um |= (1ULL << hLib.fanin0[cls][j - 4]);
+                                um |= (1ULL << hLib.fanin1[cls][j - 4]);
+                            }
+                        }
+                        int localIdx[54];
+                        int eFo[54];
+                        for (int j = 0; j < 54; ++j) { localIdx[j] = -1; eFo[j] = 0; }
+                        for (int j = 4; j <= rt; ++j) {
+                            if (!((um >> j) & 1ULL) || match[j] != -1) continue;
+                            localIdx[j] = nodesAdded++;
+                        }
+                        if (nodesAdded == 0 || nodesAdded > kGradMaxSubGates) continue;
+                        for (int j = 4; j <= rt; ++j) {
+                            if (localIdx[j] < 0) continue;
+                            int ins[2] = {hLib.fanin0[cls][j - 4], hLib.fanin1[cls][j - 4]};
+                            int cs[2] = {hLib.isC0[cls][j - 4], hLib.isC1[cls][j - 4]};
+                            for (int b = 0; b < 2; ++b) {
+                                int en = ins[b];
+                                if (en < 4) {
+                                    candRefs[en]++;
+                                    if ((((uPhase >> en) & 1) ^ cs[b]) != 0) candRefsNeg[en]++;
+                                } else if (match[en] != -1) {
+                                    addHit(match[en], 1);
+                                } else {
+                                    eFo[en]++;
+                                }
+                            }
+                        }
+                        gc.subGates.resize(nodesAdded);
+                        for (int j = 4; j <= rt; ++j) {
+                            if (localIdx[j] < 0) continue;
+                            int g = localIdx[j];
+                            int ins[2] = {hLib.fanin0[cls][j - 4], hLib.fanin1[cls][j - 4]};
+                            int cs[2] = {hLib.isC0[cls][j - 4], hLib.isC1[cls][j - 4]};
+                            int enc[2];
+                            for (int b = 0; b < 2; ++b) {
+                                int en = ins[b];
+                                if (en < 4) {
+                                    int ph = (((uPhase >> en) & 1) ^ cs[b]);
+                                    enc[b] = (leaves[en] << 1) | ph;
+                                } else if (match[en] != -1) {
+                                    enc[b] = (match[en] << 1) | cs[b];
+                                } else {
+                                    enc[b] = -1 - localIdx[en];
+                                }
+                            }
+                            float ld = (j == rt) ? 0.0f : (eFo[j] > 1 ? static_cast<float>(eFo[j] - 1) : 0.0f);
+                            gc.subGates[g] = {enc[0], enc[1], ld};
+                        }
+                    }
+
+                    gc.deltaAnd = nodesAdded - static_cast<int>(remAll.size());
+                    gc.hitCnt = hitCnt;
+                    for (int t = 0; t < hitCnt; ++t) gc.hitIds[t] = hitIds[t];
+                    gc.remAll = std::move(remAll);
+                    gc.remStrict = std::move(remStrict);
+
+                    // Sparse external fanout deltas (only external leaves and hitIds, never remStrict)
+                    for (int j = 0; j < 4; ++j) {
+                        int lf = leaves[j];
+                        if (lf <= 0) continue;
+                        bool negOnly = (lf <= nPIs && params.piPhaseAware);
+                        int d = negOnly ? (candRefsNeg[j] - origRefsNeg[j]) : (candRefs[j] - origRefs[j]);
+                        if (d != 0) gc.foDeltas.emplace_back(lf, d);
+                    }
+                    for (int t = 0; t < hitCnt; ++t) {
+                        if (hitDelta[t] != 0 && hitIds[t] > nPIs) gc.foDeltas.emplace_back(hitIds[t], hitDelta[t]);
+                    }
+
+                    for (int u : gc.remStrict) addUnique(reg.remStrictUnion, u);
+                    for (int j = 0; j < 4; ++j) addUnique(reg.refsUnion, leaves[j]);
+                    for (int t = 0; t < hitCnt; ++t) addUnique(reg.refsUnion, hitIds[t]);
+
+                    if (ms.score > bestAdp) bestAdp = ms.score;
+                    if (ms.deltaJ > bestDj) bestDj = ms.deltaJ;
+                    reg.cands.push_back(std::move(gc));
+                }
+                if (!reg.cands.empty()) {
+                    reg.weight = std::max(1e-6f, bestAdp) + 1e-4f * std::max(0.0f, bestDj);
+                    candRegions.push_back(std::move(reg));
+                }
+            }
+
+            // Linear-time GWMIN conflict-free region selection (4 strict invariants)
+            std::vector<int> cntRemStrict(nObjs, 0), cntRefs(nObjs, 0), cntRoot(nObjs, 0);
+            for (const auto & reg : candRegions) {
+                cntRoot[reg.root] = 1;
+                for (int u : reg.remStrictUnion) cntRemStrict[u]++;
+                for (int u : reg.refsUnion) cntRefs[u]++;
+            }
+            std::vector<int> order(candRegions.size());
+            std::vector<float> gwScore(candRegions.size(), 0.0f);
+            for (size_t i = 0; i < candRegions.size(); ++i) {
+                order[i] = static_cast<int>(i);
+                const auto & reg = candRegions[i];
+                int deg = cntRemStrict[reg.root];
+                for (int u : reg.remStrictUnion) deg += (cntRemStrict[u] - 1) + cntRefs[u] + cntRoot[u];
+                for (int u : reg.refsUnion) deg += cntRemStrict[u];
+                gwScore[i] = reg.weight / (1.0f + static_cast<float>(std::max(0, deg)));
+            }
+            std::sort(order.begin(), order.end(), [&](int a, int b) {
+                if (gwScore[a] != gwScore[b]) return gwScore[a] > gwScore[b];
+                return candRegions[a].root < candRegions[b].root;
+            });
+
+            std::vector<uint8_t> usedRoot(nObjs, 0), delStrict(nObjs, 0), prot(nObjs, 0), refByDownstream(nObjs, 0);
+            std::vector<int> activeIdx;
+            activeIdx.reserve(candRegions.size());
+            for (int idxR : order) {
+                const auto & reg = candRegions[idxR];
+                if (usedRoot[reg.root] || delStrict[reg.root]) continue;
+                bool conflict = false;
+                for (int u : reg.remStrictUnion) {
+                    if (delStrict[u] || prot[u] || usedRoot[u]) { conflict = true; break; }
+                }
+                if (!conflict) {
+                    for (int u : reg.refsUnion) {
+                        if (delStrict[u]) { conflict = true; break; }
+                    }
+                }
+                if (conflict) continue;
+
+                usedRoot[reg.root] = 1;
+                prot[reg.root] = 1;
+                for (int u : reg.remStrictUnion) delStrict[u] = 1;
+                for (int u : reg.refsUnion) { prot[u] = 1; refByDownstream[u] = 1; }
+                activeIdx.push_back(idxR);
+            }
+
+            // Invariant 4: strip wire-fold candidates from any active root referenced by a downstream active region
+            std::vector<int> finalActiveIdx;
+            finalActiveIdx.reserve(activeIdx.size());
+            for (int idxR : activeIdx) {
+                auto & reg = candRegions[idxR];
+                if (refByDownstream[reg.root]) {
+                    std::vector<GradCandHost> kept;
+                    for (auto & gc : reg.cands) {
+                        if (gc.wireLit < 0) kept.push_back(std::move(gc));
+                    }
+                    reg.cands.swap(kept);
+                }
+                if (!reg.cands.empty()) finalActiveIdx.push_back(idxR);
+            }
+
+            int M = static_cast<int>(finalActiveIdx.size());
+            if (M == 0) {
+                auto t4 = std::chrono::steady_clock::now();
+                msSelectRebuild += std::chrono::duration<double, std::milli>(t4 - t3).count();
+                break;
+            }
+
+            // Pack GradProblem for GPU joint gradient solver
+            GradProblem prob;
+            prob.nPIs = nPIs; prob.nPOs = nPOs; prob.nObjs = nObjs; prob.nNodes = nNodes;
+            prob.maxLv = maxLv; prob.depth0 = depth; prob.tau0 = tau;
+            prob.f0 = &f0; prob.f1 = &f1; prob.outs = &outs; prob.lvOff = &lvOff;
+            prob.foBase.assign(nObjs, 0);
+            for (int u = 1; u <= nPIs; ++u) prob.foBase[u] = params.piPhaseAware ? hNegFo[u] : hFo[u];
+            for (int u = nPIs + 1; u < nObjs; ++u) prob.foBase[u] = hFo[u];
+
+            prob.M = M;
+            prob.regionRoot.resize(M);
+            prob.isRegionRoot.assign(nObjs, -1);
+            prob.candCount.resize(M);
+            prob.candDeltaAnd.assign(M * kGradMaxK, 0);
+            prob.candWireLit.assign(M * kGradMaxK, -1);
+            prob.candNumGates.assign(M * kGradMaxK, 0);
+            prob.candSubGates.assign(static_cast<size_t>(M) * kGradMaxK * kGradMaxSubGates, {0, 0, 0.0f});
+            prob.foDeltaOffset.assign(M * kGradMaxK + 1, 0);
+
+            for (int m = 0; m < M; ++m) {
+                const auto & reg = candRegions[finalActiveIdx[m]];
+                int r = reg.root;
+                prob.regionRoot[m] = r;
+                prob.isRegionRoot[r] = m;
+                int K = std::min(kGradMaxK, 1 + static_cast<int>(reg.cands.size()));
+                prob.candCount[m] = K;
+
+                // k = 0 (no-op): 1-gate micro-subgraph reading original (f0[r], f1[r])
+                int slot0 = m * kGradMaxK + 0;
+                prob.candDeltaAnd[slot0] = 0;
+                prob.candWireLit[slot0] = -1;
+                prob.candNumGates[slot0] = 1;
+                prob.candSubGates[slot0 * kGradMaxSubGates + 0] = {f0[r], f1[r], 0.0f};
+                prob.foDeltaOffset[slot0 + 1] = static_cast<int>(prob.foDeltaNode.size());
+
+                for (int k = 1; k < K; ++k) {
+                    const auto & gc = reg.cands[k - 1];
+                    int slot = m * kGradMaxK + k;
+                    prob.candDeltaAnd[slot] = gc.deltaAnd;
+                    prob.candWireLit[slot] = gc.wireLit;
+                    if (gc.wireLit < 0) {
+                        int nG = static_cast<int>(gc.subGates.size());
+                        prob.candNumGates[slot] = nG;
+                        for (int g = 0; g < nG; ++g) {
+                            prob.candSubGates[slot * kGradMaxSubGates + g] = gc.subGates[g];
+                        }
+                    }
+                    for (const auto & kv : gc.foDeltas) {
+                        prob.foDeltaNode.push_back(kv.first);
+                        prob.foDeltaVal.push_back(kv.second);
+                    }
+                    prob.foDeltaOffset[slot + 1] = static_cast<int>(prob.foDeltaNode.size());
+                }
+                for (int k = K; k < kGradMaxK; ++k) {
+                    prob.foDeltaOffset[m * kGradMaxK + k + 1] = static_cast<int>(prob.foDeltaNode.size());
+                }
+            }
+
+            std::vector<int> chosenCand;
+            GradSolveStats gStats = solveJointGradGPU(prob, params, chosenCand);
+
+            if (params.verbose >= 1) {
+                printf("rw4b-grad round %d: M=%d applied=%d theta=%.2f avgMaxP=%.3f loss=%.5f->%.5f discD=%.2f(D0=%.2f) dAND=%d grad=%.1fms disc=%.1fms\n",
+                       rnd + 1, M, gStats.selectedNonZero, gStats.bestTheta, gStats.avgMaxProb,
+                       gStats.initLoss, gStats.finalLoss, gStats.bestDiscDelay, depth,
+                       gStats.bestDiscDeltaAnd, gStats.msGradLoop, gStats.msDiscSearch);
+            }
+
+            if (gStats.selectedNonZero == 0) {
+                auto t4 = std::chrono::steady_clock::now();
+                msSelectRebuild += std::chrono::duration<double, std::milli>(t4 - t3).count();
+                break;
+            }
+            totalApplied += gStats.selectedNonZero;
+
+            // Mark ONLY the remStrict of actually chosen non-noop candidates for clean StrashRebuild (--fo-cap 0)
+            std::vector<uint8_t> finalDelStrict(nObjs, 0);
+            std::vector<const GradCandHost *> chosenOp(nObjs, nullptr);
+            for (int m = 0; m < M; ++m) {
+                int ck = chosenCand[m];
+                if (ck <= 0) continue;
+                const auto & reg = candRegions[finalActiveIdx[m]];
+                const auto & gc = reg.cands[ck - 1];
+                chosenOp[reg.root] = &gc;
+                for (int u : gc.remStrict) finalDelStrict[u] = 1;
+            }
+
+            StrashRebuild builder(nPIs, nNodes, 0);
+            std::vector<int> litMap(nObjs, 0);
+            for (int i = 0; i <= nPIs; ++i) litMap[i] = i << 1;
+
+            for (int id = nPIs + 1; id < nObjs; ++id) {
+                if (finalDelStrict[id]) continue;
+                const GradCandHost * op = chosenOp[id];
+                if (!op) {
+                    int nl0 = litMap[f0[id] >> 1] ^ (f0[id] & 1);
+                    int nl1 = litMap[f1[id] >> 1] ^ (f1[id] & 1);
+                    litMap[id] = builder.andLit(nl0, nl1, false);
+                } else {
+                    int localLit[54];
+                    for (int j = 0; j < 4; ++j) {
+                        int base = op->leaves[j] > 0 ? litMap[op->leaves[j]] : 0;
+                        localLit[j] = base ^ (((op->uPhase >> j) & 1) ? 1 : 0);
+                    }
+                    uint64_t um = 1ULL << op->rt;
+                    for (int j = op->rt; j >= 4; --j) {
+                        if ((um >> j) & 1ULL) {
+                            if (op->match[j] != -1) continue;
+                            um |= (1ULL << hLib.fanin0[op->cls][j - 4]);
+                            um |= (1ULL << hLib.fanin1[op->cls][j - 4]);
+                        }
+                    }
+                    for (int j = 4; j <= op->rt; ++j) {
+                        if (!((um >> j) & 1ULL)) continue;
+                        if (op->match[j] != -1) {
+                            localLit[j] = litMap[op->match[j]];
+                            continue;
+                        }
+                        int i0 = hLib.fanin0[op->cls][j - 4], i1 = hLib.fanin1[op->cls][j - 4];
+                        int nl0 = localLit[i0] ^ (hLib.isC0[op->cls][j - 4] ? 1 : 0);
+                        int nl1 = localLit[i1] ^ (hLib.isC1[op->cls][j - 4] ? 1 : 0);
+                        localLit[j] = builder.andLit(nl0, nl1, false);
+                    }
+                    litMap[id] = localLit[op->rt] ^ op->flip;
+                }
+            }
+
+            std::vector<int> newOuts(nPOs);
+            for (int i = 0; i < nPOs; ++i) newOuts[i] = litMap[outs[i] >> 1] ^ (outs[i] & 1);
+
+            int bObjs = static_cast<int>(builder.f0.size());
+            std::vector<uint8_t> keep(bObjs, 0);
+            std::vector<int> stk;
+            stk.reserve(bObjs);
+            for (int l : newOuts) {
+                int n = l >> 1;
+                if (n > nPIs && !keep[n]) { keep[n] = 1; stk.push_back(n); }
+            }
+            while (!stk.empty()) {
+                int u = stk.back(); stk.pop_back();
+                for (int s : {builder.f0[u] >> 1, builder.f1[u] >> 1}) {
+                    if (s > nPIs && !keep[s]) { keep[s] = 1; stk.push_back(s); }
+                }
+            }
+            std::vector<int> remap(bObjs, 0);
+            for (int i = 0; i <= nPIs; ++i) remap[i] = i;
+            std::vector<int> nextF0(nPIs + 1, 0), nextF1(nPIs + 1, 0);
+            for (int i = nPIs + 1; i < bObjs; ++i) {
+                if (!keep[i]) continue;
+                int nid = static_cast<int>(nextF0.size());
+                remap[i] = nid;
+                int l0 = (remap[builder.f0[i] >> 1] << 1) | (builder.f0[i] & 1);
+                int l1 = (remap[builder.f1[i] >> 1] << 1) | (builder.f1[i] & 1);
+                if (l0 > l1) std::swap(l0, l1);
+                nextF0.push_back(l0);
+                nextF1.push_back(l1);
+            }
+            for (int i = 0; i < nPOs; ++i) newOuts[i] = (remap[newOuts[i] >> 1] << 1) | (newOuts[i] & 1);
+            f0.swap(nextF0); f1.swap(nextF1); outs.swap(newOuts);
+
+            auto t4 = std::chrono::steady_clock::now();
+            msSelectRebuild += std::chrono::duration<double, std::milli>(t4 - t3).count();
+            continue;
+        }
+
         evaluateNode4BKernel<<<(nNodes + kBlockSize - 1) / kBlockSize, kBlockSize>>>(
             nPIs, nObjs, P, depth, phi, d_f0, d_f1, d_fo, d_negFo, d_foOff, d_foEdge,
             d_arr, d_req, d_gd, d_negExtra, d_outSlew, d_negSlew, d_slewIn, d_sens, d_slewCoef, d_slewCoefNeg,

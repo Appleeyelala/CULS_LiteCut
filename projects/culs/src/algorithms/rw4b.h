@@ -22,10 +22,10 @@ struct Rw4BParams {
     bool fanoutBudget = true;
     int perRootK = 2;
     float budgetTol = 1e-4f;
-    int foCap = 16;         // Fanout-capped strash limit (0 = unlimited)
+    int foCap = 0;          // Fanout-capped strash limit (0 = unlimited / no duplicate gates)
     bool adpScore = true;   // P0-3: scale-invariant ADP first-order scoring w*(dD/D) - da/A
-    float adpW = 1.5f;      // P0-3: delay weight w in ADP score
-    float slackKappa = 1.0f;// P0-2/P0-3: near-critical gate slack(root) <= kappa * tau
+    float adpW = 2.0f;      // P0-3: delay weight w in ADP score
+    float slackKappa = 2.0f;// P0-2/P0-3: near-critical gate slack(root) <= kappa * tau
     int macroMode = 0; // 0: pure rw4b, 1: v3-gated GPU balance (-b), 2: v3-gated GPU struct {orig,bal,rfz,bal_rfz} (-m)
     int verbose = 1;
 };

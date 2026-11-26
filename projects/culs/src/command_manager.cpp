@@ -109,9 +109,9 @@ int rw4bHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals) {
     bool noBudget = false;
     bool legacyV1 = false;
     bool noAdp = false;
-    float adpW = 1.5f;
-    float slackKappa = 1.0f;
-    int foCap = 16;
+    float adpW = 2.0f;
+    float slackKappa = 2.0f;
+    int foCap = 0;
 
     CLI::App parser("Perform GPU fanout-aware global sensitivity 4B rewrite");
     parser.add_option("-r", rounds, descWithDefault("number of rounds", rounds));

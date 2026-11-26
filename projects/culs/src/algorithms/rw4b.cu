@@ -34,6 +34,7 @@ static constexpr int kAreaSlotStart = 6;
 static constexpr int kAreaSlotEnd = 12;  // [6, 12) -> 6 native area/sharing slots
 static constexpr int kBlockSize = 256;
 static constexpr int kMaxMffc = 24;
+static constexpr int kMaxCone = 32;
 static constexpr int kTopK = 2;
 static constexpr float kInf = 1e30f;
 
@@ -706,6 +707,7 @@ __global__ void evaluateNode4BKernel(
     };
 
     int remIds[kMaxMffc], remRem[kMaxMffc];
+    int coneIds[kMaxCone];
     int match[54];
     float cvMax[54], cvLse[54], cvSlew[54];
 
@@ -774,20 +776,55 @@ __global__ void evaluateNode4BKernel(
             remIds[b + 1] = key;
         }
 
-        // Compute orig_refs, orig_refs_neg, leaf_delays, local_sens over remIds
+        // 1. Compute orig_refs and orig_refs_neg over MFFC (remIds)
         int origRefs[4] = {0, 0, 0, 0};
         int origRefsNeg[4] = {0, 0, 0, 0};
-        float remDist[kMaxMffc], remSens[kMaxMffc];
-        for (int a = 0; a < remCnt; ++a) { remDist[a] = -1.0f; remSens[a] = 0.0f; }
-        remDist[0] = d_gateDelay[root];
-        remSens[0] = sRoot;
+        for (int a = 0; a < remCnt; ++a) {
+            int u = remIds[a];
+            int lits[2] = {d_f0[u], d_f1[u]};
+            for (int k = 0; k < 2; ++k) {
+                int lit = lits[k];
+                int li = isLeafIdx(lit >> 1, leaves);
+                if (li >= 0) {
+                    origRefs[li]++;
+                    if (lit & 1) origRefsNeg[li]++;
+                }
+            }
+        }
+
+        // 2. Discover FULL 4-cut interior cone (including shared multi-fanout nodes!) for exact jOrig & local_sens
+        int coneCnt = 0;
+        coneIds[coneCnt++] = root;
+        int cHead = 0;
+        while (cHead < coneCnt) {
+            int u = coneIds[cHead++];
+            int lits[2] = {d_f0[u], d_f1[u]};
+            for (int k = 0; k < 2; ++k) {
+                int pred = lits[k] >> 1;
+                if (pred <= nPIs || isLeafIdx(pred, leaves) >= 0) continue;
+                if (coneCnt < kMaxCone && !inList(pred, coneIds, coneCnt)) {
+                    coneIds[coneCnt++] = pred;
+                }
+            }
+        }
+        // Sort coneIds descending for exact topological backward distance & local_sens
+        for (int a = 1; a < coneCnt; ++a) {
+            int key = coneIds[a], b = a - 1;
+            while (b >= 0 && coneIds[b] < key) { coneIds[b + 1] = coneIds[b]; --b; }
+            coneIds[b + 1] = key;
+        }
+
+        float coneDist[kMaxCone], coneSens[kMaxCone];
+        for (int a = 0; a < coneCnt; ++a) { coneDist[a] = -1.0f; coneSens[a] = 0.0f; }
+        coneDist[0] = d_gateDelay[root];
+        coneSens[0] = sRoot;
         float leafDelays[4] = {-1.0f, -1.0f, -1.0f, -1.0f};
         float leafLocalSens[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 
-        for (int a = 0; a < remCnt; ++a) {
-            int u = remIds[a];
-            float du = remDist[a];
-            float su = remSens[a];
+        for (int a = 0; a < coneCnt; ++a) {
+            int u = coneIds[a];
+            float du = coneDist[a];
+            float su = coneSens[a];
             int l0 = d_f0[u], l1 = d_f1[u];
             float a0 = edgeArr(l0, d_arr, d_negExtra, piPhaseAware);
             float a1 = edgeArr(l1, d_arr, d_negExtra, piPhaseAware);
@@ -802,17 +839,19 @@ __global__ void evaluateNode4BKernel(
                 float extra = (piPhaseAware && (lit & 1) && d_negExtra) ? d_negExtra[pred] : 0.0f;
                 int li = isLeafIdx(pred, leaves);
                 if (li >= 0) {
-                    origRefs[li]++;
-                    if (lit & 1) origRefsNeg[li]++;
-                    float dp = du + extra;
-                    if (dp > leafDelays[li]) leafDelays[li] = dp;
+                    if (du >= 0.0f) {
+                        float dp = du + extra;
+                        if (dp > leafDelays[li]) leafDelays[li] = dp;
+                    }
                     leafLocalSens[li] += su * ws[k];
                 } else {
-                    for (int b = a + 1; b < remCnt; ++b) {
-                        if (remIds[b] == pred) {
-                            float dp = du + d_gateDelay[pred];
-                            if (dp > remDist[b]) remDist[b] = dp;
-                            remSens[b] += su * ws[k];
+                    for (int b = a + 1; b < coneCnt; ++b) {
+                        if (coneIds[b] == pred) {
+                            if (du >= 0.0f) {
+                                float dp = du + d_gateDelay[pred] + extra;
+                                if (dp > coneDist[b]) coneDist[b] = dp;
+                            }
+                            coneSens[b] += su * ws[k];
                             break;
                         }
                     }

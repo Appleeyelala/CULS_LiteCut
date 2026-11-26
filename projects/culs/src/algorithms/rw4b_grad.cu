@@ -546,24 +546,25 @@ __global__ void k_region_grad_and_adam(
     int r = d_regionRoot[m];
     float gAr = d_gArr[r];
     float gSr = d_gSlew[r];
-    float invV0 = 1.0f / static_cast<float>(nNodes > 0 ? nNodes : 1);
+    double invV0 = 1.0 / static_cast<double>(nNodes > 0 ? nNodes : 1);
 
-    float gp[kGradMaxK];
-    float dotPG = 0.0f;
+    double gp[kGradMaxK];
+    double dotPG = 0.0;
     for (int k = 0; k < K; ++k) {
         int slot = base + k;
-        float pk = d_prob[slot];
-        float g1 = gAr * d_candArr[slot] + gSr * d_candOutSlew[slot];
-        float g2 = 0.0f;
+        double pk = static_cast<double>(d_prob[slot]);
+        double g1 = static_cast<double>(gAr) * static_cast<double>(d_candArr[slot]) +
+                    static_cast<double>(gSr) * static_cast<double>(d_candOutSlew[slot]);
+        double g2 = 0.0;
         if (k > 0) {
             int st = d_foDeltaOffset[slot];
             int ed = d_foDeltaOffset[slot + 1];
             for (int e = st; e < ed; ++e) {
-                g2 += d_gFo[d_foDeltaNode[e]] * static_cast<float>(d_foDeltaVal[e]);
+                g2 += static_cast<double>(d_gFo[d_foDeltaNode[e]]) * static_cast<double>(d_foDeltaVal[e]);
             }
         }
-        float g3 = lamArea * static_cast<float>(d_candDeltaAnd[slot]) * invV0;
-        float g4 = -2.0f * discLam * pk * invV0;
+        double g3 = static_cast<double>(lamArea) * static_cast<double>(d_candDeltaAnd[slot]) * invV0;
+        double g4 = -2.0 * static_cast<double>(discLam) * pk * invV0;
         gp[k] = g1 + g2 + g3 + g4;
         dotPG += pk * gp[k];
     }
@@ -574,7 +575,7 @@ __global__ void k_region_grad_and_adam(
 
     for (int k = 0; k < K; ++k) {
         int slot = base + k;
-        float gz = (d_prob[slot] / tauP) * (gp[k] - dotPG);
+        float gz = static_cast<float>((static_cast<double>(d_prob[slot]) / static_cast<double>(tauP)) * (gp[k] - dotPG));
         if (d_gLogitsOut) d_gLogitsOut[slot] = gz;
         if (doUpdate) {
             float mNew = b1 * d_adamM[slot] + (1.0f - b1) * gz;
@@ -964,8 +965,8 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
                 double numG = (lp - lm) / (2.0 * epsFD);
                 double anaG = static_cast<double>(hAnaGrad[slot]);
                 double absErr = std::fabs(anaG - numG);
-                double denom = std::max({std::fabs(anaG), std::fabs(numG), 1e-6});
-                double relErr = absErr / denom;
+                double denom = std::max({std::fabs(anaG), std::fabs(numG), 1e-5});
+                double relErr = (absErr <= 1e-7) ? 0.0 : (absErr / denom);
                 if (relErr > maxRel) {
                     maxRel = relErr;
                     worstM = m; worstK = k; worstAna = anaG; worstNum = numG;

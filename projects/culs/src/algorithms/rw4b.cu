@@ -467,9 +467,9 @@ __device__ inline void insertHybridCut(Cut4B * cuts, Cut4B cand) {
     int worstA = -1;
     for (int pass = 0; pass < 3 && worstA == -1; ++pass) {
         for (int i = kAreaSlotStart; i < kAreaSlotEnd; ++i) {
-            bool ok = (pass == 0 && cuts[i].nLeaves > 2) ||
+            bool ok = (pass == 0 && cuts[i].nLeaves < 2) ||
                       (pass == 1 && cuts[i].nLeaves == 2) ||
-                      (pass == 2 && cuts[i].nLeaves < 2);
+                      (pass == 2 && cuts[i].nLeaves > 2);
             if (ok && (worstA == -1 || cuts[i].value < cuts[worstA].value)) worstA = i;
         }
     }
@@ -706,7 +706,8 @@ __global__ void evaluateNode4BKernel(
         {0.0f, 0.0f, req, 0, -1, -1}
     };
 
-    int remIds[kMaxMffc], remRem[kMaxMffc];
+    int remIds[kMaxMffc];
+    int trkIds[kMaxMffc], trkRem[kMaxMffc];
     int coneIds[kMaxCone];
     int match[54];
     float cvMax[54], cvLse[54], cvSlew[54];
@@ -728,7 +729,7 @@ __global__ void evaluateNode4BKernel(
             leavesCompl[j] = (uPhase >> j) & 1;
         }
 
-        // Bounded MFFC discovery (iterative BFS/stack up to kMaxMffc)
+        // Bounded MFFC discovery (separate trkIds/trkRem so remIds never overwrites tracked entries)
         int remCnt = 0;
         int tracked = 0;
         remIds[remCnt++] = root;
@@ -741,28 +742,22 @@ __global__ void evaluateNode4BKernel(
                 if (src <= nPIs || isLeafIdx(src, leaves) >= 0) continue;
                 int pos = -1;
                 for (int t = 0; t < tracked; ++t) {
-                    if (remIds[remCnt + t] == src) { pos = t; break; }
+                    if (trkIds[t] == src) { pos = t; break; }
                 }
                 int r;
                 if (pos >= 0) {
-                    r = --remRem[pos];
+                    r = --trkRem[pos];
                 } else {
-                    if (remCnt + tracked >= kMaxMffc) continue;
-                    remIds[remCnt + tracked] = src;
+                    if (tracked >= kMaxMffc) continue;
+                    trkIds[tracked] = src;
                     r = d_fo[src] - 1;
-                    remRem[tracked] = r;
-                    tracked++;
+                    trkRem[tracked] = r;
+                    pos = tracked++;
                 }
                 if (r == 0 && remCnt < kMaxMffc && !inList(src, remIds, remCnt)) {
-                    // move src into remIds[remCnt]
-                    // compact tracked entry
-                    if (pos >= 0) {
-                        remIds[remCnt + pos] = remIds[remCnt + tracked - 1];
-                        remRem[pos] = remRem[tracked - 1];
-                        tracked--;
-                    } else {
-                        tracked--;
-                    }
+                    trkIds[pos] = trkIds[tracked - 1];
+                    trkRem[pos] = trkRem[tracked - 1];
+                    tracked--;
                     remIds[remCnt++] = src;
                 }
             }
@@ -900,7 +895,7 @@ __global__ void evaluateNode4BKernel(
             int lit0 = (match[in0] << 1) | c0;
             int lit1 = (match[in1] << 1) | c1;
             int hit = lookupHash(lit0, lit1, P, d_ht, d_f0, d_f1);
-            if (hit != -1 && hit != root && !inList(hit, remIds, remCnt)) {
+            if (hit != -1 && hit < root && !inList(hit, remIds, remCnt)) {
                 match[num] = hit;
             }
         }
@@ -939,8 +934,13 @@ __global__ void evaluateNode4BKernel(
             };
 
             if (rt < 4) {
-                // Wire directly to leaf rt
+                // Wire directly to leaf rt (conservative negative-phase accounting for PI)
                 candRefs[rt] += rootFo;
+                if (piPhaseAware && leaves[rt] > 0 && leaves[rt] <= nPIs) {
+                    int rNeg = d_negFo[root];
+                    int rPos = rootFo - rNeg;
+                    candRefsNeg[rt] += (rNeg > rPos ? rNeg : rPos);
+                }
             } else if (match[rt] != -1) {
                 addHit(match[rt], rootFo);
             } else {
@@ -985,9 +985,9 @@ __global__ void evaluateNode4BKernel(
                 if (newCnt < 0) newCnt = 0;
                 int dl = loadI(newCnt) - loadI(baseCnt);
                 float dd = coef * static_cast<float>(dl);
-                if (fanoutBudget && dd > 1e-6f) {
+                if (fanoutBudget && dd > 1e-6f && !(newCnt <= pivot && dd <= 0.5f)) {
                     float so = querySlackOtherDev(
-                        lf, negOnly, nObjs, depth, piPhaseAware, coneIds, coneCnt,
+                        lf, negOnly, nObjs, depth, piPhaseAware, remIds, remCnt,
                         d_foOff, d_foEdge, d_arr, d_req, d_gateDelay, d_negExtra, d_top3, d_negTop3);
                     if (so < kInf * 0.5f && dd > (so > 0.0f ? so : 0.0f) + budgetTol) {
                         budgetOk = false;
@@ -1013,7 +1013,7 @@ __global__ void evaluateNode4BKernel(
                 if (newCnt < 0) newCnt = 0;
                 int dl = loadI(newCnt) - loadI(baseCnt);
                 float dd = coef * static_cast<float>(dl);
-                if (fanoutBudget && dd > 1e-6f) {
+                if (fanoutBudget && dd > 1e-6f && !(newCnt <= pivot && dd <= 0.5f)) {
                     float so = querySlackOtherDev(
                         u, false, nObjs, depth, piPhaseAware, remIds, remCnt,
                         d_foOff, d_foEdge, d_arr, d_req, d_gateDelay, d_negExtra, d_top3, d_negTop3);
@@ -1903,6 +1903,9 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
             int uPhase;
             int flip;
             int leaves[4];
+            int hitCnt;
+            int hitIds[8];
+            int match[54];
             std::vector<int> remAll;
             std::vector<int> remStrict;
             std::vector<TouchEntry> touched;
@@ -1969,7 +1972,7 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
                         if (l0 > l1) std::swap(l0, l1);
                         uint64_t key = (static_cast<uint64_t>(static_cast<uint32_t>(l0)) << 32) | static_cast<uint32_t>(l1);
                         auto it = origStrash.find(key);
-                        if (it != origStrash.end() && it->second != root && !inRemAll(it->second)) {
+                        if (it != origStrash.end() && it->second < root && !inRemAll(it->second)) {
                             match[num] = it->second;
                         }
                     }
@@ -2008,6 +2011,12 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
 
                 if (rt < 4) {
                     candRefs[rt] += hFo[root];
+                    if (leaves[rt] > 0 && leaves[rt] <= nPIs && params.piPhaseAware) {
+                        int p = (((uPhase >> rt) & 1) ^ flip);
+                        int rNeg = hNegFo[root];
+                        int moved = (p == 0) ? rNeg : (hFo[root] - rNeg);
+                        candRefsNeg[rt] += moved;
+                    }
                     if (leaves[rt] > 0) addInput(leaves[rt], (leaves[rt] <= nPIs && params.piPhaseAware));
                 } else if (match[rt] != -1) {
                     addHit(match[rt], hFo[root]);
@@ -2043,22 +2052,6 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
                     }
                 }
 
-                std::vector<int> coneAll;
-                {
-                    auto isLf = [&](int n) {
-                        return n == leaves[0] || n == leaves[1] || n == leaves[2] || n == leaves[3];
-                    };
-                    coneAll.push_back(root);
-                    for (size_t ci = 0; ci < coneAll.size() && coneAll.size() < kMaxCone; ++ci) {
-                        int u = coneAll[ci];
-                        for (int pred : {f0[u] >> 1, f1[u] >> 1}) {
-                            if (pred <= nPIs || isLf(pred)) continue;
-                            if (std::find(coneAll.begin(), coneAll.end(), pred) == coneAll.end()) {
-                                coneAll.push_back(pred);
-                            }
-                        }
-                    }
-                }
                 std::vector<TouchEntry> touched;
                 for (int j = 0; j < 4; ++j) {
                     int lf = leaves[j];
@@ -2070,7 +2063,7 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
                     if (coef <= 0.0f) continue;
                     int base = negOnly ? hNegFo[lf] : hFo[lf];
                     float so = (d > 0 && params.fanoutBudget)
-                        ? querySlackOtherHost(lf, negOnly, nObjs, depth, params.piPhaseAware, coneAll,
+                        ? querySlackOtherHost(lf, negOnly, nObjs, depth, params.piPhaseAware, remAll,
                                               hFoOff, hFoEdge, hArr, hReq, hGd, hNegExtra, hTop3, hNegTop3)
                         : kInf;
                     touched.push_back({lf, negOnly, d, coef, base, so});
@@ -2099,6 +2092,9 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
                 item.uPhase = uPhase;
                 item.flip = flip;
                 for (int j = 0; j < 4; ++j) item.leaves[j] = leaves[j];
+                item.hitCnt = hitCnt;
+                for (int t = 0; t < hitCnt; ++t) item.hitIds[t] = hitIds[t];
+                for (int j = 0; j < 54; ++j) item.match[j] = match[j];
                 item.remAll = std::move(remAll);
                 item.remStrict = std::move(remStrict);
                 item.touched = std::move(touched);
@@ -2143,6 +2139,9 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
             for (int j = 0; j < 4; ++j)
                 if (op.leaves[j] > 0 && delStrict[op.leaves[j]]) { conflict = true; break; }
             if (!conflict) {
+                for (int t = 0; t < op.hitCnt; ++t) if (delStrict[op.hitIds[t]]) { conflict = true; break; }
+            }
+            if (!conflict) {
                 for (int u : op.remStrict) if (prot[u]) { conflict = true; break; }
             }
             if (!conflict) {
@@ -2163,7 +2162,8 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
                     if (te.d > 0 && te.slackOther < kInf * 0.5f) {
                         int nCnt = std::max(0, te.base + a_ + te.d);
                         float inc = te.coef * float(hostLoad(nCnt) - hostLoad(te.base));
-                        if (inc > 1e-6f && inc > std::max(0.0f, te.slackOther) + params.budgetTol) {
+                        if (inc > 1e-6f && !(nCnt <= params.fanoutPivot && inc <= 0.5f) &&
+                            inc > std::max(0.0f, te.slackOther) + params.budgetTol) {
                             ok = false;
                             break;
                         }
@@ -2195,6 +2195,7 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
             for (int u : op.remStrict) delStrict[u] = 1;
             for (int u : op.remAll) prot[u] = 1;
             for (int j = 0; j < 4; ++j) if (op.leaves[j] > 0) prot[op.leaves[j]] = 1;
+            for (int t = 0; t < op.hitCnt; ++t) prot[op.hitIds[t]] = 1;
             for (const auto & te : op.touched) {
                 if (te.negOnly) accNegFo[te.node] += te.d;
                 else accFo[te.node] += te.d;
@@ -2209,12 +2210,13 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
         }
         totalApplied += static_cast<int>(chosenIdx.size());
 
-        // Exact topological strashed rebuild (with fanout-capped dedup) + PO reachability pruning
+        // Exact topological strashed rebuild (skip deleted remStrict, stop at matched nodes) + PO reachability pruning
         StrashRebuild builder(nPIs, nNodes, params.foCap);
         std::vector<int> litMap(nObjs, 0);
         for (int i = 0; i <= nPIs; ++i) litMap[i] = i << 1;
 
         for (int id = nPIs + 1; id < nObjs; ++id) {
+            if (delStrict[id]) continue; // P0-1: skip deleted MFFC interior nodes so they never inflate foCnt
             auto it = chosenIdx.find(id);
             if (it == chosenIdx.end()) {
                 int nl0 = litMap[f0[id] >> 1] ^ (f0[id] & 1);
@@ -2230,12 +2232,17 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
                 uint64_t um = 1ULL << op.rt;
                 for (int j = op.rt; j >= 4; --j) {
                     if ((um >> j) & 1ULL) {
+                        if (op.match[j] != -1) continue; // P0-1: stop expansion at strash-matched node
                         um |= (1ULL << hLib.fanin0[op.cls][j - 4]);
                         um |= (1ULL << hLib.fanin1[op.cls][j - 4]);
                     }
                 }
                 for (int j = 4; j <= op.rt; ++j) {
                     if (!((um >> j) & 1ULL)) continue;
+                    if (op.match[j] != -1) {
+                        localLit[j] = litMap[op.match[j]];
+                        continue;
+                    }
                     int i0 = hLib.fanin0[op.cls][j - 4], i1 = hLib.fanin1[op.cls][j - 4];
                     int nl0 = localLit[i0] ^ (hLib.isC0[op.cls][j - 4] ? 1 : 0);
                     int nl1 = localLit[i1] ^ (hLib.isC1[op.cls][j - 4] ? 1 : 0);

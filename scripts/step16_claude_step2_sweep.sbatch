@@ -1,6 +1,5 @@
 #!/bin/bash
 #SBATCH --job-name=rw4b-s2-sweep
-#SBATCH --partition=gpu
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=64G

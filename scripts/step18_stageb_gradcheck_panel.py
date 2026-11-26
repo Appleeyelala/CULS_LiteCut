@@ -20,7 +20,7 @@ GRAD_CHECK_CIRCUITS = [
     "forgeEDA/intra_pred_PE.aig",
 ]
 
-CHECK_RE = re.compile(r"rw4b-grad CHECK: M=(\d+) tested=(\d+) max_rel_err=([0-9.eE+-]+) max_abs_err=([0-9.eE+-]+) \[([^\]]+)\]")
+CHECK_RE = re.compile(r"rw4b-grad CHECK: M=(\d+) tested=(\d+) max_rel_err=([0-9.eE+-]+) max_abs_err=([0-9.eE+-]+) \(([^)]+)\) \[([^\]]+)\]")
 ROUND_RE = re.compile(r"rw4b-grad round (\d+):.*")
 
 
@@ -64,8 +64,8 @@ def main() -> int:
             print(f"  {rel:28s} | ERROR: no CHECK line! rc={proc.returncode}\n{out[-600:]}", flush=True)
             all_grad_ok = False
             continue
-        M, tested, rel_err, abs_err, tag = int(m.group(1)), int(m.group(2)), float(m.group(3)), float(m.group(4)), m.group(5)
-        print(f"  {rel:28s} | M={M:5d} tested={tested:3d} max_rel_err={rel_err:.3e} max_abs_err={abs_err:.3e} [{tag}]", flush=True)
+        M, tested, rel_err, abs_err, worst_str, tag = int(m.group(1)), int(m.group(2)), float(m.group(3)), float(m.group(4)), m.group(5), m.group(6)
+        print(f"  {rel:28s} | M={M:5d} tested={tested:3d} max_rel_err={rel_err:.3e} max_abs_err={abs_err:.3e} ({worst_str}) [{tag}]", flush=True)
         for rm in ROUND_RE.finditer(out):
             print(f"    {rm.group(0)}", flush=True)
         if rel_err >= 1e-4:

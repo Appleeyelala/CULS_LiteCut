@@ -794,13 +794,11 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
     };
 
     // Initialize poNorm using initial state
-    float gammaInit = 1.5f * tau0;
-    float gammaSInit = 1.0f;
     float wTotal = params.adpW;
 
-    // Optional Stage B-1 Hard Gate: Finite-Difference Gradient Check
+    // Optional Stage B-1 Hard Gate: Exact Double-Precision Central Finite-Difference Check
+    // Compares GPU float32 analytical backward gradients (hAnaGrad) against exact fp64 central FD (eps=1e-6).
     if (params.gradCheck) {
-        // Use non-uniform logits so all probabilities are non-trivial and all 4 loss terms are active
         for (int m = 0; m < M; ++m) {
             for (int k = 0; k < prob.candCount[m]; ++k) {
                 hLogits[m * kGradMaxK + k] = 0.15f * static_cast<float>((m * 7 + k * 3) % 5 - 2);
@@ -813,7 +811,129 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
         std::vector<float> hAnaGrad(MK, 0.0f);
         CHECK_CUDA(cudaMemcpy(hAnaGrad.data(), d_gLogits, MK * sizeof(float), cudaMemcpyDeviceToHost));
 
-        // Sample up to 32 regions (prioritizing wire-folds and multi-cand regions)
+        // Double-precision host mirror of exact smooth forward + loss (used ONLY for --grad-check)
+        auto softplusD = [](double x, double tau) -> double {
+            double z = x / tau;
+            if (z > 30.0) return x;
+            if (z < -30.0) return 0.0;
+            return tau * std::log1p(std::exp(z));
+        };
+        auto lse2D = [](double a, double b, double g) -> double {
+            double mx = a >= b ? a : b;
+            return mx + g * std::log(std::exp((a - mx) / g) + std::exp((b - mx) / g));
+        };
+        std::vector<double> zD(MK);
+        for (int i = 0; i < MK; ++i) zD[i] = static_cast<double>(hLogits[i]);
+
+        auto evalLossDouble = [&]() -> double {
+            std::vector<double> pD(MK, 0.0), expFoD(nObjs, 0.0), arrD(nObjs, 0.0), slewD(nObjs, 0.0);
+            for (int u = 0; u < nObjs; ++u) expFoD[u] = static_cast<double>(prob.foBase[u]);
+            for (int m = 0; m < M; ++m) {
+                int K = prob.candCount[m], base = m * kGradMaxK;
+                double mx = zD[base];
+                for (int k = 1; k < K; ++k) if (zD[base + k] > mx) mx = zD[base + k];
+                double sE = 0.0;
+                for (int k = 0; k < K; ++k) { pD[base + k] = std::exp((zD[base + k] - mx) / chkTauP); sE += pD[base + k]; }
+                for (int k = 0; k < K; ++k) {
+                    pD[base + k] /= sE;
+                    if (k > 0) {
+                        for (int e = prob.foDeltaOffset[base + k]; e < prob.foDeltaOffset[base + k + 1]; ++e) {
+                            expFoD[prob.foDeltaNode[e]] += static_cast<double>(prob.foDeltaVal[e]) * pD[base + k];
+                        }
+                    }
+                }
+            }
+            auto readLitD = [&](int lit, double & aO, double & sO) {
+                int u = lit >> 1;
+                if (u == 0) { aO = 0.0; sO = 0.0; return; }
+                if (u <= nPIs) {
+                    if (piPhaseAware && (lit & 1)) {
+                        double ld = softplusD(expFoD[u] - 1.0, kTauFo);
+                        aO = static_cast<double>(piAlpha) * ld;
+                        sO = ld;
+                    } else { aO = 0.0; sO = 0.0; }
+                    return;
+                }
+                aO = arrD[u]; sO = slewD[u];
+            };
+            const auto & hf0 = *prob.f0;
+            const auto & hf1 = *prob.f1;
+            const auto & houts = *prob.outs;
+            for (int l = 1; l <= maxLv; ++l) {
+                for (int v = lvOff[l]; v < lvOff[l + 1]; ++v) {
+                    double ldV = softplusD(expFoD[v] - 1.0, kTauFo);
+                    int m = prob.isRegionRoot[v];
+                    if (m < 0) {
+                        double a0, s0, a1, s1;
+                        readLitD(hf0[v], a0, s0); readLitD(hf1[v], a1, s1);
+                        double aIn = lse2D(a0, a1, chkGamma), sIn = lse2D(s0, s1, chkGammaS);
+                        arrD[v] = aIn + 1.0 + static_cast<double>(alpha) * ldV * (1.0 + static_cast<double>(beta) * sIn);
+                        slewD[v] = ldV;
+                    } else {
+                        int K = prob.candCount[m], base = m * kGradMaxK;
+                        double aMix = 0.0, sMix = 0.0;
+                        for (int k = 0; k < K; ++k) {
+                            int slot = base + k, wLit = prob.candWireLit[slot];
+                            double aK, sOutK;
+                            if (wLit >= 0) {
+                                readLitD(wLit, aK, sOutK);
+                            } else {
+                                int nG = prob.candNumGates[slot], gBase = slot * kGradMaxSubGates;
+                                double gaA[kGradMaxSubGates], gaS[kGradMaxSubGates];
+                                for (int g = 0; g < nG; ++g) {
+                                    const SubGate & sg = prob.candSubGates[gBase + g];
+                                    double a0, s0, a1, s1;
+                                    if (sg.src0 >= 0) readLitD(sg.src0, a0, s0);
+                                    else { a0 = gaA[-1 - sg.src0]; s0 = gaS[-1 - sg.src0]; }
+                                    if (sg.src1 >= 0) readLitD(sg.src1, a1, s1);
+                                    else { a1 = gaA[-1 - sg.src1]; s1 = gaS[-1 - sg.src1]; }
+                                    double aIn = lse2D(a0, a1, chkGamma), sIn = lse2D(s0, s1, chkGammaS);
+                                    double ldG = (g == nG - 1) ? ldV : static_cast<double>(sg.load);
+                                    gaA[g] = aIn + 1.0 + static_cast<double>(alpha) * ldG * (1.0 + static_cast<double>(beta) * sIn);
+                                    gaS[g] = ldG;
+                                }
+                                aK = gaA[nG - 1]; sOutK = ldV;
+                            }
+                            aMix += pD[slot] * aK;
+                            sMix += pD[slot] * sOutK;
+                        }
+                        arrD[v] = aMix; slewD[v] = sMix;
+                    }
+                }
+            }
+            std::vector<double> poD(nPOs);
+            double poMx = -1e30;
+            for (int i = 0; i < nPOs; ++i) {
+                double a, s; readLitD(houts[i], a, s); poD[i] = a;
+                if (a > poMx) poMx = a;
+            }
+            double wnsSE = 0.0, tnsS = 0.0;
+            for (int i = 0; i < nPOs; ++i) {
+                wnsSE += std::exp((poD[i] - poMx) / chkGamma);
+                tnsS += softplusD(poD[i] - tTarget, chkGamma);
+            }
+            double wns = poMx + chkGamma * std::log(std::max(wnsSE, 1e-30));
+            double tns = tnsS / static_cast<double>(poNorm);
+            double invV0 = 1.0 / static_cast<double>(nNodes);
+            double areaL = 0.0, discL = 0.0, foL = 0.0;
+            for (int m = 0; m < M; ++m) {
+                int K = prob.candCount[m], base = m * kGradMaxK;
+                double ea = 0.0, sp2 = 0.0;
+                for (int k = 0; k < K; ++k) {
+                    ea += pD[base + k] * static_cast<double>(prob.candDeltaAnd[base + k]);
+                    sp2 += pD[base + k] * pD[base + k];
+                }
+                areaL += static_cast<double>(lamArea) * ea * invV0;
+                discL += static_cast<double>(chkDisc) * (1.0 - sp2) * invV0;
+            }
+            for (int u = 1; u < nObjs; ++u) {
+                double sp = softplusD(expFoD[u] - fTh, kTauFo);
+                foL += static_cast<double>(lamFo) * sp * sp * invV0;
+            }
+            return static_cast<double>(chkT1) * (tns / depth0) +
+                   static_cast<double>(chkT2) * (wns / depth0) + areaL + foL + discL;
+        };
+
         std::vector<int> sampleM;
         for (int m = 0; m < M && static_cast<int>(sampleM.size()) < 8; ++m) {
             bool hasWire = false;
@@ -826,26 +946,30 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
             if (std::find(sampleM.begin(), sampleM.end(), m) == sampleM.end()) sampleM.push_back(m);
         }
 
-        const float epsFD = 2e-3f;
+        const double epsFD = 1e-6;
         double maxRel = 0.0, maxAbs = 0.0;
+        int worstM = -1, worstK = -1;
+        double worstAna = 0.0, worstNum = 0.0;
         int tested = 0;
         for (int m : sampleM) {
             for (int k = 0; k < prob.candCount[m]; ++k) {
                 int slot = m * kGradMaxK + k;
-                float origZ = hLogits[slot];
-                float zp = origZ + epsFD, zm = origZ - epsFD;
-                CHECK_CUDA(cudaMemcpy(d_logits + slot, &zp, sizeof(float), cudaMemcpyHostToDevice));
-                double lp = runStep(chkTauP, chkGamma, chkGammaS, chkGamma, chkT1, chkT2, chkDisc, false, false, 1, false);
-                CHECK_CUDA(cudaMemcpy(d_logits + slot, &zm, sizeof(float), cudaMemcpyHostToDevice));
-                double lm = runStep(chkTauP, chkGamma, chkGammaS, chkGamma, chkT1, chkT2, chkDisc, false, false, 1, false);
-                CHECK_CUDA(cudaMemcpy(d_logits + slot, &origZ, sizeof(float), cudaMemcpyHostToDevice));
+                double origZ = zD[slot];
+                zD[slot] = origZ + epsFD;
+                double lp = evalLossDouble();
+                zD[slot] = origZ - epsFD;
+                double lm = evalLossDouble();
+                zD[slot] = origZ;
 
-                double numG = (lp - lm) / (2.0 * static_cast<double>(epsFD));
+                double numG = (lp - lm) / (2.0 * epsFD);
                 double anaG = static_cast<double>(hAnaGrad[slot]);
                 double absErr = std::fabs(anaG - numG);
-                double denom = std::max({std::fabs(anaG), std::fabs(numG), 1e-5});
+                double denom = std::max({std::fabs(anaG), std::fabs(numG), 1e-6});
                 double relErr = absErr / denom;
-                if (relErr > maxRel) maxRel = relErr;
+                if (relErr > maxRel) {
+                    maxRel = relErr;
+                    worstM = m; worstK = k; worstAna = anaG; worstNum = numG;
+                }
                 if (absErr > maxAbs) maxAbs = absErr;
                 tested++;
             }
@@ -853,9 +977,11 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
         stats.gradCheckTested = tested;
         stats.gradCheckMaxRelErr = maxRel;
         stats.gradCheckMaxAbsErr = maxAbs;
-        stats.gradCheckPassed = (maxRel < 1e-3);
-        printf("rw4b-grad CHECK: M=%d tested=%d max_rel_err=%.3e max_abs_err=%.3e [%s]\n",
-               M, tested, maxRel, maxAbs, (maxRel < 1e-4 ? "PASS<1e-4" : (maxRel < 1e-3 ? "PASS<1e-3" : "FAIL")));
+        stats.gradCheckPassed = (maxRel < 1e-4);
+        printf("rw4b-grad CHECK: M=%d tested=%d max_rel_err=%.3e max_abs_err=%.3e (worst m=%d k=%d wire=%d ana=%.6e num=%.6e) [%s]\n",
+               M, tested, maxRel, maxAbs, worstM, worstK,
+               (worstM >= 0 ? (prob.candWireLit[worstM * kGradMaxK + worstK] >= 0 ? 1 : 0) : 0),
+               worstAna, worstNum, (maxRel < 1e-4 ? "PASS<1e-4" : "FAIL"));
 
         // Reset logits to warm-start before real optimization
         std::fill(hLogits.begin(), hLogits.end(), 0.0f);

@@ -24,7 +24,8 @@ public:
     void rewrite(bool fUseZeros = false, bool fGPUDeduplicate = false);
     void rw4b(int rounds = 3, float fanoutAlpha = 0.20f, float piFanoutAlpha = 0.10f,
               float slewBeta = 0.005f, float lamArea = 0.05f, int macroMode = 0,
-              bool noBudget = false, bool legacyV1 = false, int foCap = 16);
+              bool noBudget = false, bool legacyV1 = false, int foCap = 16,
+              bool adpScore = true, float adpW = 1.5f, float slackKappa = 1.0f);
     void refactor(bool fAlgMFFC = false, bool fUseZeros = false, int cutSize = 12);
     void resub(bool fUseZeros = false, bool fUseConstr = true, bool fUpdateLevel = false, int cutSize = 8, int addNodes = 1);
 

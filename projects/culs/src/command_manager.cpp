@@ -108,6 +108,9 @@ int rw4bHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals) {
     bool structMacro = false;
     bool noBudget = false;
     bool legacyV1 = false;
+    bool noAdp = false;
+    float adpW = 1.5f;
+    float slackKappa = 1.0f;
     int foCap = 16;
 
     CLI::App parser("Perform GPU fanout-aware global sensitivity 4B rewrite");
@@ -115,8 +118,11 @@ int rw4bHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals) {
     parser.add_option("-a", fanoutAlpha, descWithDefault("AND fanout alpha", fanoutAlpha));
     parser.add_option("-p", piFanoutAlpha, descWithDefault("PI fanout alpha", piFanoutAlpha));
     parser.add_option("-s", slewBeta, descWithDefault("slew coupling beta", slewBeta));
-    parser.add_option("-l", lamArea, descWithDefault("area penalty lambda", lamArea));
+    parser.add_option("-l", lamArea, descWithDefault("area penalty lambda (legacy mode)", lamArea));
     parser.add_option("--fo-cap", foCap, descWithDefault("fanout-capped strash limit (0=unlimited)", foCap));
+    parser.add_option("--adp-w", adpW, descWithDefault("ADP delay weight w in w*dD/D - da/A", adpW));
+    parser.add_option("--kappa", slackKappa, descWithDefault("near-critical slack gate kappa*tau", slackKappa));
+    parser.add_flag("--no-adp", noAdp, descWithDefault("disable ADP scoring and use legacy lamArea", noAdp));
     parser.add_flag("-b", condBalance, descWithDefault("conditional v3-gated GPU balance", condBalance));
     parser.add_flag("-m", structMacro, descWithDefault("v3-gated GPU struct macro {orig,bal,rfz,bal_rfz}", structMacro));
     parser.add_flag("--no-budget", noBudget, descWithDefault("disable slack_other hard fanout budget guard", noBudget));
@@ -128,7 +134,7 @@ int rw4bHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals) {
         return ret;
 
     int macroMode = structMacro ? 2 : (condBalance ? 1 : 0);
-    aigman.rw4b(rounds, fanoutAlpha, piFanoutAlpha, slewBeta, lamArea, macroMode, noBudget, legacyV1, foCap);
+    aigman.rw4b(rounds, fanoutAlpha, piFanoutAlpha, slewBeta, lamArea, macroMode, noBudget, legacyV1, foCap, !noAdp, adpW, slackKappa);
     return 0;
 }
 

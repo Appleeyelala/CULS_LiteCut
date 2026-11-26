@@ -235,13 +235,14 @@ __global__ void propagateReqLevelKernel(int startId, int count, int nPIs,
 
 __global__ void initSensPOKernel(const int * d_outs, int nPOs, float depth, float tau,
                                  const float * d_arr, const float * d_negExtra,
-                                 bool piPhaseAware, float * d_sens) {
+                                 bool piPhaseAware, float * d_sens, float * d_phi) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx >= nPOs) return;
     int lit = d_outs[idx];
     float a = edgeArr(lit, d_arr, d_negExtra, piPhaseAware);
     float w = expf((a - depth) / tau);
     atomicAdd(&d_sens[lit >> 1], w);
+    if (d_phi) atomicAdd(d_phi, w);
 }
 
 __global__ void propagateSensLevelKernel(int startId, int count, float tau,
@@ -676,7 +677,7 @@ __device__ inline float querySlackOtherDev(
 }
 
 __global__ void evaluateNode4BKernel(
-    int nPIs, int nObjs, int P, float depth,
+    int nPIs, int nObjs, int P, float depth, float phi,
     const int * d_f0, const int * d_f1, const int * d_fo, const int * d_negFo,
     const int * d_foOff, const int * d_foEdge,
     const float * d_arr, const float * d_req, const float * d_gateDelay,
@@ -686,6 +687,7 @@ __global__ void evaluateNode4BKernel(
     const Cut4B * d_cuts, const rw::Library * lib, const TableNode4B * d_ht,
     float alpha, float piAlpha, float beta, float lamArea, float regW, int pivot, float tau,
     float budgetTol, bool piPhaseAware, bool strashAware, bool fanoutBudget,
+    bool adpScore, float adpW, float slackKappa, int foCap,
     CandResult * d_out) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int nNodes = nObjs - nPIs - 1;
@@ -699,6 +701,9 @@ __global__ void evaluateNode4BKernel(
     float sRoot = d_sens[root];
     float nodeLv = d_arr[root];
     int rootFo = d_fo[root];
+    float slackRoot = req - nodeLv;
+    bool isNearCrit = (slackKappa <= 0.0f) ? true : (slackRoot <= slackKappa * tau + 1e-5f);
+    bool allowDupHit = (foCap > 0 && isNearCrit);
 
     const Cut4B * myCuts = d_cuts + static_cast<size_t>(root) * kCutSetSize;
     CandResult topCand[kTopK] = {
@@ -896,7 +901,10 @@ __global__ void evaluateNode4BKernel(
             int lit1 = (match[in1] << 1) | c1;
             int hit = lookupHash(lit0, lit1, P, d_ht, d_f0, d_f1);
             if (hit != -1 && hit < root && !inList(hit, remIds, remCnt)) {
-                match[num] = hit;
+                // P0-2: if near-critical and hit already at/above foCap, treat as new gate to align with rebuild
+                if (!(allowDupHit && d_fo[hit] >= foCap)) {
+                    match[num] = hit;
+                }
             }
         }
 
@@ -1096,16 +1104,33 @@ __global__ void evaluateNode4BKernel(
             if (maxArrAbs > req + 1e-5f) continue;
             int da = nodesAdded - saved;
             float deltaJ = jOrig - jCand;
-            float effDelta = sRoot * deltaJ - side - reg - slewCost;
+            float rawTiming = sRoot * deltaJ - side - slewCost;
+            float effDelta = rawTiming - reg;
             float score;
-            if (da <= 0) {
-                if (deltaJ < -1e-5f || effDelta < -1e-5f) continue;
-                if (da == 0 && effDelta <= 1e-5f) continue; // avoid float32 zero-gain churn
-                score = effDelta + 1e-4f * static_cast<float>(-da);
+            float minScore = adpScore ? 1e-9f : 1e-6f;
+            if (adpScore) {
+                // P0-3: hard near-critical slack gate for area-increasing rewrites
+                if (da > 0 && !isNearCrit) continue;
+                float dD = rawTiming / phi;
+                float invDepth = 1.0f / fmaxf(depth, 1.0f);
+                float invArea = 1.0f / fmaxf(static_cast<float>(nNodes), 1.0f);
+                if (da <= 0) {
+                    if (deltaJ < -1e-5f || effDelta < -1e-5f) continue;
+                    if (da == 0 && effDelta <= 1e-5f) continue; // avoid float32 zero-gain churn
+                    score = adpW * (dD * invDepth) - (reg * invDepth) + static_cast<float>(-da) * invArea;
+                } else {
+                    score = adpW * (dD * invDepth) - (reg * invDepth) - static_cast<float>(da) * invArea;
+                }
             } else {
-                score = effDelta - lamArea * static_cast<float>(da);
+                if (da <= 0) {
+                    if (deltaJ < -1e-5f || effDelta < -1e-5f) continue;
+                    if (da == 0 && effDelta <= 1e-5f) continue; // avoid float32 zero-gain churn
+                    score = effDelta + 1e-4f * static_cast<float>(-da);
+                } else {
+                    score = effDelta - lamArea * static_cast<float>(da);
+                }
             }
-            if (score > cutBestScore && score > 1e-6f) {
+            if (score > cutBestScore && score > minScore) {
                 cutBestScore = score;
                 cutBest = {score, maxArrAbs, req, da, slot, out};
             }
@@ -1688,7 +1713,7 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
         int *d_foOff = nullptr, *d_foCursor = nullptr, *d_foEdge = nullptr;
         float *d_arr = nullptr, *d_req = nullptr, *d_reqNeg = nullptr, *d_gd = nullptr;
         float *d_negExtra = nullptr, *d_outSlew = nullptr, *d_negSlew = nullptr, *d_slewIn = nullptr;
-        float *d_sens = nullptr, *d_slewCoef = nullptr, *d_slewCoefNeg = nullptr, *d_poArr = nullptr;
+        float *d_sens = nullptr, *d_slewCoef = nullptr, *d_slewCoefNeg = nullptr, *d_poArr = nullptr, *d_phi = nullptr;
         Top3Bounds *d_top3 = nullptr, *d_negTop3 = nullptr;
         Cut4B * d_cuts = nullptr;
         TableNode4B * d_ht = nullptr;
@@ -1717,6 +1742,7 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
         CHECK_CUDA(cudaMalloc(&d_slewCoef, nObjs * sizeof(float)));
         CHECK_CUDA(cudaMalloc(&d_slewCoefNeg, (nPIs + 1) * sizeof(float)));
         CHECK_CUDA(cudaMalloc(&d_poArr, std::max(1, nPOs) * sizeof(float)));
+        CHECK_CUDA(cudaMalloc(&d_phi, sizeof(float)));
         CHECK_CUDA(cudaMalloc(&d_top3, nObjs * sizeof(Top3Bounds)));
         CHECK_CUDA(cudaMalloc(&d_negTop3, (nPIs + 1) * sizeof(Top3Bounds)));
         CHECK_CUDA(cudaMalloc(&d_cuts, static_cast<size_t>(nObjs) * kCutSetSize * sizeof(Cut4B)));
@@ -1729,6 +1755,7 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
         CHECK_CUDA(cudaMemset(d_fo, 0, (nObjs + 1) * sizeof(int)));
         CHECK_CUDA(cudaMemset(d_negFo, 0, nObjs * sizeof(int)));
         CHECK_CUDA(cudaMemset(d_sens, 0, nObjs * sizeof(float)));
+        CHECK_CUDA(cudaMemset(d_phi, 0, sizeof(float)));
         CHECK_CUDA(cudaMemset(d_slewCoef, 0, nObjs * sizeof(float)));
         CHECK_CUDA(cudaMemset(d_slewCoefNeg, 0, (nPIs + 1) * sizeof(float)));
         CHECK_CUDA(cudaMemset(d_negExtra, 0, nObjs * sizeof(float)));
@@ -1783,11 +1810,14 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
         }
 
         // Backward required + sensitivity + slew coupling + consumer slack bounds
+        float phi = 1.0f;
         if (nPOs > 0) {
             initReqPOKernel<<<(nPOs + kBlockSize - 1) / kBlockSize, kBlockSize>>>(
                 d_outs, nPOs, nPIs, depth, d_negExtra, params.piPhaseAware, d_req, d_reqNeg);
             initSensPOKernel<<<(nPOs + kBlockSize - 1) / kBlockSize, kBlockSize>>>(
-                d_outs, nPOs, depth, tau, d_arr, d_negExtra, params.piPhaseAware, d_sens);
+                d_outs, nPOs, depth, tau, d_arr, d_negExtra, params.piPhaseAware, d_sens, d_phi);
+            CHECK_CUDA(cudaMemcpy(&phi, d_phi, sizeof(float), cudaMemcpyDeviceToHost));
+            if (phi < 1e-6f) phi = 1.0f;
         }
         for (int l = maxLv; l >= 1; --l) {
             int cnt = lvOff[l + 1] - lvOff[l];
@@ -1826,12 +1856,13 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
         // 3. GPU strash table + 4B evaluation (Top-2 per root + slack_other guard)
         buildHashKernel<<<(nNodes + kBlockSize - 1) / kBlockSize, kBlockSize>>>(nPIs, nObjs, P, d_f0, d_f1, d_ht);
         evaluateNode4BKernel<<<(nNodes + kBlockSize - 1) / kBlockSize, kBlockSize>>>(
-            nPIs, nObjs, P, depth, d_f0, d_f1, d_fo, d_negFo, d_foOff, d_foEdge,
+            nPIs, nObjs, P, depth, phi, d_f0, d_f1, d_fo, d_negFo, d_foOff, d_foEdge,
             d_arr, d_req, d_gd, d_negExtra, d_outSlew, d_negSlew, d_slewIn, d_sens, d_slewCoef, d_slewCoefNeg,
             d_top3, d_negTop3, d_cuts, d_lib, d_ht,
             params.fanoutAlpha, params.piFanoutAlpha, params.slewBeta,
             params.lamArea, params.fanoutReg, params.fanoutPivot, tau,
-            params.budgetTol, params.piPhaseAware, params.strashAware, params.fanoutBudget, d_candOut);
+            params.budgetTol, params.piPhaseAware, params.strashAware, params.fanoutBudget,
+            params.adpScore, params.adpW, params.slackKappa, params.foCap, d_candOut);
         CHECK_CUDA(cudaDeviceSynchronize());
         auto t3 = std::chrono::steady_clock::now();
         msEval += std::chrono::duration<double, std::milli>(t3 - t2).count();
@@ -1861,7 +1892,7 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
         cudaFree(d_foOff); cudaFree(d_foCursor); cudaFree(d_foEdge);
         cudaFree(d_arr); cudaFree(d_req); cudaFree(d_reqNeg); cudaFree(d_gd);
         cudaFree(d_negExtra); cudaFree(d_outSlew); cudaFree(d_negSlew); cudaFree(d_slewIn);
-        cudaFree(d_sens); cudaFree(d_slewCoef); cudaFree(d_slewCoefNeg); cudaFree(d_poArr);
+        cudaFree(d_sens); cudaFree(d_slewCoef); cudaFree(d_slewCoefNeg); cudaFree(d_poArr); cudaFree(d_phi);
         cudaFree(d_top3); cudaFree(d_negTop3);
         cudaFree(d_cuts); cudaFree(d_ht); cudaFree(d_candOut);
 
@@ -1902,6 +1933,7 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
             int rt;
             int uPhase;
             int flip;
+            bool allowDup;
             int leaves[4];
             int hitCnt;
             int hitIds[8];
@@ -1922,11 +1954,14 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
         std::vector<SelectedItem> entries;
         entries.reserve(nNodes / 2);
 
+        float minScore = params.adpScore ? 1e-9f : 1e-6f;
+        float regScale = params.adpScore ? (1.0f / std::max(depth, 1.0f)) : 1.0f;
+
         for (int root = nPIs + 1; root < nObjs; ++root) {
             int kLimit = std::min(kTopK, std::max(1, params.perRootK));
             for (int k = 0; k < kLimit; ++k) {
                 const CandResult & cr = hCand[static_cast<size_t>(root) * kTopK + k];
-                if (cr.score <= 1e-6f || cr.cutSlot < 0) continue;
+                if (cr.score <= minScore || cr.cutSlot < 0) continue;
 
                 Cut4B cut = hCuts[static_cast<size_t>(root) * kCutSetSize + cr.cutSlot];
                 if (!cut.used || cut.nLeaves < 3) continue;
@@ -1959,6 +1994,9 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
                     for (int r : remAll) if (r == u) return true;
                     return false;
                 };
+                float slackRootH = cr.req - hArr[root];
+                bool isNearCritH = (params.slackKappa <= 0.0f) ? true : (slackRootH <= params.slackKappa * tau + 1e-5f);
+                bool allowDupOp = (params.foCap > 0 && isNearCritH && cr.da > 0);
                 if (params.strashAware) {
                     int nLibN = hLib.nNodes[cls];
                     for (int j = 0; j < nLibN; ++j) {
@@ -1973,7 +2011,9 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
                         uint64_t key = (static_cast<uint64_t>(static_cast<uint32_t>(l0)) << 32) | static_cast<uint32_t>(l1);
                         auto it = origStrash.find(key);
                         if (it != origStrash.end() && it->second < root && !inRemAll(it->second)) {
-                            match[num] = it->second;
+                            if (!(allowDupOp && hFo[it->second] >= params.foCap)) {
+                                match[num] = it->second;
+                            }
                         }
                     }
                 }
@@ -2091,6 +2131,7 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
                 item.rt = rt;
                 item.uPhase = uPhase;
                 item.flip = flip;
+                item.allowDup = allowDupOp;
                 for (int j = 0; j < 4; ++j) item.leaves[j] = leaves[j];
                 item.hitCnt = hitCnt;
                 for (int t = 0; t < hitCnt; ++t) item.hitIds[t] = hitIds[t];
@@ -2126,8 +2167,8 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
         std::vector<uint8_t> usedRoot(nObjs, 0), delStrict(nObjs, 0), prot(nObjs, 0);
         std::vector<int> accFo(nObjs, 0), accNegFo(nPIs + 1, 0);
         std::vector<uint8_t> requeueCnt(entries.size(), 0);
-        std::unordered_map<int, int> chosenIdx;
-        chosenIdx.reserve(entries.size() / 2 + 16);
+        std::vector<int> chosenIdx(nObjs, -1);
+        int chosenCount = 0;
 
         while (!pq.empty()) {
             HeapNode top = pq.top();
@@ -2183,9 +2224,9 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
             }
             if (!ok) continue;
 
-            float liveScore = op.score - extraReg;
-            if (liveScore <= 1e-6f) continue;
-            if (params.fanoutBudget && requeueCnt[top.idx] < 4 && !pq.empty() && liveScore < pq.top().score - 1e-6f) {
+            float liveScore = op.score - extraReg * regScale;
+            if (liveScore <= minScore) continue;
+            if (params.fanoutBudget && requeueCnt[top.idx] < 4 && !pq.empty() && liveScore < pq.top().score - minScore) {
                 requeueCnt[top.idx]++;
                 pq.push({liveScore, top.negDa, top.negRoot, top.negSubgr, top.idx});
                 continue;
@@ -2200,30 +2241,31 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
                 if (te.negOnly) accNegFo[te.node] += te.d;
                 else accFo[te.node] += te.d;
             }
-            chosenIdx.emplace(op.root, top.idx);
+            chosenIdx[op.root] = top.idx;
+            chosenCount++;
         }
 
-        if (chosenIdx.empty()) {
+        if (chosenCount == 0) {
             auto t4 = std::chrono::steady_clock::now();
             msSelectRebuild += std::chrono::duration<double, std::milli>(t4 - t3).count();
             break;
         }
-        totalApplied += static_cast<int>(chosenIdx.size());
+        totalApplied += chosenCount;
 
-        // Exact topological strashed rebuild (skip deleted remStrict, stop at matched nodes) + PO reachability pruning
+        // Exact topological strashed rebuild (skip deleted remStrict, stop at matched nodes, P0-2 allowDup gate)
         StrashRebuild builder(nPIs, nNodes, params.foCap);
         std::vector<int> litMap(nObjs, 0);
         for (int i = 0; i <= nPIs; ++i) litMap[i] = i << 1;
 
         for (int id = nPIs + 1; id < nObjs; ++id) {
             if (delStrict[id]) continue; // P0-1: skip deleted MFFC interior nodes so they never inflate foCnt
-            auto it = chosenIdx.find(id);
-            if (it == chosenIdx.end()) {
+            int cIdx = chosenIdx[id];
+            if (cIdx < 0) {
                 int nl0 = litMap[f0[id] >> 1] ^ (f0[id] & 1);
                 int nl1 = litMap[f1[id] >> 1] ^ (f1[id] & 1);
                 litMap[id] = builder.andLit(nl0, nl1, false);
             } else {
-                const SelectedItem & op = entries[it->second];
+                const SelectedItem & op = entries[cIdx];
                 int localLit[54];
                 for (int j = 0; j < 4; ++j) {
                     int base = op.leaves[j] > 0 ? litMap[op.leaves[j]] : 0;
@@ -2246,7 +2288,7 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
                     int i0 = hLib.fanin0[op.cls][j - 4], i1 = hLib.fanin1[op.cls][j - 4];
                     int nl0 = localLit[i0] ^ (hLib.isC0[op.cls][j - 4] ? 1 : 0);
                     int nl1 = localLit[i1] ^ (hLib.isC1[op.cls][j - 4] ? 1 : 0);
-                    localLit[j] = builder.andLit(nl0, nl1, true);
+                    localLit[j] = builder.andLit(nl0, nl1, op.allowDup);
                 }
                 litMap[id] = localLit[op.rt] ^ op.flip;
             }
@@ -2295,8 +2337,8 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
         msSelectRebuild += std::chrono::duration<double, std::milli>(t4 - t3).count();
 
         if (params.verbose >= 1) {
-            printf("rw4b round %d: tau=%.2f applied=%zu ands=%zu\n",
-                   rnd + 1, tau, chosenIdx.size(), f0.size() - nPIs - 1);
+            printf("rw4b round %d: tau=%.2f phi=%.2f applied=%d ands=%zu\n",
+                   rnd + 1, tau, phi, chosenCount, f0.size() - nPIs - 1);
         }
     }
 

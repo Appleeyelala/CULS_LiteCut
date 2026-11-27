@@ -118,7 +118,7 @@ int rw4bHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals) {
     float tnsRho = 0.85f;
     float discLam = 0.30f;
     float gradLr = 0.20f;
-    float foIncLam = 0.50f;
+    float foIncLam = 0.0f;
     float foIncTh = 6.0f;
 
     CLI::App parser("Perform GPU fanout-aware global sensitivity 4B rewrite");

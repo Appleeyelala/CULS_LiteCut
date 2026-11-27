@@ -600,6 +600,24 @@ __global__ void k_region_grad_and_adam(
     }
 }
 
+__global__ void k_preset_choice_and_exp_fo(
+    int M, const int * d_discChoice, const int * d_candDeltaAnd,
+    const int * d_foDeltaOffset, const int * d_foDeltaNode, const int * d_foDeltaVal,
+    float * d_expFo, int * d_totalDeltaAnd) {
+    int m = blockIdx.x * blockDim.x + threadIdx.x;
+    if (m >= M) return;
+    int bestK = d_discChoice[m];
+    if (bestK > 0) {
+        int slot = m * kGradMaxK + bestK;
+        atomicAdd(d_totalDeltaAnd, d_candDeltaAnd[slot]);
+        int beg = d_foDeltaOffset[slot];
+        int end = d_foDeltaOffset[slot + 1];
+        for (int idx = beg; idx < end; ++idx) {
+            atomicAdd(&d_expFo[d_foDeltaNode[idx]], static_cast<float>(d_foDeltaVal[idx]));
+        }
+    }
+}
+
 // ---------------- Host Orchestrator ----------------
 
 GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & params,
@@ -694,15 +712,17 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
         CHECK_CUDA(cudaMemcpy(d_foDeltaVal, prob.foDeltaVal.data(), nnz * sizeof(int), cudaMemcpyHostToDevice));
     }
 
-    // Parameterized warm-start initializer (z_{m,0} = z0Init, others 0).
-    auto initWarmLogits = [&](std::vector<float> & zVec, float z0Init) {
+    // Start near the true original circuit (z_{m,0} = 2.5, p_0 ~ 75%..92%, 66415 champion config)
+    // so simultaneous fractional fanout deltas never cause a t=1 fanout explosion.
+    auto initWarmLogits = [&](std::vector<float> & zVec, float z0Init = 2.5f) {
         std::fill(zVec.begin(), zVec.end(), 0.0f);
         for (int m = 0; m < M; ++m) {
             zVec[m * kGradMaxK + 0] = z0Init;
         }
     };
     std::vector<float> hLogits(MK, 0.0f);
-    initWarmLogits(hLogits, 1.2f);
+    initWarmLogits(hLogits, 2.5f);
+    stats.chosenZ0 = 2.5f;
     CHECK_CUDA(cudaMemcpy(d_logits, hLogits.data(), MK * sizeof(float), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemset(d_adamM, 0, MK * sizeof(float)));
     CHECK_CUDA(cudaMemset(d_adamV, 0, MK * sizeof(float)));
@@ -1004,34 +1024,12 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
                (worstM >= 0 ? (prob.candWireLit[worstM * kGradMaxK + worstK] >= 0 ? 1 : 0) : 0),
                worstAna, worstNum, (maxRel < 1e-4 ? "PASS<1e-4" : "FAIL"));
 
-        // Reset logits before backtracking warm-start
-        initWarmLogits(hLogits, 1.2f);
+        // Reset logits to warm-start before real optimization
+        initWarmLogits(hLogits, 2.5f);
         CHECK_CUDA(cudaMemcpy(d_logits, hLogits.data(), MK * sizeof(float), cudaMemcpyHostToDevice));
     }
 
-    // Backtracking Warm-Start: probe z_0 in {1.2, 2.0, 2.5, 3.2} with forward-only t=1 pass
-    // and pick the smallest z_0 whose physical continuous worst-case PO arrival stays within 1.15x D0
-    // (immune to multi-PO LSE log(|PO|) baseline offset).
-    {
-        static constexpr float kZ0Ladder[4] = {1.2f, 2.0f, 2.5f, 3.2f};
-        float selectedZ0 = kZ0Ladder[3];
-        for (float candZ0 : kZ0Ladder) {
-            initWarmLogits(hLogits, candZ0);
-            CHECK_CUDA(cudaMemcpy(d_logits, hLogits.data(), MK * sizeof(float), cudaMemcpyHostToDevice));
-            (void)runStep(1.0f, 1.5f * tau0, 1.0f, 1.5f * tau0,
-                          0.85f * wTotal, 0.15f * wTotal, 0.0f,
-                          false, false, 0, true);
-            selectedZ0 = candZ0;
-            if (lastPoMax <= 1.15f * depth0) {
-                break;
-            }
-        }
-        stats.chosenZ0 = selectedZ0;
-    }
-
-    // Main Inner Joint Gradient Loop (3-Stage Annealing Schedule)
-    // Gini magnet stays strictly OFF for the first 60% of steps so pure timing+area gradients
-    // decide winners without no-op pull-back, then ramps linearly over the final 40%.
+    // Main Inner Joint Gradient Loop (66415 Champion 3-Stage Annealing Schedule)
     const int T = std::max(1, params.gradSteps);
     for (int t = 1; t <= T; ++t) {
         float frac = static_cast<float>(t - 1) / static_cast<float>(std::max(1, T - 1));
@@ -1044,24 +1042,24 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
             gammaS = 1.0f;
             tauP = 1.0f;
             discLam = 0.0f;
-        } else if (frac <= 0.60f) {
-            // Stage 2a: Bottleneck focus (transition TNS -> WNS, anneal tau, magnet STILL OFF)
-            float u = (frac - 0.40f) / 0.20f;
+        } else if (frac <= 0.72f) {
+            // Stage 2: Bottleneck focus (transition TNS -> WNS, anneal tau, warm magnet)
+            float u = (frac - 0.40f) / 0.32f;
             t1 = (0.85f - 0.45f * u) * wTotal;
             t2 = wTotal - t1;
             gamma = (1.5f - 0.5f * u) * tau0;
             gammaS = 1.0f - 0.3f * u;
-            tauP = 1.0f - 0.25f * u;
-            discLam = 0.0f;
+            tauP = 1.0f - 0.30f * u;
+            discLam = 0.35f * params.discLam * u;
         } else {
-            // Stage 3: Discretization pull-in (WNS-heavy, sharp tau, linear Gini magnet ramp)
-            float u = (frac - 0.60f) / 0.40f;
+            // Stage 3: Discretization pull-in (WNS-heavy, sharp tau, full Gini magnet)
+            float u = (frac - 0.72f) / 0.28f;
             t1 = (0.40f - 0.15f * u) * wTotal;
             t2 = wTotal - t1;
             gamma = (1.0f - 0.5f * u) * tau0;
             gammaS = 0.7f - 0.3f * u;
-            tauP = 0.75f - 0.30f * u;
-            discLam = params.discLam * u;
+            tauP = 0.70f - 0.25f * u;
+            discLam = (0.35f + 0.65f * u) * params.discLam;
         }
         double loss = runStep(tauP, gamma, gammaS, gamma, t1, t2, discLam, true, true, t, t == 1);
         if (t == 1) stats.initLoss = loss;
@@ -1132,10 +1130,48 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
         }
     }
 
+    // 9th portfolio candidate (theta = 0.0): Stage A local-ADP warm-start prior evaluated under the
+    // exact same GPU global discrete ADP objective (guarantees per-round monotonic non-degradation vs greedy).
+    {
+        CHECK_CUDA(cudaMemcpy(d_discChoice, prob.candWarmBestK.data(), M * sizeof(int), cudaMemcpyHostToDevice));
+        k_init_exp_fo<<<(nObjs + kGradBlock - 1) / kGradBlock, kGradBlock>>>(nObjs, d_foBase, d_expFo);
+        CHECK_CUDA(cudaMemset(d_totalDeltaAnd, 0, sizeof(int)));
+        k_preset_choice_and_exp_fo<<<(M + kGradBlock - 1) / kGradBlock, kGradBlock>>>(
+            M, d_discChoice, d_candDeltaAnd, d_foDeltaOffset, d_foDeltaNode, d_foDeltaVal,
+            d_expFo, d_totalDeltaAnd);
+        for (int l = 1; l <= maxLv; ++l) {
+            int cnt = lvOff[l + 1] - lvOff[l];
+            if (cnt <= 0) continue;
+            k_fwd_level_hard<<<(cnt + kGradBlock - 1) / kGradBlock, kGradBlock>>>(
+                lvOff[l], cnt, nPIs, alpha, piAlpha, beta, piPhaseAware,
+                d_f0, d_f1, d_isRegionRoot, d_discChoice, d_candWireLit, d_candNumGates,
+                d_candSubGates, d_expFo, d_arr, d_slew);
+        }
+        k_extract_po_arr<<<(nPOs + kGradBlock - 1) / kGradBlock, kGradBlock>>>(
+            nPOs, nPIs, piAlpha, kTauFo, piPhaseAware, true, d_outs, d_expFo, d_arr, d_slew, d_poArr);
+        CHECK_CUDA(cudaMemcpy(hPoArr.data(), d_poArr, nPOs * sizeof(float), cudaMemcpyDeviceToHost));
+        float dHard = hPoArr[0];
+        for (int i = 1; i < nPOs; ++i)
+            if (hPoArr[i] > dHard) dHard = hPoArr[i];
+        int hDa = 0;
+        CHECK_CUDA(cudaMemcpy(&hDa, d_totalDeltaAnd, sizeof(int), cudaMemcpyDeviceToHost));
+        float adpDelta = wTotal * ((dHard - depth0) / depth0) +
+                         static_cast<float>(hDa) / static_cast<float>(nNodes);
+        if (adpDelta < bestAdpDelta - 1e-7f) {
+            bestAdpDelta = adpDelta;
+            bestTheta = 0.0f;
+            bestDelay = dHard;
+            bestDa = hDa;
+            bestChoices = prob.candWarmBestK;
+        }
+    }
+
     chosenCand.swap(bestChoices);
     if (chosenProb) {
         chosenProb->resize(M);
-        for (int m = 0; m < M; ++m) (*chosenProb)[m] = hProb[m * kGradMaxK + chosenCand[m]];
+        for (int m = 0; m < M; ++m) {
+            (*chosenProb)[m] = (bestTheta == 0.0f) ? 1.0f : hProb[m * kGradMaxK + chosenCand[m]];
+        }
     }
     int nonZero = 0;
     for (int c : chosenCand)

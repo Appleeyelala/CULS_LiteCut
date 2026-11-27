@@ -36,7 +36,7 @@ struct Rw4BParams {
     float gradLr = 0.20f;
     float foIncLam = 0.0f;  // Stage B: optional bounded linear net-fanout-increase penalty weight
     float foIncTh = 6.0f;   // Stage B: free fanout ceiling B(u) = max(fo_base(u), foIncTh)
-    int critMax = 4096;     // Stage B: max critical-cone regions in continuous joint-grad (0 = unlimited)
+    int critMax = 0;        // Stage B: max critical-cone regions in continuous joint-grad (0 = unlimited)
     int verbose = 1;
 };
 

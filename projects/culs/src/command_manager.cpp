@@ -120,7 +120,7 @@ int rw4bHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals) {
     float gradLr = 0.20f;
     float foIncLam = 0.0f;
     float foIncTh = 6.0f;
-    int critMax = 4096;
+    int critMax = 0;
 
     CLI::App parser("Perform GPU fanout-aware global sensitivity 4B rewrite");
     parser.add_option("-r", rounds, descWithDefault("number of rounds", rounds));

@@ -2567,27 +2567,31 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
             // for GPU joint-grad optimization, and Non-Critical pool for safe Stage A discrete merge.
             std::vector<int> critPool, nonCritPool;
             critPool.reserve(candRegions.size());
-            nonCritPool.reserve(candRegions.size());
-            for (size_t i = 0; i < candRegions.size(); ++i) {
-                int r = candRegions[i].root;
-                float sl = hReq[r] - hArr[r];
-                if (sl <= 3.0f * tau + 1e-5f || hSens[r] > 1e-6f) {
-                    critPool.push_back(static_cast<int>(i));
-                } else {
-                    nonCritPool.push_back(static_cast<int>(i));
+            if (params.critMax <= 0) {
+                for (size_t i = 0; i < candRegions.size(); ++i) critPool.push_back(static_cast<int>(i));
+            } else {
+                nonCritPool.reserve(candRegions.size());
+                for (size_t i = 0; i < candRegions.size(); ++i) {
+                    int r = candRegions[i].root;
+                    float sl = hReq[r] - hArr[r];
+                    if (sl <= 3.0f * tau + 1e-5f || hSens[r] > 1e-6f) {
+                        critPool.push_back(static_cast<int>(i));
+                    } else {
+                        nonCritPool.push_back(static_cast<int>(i));
+                    }
                 }
-            }
-            if (params.critMax > 0 && static_cast<int>(critPool.size()) > params.critMax) {
-                std::sort(critPool.begin(), critPool.end(), [&](int a, int b) {
-                    float sa = hSens[candRegions[a].root], sb = hSens[candRegions[b].root];
-                    if (sa != sb) return sa > sb;
-                    if (candRegions[a].weight != candRegions[b].weight) return candRegions[a].weight > candRegions[b].weight;
-                    return candRegions[a].root < candRegions[b].root;
-                });
-                for (size_t i = static_cast<size_t>(params.critMax); i < critPool.size(); ++i) {
-                    nonCritPool.push_back(critPool[i]);
+                if (static_cast<int>(critPool.size()) > params.critMax) {
+                    std::sort(critPool.begin(), critPool.end(), [&](int a, int b) {
+                        float sa = hSens[candRegions[a].root], sb = hSens[candRegions[b].root];
+                        if (sa != sb) return sa > sb;
+                        if (candRegions[a].weight != candRegions[b].weight) return candRegions[a].weight > candRegions[b].weight;
+                        return candRegions[a].root < candRegions[b].root;
+                    });
+                    for (size_t i = static_cast<size_t>(params.critMax); i < critPool.size(); ++i) {
+                        nonCritPool.push_back(critPool[i]);
+                    }
+                    critPool.resize(static_cast<size_t>(params.critMax));
                 }
-                critPool.resize(static_cast<size_t>(params.critMax));
             }
 
             // Linear-time GWMIN conflict-free region selection on Critical Cone (4 strict invariants)

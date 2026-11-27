@@ -34,6 +34,7 @@ CHECK_RE = re.compile(
 GRAD_ROUND_RE = re.compile(
     r"rw4b-grad round (\d+): M=(\d+) applied=(\d+)\(raw=(\d+)\)(?: z0=([0-9.]+))? theta=([0-9.-]+) avgMaxP=([0-9.]+) "
     r"loss=([0-9.eE+-]+)->([0-9.eE+-]+) discD=([0-9.]+)\(D0=([0-9.]+)\) dAND=([0-9-]+) grad=([0-9.]+)ms disc=([0-9.]+)ms"
+    r"(?: crit=(\d+) nc=(\d+))?"
 )
 
 
@@ -80,6 +81,8 @@ def _run_gpuls_diag(gpuls_bin: Path, in_aig: Path, out_aig: Path, flags: str, ti
             "dAND": int(rm.group(12)),
             "grad_ms": float(rm.group(13)),
             "disc_ms": float(rm.group(14)),
+            "crit": int(rm.group(15)) if rm.group(15) is not None else -1,
+            "nc": int(rm.group(16)) if rm.group(16) is not None else -1,
         })
     return info
 

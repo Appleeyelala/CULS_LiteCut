@@ -678,7 +678,7 @@ void AIGMan::rw4b(int rounds, float fanoutAlpha, float piFanoutAlpha,
                   bool adpScore, float adpW, float slackKappa,
                   bool jointGrad, int gradSteps, bool gradCheck,
                   float tnsRho, float discLam, float gradLr,
-                  float foIncLam, float foIncTh) {
+                  float foIncLam, float foIncTh, int critMax) {
     if (!aigCreated) {
         printf("rw4b: AIG is null!\n");
         return;
@@ -704,6 +704,7 @@ void AIGMan::rw4b(int rounds, float fanoutAlpha, float piFanoutAlpha,
     p.gradLr = gradLr;
     p.foIncLam = foIncLam;
     p.foIncTh = foIncTh;
+    p.critMax = critMax;
     if (noBudget) {
         p.fanoutBudget = false;
     }

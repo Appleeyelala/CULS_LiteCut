@@ -93,9 +93,9 @@ def main() -> int:
         )
         for rd in g_new.get("rounds", []):
             print(
-                f"      R{rd['round']}: M={rd['M']:5d} raw={rd['raw']:5d} app={rd['applied']:5d} "
+                f"      R{rd['round']}: M_crit={rd['M']:4d} app={rd['applied']:5d}(crit={rd['crit']:4d}/raw={rd['raw']:4d}, nc={rd['nc']:5d}) "
                 f"z0={rd['z0']:.1f} theta={rd['theta']:.2f} avgMaxP={rd['avgMaxP']:.3f} loss={rd['initLoss']:.2f}->{rd['finalLoss']:.2f} "
-                f"discD={rd['discD']:.1f}(D0={rd['D0']:.1f}) dAND={rd['dAND']:+d}",
+                f"discD={rd['discD']:.1f}(D0={rd['D0']:.1f}) grad={rd['grad_ms']:.1f}ms",
                 flush=True,
             )
 

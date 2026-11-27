@@ -713,7 +713,9 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
     const float tau0 = std::max(prob.tau0, 1.0f);
     const float tTarget = params.tnsRho * depth0;
     const float lamArea = 1.0f;
-    const float lamFo = params.fanoutReg * 10.0f; // gentle excess-fanout soft penalty
+    // Path 2 exact fanout+slew backprop already models physical load & slew;
+    // quadratic excess-FO (fo^2) explodes to 100+ on 4000-fanout memory nets and drowns WNS/TNS.
+    const float lamFo = 0.0f;
     const float fTh = static_cast<float>(params.fanoutPivot);
 
     std::vector<float> hPoArr(nPOs, 0.0f);

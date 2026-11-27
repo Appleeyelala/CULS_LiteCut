@@ -2331,6 +2331,7 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
             struct GradRegionHost {
                 int root;
                 float weight;
+                int warmBestK; // 0 if bestAdp <= 0, else 1-based index into cands (+1)
                 std::vector<GradCandHost> cands; // non-noop candidates (1..4)
                 std::vector<int> remStrictUnion;
                 std::vector<int> refsUnion;
@@ -2362,6 +2363,7 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
                 GradRegionHost reg;
                 reg.root = root;
                 reg.weight = 0.0f;
+                reg.warmBestK = 0;
                 float bestAdp = -kInf, bestDj = 0.0f;
                 for (int s = 0; s < nRaw; ++s) {
                     const MenuSlot & ms = slots[s];
@@ -2531,12 +2533,18 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
                     for (int j = 0; j < 4; ++j) addUnique(reg.refsUnion, leaves[j]);
                     for (int t = 0; t < hitCnt; ++t) addUnique(reg.refsUnion, hitIds[t]);
 
-                    if (ms.score > bestAdp) bestAdp = ms.score;
+                    if (ms.score > bestAdp) {
+                        bestAdp = ms.score;
+                        if (ms.score > 1e-9f) reg.warmBestK = static_cast<int>(reg.cands.size()) + 1;
+                    }
                     if (ms.deltaJ > bestDj) bestDj = ms.deltaJ;
                     reg.cands.push_back(std::move(gc));
                 }
                 if (!reg.cands.empty()) {
-                    reg.weight = std::max(1e-6f, bestAdp) + 1e-4f * std::max(0.0f, bestDj);
+                    // Strictly prioritize positive global ADP regions over speculative off-critical regions
+                    reg.weight = (bestAdp > 1e-9f)
+                        ? bestAdp
+                        : (1e-11f * std::max(0.0f, bestDj) / std::max(depth, 1.0f));
                     candRegions.push_back(std::move(reg));
                 }
             }
@@ -2594,10 +2602,15 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
                 auto & reg = candRegions[idxR];
                 if (refByDownstream[reg.root]) {
                     std::vector<GradCandHost> kept;
-                    for (auto & gc : reg.cands) {
-                        if (gc.wireLit < 0) kept.push_back(std::move(gc));
+                    int newWarmK = 0;
+                    for (size_t ci = 0; ci < reg.cands.size(); ++ci) {
+                        if (reg.cands[ci].wireLit < 0) {
+                            kept.push_back(std::move(reg.cands[ci]));
+                            if (reg.warmBestK == static_cast<int>(ci) + 1) newWarmK = static_cast<int>(kept.size());
+                        }
                     }
                     reg.cands.swap(kept);
+                    reg.warmBestK = newWarmK;
                 }
                 if (!reg.cands.empty()) finalActiveIdx.push_back(idxR);
             }
@@ -2622,6 +2635,7 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
             prob.regionRoot.resize(M);
             prob.isRegionRoot.assign(nObjs, -1);
             prob.candCount.resize(M);
+            prob.candWarmBestK.assign(M, 0);
             prob.candDeltaAnd.assign(M * kGradMaxK, 0);
             prob.candWireLit.assign(M * kGradMaxK, -1);
             prob.candNumGates.assign(M * kGradMaxK, 0);
@@ -2635,6 +2649,7 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
                 prob.isRegionRoot[r] = m;
                 int K = std::min(kGradMaxK, 1 + static_cast<int>(reg.cands.size()));
                 prob.candCount[m] = K;
+                prob.candWarmBestK[m] = (reg.warmBestK < K) ? reg.warmBestK : 0;
 
                 // k = 0 (no-op): 1-gate micro-subgraph reading original (f0[r], f1[r])
                 int slot0 = m * kGradMaxK + 0;

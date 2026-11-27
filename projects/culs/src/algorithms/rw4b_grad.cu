@@ -16,7 +16,7 @@ namespace rw4b {
 
 static constexpr int kGradBlock = 256;
 static constexpr float kTauFo = 0.10f;
-static constexpr float kStepClip = 0.20f;
+static constexpr float kStepClip = 0.25f;
 
 // ---------------- Device smooth math helpers ----------------
 
@@ -569,10 +569,7 @@ __global__ void k_region_grad_and_adam(
         dotPG += pk * gp[k];
     }
 
-    const float b1 = 0.9f, b2 = 0.999f;
-    // Scale-aware Adam damping: critical-path grads (~1e-3..1e-2) move at full lr,
-    // while tiny off-critical area grads (~1/V0) move gently without saturating p in 5 steps.
-    const float eps = fmaxf(1e-5f, 4.0f * static_cast<float>(invV0));
+    const float b1 = 0.9f, b2 = 0.999f, eps = 1e-8f;
     float b1Corr = 1.0f - powf(b1, static_cast<float>(stepIdx));
     float b2Corr = 1.0f - powf(b2, static_cast<float>(stepIdx));
 
@@ -690,9 +687,18 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
         CHECK_CUDA(cudaMemcpy(d_foDeltaVal, prob.foDeltaVal.data(), nnz * sizeof(int), cudaMemcpyHostToDevice));
     }
 
-    // Warm-start logits: z_{m,0} = 0.25 (gentle no-op bias), others = 0.0
+    // Soft warm-start logits: if region has a Stage A positive-ADP candidate k*, give it gentle +0.15 prior;
+    // otherwise give no-op (k=0) gentle +0.15 prior.
+    auto initWarmLogits = [&](std::vector<float> & zVec) {
+        std::fill(zVec.begin(), zVec.end(), 0.0f);
+        for (int m = 0; m < M; ++m) {
+            int wk = (m < static_cast<int>(prob.candWarmBestK.size())) ? prob.candWarmBestK[m] : 0;
+            if (wk > 0 && wk < prob.candCount[m]) zVec[m * kGradMaxK + wk] = 0.15f;
+            else zVec[m * kGradMaxK + 0] = 0.15f;
+        }
+    };
     std::vector<float> hLogits(MK, 0.0f);
-    for (int m = 0; m < M; ++m) hLogits[m * kGradMaxK + 0] = 0.25f;
+    initWarmLogits(hLogits);
     CHECK_CUDA(cudaMemcpy(d_logits, hLogits.data(), MK * sizeof(float), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemset(d_adamM, 0, MK * sizeof(float)));
     CHECK_CUDA(cudaMemset(d_adamV, 0, MK * sizeof(float)));
@@ -988,8 +994,7 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
                worstAna, worstNum, (maxRel < 1e-4 ? "PASS<1e-4" : "FAIL"));
 
         // Reset logits to warm-start before real optimization
-        std::fill(hLogits.begin(), hLogits.end(), 0.0f);
-        for (int m = 0; m < M; ++m) hLogits[m * kGradMaxK + 0] = 0.25f;
+        initWarmLogits(hLogits);
         CHECK_CUDA(cudaMemcpy(d_logits, hLogits.data(), MK * sizeof(float), cudaMemcpyHostToDevice));
     }
 

@@ -42,6 +42,7 @@ struct GradProblem {
     std::vector<int> regionRoot;       // [M]
     std::vector<int> isRegionRoot;     // [nObjs], -1 if ordinary node, else region idx m
     std::vector<int> candCount;        // [M], 2 <= K_m <= kGradMaxK
+    std::vector<int> candWarmBestK;    // [M], 0 if no positive Stage A cand, else 1..K_m-1 best Stage A ADP cand
     std::vector<int> candDeltaAnd;     // [M * kGradMaxK]
     std::vector<int> candWireLit;      // [M * kGradMaxK], >= 0 if wire-fold literal, -1 if micro-subgraph
     std::vector<int> candNumGates;     // [M * kGradMaxK], 0 if wire-fold, else 1..kGradMaxSubGates (k=0 has 1)

@@ -1009,19 +1009,20 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
         CHECK_CUDA(cudaMemcpy(d_logits, hLogits.data(), MK * sizeof(float), cudaMemcpyHostToDevice));
     }
 
-    // Backtracking Warm-Start: probe z_0 in {1.2, 2.0, 2.8, 3.8} with forward-only t=1 pass
-    // and pick the smallest z_0 that avoids a t=1 fractional fanout/delay explosion.
+    // Backtracking Warm-Start: probe z_0 in {1.2, 2.0, 2.5, 3.2} with forward-only t=1 pass
+    // and pick the smallest z_0 whose physical continuous worst-case PO arrival stays within 1.15x D0
+    // (immune to multi-PO LSE log(|PO|) baseline offset).
     {
-        static constexpr float kZ0Ladder[4] = {1.2f, 2.0f, 2.8f, 3.8f};
+        static constexpr float kZ0Ladder[4] = {1.2f, 2.0f, 2.5f, 3.2f};
         float selectedZ0 = kZ0Ladder[3];
         for (float candZ0 : kZ0Ladder) {
             initWarmLogits(hLogits, candZ0);
             CHECK_CUDA(cudaMemcpy(d_logits, hLogits.data(), MK * sizeof(float), cudaMemcpyHostToDevice));
-            double probeLoss = runStep(1.0f, 1.5f * tau0, 1.0f, 1.5f * tau0,
-                                       0.85f * wTotal, 0.15f * wTotal, 0.0f,
-                                       false, false, 0, true);
+            (void)runStep(1.0f, 1.5f * tau0, 1.0f, 1.5f * tau0,
+                          0.85f * wTotal, 0.15f * wTotal, 0.0f,
+                          false, false, 0, true);
             selectedZ0 = candZ0;
-            if (probeLoss <= 1.15 && lastPoMax <= 1.15f * depth0) {
+            if (lastPoMax <= 1.15f * depth0) {
                 break;
             }
         }

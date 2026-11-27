@@ -2776,11 +2776,13 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
                 std::vector<float> chosenProb;
                 gStats = solveJointGradGPU(prob, params, chosenCand, &chosenProb);
 
-                // Gradient-Stall Guarded Fallback:
-                // Only when joint-grad truly stalls (fails to reduce global discD AND activates < 10% of regions),
-                // fall back to live fanout-budgeted greedy ADP selection across candRegions (exact Stage A safety).
+                // Gradient-Stall Guarded Fallback with Global Discrete Monotonicity Gate:
+                // Only when joint-grad truly stalls (discD >= D0 && raw < 10% M), build a trial
+                // live fanout-budgeted greedy ADP selection and accept it IFF it strictly reduces
+                // exact global discrete delay (fbDiscD < D0 - 1e-4).
                 bool gradStalled = (gStats.bestDiscDelay >= depth - 1e-4f &&
                                     gStats.selectedNonZero < std::max(1, M / 10));
+                bool usedFallback = false;
                 if (gradStalled) {
                     std::vector<int> fbOrder;
                     fbOrder.reserve(candRegions.size());
@@ -2792,31 +2794,132 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
                             return candRegions[a].weight > candRegions[b].weight;
                         return candRegions[a].root < candRegions[b].root;
                     });
+                    std::vector<int> fbAccFo(nObjs, 0);
+                    std::vector<uint8_t> fbDelStrict(nObjs, 0), fbLockedRoot(nObjs, 0), fbLockedProt(nObjs, 0);
+                    std::vector<const GradCandHost *> fbOp(nObjs, nullptr);
+                    int fbCount = 0;
                     for (int idxR : fbOrder) {
                         const auto & reg = candRegions[idxR];
                         const auto & gc = reg.cands[reg.warmBestK - 1];
-                        if (lockedRoot[reg.root] || finalDelStrict[reg.root]) continue;
+                        if (fbLockedRoot[reg.root] || fbDelStrict[reg.root]) continue;
                         bool conflict = false;
                         for (int u : gc.remStrict) {
-                            if (finalDelStrict[u] || lockedProt[u] || lockedRoot[u]) { conflict = true; break; }
+                            if (fbDelStrict[u] || fbLockedProt[u] || fbLockedRoot[u]) { conflict = true; break; }
                         }
                         if (!conflict) {
                             for (int j = 0; j < 4; ++j) {
-                                if (gc.leaves[j] > 0 && finalDelStrict[gc.leaves[j]]) { conflict = true; break; }
+                                if (gc.leaves[j] > 0 && fbDelStrict[gc.leaves[j]]) { conflict = true; break; }
                             }
                         }
                         if (!conflict) {
                             for (int t = 0; t < gc.hitCnt; ++t) {
-                                if (gc.hitIds[t] > 0 && finalDelStrict[gc.hitIds[t]]) { conflict = true; break; }
+                                if (gc.hitIds[t] > 0 && fbDelStrict[gc.hitIds[t]]) { conflict = true; break; }
                             }
                         }
                         if (conflict) continue;
-                        if (!checkFanoutBudgetHost(gc)) continue;
-                        commitChosenOp(reg.root, gc);
-                        critApplied++;
+                        bool budgetOk = true;
+                        if (params.fanoutBudget) {
+                            for (const auto & kv : gc.foDeltas) {
+                                int u = kv.first, d = kv.second;
+                                if (d <= 0) continue;
+                                bool negOnly = (u <= nPIs && params.piPhaseAware);
+                                float coef = (u <= nPIs)
+                                    ? params.piFanoutAlpha
+                                    : (params.slewBeta > 0.0f ? params.fanoutAlpha * (1.0f + params.slewBeta * hSlewIn[u]) : params.fanoutAlpha);
+                                if (coef <= 0.0f) continue;
+                                int base = foBaseHost[u];
+                                int nCnt = std::max(0, base + fbAccFo[u] + d);
+                                float inc = coef * static_cast<float>(hLoad(nCnt) - hLoad(base));
+                                if (inc > 1e-6f && !(nCnt <= params.fanoutPivot && inc <= 0.5f)) {
+                                    float so = querySlackOtherHost(u, negOnly, nObjs, depth, params.piPhaseAware, gc.remAll,
+                                                                   hFoOff, hFoEdge, hArr, hReq, hGd, hNegExtra, hTop3, hNegTop3);
+                                    if (so < kInf * 0.5f && inc > std::max(0.0f, so) + params.budgetTol) {
+                                        budgetOk = false;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if (!budgetOk) continue;
+                        for (const auto & kv : gc.foDeltas) fbAccFo[kv.first] += kv.second;
+                        fbOp[reg.root] = &gc;
+                        fbLockedRoot[reg.root] = 1;
+                        fbLockedProt[reg.root] = 1;
+                        for (int u : gc.remStrict) fbDelStrict[u] = 1;
+                        for (int j = 0; j < 4; ++j) if (gc.leaves[j] > 0) fbLockedProt[gc.leaves[j]] = 1;
+                        for (int t = 0; t < gc.hitCnt; ++t) if (gc.hitIds[t] > 0) fbLockedProt[gc.hitIds[t]] = 1;
+                        fbCount++;
                     }
-                    if (critApplied > 0) gStats.bestTheta = 0.0f;
-                } else if (gStats.selectedNonZero > 0) {
+
+                    if (fbCount > 0) {
+                        std::vector<float> fbArr(nObjs, 0.0f), fbSlew(nObjs, 0.0f);
+                        auto readFbLit = [&](int lit, float & aOut, float & sOut) {
+                            int u = lit >> 1, c = lit & 1;
+                            if (u <= 0) { aOut = 0.0f; sOut = 0.0f; return; }
+                            if (u <= nPIs) {
+                                if (!params.piPhaseAware || c != 0) {
+                                    float ld = static_cast<float>(hLoad(std::max(0, foBaseHost[u] + fbAccFo[u])));
+                                    aOut = params.piFanoutAlpha * ld;
+                                    sOut = ld;
+                                } else {
+                                    aOut = 0.0f; sOut = 0.0f;
+                                }
+                                return;
+                            }
+                            aOut = fbArr[u]; sOut = fbSlew[u];
+                        };
+                        for (int id = nPIs + 1; id < nObjs; ++id) {
+                            if (fbDelStrict[id]) continue;
+                            const GradCandHost * op = fbOp[id];
+                            float rootLd = static_cast<float>(hLoad(std::max(0, foBaseHost[id] + fbAccFo[id])));
+                            if (!op) {
+                                float a0, s0, a1, s1;
+                                readFbLit(f0[id], a0, s0);
+                                readFbLit(f1[id], a1, s1);
+                                float gd = 1.0f + params.fanoutAlpha * rootLd * (1.0f + params.slewBeta * std::max(s0, s1));
+                                fbArr[id] = gd + std::max(a0, a1);
+                                fbSlew[id] = rootLd;
+                            } else if (op->wireLit >= 0) {
+                                readFbLit(op->wireLit, fbArr[id], fbSlew[id]);
+                            } else {
+                                int nG = static_cast<int>(op->subGates.size());
+                                float locA[kGradMaxSubGates], locS[kGradMaxSubGates];
+                                for (int g = 0; g < nG; ++g) {
+                                    const SubGate & sg = op->subGates[g];
+                                    float a0, s0, a1, s1;
+                                    if (sg.in0 < 0) { a0 = locA[-1 - sg.in0]; s0 = locS[-1 - sg.in0]; }
+                                    else readFbLit(sg.in0, a0, s0);
+                                    if (sg.in1 < 0) { a1 = locA[-1 - sg.in1]; s1 = locS[-1 - sg.in1]; }
+                                    else readFbLit(sg.in1, a1, s1);
+                                    float ld = (g == nG - 1) ? rootLd : sg.internalLoad;
+                                    float gd = 1.0f + params.fanoutAlpha * ld * (1.0f + params.slewBeta * std::max(s0, s1));
+                                    locA[g] = gd + std::max(a0, a1);
+                                    locS[g] = ld;
+                                }
+                                fbArr[id] = locA[nG - 1];
+                                fbSlew[id] = locS[nG - 1];
+                            }
+                        }
+                        float fbDiscD = 0.0f;
+                        for (int l : outs) {
+                            float a, s;
+                            readFbLit(l, a, s);
+                            if (a > fbDiscD) fbDiscD = a;
+                        }
+                        if (fbDiscD < depth - 1e-4f) {
+                            accFo.swap(fbAccFo);
+                            finalDelStrict.swap(fbDelStrict);
+                            lockedRoot.swap(fbLockedRoot);
+                            lockedProt.swap(fbLockedProt);
+                            chosenOp.swap(fbOp);
+                            critApplied = fbCount;
+                            gStats.bestTheta = 0.0f;
+                            gStats.bestDiscDelay = fbDiscD;
+                            usedFallback = true;
+                        }
+                    }
+                }
+                if (!usedFallback && gStats.selectedNonZero > 0) {
                     std::vector<int> selRegions;
                     selRegions.reserve(gStats.selectedNonZero);
                     for (int m = 0; m < M; ++m) {

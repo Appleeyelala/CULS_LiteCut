@@ -32,8 +32,8 @@ struct Rw4BParams {
     int gradSteps = 25;
     bool gradCheck = false;
     float tnsRho = 0.85f;
-    float discLam = 0.60f;
-    float gradLr = 0.25f;
+    float discLam = 0.30f;
+    float gradLr = 0.10f;
     int verbose = 1;
 };
 

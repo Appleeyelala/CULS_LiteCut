@@ -1163,12 +1163,15 @@ struct MenuSlot {
 __global__ void evaluateNode4BMenuKernel(
     int nPIs, int nObjs, int P, float depth, float phi,
     const int * d_f0, const int * d_f1, const int * d_fo, const int * d_negFo,
-    const int * d_nodeLv, const float * d_arr, const float * d_req, const float * d_gateDelay,
+    const int * d_foOff, const int * d_foEdge, const int * d_nodeLv,
+    const float * d_arr, const float * d_req, const float * d_gateDelay,
     const float * d_negExtra, const float * d_outSlew, const float * d_negSlew,
     const float * d_slewIn, const float * d_sens, const float * d_slewCoef, const float * d_slewCoefNeg,
+    const Top3Bounds * d_top3, const Top3Bounds * d_negTop3,
     const Cut4B * d_cuts, const rw::Library * lib, const TableNode4B * d_ht,
     float alpha, float piAlpha, float beta, float regW, int pivot, float tau,
-    bool piPhaseAware, bool strashAware, float adpW, float tnsRho,
+    float budgetTol, bool piPhaseAware, bool strashAware, bool fanoutBudget,
+    float adpW, float tnsRho,
     MenuSlot * d_menuOut) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int nNodes = nObjs - nPIs - 1;
@@ -1418,6 +1421,8 @@ __global__ void evaluateNode4BMenuKernel(
             float leafDd[4] = {0, 0, 0, 0};
             int leafDl[4] = {0, 0, 0, 0};
             float side = 0.0f, reg = 0.0f, slewCost = 0.0f, posFoInc = 0.0f;
+            float effTol = (da > 0 && inVision) ? (budgetTol + 0.25f * tau) : budgetTol;
+            bool budgetOk = true;
             for (int i = 0; i < 4; ++i) {
                 int lf = leaves[i];
                 if (lf <= 0) continue;
@@ -1432,6 +1437,15 @@ __global__ void evaluateNode4BMenuKernel(
                 if (newCnt < 0) newCnt = 0;
                 int dl = loadI(newCnt) - loadI(baseCnt);
                 float dd = coef * static_cast<float>(dl);
+                if (fanoutBudget && dd > 1e-6f && !(newCnt <= pivot && dd <= 0.5f)) {
+                    float so = querySlackOtherDev(
+                        lf, negOnly, nObjs, depth, piPhaseAware, remIds, remCnt,
+                        d_foOff, d_foEdge, d_arr, d_req, d_gateDelay, d_negExtra, d_top3, d_negTop3);
+                    if (so < kInf * 0.5f && dd > (so > 0.0f ? so : 0.0f) + effTol) {
+                        budgetOk = false;
+                        break;
+                    }
+                }
                 leafDd[i] = dd;
                 leafDl[i] = dl;
                 side += sensOther[i] * dd;
@@ -1441,6 +1455,7 @@ __global__ void evaluateNode4BMenuKernel(
                     if (sc > 0.0f) slewCost += sc * static_cast<float>(dl);
                 }
             }
+            if (!budgetOk) continue;
             for (int t = 0; t < hitCnt; ++t) {
                 int u = hitIds[t], dfo = hitDelta[t];
                 if (dfo > 0) posFoInc += static_cast<float>(dfo);
@@ -1450,10 +1465,20 @@ __global__ void evaluateNode4BMenuKernel(
                 if (newCnt < 0) newCnt = 0;
                 int dl = loadI(newCnt) - loadI(baseCnt);
                 float dd = coef * static_cast<float>(dl);
+                if (fanoutBudget && dd > 1e-6f && !(newCnt <= pivot && dd <= 0.5f)) {
+                    float so = querySlackOtherDev(
+                        u, false, nObjs, depth, piPhaseAware, remIds, remCnt,
+                        d_foOff, d_foEdge, d_arr, d_req, d_gateDelay, d_negExtra, d_top3, d_negTop3);
+                    if (so < kInf * 0.5f && dd > (so > 0.0f ? so : 0.0f) + effTol) {
+                        budgetOk = false;
+                        break;
+                    }
+                }
                 side += d_sens[u] * dd;
                 if (regW > 0.0f) reg += regW * static_cast<float>(hqI(newCnt, pivot) - hqI(baseCnt, pivot));
                 if (beta > 0.0f && dl != 0 && d_slewCoef[u] > 0.0f) slewCost += d_slewCoef[u] * static_cast<float>(dl);
             }
+            if (!budgetOk) continue;
 
             for (int i = 0; i < 4; ++i) {
                 int lf = leaves[i];
@@ -1510,9 +1535,10 @@ __global__ void evaluateNode4BMenuKernel(
                 maxArrAbs = cvMax[rt];
                 jCand = cvLse[rt];
             }
-            if (maxArrAbs > req + (inVision ? 0.5f * tau : 1e-5f)) continue;
+            if (maxArrAbs > req + (inVision ? 0.25f * tau : 1e-5f)) continue;
 
             float deltaJ = jOrig - jCand;
+            if (da <= 0 && deltaJ < -1e-5f) continue; // area-saving rewrites must not degrade local cone timing
             if (!inVision && !(da < 0 || (da == 0 && deltaJ > 1e-4f))) continue;
             if (inVision && !(deltaJ > 1e-4f || da < 0)) continue;
 
@@ -2253,11 +2279,11 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
             CHECK_CUDA(cudaMemcpy(d_nodeLv, hNodeLv.data(), nObjs * sizeof(int), cudaMemcpyHostToDevice));
 
             evaluateNode4BMenuKernel<<<(nNodes + kBlockSize - 1) / kBlockSize, kBlockSize>>>(
-                nPIs, nObjs, P, depth, phi, d_f0, d_f1, d_fo, d_negFo, d_nodeLv,
+                nPIs, nObjs, P, depth, phi, d_f0, d_f1, d_fo, d_negFo, d_foOff, d_foEdge, d_nodeLv,
                 d_arr, d_req, d_gd, d_negExtra, d_outSlew, d_negSlew, d_slewIn, d_sens, d_slewCoef, d_slewCoefNeg,
-                d_cuts, d_lib, d_ht, params.fanoutAlpha, params.piFanoutAlpha, params.slewBeta,
-                params.fanoutReg, params.fanoutPivot, tau, params.piPhaseAware, params.strashAware,
-                params.adpW, params.tnsRho, d_menuOut);
+                d_top3, d_negTop3, d_cuts, d_lib, d_ht, params.fanoutAlpha, params.piFanoutAlpha, params.slewBeta,
+                params.fanoutReg, params.fanoutPivot, tau, params.budgetTol, params.piPhaseAware, params.strashAware,
+                params.fanoutBudget, params.adpW, params.tnsRho, d_menuOut);
             CHECK_CUDA(cudaDeviceSynchronize());
             auto t3 = std::chrono::steady_clock::now();
             msEval += std::chrono::duration<double, std::milli>(t3 - t2).count();

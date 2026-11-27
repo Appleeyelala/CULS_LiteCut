@@ -16,7 +16,7 @@ namespace rw4b {
 
 static constexpr int kGradBlock = 256;
 static constexpr float kTauFo = 0.10f;
-static constexpr float kStepClip = 0.35f;
+static constexpr float kStepClip = 0.20f;
 
 // ---------------- Device smooth math helpers ----------------
 
@@ -569,7 +569,10 @@ __global__ void k_region_grad_and_adam(
         dotPG += pk * gp[k];
     }
 
-    const float b1 = 0.9f, b2 = 0.999f, eps = 1e-8f;
+    const float b1 = 0.9f, b2 = 0.999f;
+    // Scale-aware Adam damping: critical-path grads (~1e-3..1e-2) move at full lr,
+    // while tiny off-critical area grads (~1/V0) move gently without saturating p in 5 steps.
+    const float eps = fmaxf(1e-5f, 4.0f * static_cast<float>(invV0));
     float b1Corr = 1.0f - powf(b1, static_cast<float>(stepIdx));
     float b2Corr = 1.0f - powf(b2, static_cast<float>(stepIdx));
 
@@ -1010,8 +1013,8 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
             t2 = wTotal - t1;
             gamma = (1.5f - 0.5f * u) * tau0;
             gammaS = 1.0f - 0.3f * u;
-            tauP = 1.0f - 0.4f * u;
-            discLam = 0.4f * params.discLam * u;
+            tauP = 1.0f - 0.30f * u;
+            discLam = 0.35f * params.discLam * u;
         } else {
             // Stage 3: Discretization pull-in (WNS-heavy, sharp tau, full Gini magnet)
             float u = (frac - 0.72f) / 0.28f;
@@ -1019,18 +1022,18 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
             t2 = wTotal - t1;
             gamma = (1.0f - 0.5f * u) * tau0;
             gammaS = 0.7f - 0.3f * u;
-            tauP = 0.6f - 0.3f * u;
-            discLam = (0.4f + 0.6f * u) * params.discLam;
+            tauP = 0.70f - 0.25f * u;
+            discLam = (0.35f + 0.65f * u) * params.discLam;
         }
         double loss = runStep(tauP, gamma, gammaS, gamma, t1, t2, discLam, true, true, t, t == 1);
         if (t == 1) stats.initLoss = loss;
         if (t == T) stats.finalLoss = loss;
     }
 
-    // Final probabilities at final tauP=0.30
+    // Final probabilities at final tauP=0.45
     k_init_exp_fo<<<(nObjs + kGradBlock - 1) / kGradBlock, kGradBlock>>>(nObjs, d_foBase, d_expFo);
     k_softmax_and_exp_fo<<<(M + kGradBlock - 1) / kGradBlock, kGradBlock>>>(
-        M, 0.30f, d_candCount, d_logits, d_foDeltaOffset, d_foDeltaNode, d_foDeltaVal, d_prob, d_expFo);
+        M, 0.45f, d_candCount, d_logits, d_foDeltaOffset, d_foDeltaNode, d_foDeltaVal, d_prob, d_expFo);
     CHECK_CUDA(cudaDeviceSynchronize());
     auto tLoop1 = std::chrono::steady_clock::now();
     stats.msGradLoop = std::chrono::duration<double, std::milli>(tLoop1 - tLoop0).count();
@@ -1047,8 +1050,8 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
     }
     stats.avgMaxProb = static_cast<float>(sumMaxP / static_cast<double>(M));
 
-    // Module 5.4: GPU Multi-Threshold Discrete Line Search
-    const float thetas[5] = {0.50f, 0.65f, 0.80f, 0.90f, 0.95f};
+    // Module 5.4: GPU Multi-Threshold Discrete Line Search (8 confidence levels)
+    const float thetas[8] = {0.35f, 0.50f, 0.65f, 0.75f, 0.85f, 0.92f, 0.96f, 0.985f};
     float bestAdpDelta = 0.0f; // 0.0 = all no-op baseline (strict monotonic non-degradation)
     float bestTheta = -1.0f;
     float bestDelay = depth0;

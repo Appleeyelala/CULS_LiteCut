@@ -116,8 +116,8 @@ int rw4bHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals) {
     int gradSteps = 25;
     bool gradCheck = false;
     float tnsRho = 0.85f;
-    float discLam = 0.60f;
-    float gradLr = 0.25f;
+    float discLam = 0.30f;
+    float gradLr = 0.10f;
 
     CLI::App parser("Perform GPU fanout-aware global sensitivity 4B rewrite");
     parser.add_option("-r", rounds, descWithDefault("number of rounds", rounds));

@@ -120,7 +120,7 @@ int rw4bHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals) {
     float gradLr = 0.20f;
     float foIncLam = 0.0f;
     float foIncTh = 6.0f;
-    int critMax = 0;
+    bool noFoGrad = false;
 
     CLI::App parser("Perform GPU fanout-aware global sensitivity 4B rewrite");
     parser.add_option("-r", rounds, descWithDefault("number of rounds", rounds));
@@ -140,7 +140,7 @@ int rw4bHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals) {
     parser.add_option("--lr", gradLr, descWithDefault("Stage B: Adam learning rate for logits", gradLr));
     parser.add_option("--fo-inc-lam", foIncLam, descWithDefault("Stage B: bounded linear net-fanout-increase penalty weight", foIncLam));
     parser.add_option("--fo-inc-th", foIncTh, descWithDefault("Stage B: free fanout ceiling threshold F_th", foIncTh));
-    parser.add_option("--crit-max", critMax, descWithDefault("Stage B: max critical-cone regions in continuous joint-grad (0=unlimited)", critMax));
+    parser.add_flag("--no-fo-grad", noFoGrad, descWithDefault("Stage B ablation: disable Path 2 fanout adjoint gradient (g_fo=0)", noFoGrad));
     parser.add_flag("-b", condBalance, descWithDefault("conditional v3-gated GPU balance", condBalance));
     parser.add_flag("-m", structMacro, descWithDefault("v3-gated GPU struct macro {orig,bal,rfz,bal_rfz}", structMacro));
     parser.add_flag("--no-budget", noBudget, descWithDefault("disable slack_other hard fanout budget guard", noBudget));
@@ -153,7 +153,7 @@ int rw4bHandler(AIGMan & aigman, const std::vector<std::string> & vLiterals) {
 
     int macroMode = structMacro ? 2 : (condBalance ? 1 : 0);
     aigman.rw4b(rounds, fanoutAlpha, piFanoutAlpha, slewBeta, lamArea, macroMode, noBudget, legacyV1, foCap,
-                !noAdp, adpW, slackKappa, jointGrad, gradSteps, gradCheck, tnsRho, discLam, gradLr, foIncLam, foIncTh, critMax);
+                !noAdp, adpW, slackKappa, jointGrad, gradSteps, gradCheck, tnsRho, discLam, gradLr, foIncLam, foIncTh, noFoGrad);
     return 0;
 }
 

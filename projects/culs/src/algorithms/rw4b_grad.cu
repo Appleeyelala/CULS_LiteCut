@@ -694,17 +694,16 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
         CHECK_CUDA(cudaMemcpy(d_foDeltaVal, prob.foDeltaVal.data(), nnz * sizeof(int), cudaMemcpyHostToDevice));
     }
 
-    // Start near the true original circuit (z_{m,0} = 2.5, p_0 ~ 75%..92%, 66415 champion config)
-    // so simultaneous fractional fanout deltas never cause a t=1 fanout explosion.
-    auto initWarmLogits = [&](std::vector<float> & zVec, float z0Init = 2.5f) {
+    // Start near the true original circuit (p(no-op) ~ 0.75..0.92) so simultaneous
+    // fractional fanout deltas never cause a 50x fanout explosion at t=1.
+    auto initWarmLogits = [&](std::vector<float> & zVec) {
         std::fill(zVec.begin(), zVec.end(), 0.0f);
         for (int m = 0; m < M; ++m) {
-            zVec[m * kGradMaxK + 0] = z0Init;
+            zVec[m * kGradMaxK + 0] = 2.5f;
         }
     };
     std::vector<float> hLogits(MK, 0.0f);
-    initWarmLogits(hLogits, 2.5f);
-    stats.chosenZ0 = 2.5f;
+    initWarmLogits(hLogits);
     CHECK_CUDA(cudaMemcpy(d_logits, hLogits.data(), MK * sizeof(float), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemset(d_adamM, 0, MK * sizeof(float)));
     CHECK_CUDA(cudaMemset(d_adamV, 0, MK * sizeof(float)));
@@ -726,7 +725,6 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
 
     std::vector<float> hPoArr(nPOs, 0.0f);
     float poNorm = 1.0f;
-    float lastPoMax = depth0;
 
     // Helper: run forward + loss (and optionally backward + Adam update)
     auto runStep = [&](float tauP, float gamma, float gammaS, float gammaPo,
@@ -752,7 +750,6 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
         float poMax = hPoArr[0];
         for (int i = 1; i < nPOs; ++i)
             if (hPoArr[i] > poMax) poMax = hPoArr[i];
-        lastPoMax = poMax;
 
         if (computePoNorm) {
             int cntNear = 0;
@@ -799,10 +796,14 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
                     d_gArr, d_gSlew, d_gPiNegArr, d_gPiNegSlew);
             }
 
-            k_fanout_grad<<<(nObjs + kGradBlock - 1) / kGradBlock, kGradBlock>>>(
-                nPIs, nObjs, nNodes, alpha, piAlpha, beta, lamFo, fTh, kTauFo,
-                d_isRegionRoot, d_candCount, d_candWireLit, d_foBase, d_prob, d_expFo, d_slewIn, d_candRootInSlew,
-                d_gArr, d_gSlew, d_gPiNegArr, d_gPiNegSlew, d_gFo);
+            if (params.noFoGrad) {
+                CHECK_CUDA(cudaMemset(d_gFo, 0, nObjs * sizeof(float)));
+            } else {
+                k_fanout_grad<<<(nObjs + kGradBlock - 1) / kGradBlock, kGradBlock>>>(
+                    nPIs, nObjs, nNodes, alpha, piAlpha, beta, lamFo, fTh, kTauFo,
+                    d_isRegionRoot, d_candCount, d_candWireLit, d_foBase, d_prob, d_expFo, d_slewIn, d_candRootInSlew,
+                    d_gArr, d_gSlew, d_gPiNegArr, d_gPiNegSlew, d_gFo);
+            }
 
             k_region_grad_and_adam<<<(M + kGradBlock - 1) / kGradBlock, kGradBlock>>>(
                 M, nNodes, tauP, lamArea, discLam, params.gradLr, kStepClip, stepIdx, doUpdate,
@@ -1007,11 +1008,11 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
                worstAna, worstNum, (maxRel < 1e-4 ? "PASS<1e-4" : "FAIL"));
 
         // Reset logits to warm-start before real optimization
-        initWarmLogits(hLogits, 2.5f);
+        initWarmLogits(hLogits);
         CHECK_CUDA(cudaMemcpy(d_logits, hLogits.data(), MK * sizeof(float), cudaMemcpyHostToDevice));
     }
 
-    // Main Inner Joint Gradient Loop (66415 Champion 3-Stage Annealing Schedule)
+    // Main Inner Joint Gradient Loop (3-Stage Annealing Schedule)
     const int T = std::max(1, params.gradSteps);
     for (int t = 1; t <= T; ++t) {
         float frac = static_cast<float>(t - 1) / static_cast<float>(std::max(1, T - 1));

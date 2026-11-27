@@ -2292,7 +2292,7 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
 
             std::vector<MenuSlot> hMenu(static_cast<size_t>(nObjs) * 4);
             std::vector<int> hFo(nObjs), hNegFo(nObjs), hFoOff(nObjs + 1), hFoEdge(totalEdges);
-            std::vector<float> hArr(nObjs), hReq(nObjs), hGd(nObjs), hNegExtra(nObjs), hSlewIn(nObjs), hSens(nObjs);
+            std::vector<float> hArr(nObjs), hReq(nObjs), hGd(nObjs), hNegExtra(nObjs), hSlewIn(nObjs);
             std::vector<Top3Bounds> hTop3(nObjs), hNegTop3(nPIs + 1);
             std::vector<Cut4B> hCuts(static_cast<size_t>(nObjs) * kCutSetSize);
             CHECK_CUDA(cudaMemcpy(hMenu.data(), d_menuOut, static_cast<size_t>(nObjs) * 4 * sizeof(MenuSlot), cudaMemcpyDeviceToHost));
@@ -2305,7 +2305,6 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
             CHECK_CUDA(cudaMemcpy(hGd.data(), d_gd, nObjs * sizeof(float), cudaMemcpyDeviceToHost));
             CHECK_CUDA(cudaMemcpy(hNegExtra.data(), d_negExtra, nObjs * sizeof(float), cudaMemcpyDeviceToHost));
             CHECK_CUDA(cudaMemcpy(hSlewIn.data(), d_slewIn, nObjs * sizeof(float), cudaMemcpyDeviceToHost));
-            CHECK_CUDA(cudaMemcpy(hSens.data(), d_sens, nObjs * sizeof(float), cudaMemcpyDeviceToHost));
             CHECK_CUDA(cudaMemcpy(hTop3.data(), d_top3, nObjs * sizeof(Top3Bounds), cudaMemcpyDeviceToHost));
             CHECK_CUDA(cudaMemcpy(hNegTop3.data(), d_negTop3, (nPIs + 1) * sizeof(Top3Bounds), cudaMemcpyDeviceToHost));
             CHECK_CUDA(cudaMemcpy(hCuts.data(), d_cuts, static_cast<size_t>(nObjs) * kCutSetSize * sizeof(Cut4B), cudaMemcpyDeviceToHost));
@@ -2332,7 +2331,6 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
 
             struct GradCandHost {
                 int cls, rt, uPhase, flip, deltaAnd, wireLit;
-                float score = -kInf, deltaJ = 0.0f;
                 int leaves[4];
                 int match[54];
                 int hitCnt, hitIds[8];
@@ -2451,7 +2449,6 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
 
                     GradCandHost gc;
                     gc.cls = cls; gc.rt = rt; gc.uPhase = uPhase; gc.flip = flip;
-                    gc.score = ms.score; gc.deltaJ = ms.deltaJ;
                     gc.wireLit = -1;
                     for (int j = 0; j < 4; ++j) gc.leaves[j] = leaves[j];
                     for (int j = 0; j < 54; ++j) gc.match[j] = match[j];
@@ -2562,66 +2559,32 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
                 }
             }
 
-            // Critical-Cone Hybrid Partitioning:
-            // Split candRegions into Critical Cone (slack <= 3*tau or sens > 0, capped at params.critMax)
-            // for GPU joint-grad optimization, and Non-Critical pool for safe Stage A discrete merge.
-            std::vector<int> critPool, nonCritPool;
-            critPool.reserve(candRegions.size());
-            if (params.critMax <= 0) {
-                for (size_t i = 0; i < candRegions.size(); ++i) critPool.push_back(static_cast<int>(i));
-            } else {
-                nonCritPool.reserve(candRegions.size());
-                for (size_t i = 0; i < candRegions.size(); ++i) {
-                    int r = candRegions[i].root;
-                    float sl = hReq[r] - hArr[r];
-                    if (sl <= 3.0f * tau + 1e-5f || hSens[r] > 1e-6f) {
-                        critPool.push_back(static_cast<int>(i));
-                    } else {
-                        nonCritPool.push_back(static_cast<int>(i));
-                    }
-                }
-                if (static_cast<int>(critPool.size()) > params.critMax) {
-                    std::sort(critPool.begin(), critPool.end(), [&](int a, int b) {
-                        float sa = hSens[candRegions[a].root], sb = hSens[candRegions[b].root];
-                        if (sa != sb) return sa > sb;
-                        if (candRegions[a].weight != candRegions[b].weight) return candRegions[a].weight > candRegions[b].weight;
-                        return candRegions[a].root < candRegions[b].root;
-                    });
-                    for (size_t i = static_cast<size_t>(params.critMax); i < critPool.size(); ++i) {
-                        nonCritPool.push_back(critPool[i]);
-                    }
-                    critPool.resize(static_cast<size_t>(params.critMax));
-                }
-            }
-
-            // Linear-time GWMIN conflict-free region selection on Critical Cone (4 strict invariants)
+            // Linear-time GWMIN conflict-free region selection (4 strict invariants)
             std::vector<int> cntRemStrict(nObjs, 0), cntRefs(nObjs, 0), cntRoot(nObjs, 0);
-            for (int idxR : critPool) {
-                const auto & reg = candRegions[idxR];
+            for (const auto & reg : candRegions) {
                 cntRoot[reg.root] = 1;
                 for (int u : reg.remStrictUnion) cntRemStrict[u]++;
                 for (int u : reg.refsUnion) cntRefs[u]++;
             }
-            std::vector<float> gwScore(critPool.size(), 0.0f);
-            std::vector<int> critOrder(critPool.size());
-            for (size_t i = 0; i < critPool.size(); ++i) {
-                critOrder[i] = static_cast<int>(i);
-                const auto & reg = candRegions[critPool[i]];
+            std::vector<int> order(candRegions.size());
+            std::vector<float> gwScore(candRegions.size(), 0.0f);
+            for (size_t i = 0; i < candRegions.size(); ++i) {
+                order[i] = static_cast<int>(i);
+                const auto & reg = candRegions[i];
                 int deg = cntRemStrict[reg.root];
                 for (int u : reg.remStrictUnion) deg += (cntRemStrict[u] - 1) + cntRefs[u] + cntRoot[u];
                 for (int u : reg.refsUnion) deg += cntRemStrict[u];
                 gwScore[i] = reg.weight / (1.0f + static_cast<float>(std::max(0, deg)));
             }
-            std::sort(critOrder.begin(), critOrder.end(), [&](int a, int b) {
+            std::sort(order.begin(), order.end(), [&](int a, int b) {
                 if (gwScore[a] != gwScore[b]) return gwScore[a] > gwScore[b];
-                return candRegions[critPool[a]].root < candRegions[critPool[b]].root;
+                return candRegions[a].root < candRegions[b].root;
             });
 
             std::vector<uint8_t> usedRoot(nObjs, 0), delStrict(nObjs, 0), prot(nObjs, 0), refByDownstream(nObjs, 0);
             std::vector<int> activeIdx;
-            activeIdx.reserve(critPool.size());
-            for (int ordPos : critOrder) {
-                int idxR = critPool[ordPos];
+            activeIdx.reserve(candRegions.size());
+            for (int idxR : order) {
                 const auto & reg = candRegions[idxR];
                 if (usedRoot[reg.root] || delStrict[reg.root]) continue;
                 bool conflict = false;
@@ -2663,342 +2626,134 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
             }
 
             int M = static_cast<int>(finalActiveIdx.size());
-            if (M == 0 && nonCritPool.empty()) {
+            if (M == 0) {
                 auto t4 = std::chrono::steady_clock::now();
                 msSelectRebuild += std::chrono::duration<double, std::milli>(t4 - t3).count();
                 break;
             }
 
-            std::vector<int> foBaseHost(nObjs, 0);
-            for (int u = 1; u <= nPIs; ++u) foBaseHost[u] = params.piPhaseAware ? hNegFo[u] : hFo[u];
-            for (int u = nPIs + 1; u < nObjs; ++u) foBaseHost[u] = hFo[u];
+            // Pack GradProblem for GPU joint gradient solver
+            GradProblem prob;
+            prob.nPIs = nPIs; prob.nPOs = nPOs; prob.nObjs = nObjs; prob.nNodes = nNodes;
+            prob.maxLv = maxLv; prob.depth0 = depth; prob.tau0 = tau;
+            prob.f0 = &f0; prob.f1 = &f1; prob.outs = &outs; prob.lvOff = &lvOff;
+            prob.foBase.assign(nObjs, 0);
+            for (int u = 1; u <= nPIs; ++u) prob.foBase[u] = params.piPhaseAware ? hNegFo[u] : hFo[u];
+            for (int u = nPIs + 1; u < nObjs; ++u) prob.foBase[u] = hFo[u];
 
-            auto hLoad = [](int fo) { return fo > 1 ? (fo - 1) : 0; };
-            std::vector<int> accFo(nObjs, 0);
-            std::vector<uint8_t> finalDelStrict(nObjs, 0), lockedRoot(nObjs, 0), lockedProt(nObjs, 0);
+            prob.M = M;
+            prob.regionRoot.resize(M);
+            prob.isRegionRoot.assign(nObjs, -1);
+            prob.candCount.resize(M);
+            prob.candWarmBestK.assign(M, 0);
+            prob.candDeltaAnd.assign(M * kGradMaxK, 0);
+            prob.candWireLit.assign(M * kGradMaxK, -1);
+            prob.candNumGates.assign(M * kGradMaxK, 0);
+            prob.candSubGates.assign(static_cast<size_t>(M) * kGradMaxK * kGradMaxSubGates, {0, 0, 0.0f});
+            prob.foDeltaOffset.assign(M * kGradMaxK + 1, 0);
+
+            for (int m = 0; m < M; ++m) {
+                const auto & reg = candRegions[finalActiveIdx[m]];
+                int r = reg.root;
+                prob.regionRoot[m] = r;
+                prob.isRegionRoot[r] = m;
+                int K = std::min(kGradMaxK, 1 + static_cast<int>(reg.cands.size()));
+                prob.candCount[m] = K;
+                prob.candWarmBestK[m] = (reg.warmBestK < K) ? reg.warmBestK : 0;
+
+                // k = 0 (no-op): 1-gate micro-subgraph reading original (f0[r], f1[r])
+                int slot0 = m * kGradMaxK + 0;
+                prob.candDeltaAnd[slot0] = 0;
+                prob.candWireLit[slot0] = -1;
+                prob.candNumGates[slot0] = 1;
+                prob.candSubGates[slot0 * kGradMaxSubGates + 0] = {f0[r], f1[r], 0.0f};
+                prob.foDeltaOffset[slot0 + 1] = static_cast<int>(prob.foDeltaNode.size());
+
+                for (int k = 1; k < K; ++k) {
+                    const auto & gc = reg.cands[k - 1];
+                    int slot = m * kGradMaxK + k;
+                    prob.candDeltaAnd[slot] = gc.deltaAnd;
+                    prob.candWireLit[slot] = gc.wireLit;
+                    if (gc.wireLit < 0) {
+                        int nG = static_cast<int>(gc.subGates.size());
+                        prob.candNumGates[slot] = nG;
+                        for (int g = 0; g < nG; ++g) {
+                            prob.candSubGates[slot * kGradMaxSubGates + g] = gc.subGates[g];
+                        }
+                    }
+                    for (const auto & kv : gc.foDeltas) {
+                        prob.foDeltaNode.push_back(kv.first);
+                        prob.foDeltaVal.push_back(kv.second);
+                    }
+                    prob.foDeltaOffset[slot + 1] = static_cast<int>(prob.foDeltaNode.size());
+                }
+                for (int k = K; k < kGradMaxK; ++k) {
+                    prob.foDeltaOffset[m * kGradMaxK + k + 1] = static_cast<int>(prob.foDeltaNode.size());
+                }
+            }
+
+            std::vector<int> chosenCand;
+            std::vector<float> chosenProb;
+            GradSolveStats gStats = solveJointGradGPU(prob, params, chosenCand, &chosenProb);
+
+            // Post-discretization Live Fanout-Spike Guard (ordered by descending gradient confidence)
+            // Prevents multi-region simultaneous fanout pileups on shared off-critical nets (ASAP7 slew cliff).
+            int guardedApplied = 0;
+            std::vector<uint8_t> finalDelStrict(nObjs, 0);
             std::vector<const GradCandHost *> chosenOp(nObjs, nullptr);
-
-            auto checkFanoutBudgetHost = [&](const GradCandHost & gc) -> bool {
-                if (!params.fanoutBudget) return true;
-                for (const auto & kv : gc.foDeltas) {
-                    int u = kv.first, d = kv.second;
-                    if (d <= 0) continue;
-                    bool negOnly = (u <= nPIs && params.piPhaseAware);
-                    float coef = (u <= nPIs)
-                        ? params.piFanoutAlpha
-                        : (params.slewBeta > 0.0f ? params.fanoutAlpha * (1.0f + params.slewBeta * hSlewIn[u]) : params.fanoutAlpha);
-                    if (coef <= 0.0f) continue;
-                    int base = foBaseHost[u];
-                    int nCnt = std::max(0, base + accFo[u] + d);
-                    float inc = coef * static_cast<float>(hLoad(nCnt) - hLoad(base));
-                    if (inc > 1e-6f && !(nCnt <= params.fanoutPivot && inc <= 0.5f)) {
-                        float so = querySlackOtherHost(u, negOnly, nObjs, depth, params.piPhaseAware, gc.remAll,
-                                                       hFoOff, hFoEdge, hArr, hReq, hGd, hNegExtra, hTop3, hNegTop3);
-                        if (so < kInf * 0.5f && inc > std::max(0.0f, so) + params.budgetTol) {
-                            return false;
-                        }
-                    }
-                }
-                return true;
-            };
-
-            auto commitChosenOp = [&](int root, const GradCandHost & gc) {
-                for (const auto & kv : gc.foDeltas) accFo[kv.first] += kv.second;
-                chosenOp[root] = &gc;
-                lockedRoot[root] = 1;
-                lockedProt[root] = 1;
-                for (int u : gc.remStrict) finalDelStrict[u] = 1;
-                for (int j = 0; j < 4; ++j) if (gc.leaves[j] > 0) lockedProt[gc.leaves[j]] = 1;
-                for (int t = 0; t < gc.hitCnt; ++t) if (gc.hitIds[t] > 0) lockedProt[gc.hitIds[t]] = 1;
-            };
-
-            // Step 1: Critical-Cone GPU Joint Gradient Optimization + Live Fanout-Spike Guard
-            GradSolveStats gStats;
-            int critApplied = 0;
-            if (M > 0) {
-                GradProblem prob;
-                prob.nPIs = nPIs; prob.nPOs = nPOs; prob.nObjs = nObjs; prob.nNodes = nNodes;
-                prob.maxLv = maxLv; prob.depth0 = depth; prob.tau0 = tau;
-                prob.f0 = &f0; prob.f1 = &f1; prob.outs = &outs; prob.lvOff = &lvOff;
-                prob.foBase = foBaseHost;
-
-                prob.M = M;
-                prob.regionRoot.resize(M);
-                prob.isRegionRoot.assign(nObjs, -1);
-                prob.candCount.resize(M);
-                prob.candWarmBestK.assign(M, 0);
-                prob.candDeltaAnd.assign(M * kGradMaxK, 0);
-                prob.candWireLit.assign(M * kGradMaxK, -1);
-                prob.candNumGates.assign(M * kGradMaxK, 0);
-                prob.candSubGates.assign(static_cast<size_t>(M) * kGradMaxK * kGradMaxSubGates, {0, 0, 0.0f});
-                prob.foDeltaOffset.assign(M * kGradMaxK + 1, 0);
-
+            if (gStats.selectedNonZero > 0) {
+                std::vector<int> selRegions;
+                selRegions.reserve(gStats.selectedNonZero);
                 for (int m = 0; m < M; ++m) {
-                    const auto & reg = candRegions[finalActiveIdx[m]];
-                    int r = reg.root;
-                    prob.regionRoot[m] = r;
-                    prob.isRegionRoot[r] = m;
-                    int K = std::min(kGradMaxK, 1 + static_cast<int>(reg.cands.size()));
-                    prob.candCount[m] = K;
-                    prob.candWarmBestK[m] = (reg.warmBestK < K) ? reg.warmBestK : 0;
-
-                    int slot0 = m * kGradMaxK + 0;
-                    prob.candDeltaAnd[slot0] = 0;
-                    prob.candWireLit[slot0] = -1;
-                    prob.candNumGates[slot0] = 1;
-                    prob.candSubGates[slot0 * kGradMaxSubGates + 0] = {f0[r], f1[r], 0.0f};
-                    prob.foDeltaOffset[slot0 + 1] = static_cast<int>(prob.foDeltaNode.size());
-
-                    for (int k = 1; k < K; ++k) {
-                        const auto & gc = reg.cands[k - 1];
-                        int slot = m * kGradMaxK + k;
-                        prob.candDeltaAnd[slot] = gc.deltaAnd;
-                        prob.candWireLit[slot] = gc.wireLit;
-                        if (gc.wireLit < 0) {
-                            int nG = static_cast<int>(gc.subGates.size());
-                            prob.candNumGates[slot] = nG;
-                            for (int g = 0; g < nG; ++g) {
-                                prob.candSubGates[slot * kGradMaxSubGates + g] = gc.subGates[g];
-                            }
-                        }
-                        for (const auto & kv : gc.foDeltas) {
-                            prob.foDeltaNode.push_back(kv.first);
-                            prob.foDeltaVal.push_back(kv.second);
-                        }
-                        prob.foDeltaOffset[slot + 1] = static_cast<int>(prob.foDeltaNode.size());
-                    }
-                    for (int k = K; k < kGradMaxK; ++k) {
-                        prob.foDeltaOffset[m * kGradMaxK + k + 1] = static_cast<int>(prob.foDeltaNode.size());
-                    }
+                    if (chosenCand[m] > 0) selRegions.push_back(m);
                 }
-
-                std::vector<int> chosenCand;
-                std::vector<float> chosenProb;
-                gStats = solveJointGradGPU(prob, params, chosenCand, &chosenProb);
-
-                // Gradient-Stall Guarded Fallback with Global Discrete Monotonicity Gate:
-                // Only when joint-grad truly stalls (discD >= D0 && raw < 10% M), build a trial
-                // live fanout-budgeted greedy ADP selection and accept it IFF it strictly reduces
-                // exact global discrete delay (fbDiscD < D0 - 1e-4).
-                bool gradStalled = (gStats.bestDiscDelay >= depth - 1e-4f &&
-                                    gStats.selectedNonZero < std::max(1, M / 10));
-                bool usedFallback = false;
-                if (gradStalled) {
-                    std::vector<int> fbOrder;
-                    fbOrder.reserve(candRegions.size());
-                    for (size_t i = 0; i < candRegions.size(); ++i) {
-                        if (candRegions[i].warmBestK > 0) fbOrder.push_back(static_cast<int>(i));
-                    }
-                    std::sort(fbOrder.begin(), fbOrder.end(), [&](int a, int b) {
-                        if (candRegions[a].weight != candRegions[b].weight)
-                            return candRegions[a].weight > candRegions[b].weight;
-                        return candRegions[a].root < candRegions[b].root;
-                    });
-                    std::vector<int> fbAccFo(nObjs, 0);
-                    std::vector<uint8_t> fbDelStrict(nObjs, 0), fbLockedRoot(nObjs, 0), fbLockedProt(nObjs, 0);
-                    std::vector<const GradCandHost *> fbOp(nObjs, nullptr);
-                    int fbCount = 0;
-                    for (int idxR : fbOrder) {
-                        const auto & reg = candRegions[idxR];
-                        const auto & gc = reg.cands[reg.warmBestK - 1];
-                        if (fbLockedRoot[reg.root] || fbDelStrict[reg.root]) continue;
-                        bool conflict = false;
-                        for (int u : gc.remStrict) {
-                            if (fbDelStrict[u] || fbLockedProt[u] || fbLockedRoot[u]) { conflict = true; break; }
-                        }
-                        if (!conflict) {
-                            for (int j = 0; j < 4; ++j) {
-                                if (gc.leaves[j] > 0 && fbDelStrict[gc.leaves[j]]) { conflict = true; break; }
-                            }
-                        }
-                        if (!conflict) {
-                            for (int t = 0; t < gc.hitCnt; ++t) {
-                                if (gc.hitIds[t] > 0 && fbDelStrict[gc.hitIds[t]]) { conflict = true; break; }
-                            }
-                        }
-                        if (conflict) continue;
-                        bool budgetOk = true;
-                        if (params.fanoutBudget) {
-                            for (const auto & kv : gc.foDeltas) {
-                                int u = kv.first, d = kv.second;
-                                if (d <= 0) continue;
-                                bool negOnly = (u <= nPIs && params.piPhaseAware);
-                                float coef = (u <= nPIs)
-                                    ? params.piFanoutAlpha
-                                    : (params.slewBeta > 0.0f ? params.fanoutAlpha * (1.0f + params.slewBeta * hSlewIn[u]) : params.fanoutAlpha);
-                                if (coef <= 0.0f) continue;
-                                int base = foBaseHost[u];
-                                int nCnt = std::max(0, base + fbAccFo[u] + d);
-                                float inc = coef * static_cast<float>(hLoad(nCnt) - hLoad(base));
-                                if (inc > 1e-6f && !(nCnt <= params.fanoutPivot && inc <= 0.5f)) {
-                                    float so = querySlackOtherHost(u, negOnly, nObjs, depth, params.piPhaseAware, gc.remAll,
-                                                                   hFoOff, hFoEdge, hArr, hReq, hGd, hNegExtra, hTop3, hNegTop3);
-                                    if (so < kInf * 0.5f && inc > std::max(0.0f, so) + params.budgetTol) {
-                                        budgetOk = false;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        if (!budgetOk) continue;
-                        for (const auto & kv : gc.foDeltas) fbAccFo[kv.first] += kv.second;
-                        fbOp[reg.root] = &gc;
-                        fbLockedRoot[reg.root] = 1;
-                        fbLockedProt[reg.root] = 1;
-                        for (int u : gc.remStrict) fbDelStrict[u] = 1;
-                        for (int j = 0; j < 4; ++j) if (gc.leaves[j] > 0) fbLockedProt[gc.leaves[j]] = 1;
-                        for (int t = 0; t < gc.hitCnt; ++t) if (gc.hitIds[t] > 0) fbLockedProt[gc.hitIds[t]] = 1;
-                        fbCount++;
-                    }
-
-                    if (fbCount > 0) {
-                        std::vector<float> fbArr(nObjs, 0.0f), fbSlew(nObjs, 0.0f);
-                        auto readFbLit = [&](int lit, float & aOut, float & sOut) {
-                            int u = lit >> 1, c = lit & 1;
-                            if (u <= 0) { aOut = 0.0f; sOut = 0.0f; return; }
-                            if (u <= nPIs) {
-                                if (!params.piPhaseAware || c != 0) {
-                                    float ld = static_cast<float>(hLoad(std::max(0, foBaseHost[u] + fbAccFo[u])));
-                                    aOut = params.piFanoutAlpha * ld;
-                                    sOut = ld;
-                                } else {
-                                    aOut = 0.0f; sOut = 0.0f;
-                                }
-                                return;
-                            }
-                            aOut = fbArr[u]; sOut = fbSlew[u];
-                        };
-                        for (int id = nPIs + 1; id < nObjs; ++id) {
-                            if (fbDelStrict[id]) continue;
-                            const GradCandHost * op = fbOp[id];
-                            float rootLd = static_cast<float>(hLoad(std::max(0, foBaseHost[id] + fbAccFo[id])));
-                            if (!op) {
-                                float a0, s0, a1, s1;
-                                readFbLit(f0[id], a0, s0);
-                                readFbLit(f1[id], a1, s1);
-                                float gd = 1.0f + params.fanoutAlpha * rootLd * (1.0f + params.slewBeta * std::max(s0, s1));
-                                fbArr[id] = gd + std::max(a0, a1);
-                                fbSlew[id] = rootLd;
-                            } else if (op->wireLit >= 0) {
-                                readFbLit(op->wireLit, fbArr[id], fbSlew[id]);
-                            } else {
-                                int nG = static_cast<int>(op->subGates.size());
-                                float locA[kGradMaxSubGates], locS[kGradMaxSubGates];
-                                for (int g = 0; g < nG; ++g) {
-                                    const SubGate & sg = op->subGates[g];
-                                    float a0, s0, a1, s1;
-                                    if (sg.src0 < 0) { a0 = locA[-1 - sg.src0]; s0 = locS[-1 - sg.src0]; }
-                                    else readFbLit(sg.src0, a0, s0);
-                                    if (sg.src1 < 0) { a1 = locA[-1 - sg.src1]; s1 = locS[-1 - sg.src1]; }
-                                    else readFbLit(sg.src1, a1, s1);
-                                    float ld = (g == nG - 1) ? rootLd : sg.load;
-                                    float gd = 1.0f + params.fanoutAlpha * ld * (1.0f + params.slewBeta * std::max(s0, s1));
-                                    locA[g] = gd + std::max(a0, a1);
-                                    locS[g] = ld;
-                                }
-                                fbArr[id] = locA[nG - 1];
-                                fbSlew[id] = locS[nG - 1];
-                            }
-                        }
-                        float fbDiscD = 0.0f;
-                        for (int l : outs) {
-                            float a, s;
-                            readFbLit(l, a, s);
-                            if (a > fbDiscD) fbDiscD = a;
-                        }
-                        if (fbDiscD < depth - 1e-4f) {
-                            accFo.swap(fbAccFo);
-                            finalDelStrict.swap(fbDelStrict);
-                            lockedRoot.swap(fbLockedRoot);
-                            lockedProt.swap(fbLockedProt);
-                            chosenOp.swap(fbOp);
-                            critApplied = fbCount;
-                            gStats.bestTheta = 0.0f;
-                            gStats.bestDiscDelay = fbDiscD;
-                            usedFallback = true;
-                        }
-                    }
-                }
-                if (!usedFallback && gStats.selectedNonZero > 0) {
-                    std::vector<int> selRegions;
-                    selRegions.reserve(gStats.selectedNonZero);
-                    for (int m = 0; m < M; ++m) {
-                        if (chosenCand[m] > 0) selRegions.push_back(m);
-                    }
-                    std::sort(selRegions.begin(), selRegions.end(), [&](int a, int b) {
-                        if (chosenProb[a] != chosenProb[b]) return chosenProb[a] > chosenProb[b];
-                        return candRegions[finalActiveIdx[a]].weight > candRegions[finalActiveIdx[b]].weight;
-                    });
-                    for (int m : selRegions) {
-                        const auto & reg = candRegions[finalActiveIdx[m]];
-                        const auto & gc = reg.cands[chosenCand[m] - 1];
-                        if (!checkFanoutBudgetHost(gc)) continue;
-                        commitChosenOp(reg.root, gc);
-                        critApplied++;
-                    }
-                }
-            }
-
-            // Step 2: Non-Critical Safe Discrete Merge (Stage A rules on remaining conflict-free regions)
-            // Only safe area-saving / zero-area non-degrading rewrites (deltaAnd <= 0, deltaJ >= 0, score > 0)
-            // obeying the live accFo and slack_other redline updated by Step 1.
-            int nonCritApplied = 0;
-            if (!nonCritPool.empty()) {
-                struct SafeNonCritItem {
-                    int regIdx;
-                    int candIdx;
-                    float score;
-                };
-                std::vector<SafeNonCritItem> safeItems;
-                safeItems.reserve(nonCritPool.size());
-                for (int idxR : nonCritPool) {
-                    const auto & reg = candRegions[idxR];
-                    int bestCi = -1;
-                    float bestSc = 1e-9f;
-                    for (size_t ci = 0; ci < reg.cands.size(); ++ci) {
-                        const auto & gc = reg.cands[ci];
-                        if (gc.deltaAnd <= 0 && gc.deltaJ >= -1e-5f && gc.score > bestSc) {
-                            bestSc = gc.score;
-                            bestCi = static_cast<int>(ci);
-                        }
-                    }
-                    if (bestCi >= 0) safeItems.push_back({idxR, bestCi, bestSc});
-                }
-                std::sort(safeItems.begin(), safeItems.end(), [&](const SafeNonCritItem & a, const SafeNonCritItem & b) {
-                    if (a.score != b.score) return a.score > b.score;
-                    return candRegions[a.regIdx].root < candRegions[b.regIdx].root;
+                std::sort(selRegions.begin(), selRegions.end(), [&](int a, int b) {
+                    if (chosenProb[a] != chosenProb[b]) return chosenProb[a] > chosenProb[b];
+                    return candRegions[finalActiveIdx[a]].weight > candRegions[finalActiveIdx[b]].weight;
                 });
-                for (const auto & item : safeItems) {
-                    const auto & reg = candRegions[item.regIdx];
-                    const auto & gc = reg.cands[item.candIdx];
-                    if (lockedRoot[reg.root] || finalDelStrict[reg.root]) continue;
-                    bool conflict = false;
-                    for (int u : gc.remStrict) {
-                        if (finalDelStrict[u] || lockedProt[u] || lockedRoot[u]) { conflict = true; break; }
-                    }
-                    if (!conflict) {
-                        for (int j = 0; j < 4; ++j) {
-                            if (gc.leaves[j] > 0 && finalDelStrict[gc.leaves[j]]) { conflict = true; break; }
+
+                auto hLoad = [](int fo) { return fo > 1 ? (fo - 1) : 0; };
+                std::vector<int> accFo(nObjs, 0);
+                for (int m : selRegions) {
+                    int ck = chosenCand[m];
+                    const auto & reg = candRegions[finalActiveIdx[m]];
+                    const auto & gc = reg.cands[ck - 1];
+                    bool ok = true;
+                    if (params.fanoutBudget) {
+                        for (const auto & kv : gc.foDeltas) {
+                            int u = kv.first, d = kv.second;
+                            if (d <= 0) continue;
+                            bool negOnly = (u <= nPIs && params.piPhaseAware);
+                            float coef = (u <= nPIs)
+                                ? params.piFanoutAlpha
+                                : (params.slewBeta > 0.0f ? params.fanoutAlpha * (1.0f + params.slewBeta * hSlewIn[u]) : params.fanoutAlpha);
+                            if (coef <= 0.0f) continue;
+                            int base = prob.foBase[u];
+                            int nCnt = std::max(0, base + accFo[u] + d);
+                            float inc = coef * static_cast<float>(hLoad(nCnt) - hLoad(base));
+                            if (inc > 1e-6f && !(nCnt <= params.fanoutPivot && inc <= 0.5f)) {
+                                float so = querySlackOtherHost(u, negOnly, nObjs, depth, params.piPhaseAware, gc.remAll,
+                                                               hFoOff, hFoEdge, hArr, hReq, hGd, hNegExtra, hTop3, hNegTop3);
+                                if (so < kInf * 0.5f && inc > std::max(0.0f, so) + params.budgetTol) {
+                                    ok = false;
+                                    break;
+                                }
+                            }
                         }
                     }
-                    if (!conflict) {
-                        for (int t = 0; t < gc.hitCnt; ++t) {
-                            if (gc.hitIds[t] > 0 && finalDelStrict[gc.hitIds[t]]) { conflict = true; break; }
-                        }
-                    }
-                    if (conflict) continue;
-                    if (!checkFanoutBudgetHost(gc)) continue;
-                    commitChosenOp(reg.root, gc);
-                    nonCritApplied++;
+                    if (!ok) continue;
+                    for (const auto & kv : gc.foDeltas) accFo[kv.first] += kv.second;
+                    chosenOp[reg.root] = &gc;
+                    for (int u : gc.remStrict) finalDelStrict[u] = 1;
+                    guardedApplied++;
                 }
             }
 
-            int guardedApplied = critApplied + nonCritApplied;
             if (params.verbose >= 1) {
-                printf("rw4b-grad round %d: M=%d applied=%d(raw=%d) z0=%.1f theta=%.2f avgMaxP=%.3f loss=%.5f->%.5f discD=%.2f(D0=%.2f) dAND=%d grad=%.1fms disc=%.1fms crit=%d nc=%d\n",
-                       rnd + 1, M, guardedApplied, gStats.selectedNonZero, gStats.chosenZ0, gStats.bestTheta, gStats.avgMaxProb,
+                printf("rw4b-grad round %d: M=%d applied=%d(raw=%d) theta=%.2f avgMaxP=%.3f loss=%.5f->%.5f discD=%.2f(D0=%.2f) dAND=%d grad=%.1fms disc=%.1fms\n",
+                       rnd + 1, M, guardedApplied, gStats.selectedNonZero, gStats.bestTheta, gStats.avgMaxProb,
                        gStats.initLoss, gStats.finalLoss, gStats.bestDiscDelay, depth,
-                       gStats.bestDiscDeltaAnd, gStats.msGradLoop, gStats.msDiscSearch, critApplied, nonCritApplied);
+                       gStats.bestDiscDeltaAnd, gStats.msGradLoop, gStats.msDiscSearch);
             }
 
             if (guardedApplied == 0) {

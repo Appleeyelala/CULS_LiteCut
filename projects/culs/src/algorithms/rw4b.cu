@@ -2713,6 +2713,13 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
                 });
 
                 auto hLoad = [](int fo) { return fo > 1 ? (fo - 1) : 0; };
+                const int fThInt = std::max(params.fanoutPivot, static_cast<int>(std::lround(params.foIncTh)));
+                std::vector<int> batchNetDelta(nObjs, 0);
+                for (int m : selRegions) {
+                    const auto & gc = candRegions[finalActiveIdx[m]].cands[chosenCand[m] - 1];
+                    for (const auto & kv : gc.foDeltas) batchNetDelta[kv.first] += kv.second;
+                }
+
                 std::vector<int> accFo(nObjs, 0);
                 for (int m : selRegions) {
                     int ck = chosenCand[m];
@@ -2723,12 +2730,16 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
                         for (const auto & kv : gc.foDeltas) {
                             int u = kv.first, d = kv.second;
                             if (d <= 0) continue;
+                            int base = prob.foBase[u];
+                            int netFo = std::max(0, base + batchNetDelta[u]);
+                            // If the batch net fanout does not exceed B(u) = max(fo_base, F_th),
+                            // do not falsely block cooperative net-canceling rewrites on static so=0.
+                            if (netFo <= std::max(base, fThInt)) continue;
                             bool negOnly = (u <= nPIs && params.piPhaseAware);
                             float coef = (u <= nPIs)
                                 ? params.piFanoutAlpha
                                 : (params.slewBeta > 0.0f ? params.fanoutAlpha * (1.0f + params.slewBeta * hSlewIn[u]) : params.fanoutAlpha);
                             if (coef <= 0.0f) continue;
-                            int base = prob.foBase[u];
                             int nCnt = std::max(0, base + accFo[u] + d);
                             float inc = coef * static_cast<float>(hLoad(nCnt) - hLoad(base));
                             if (inc > 1e-6f && !(nCnt <= params.fanoutPivot && inc <= 0.5f)) {
@@ -2741,7 +2752,10 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
                             }
                         }
                     }
-                    if (!ok) continue;
+                    if (!ok) {
+                        for (const auto & kv : gc.foDeltas) batchNetDelta[kv.first] -= kv.second;
+                        continue;
+                    }
                     for (const auto & kv : gc.foDeltas) accFo[kv.first] += kv.second;
                     chosenOp[reg.root] = &gc;
                     for (int u : gc.remStrict) finalDelStrict[u] = 1;

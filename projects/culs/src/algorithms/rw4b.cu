@@ -1555,10 +1555,21 @@ __global__ void evaluateNode4BMenuKernel(
                 bestLowFo = cur;
         }
     }
-    d_menuOut[root * 4 + 0] = bestSpeed;
-    d_menuOut[root * 4 + 1] = bestAdp;
-    d_menuOut[root * 4 + 2] = bestArea;
-    d_menuOut[root * 4 + 3] = bestLowFo;
+    // Move 2 (GWMIN slimming): full 4-candidate Pareto menu only for near-critical nodes (slack <= 2*tau);
+    // off-critical nodes keep only their single best ADP/area candidate (K_m = 2) to halve conflict footprints.
+    bool isCritMenu = (slackRoot <= 2.0f * tau + 1e-5f);
+    if (isCritMenu) {
+        d_menuOut[root * 4 + 0] = bestSpeed;
+        d_menuOut[root * 4 + 1] = bestAdp;
+        d_menuOut[root * 4 + 2] = bestArea;
+        d_menuOut[root * 4 + 3] = bestLowFo;
+    } else {
+        MenuSlot emptySlot = {-kInf, -kInf, kInf, 999999, -1, -1};
+        d_menuOut[root * 4 + 0] = bestAdp;
+        d_menuOut[root * 4 + 1] = emptySlot;
+        d_menuOut[root * 4 + 2] = emptySlot;
+        d_menuOut[root * 4 + 3] = emptySlot;
+    }
 }
 
 // ---------------- Host helpers ----------------

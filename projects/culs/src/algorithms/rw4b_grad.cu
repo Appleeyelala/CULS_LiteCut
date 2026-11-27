@@ -694,12 +694,12 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
         CHECK_CUDA(cudaMemcpy(d_foDeltaVal, prob.foDeltaVal.data(), nnz * sizeof(int), cudaMemcpyHostToDevice));
     }
 
-    // Start near the true original circuit (p(no-op) ~ 0.75..0.92) so simultaneous
-    // fractional fanout deltas never cause a 50x fanout explosion at t=1.
+    // Gentle warm-start (z_{m,0} = 1.2): p_0 ~ 77% for K=2 (off-critical) and ~45% for K=5 (critical),
+    // preventing t=1 fanout explosions while giving valid candidates ~3x stronger initial Softmax Jacobian.
     auto initWarmLogits = [&](std::vector<float> & zVec) {
         std::fill(zVec.begin(), zVec.end(), 0.0f);
         for (int m = 0; m < M; ++m) {
-            zVec[m * kGradMaxK + 0] = 2.5f;
+            zVec[m * kGradMaxK + 0] = 1.2f;
         }
     };
     std::vector<float> hLogits(MK, 0.0f);
@@ -1009,6 +1009,8 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
     }
 
     // Main Inner Joint Gradient Loop (3-Stage Annealing Schedule)
+    // Gini magnet stays strictly OFF for the first 60% of steps so pure timing+area gradients
+    // decide winners without no-op pull-back, then ramps linearly over the final 40%.
     const int T = std::max(1, params.gradSteps);
     for (int t = 1; t <= T; ++t) {
         float frac = static_cast<float>(t - 1) / static_cast<float>(std::max(1, T - 1));
@@ -1021,24 +1023,24 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
             gammaS = 1.0f;
             tauP = 1.0f;
             discLam = 0.0f;
-        } else if (frac <= 0.72f) {
-            // Stage 2: Bottleneck focus (transition TNS -> WNS, anneal tau, warm magnet)
-            float u = (frac - 0.40f) / 0.32f;
+        } else if (frac <= 0.60f) {
+            // Stage 2a: Bottleneck focus (transition TNS -> WNS, anneal tau, magnet STILL OFF)
+            float u = (frac - 0.40f) / 0.20f;
             t1 = (0.85f - 0.45f * u) * wTotal;
             t2 = wTotal - t1;
             gamma = (1.5f - 0.5f * u) * tau0;
             gammaS = 1.0f - 0.3f * u;
-            tauP = 1.0f - 0.30f * u;
-            discLam = 0.35f * params.discLam * u;
+            tauP = 1.0f - 0.25f * u;
+            discLam = 0.0f;
         } else {
-            // Stage 3: Discretization pull-in (WNS-heavy, sharp tau, full Gini magnet)
-            float u = (frac - 0.72f) / 0.28f;
+            // Stage 3: Discretization pull-in (WNS-heavy, sharp tau, linear Gini magnet ramp)
+            float u = (frac - 0.60f) / 0.40f;
             t1 = (0.40f - 0.15f * u) * wTotal;
             t2 = wTotal - t1;
             gamma = (1.0f - 0.5f * u) * tau0;
             gammaS = 0.7f - 0.3f * u;
-            tauP = 0.70f - 0.25f * u;
-            discLam = (0.35f + 0.65f * u) * params.discLam;
+            tauP = 0.75f - 0.30f * u;
+            discLam = params.discLam * u;
         }
         double loss = runStep(tauP, gamma, gammaS, gamma, t1, t2, discLam, true, true, t, t == 1);
         if (t == 1) stats.initLoss = loss;

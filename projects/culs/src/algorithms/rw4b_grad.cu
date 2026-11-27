@@ -600,24 +600,6 @@ __global__ void k_region_grad_and_adam(
     }
 }
 
-__global__ void k_preset_choice_and_exp_fo(
-    int M, const int * d_discChoice, const int * d_candDeltaAnd,
-    const int * d_foDeltaOffset, const int * d_foDeltaNode, const int * d_foDeltaVal,
-    float * d_expFo, int * d_totalDeltaAnd) {
-    int m = blockIdx.x * blockDim.x + threadIdx.x;
-    if (m >= M) return;
-    int bestK = d_discChoice[m];
-    if (bestK > 0) {
-        int slot = m * kGradMaxK + bestK;
-        atomicAdd(d_totalDeltaAnd, d_candDeltaAnd[slot]);
-        int beg = d_foDeltaOffset[slot];
-        int end = d_foDeltaOffset[slot + 1];
-        for (int idx = beg; idx < end; ++idx) {
-            atomicAdd(&d_expFo[d_foDeltaNode[idx]], static_cast<float>(d_foDeltaVal[idx]));
-        }
-    }
-}
-
 // ---------------- Host Orchestrator ----------------
 
 GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & params,
@@ -1130,48 +1112,10 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
         }
     }
 
-    // 9th portfolio candidate (theta = 0.0): Stage A local-ADP warm-start prior evaluated under the
-    // exact same GPU global discrete ADP objective (guarantees per-round monotonic non-degradation vs greedy).
-    {
-        CHECK_CUDA(cudaMemcpy(d_discChoice, prob.candWarmBestK.data(), M * sizeof(int), cudaMemcpyHostToDevice));
-        k_init_exp_fo<<<(nObjs + kGradBlock - 1) / kGradBlock, kGradBlock>>>(nObjs, d_foBase, d_expFo);
-        CHECK_CUDA(cudaMemset(d_totalDeltaAnd, 0, sizeof(int)));
-        k_preset_choice_and_exp_fo<<<(M + kGradBlock - 1) / kGradBlock, kGradBlock>>>(
-            M, d_discChoice, d_candDeltaAnd, d_foDeltaOffset, d_foDeltaNode, d_foDeltaVal,
-            d_expFo, d_totalDeltaAnd);
-        for (int l = 1; l <= maxLv; ++l) {
-            int cnt = lvOff[l + 1] - lvOff[l];
-            if (cnt <= 0) continue;
-            k_fwd_level_hard<<<(cnt + kGradBlock - 1) / kGradBlock, kGradBlock>>>(
-                lvOff[l], cnt, nPIs, alpha, piAlpha, beta, piPhaseAware,
-                d_f0, d_f1, d_isRegionRoot, d_discChoice, d_candWireLit, d_candNumGates,
-                d_candSubGates, d_expFo, d_arr, d_slew);
-        }
-        k_extract_po_arr<<<(nPOs + kGradBlock - 1) / kGradBlock, kGradBlock>>>(
-            nPOs, nPIs, piAlpha, kTauFo, piPhaseAware, true, d_outs, d_expFo, d_arr, d_slew, d_poArr);
-        CHECK_CUDA(cudaMemcpy(hPoArr.data(), d_poArr, nPOs * sizeof(float), cudaMemcpyDeviceToHost));
-        float dHard = hPoArr[0];
-        for (int i = 1; i < nPOs; ++i)
-            if (hPoArr[i] > dHard) dHard = hPoArr[i];
-        int hDa = 0;
-        CHECK_CUDA(cudaMemcpy(&hDa, d_totalDeltaAnd, sizeof(int), cudaMemcpyDeviceToHost));
-        float adpDelta = wTotal * ((dHard - depth0) / depth0) +
-                         static_cast<float>(hDa) / static_cast<float>(nNodes);
-        if (adpDelta < bestAdpDelta - 1e-7f) {
-            bestAdpDelta = adpDelta;
-            bestTheta = 0.0f;
-            bestDelay = dHard;
-            bestDa = hDa;
-            bestChoices = prob.candWarmBestK;
-        }
-    }
-
     chosenCand.swap(bestChoices);
     if (chosenProb) {
         chosenProb->resize(M);
-        for (int m = 0; m < M; ++m) {
-            (*chosenProb)[m] = (bestTheta == 0.0f) ? 1.0f : hProb[m * kGradMaxK + chosenCand[m]];
-        }
+        for (int m = 0; m < M; ++m) (*chosenProb)[m] = hProb[m * kGradMaxK + chosenCand[m]];
     }
     int nonZero = 0;
     for (int c : chosenCand)

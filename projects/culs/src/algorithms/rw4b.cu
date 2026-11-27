@@ -2776,7 +2776,47 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
                 std::vector<float> chosenProb;
                 gStats = solveJointGradGPU(prob, params, chosenCand, &chosenProb);
 
-                if (gStats.selectedNonZero > 0) {
+                // Gradient-Stall Guarded Fallback:
+                // Only when joint-grad truly stalls (fails to reduce global discD AND activates < 10% of regions),
+                // fall back to live fanout-budgeted greedy ADP selection across candRegions (exact Stage A safety).
+                bool gradStalled = (gStats.bestDiscDelay >= depth - 1e-4f &&
+                                    gStats.selectedNonZero < std::max(1, M / 10));
+                if (gradStalled) {
+                    std::vector<int> fbOrder;
+                    fbOrder.reserve(candRegions.size());
+                    for (size_t i = 0; i < candRegions.size(); ++i) {
+                        if (candRegions[i].warmBestK > 0) fbOrder.push_back(static_cast<int>(i));
+                    }
+                    std::sort(fbOrder.begin(), fbOrder.end(), [&](int a, int b) {
+                        if (candRegions[a].weight != candRegions[b].weight)
+                            return candRegions[a].weight > candRegions[b].weight;
+                        return candRegions[a].root < candRegions[b].root;
+                    });
+                    for (int idxR : fbOrder) {
+                        const auto & reg = candRegions[idxR];
+                        const auto & gc = reg.cands[reg.warmBestK - 1];
+                        if (lockedRoot[reg.root] || finalDelStrict[reg.root]) continue;
+                        bool conflict = false;
+                        for (int u : gc.remStrict) {
+                            if (finalDelStrict[u] || lockedProt[u] || lockedRoot[u]) { conflict = true; break; }
+                        }
+                        if (!conflict) {
+                            for (int j = 0; j < 4; ++j) {
+                                if (gc.leaves[j] > 0 && finalDelStrict[gc.leaves[j]]) { conflict = true; break; }
+                            }
+                        }
+                        if (!conflict) {
+                            for (int t = 0; t < gc.hitCnt; ++t) {
+                                if (gc.hitIds[t] > 0 && finalDelStrict[gc.hitIds[t]]) { conflict = true; break; }
+                            }
+                        }
+                        if (conflict) continue;
+                        if (!checkFanoutBudgetHost(gc)) continue;
+                        commitChosenOp(reg.root, gc);
+                        critApplied++;
+                    }
+                    if (critApplied > 0) gStats.bestTheta = 0.0f;
+                } else if (gStats.selectedNonZero > 0) {
                     std::vector<int> selRegions;
                     selRegions.reserve(gStats.selectedNonZero);
                     for (int m = 0; m < M; ++m) {

@@ -694,16 +694,15 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
         CHECK_CUDA(cudaMemcpy(d_foDeltaVal, prob.foDeltaVal.data(), nnz * sizeof(int), cudaMemcpyHostToDevice));
     }
 
-    // Gentle warm-start (z_{m,0} = 1.2): p_0 ~ 77% for K=2 (off-critical) and ~45% for K=5 (critical),
-    // preventing t=1 fanout explosions while giving valid candidates ~3x stronger initial Softmax Jacobian.
-    auto initWarmLogits = [&](std::vector<float> & zVec) {
+    // Parameterized warm-start initializer (z_{m,0} = z0Init, others 0).
+    auto initWarmLogits = [&](std::vector<float> & zVec, float z0Init) {
         std::fill(zVec.begin(), zVec.end(), 0.0f);
         for (int m = 0; m < M; ++m) {
-            zVec[m * kGradMaxK + 0] = 1.2f;
+            zVec[m * kGradMaxK + 0] = z0Init;
         }
     };
     std::vector<float> hLogits(MK, 0.0f);
-    initWarmLogits(hLogits);
+    initWarmLogits(hLogits, 1.2f);
     CHECK_CUDA(cudaMemcpy(d_logits, hLogits.data(), MK * sizeof(float), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemset(d_adamM, 0, MK * sizeof(float)));
     CHECK_CUDA(cudaMemset(d_adamV, 0, MK * sizeof(float)));
@@ -725,6 +724,7 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
 
     std::vector<float> hPoArr(nPOs, 0.0f);
     float poNorm = 1.0f;
+    float lastPoMax = depth0;
 
     // Helper: run forward + loss (and optionally backward + Adam update)
     auto runStep = [&](float tauP, float gamma, float gammaS, float gammaPo,
@@ -750,6 +750,7 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
         float poMax = hPoArr[0];
         for (int i = 1; i < nPOs; ++i)
             if (hPoArr[i] > poMax) poMax = hPoArr[i];
+        lastPoMax = poMax;
 
         if (computePoNorm) {
             int cntNear = 0;
@@ -1003,9 +1004,28 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
                (worstM >= 0 ? (prob.candWireLit[worstM * kGradMaxK + worstK] >= 0 ? 1 : 0) : 0),
                worstAna, worstNum, (maxRel < 1e-4 ? "PASS<1e-4" : "FAIL"));
 
-        // Reset logits to warm-start before real optimization
-        initWarmLogits(hLogits);
+        // Reset logits before backtracking warm-start
+        initWarmLogits(hLogits, 1.2f);
         CHECK_CUDA(cudaMemcpy(d_logits, hLogits.data(), MK * sizeof(float), cudaMemcpyHostToDevice));
+    }
+
+    // Backtracking Warm-Start: probe z_0 in {1.2, 2.0, 2.8, 3.8} with forward-only t=1 pass
+    // and pick the smallest z_0 that avoids a t=1 fractional fanout/delay explosion.
+    {
+        static constexpr float kZ0Ladder[4] = {1.2f, 2.0f, 2.8f, 3.8f};
+        float selectedZ0 = kZ0Ladder[3];
+        for (float candZ0 : kZ0Ladder) {
+            initWarmLogits(hLogits, candZ0);
+            CHECK_CUDA(cudaMemcpy(d_logits, hLogits.data(), MK * sizeof(float), cudaMemcpyHostToDevice));
+            double probeLoss = runStep(1.0f, 1.5f * tau0, 1.0f, 1.5f * tau0,
+                                       0.85f * wTotal, 0.15f * wTotal, 0.0f,
+                                       false, false, 0, true);
+            selectedZ0 = candZ0;
+            if (probeLoss <= 1.15 && lastPoMax <= 1.15f * depth0) {
+                break;
+            }
+        }
+        stats.chosenZ0 = selectedZ0;
     }
 
     // Main Inner Joint Gradient Loop (3-Stage Annealing Schedule)

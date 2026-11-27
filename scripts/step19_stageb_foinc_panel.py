@@ -32,7 +32,7 @@ CHECK_RE = re.compile(
     r"rw4b-grad CHECK: M=(\d+) tested=(\d+) max_rel_err=([0-9.eE+-]+) max_abs_err=([0-9.eE+-]+) \(([^)]+)\) \[([^\]]+)\]"
 )
 GRAD_ROUND_RE = re.compile(
-    r"rw4b-grad round (\d+): M=(\d+) applied=(\d+)\(raw=(\d+)\) theta=([0-9.-]+) avgMaxP=([0-9.]+) "
+    r"rw4b-grad round (\d+): M=(\d+) applied=(\d+)\(raw=(\d+)\)(?: z0=([0-9.]+))? theta=([0-9.-]+) avgMaxP=([0-9.]+) "
     r"loss=([0-9.eE+-]+)->([0-9.eE+-]+) discD=([0-9.]+)\(D0=([0-9.]+)\) dAND=([0-9-]+) grad=([0-9.]+)ms disc=([0-9.]+)ms"
 )
 
@@ -70,15 +70,16 @@ def _run_gpuls_diag(gpuls_bin: Path, in_aig: Path, out_aig: Path, flags: str, ti
             "M": int(rm.group(2)),
             "applied": int(rm.group(3)),
             "raw": int(rm.group(4)),
-            "theta": float(rm.group(5)),
-            "avgMaxP": float(rm.group(6)),
-            "initLoss": float(rm.group(7)),
-            "finalLoss": float(rm.group(8)),
-            "discD": float(rm.group(9)),
-            "D0": float(rm.group(10)),
-            "dAND": int(rm.group(11)),
-            "grad_ms": float(rm.group(12)),
-            "disc_ms": float(rm.group(13)),
+            "z0": float(rm.group(5)) if rm.group(5) is not None else -1.0,
+            "theta": float(rm.group(6)),
+            "avgMaxP": float(rm.group(7)),
+            "initLoss": float(rm.group(8)),
+            "finalLoss": float(rm.group(9)),
+            "discD": float(rm.group(10)),
+            "D0": float(rm.group(11)),
+            "dAND": int(rm.group(12)),
+            "grad_ms": float(rm.group(13)),
+            "disc_ms": float(rm.group(14)),
         })
     return info
 

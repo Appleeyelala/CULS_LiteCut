@@ -94,20 +94,21 @@ def main() -> int:
         for rd in g_new.get("rounds", []):
             print(
                 f"      R{rd['round']}: M={rd['M']:5d} raw={rd['raw']:5d} app={rd['applied']:5d} "
-                f"theta={rd['theta']:.2f} avgMaxP={rd['avgMaxP']:.3f} loss={rd['initLoss']:.2f}->{rd['finalLoss']:.2f} "
+                f"z0={rd['z0']:.1f} theta={rd['theta']:.2f} avgMaxP={rd['avgMaxP']:.3f} loss={rd['initLoss']:.2f}->{rd['finalLoss']:.2f} "
                 f"discD={rd['discD']:.1f}(D0={rd['D0']:.1f}) dAND={rd['dAND']:+d}",
                 flush=True,
             )
 
     print("\n=== 2. 16-CIRCUIT TARGET PANEL (ASAP7 delay_ps) ===", flush=True)
-    print(f"  {'Circuit':34s} | {'orig':>8s} | {'StageA':>8s} | {'B_66415':>8s} | {'B_v2':>8s} | {'app':>6s}", flush=True)
+    print(f"  {'Circuit':34s} | {'orig':>8s} | {'StageA':>8s} | {'B_66415':>8s} | {'B_v3':>8s} | {'app':>6s} | z0(initLoss) per round", flush=True)
     for rel in TARGET_PANEL:
         od = base_map[rel]["orig"]["delay_ps"]
         s_a = cached_eval.get(f"stageA::{rel}", {}).get("delay_ps", -1)
         s_old = cached_eval.get(f"stageB_old::{rel}", {}).get("delay_ps", -1)
         rn = ev.get(rel, {})
         dn = f"{rn.get('delay_ps', -1):8.1f}" if rn.get("cec") == "PASS" else f"{'ERR':>8s}"
-        print(f"  {rel:34s} | {od:8.1f} | {s_a:8.1f} | {s_old:8.1f} | {dn} | {ginfo[rel].get('applied',0):6d}", flush=True)
+        z_str = " ".join(f"R{rd['round']}:{rd['z0']:.1f}({rd['initLoss']:.2f})" for rd in ginfo[rel].get("rounds", []))
+        print(f"  {rel:34s} | {od:8.1f} | {s_a:8.1f} | {s_old:8.1f} | {dn} | {ginfo[rel].get('applied',0):6d} | {z_str}", flush=True)
 
     print("\n=== 3. AGGREGATE 16-CIRCUIT PANEL SUMMARY ===", flush=True)
     for cname in ("abc_strong_delay", "stageA", "stageB_old"):

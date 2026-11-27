@@ -63,6 +63,7 @@ struct GradSolveStats {
     int gradCheckTested = 0;
     double initLoss = 0.0;
     double finalLoss = 0.0;
+    float chosenZ0 = 1.2f;
     float avgMaxProb = 0.0f;
     float bestTheta = -1.0f;
     float bestDiscDelay = 0.0f;

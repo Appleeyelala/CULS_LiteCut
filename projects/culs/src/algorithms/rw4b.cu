@@ -1555,21 +1555,10 @@ __global__ void evaluateNode4BMenuKernel(
                 bestLowFo = cur;
         }
     }
-    // Move 2 (GWMIN slimming): full 4-candidate Pareto menu only for near-critical nodes (slack <= 2*tau);
-    // off-critical nodes keep only their single best ADP/area candidate (K_m = 2) to halve conflict footprints.
-    bool isCritMenu = (slackRoot <= 2.0f * tau + 1e-5f);
-    if (isCritMenu) {
-        d_menuOut[root * 4 + 0] = bestSpeed;
-        d_menuOut[root * 4 + 1] = bestAdp;
-        d_menuOut[root * 4 + 2] = bestArea;
-        d_menuOut[root * 4 + 3] = bestLowFo;
-    } else {
-        MenuSlot emptySlot = {-kInf, -kInf, kInf, 999999, -1, -1};
-        d_menuOut[root * 4 + 0] = bestAdp;
-        d_menuOut[root * 4 + 1] = emptySlot;
-        d_menuOut[root * 4 + 2] = emptySlot;
-        d_menuOut[root * 4 + 3] = emptySlot;
-    }
+    d_menuOut[root * 4 + 0] = bestSpeed;
+    d_menuOut[root * 4 + 1] = bestAdp;
+    d_menuOut[root * 4 + 2] = bestArea;
+    d_menuOut[root * 4 + 3] = bestLowFo;
 }
 
 // ---------------- Host helpers ----------------
@@ -2761,8 +2750,8 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
             }
 
             if (params.verbose >= 1) {
-                printf("rw4b-grad round %d: M=%d applied=%d(raw=%d) theta=%.2f avgMaxP=%.3f loss=%.5f->%.5f discD=%.2f(D0=%.2f) dAND=%d grad=%.1fms disc=%.1fms\n",
-                       rnd + 1, M, guardedApplied, gStats.selectedNonZero, gStats.bestTheta, gStats.avgMaxProb,
+                printf("rw4b-grad round %d: M=%d applied=%d(raw=%d) z0=%.1f theta=%.2f avgMaxP=%.3f loss=%.5f->%.5f discD=%.2f(D0=%.2f) dAND=%d grad=%.1fms disc=%.1fms\n",
+                       rnd + 1, M, guardedApplied, gStats.selectedNonZero, gStats.chosenZ0, gStats.bestTheta, gStats.avgMaxProb,
                        gStats.initLoss, gStats.finalLoss, gStats.bestDiscDelay, depth,
                        gStats.bestDiscDeltaAnd, gStats.msGradLoop, gStats.msDiscSearch);
             }

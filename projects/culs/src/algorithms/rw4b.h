@@ -34,6 +34,8 @@ struct Rw4BParams {
     float tnsRho = 0.85f;
     float discLam = 0.30f;
     float gradLr = 0.20f;
+    float foIncLam = 0.50f; // Stage B: bounded linear net-fanout-increase penalty weight
+    float foIncTh = 6.0f;   // Stage B: free fanout ceiling B(u) = max(fo_base(u), foIncTh)
     int verbose = 1;
 };
 

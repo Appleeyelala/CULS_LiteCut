@@ -27,7 +27,8 @@ public:
               bool noBudget = false, bool legacyV1 = false, int foCap = 0,
               bool adpScore = true, float adpW = 2.0f, float slackKappa = 2.0f,
               bool jointGrad = false, int gradSteps = 25, bool gradCheck = false,
-              float tnsRho = 0.85f, float discLam = 0.30f, float gradLr = 0.20f);
+              float tnsRho = 0.85f, float discLam = 0.30f, float gradLr = 0.20f,
+              float foIncLam = 0.50f, float foIncTh = 6.0f);
     void refactor(bool fAlgMFFC = false, bool fUseZeros = false, int cutSize = 12);
     void resub(bool fUseZeros = false, bool fUseConstr = true, bool fUpdateLevel = false, int cutSize = 8, int addNodes = 1);
 

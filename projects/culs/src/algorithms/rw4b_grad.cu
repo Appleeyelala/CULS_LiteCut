@@ -386,7 +386,8 @@ __global__ void k_po_grad_init(
 
 __global__ void k_aux_loss_terms(
     int M, int nObjs, int nNodes, float lamArea, float lamFo, float fTh, float tauFo, float discLam,
-    const int * d_candCount, const int * d_candDeltaAnd, const float * d_prob, const float * d_expFo,
+    const int * d_candCount, const int * d_candDeltaAnd, const int * d_foBase,
+    const float * d_prob, const float * d_expFo,
     double * d_areaLoss, double * d_foLoss, double * d_discLoss) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     double invV0 = 1.0 / static_cast<double>(nNodes > 0 ? nNodes : 1);
@@ -402,10 +403,11 @@ __global__ void k_aux_loss_terms(
         atomicAdd(d_areaLoss, static_cast<double>(lamArea) * ea * invV0);
         atomicAdd(d_discLoss, static_cast<double>(discLam) * (1.0 - sumP2) * invV0);
     }
-    if (tid > 0 && tid < nObjs) {
-        float sp = softplusF(d_expFo[tid] - fTh, tauFo);
+    if (lamFo > 0.0f && tid > 0 && tid < nObjs) {
+        float bU = fmaxf(static_cast<float>(d_foBase[tid]), fTh);
+        float sp = softplusF(d_expFo[tid] - bU, tauFo);
         if (sp > 0.0f) {
-            atomicAdd(d_foLoss, static_cast<double>(lamFo) * static_cast<double>(sp) * static_cast<double>(sp) * invV0);
+            atomicAdd(d_foLoss, static_cast<double>(lamFo) * static_cast<double>(sp) * invV0);
         }
     }
 }
@@ -490,7 +492,7 @@ __global__ void k_bwd_level(
 __global__ void k_fanout_grad(
     int nPIs, int nObjs, int nNodes,
     float alpha, float piAlpha, float beta, float lamFo, float fTh, float tauFo,
-    const int * d_isRegionRoot, const int * d_candCount, const int * d_candWireLit,
+    const int * d_isRegionRoot, const int * d_candCount, const int * d_candWireLit, const int * d_foBase,
     const float * d_prob, const float * d_expFo, const float * d_slewIn, const float * d_candRootInSlew,
     const float * d_gArr, const float * d_gSlew, const float * d_gPiNegArr, const float * d_gPiNegSlew,
     float * d_gFo) {
@@ -501,8 +503,11 @@ __global__ void k_fanout_grad(
     }
     float ef = d_expFo[u];
     float sig = sigmoidF(ef - 1.0f, tauFo);
-    float spEx = softplusF(ef - fTh, tauFo);
-    float rEx = (2.0f * lamFo / static_cast<float>(nNodes > 0 ? nNodes : 1)) * spEx * sigmoidF(ef - fTh, tauFo);
+    float rEx = 0.0f;
+    if (lamFo > 0.0f) {
+        float bU = fmaxf(static_cast<float>(d_foBase[u]), fTh);
+        rEx = (lamFo / static_cast<float>(nNodes > 0 ? nNodes : 1)) * sigmoidF(ef - bU, tauFo);
+    }
 
     if (u <= nPIs) {
         d_gFo[u] = sig * (d_gPiNegArr[u] * piAlpha + d_gPiNegSlew[u]) + rEx;
@@ -713,10 +718,10 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
     const float tau0 = std::max(prob.tau0, 1.0f);
     const float tTarget = params.tnsRho * depth0;
     const float lamArea = 1.0f;
-    // Path 2 exact fanout+slew backprop already models physical load & slew;
-    // quadratic excess-FO (fo^2) explodes to 100+ on 4000-fanout memory nets and drowns WNS/TNS.
-    const float lamFo = 0.0f;
-    const float fTh = static_cast<float>(params.fanoutPivot);
+    // Bounded linear smooth net-fanout-increase penalty:
+    // L_fo_inc = (lamFo / |V0|) * sum_u SoftPlus_0.1(E[fo(u)] - max(fo_base(u), fTh))
+    const float lamFo = params.foIncLam;
+    const float fTh = params.foIncTh;
 
     std::vector<float> hPoArr(nPOs, 0.0f);
     float poNorm = 1.0f;
@@ -759,7 +764,7 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
         int maxAux = std::max(M, nObjs);
         k_aux_loss_terms<<<(maxAux + kGradBlock - 1) / kGradBlock, kGradBlock>>>(
             M, nObjs, nNodes, lamArea, lamFo, fTh, kTauFo, discLam,
-            d_candCount, d_candDeltaAnd, d_prob, d_expFo,
+            d_candCount, d_candDeltaAnd, d_foBase, d_prob, d_expFo,
             d_lossBuf + 2, d_lossBuf + 3, d_lossBuf + 4);
 
         double hLoss[5];
@@ -793,7 +798,7 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
 
             k_fanout_grad<<<(nObjs + kGradBlock - 1) / kGradBlock, kGradBlock>>>(
                 nPIs, nObjs, nNodes, alpha, piAlpha, beta, lamFo, fTh, kTauFo,
-                d_isRegionRoot, d_candCount, d_candWireLit, d_prob, d_expFo, d_slewIn, d_candRootInSlew,
+                d_isRegionRoot, d_candCount, d_candWireLit, d_foBase, d_prob, d_expFo, d_slewIn, d_candRootInSlew,
                 d_gArr, d_gSlew, d_gPiNegArr, d_gPiNegSlew, d_gFo);
 
             k_region_grad_and_adam<<<(M + kGradBlock - 1) / kGradBlock, kGradBlock>>>(
@@ -938,9 +943,12 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
                 areaL += static_cast<double>(lamArea) * ea * invV0;
                 discL += static_cast<double>(chkDisc) * (1.0 - sp2) * invV0;
             }
-            for (int u = 1; u < nObjs; ++u) {
-                double sp = softplusD(expFoD[u] - fTh, kTauFo);
-                foL += static_cast<double>(lamFo) * sp * sp * invV0;
+            if (lamFo > 0.0f) {
+                for (int u = 1; u < nObjs; ++u) {
+                    double bU = std::max(static_cast<double>(prob.foBase[u]), static_cast<double>(fTh));
+                    double sp = softplusD(expFoD[u] - bU, kTauFo);
+                    foL += static_cast<double>(lamFo) * sp * invV0;
+                }
             }
             return static_cast<double>(chkT1) * (tns / depth0) +
                    static_cast<double>(chkT2) * (wns / depth0) + areaL + foL + discL;

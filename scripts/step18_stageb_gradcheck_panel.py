@@ -82,8 +82,8 @@ def main() -> int:
     base_map = {c["relative_path"]: c.get("mapping", {}) for c in json.loads(STEP4_FULL905_SUMMARY.read_text())["circuits"]}
     configs = [
         ("stageA_default",  "-r 3 -v 1"),
-        ("stageB_lr12",     "-r 3 --joint-grad --steps 25 --lr 0.12 --disc-lam 0.30 -v 1"),
-        ("stageB_lr18",     "-r 3 --joint-grad --steps 25 --lr 0.18 --disc-lam 0.30 -v 1"),
+        ("stageB_lr20",     "-r 3 --joint-grad --steps 25 --lr 0.20 --disc-lam 0.30 -v 1"),
+        ("stageB_lr30",     "-r 3 --joint-grad --steps 25 --lr 0.30 --disc-lam 0.30 -v 1"),
     ]
     eval_items = []
     ginfo = {}
@@ -108,13 +108,13 @@ def main() -> int:
     for rel in TARGET_PANEL:
         od = base_map[rel]["orig"]["delay_ps"]
         ra = ev.get(("stageA_default", rel), {})
-        rb = ev.get(("stageB_lr12", rel), {})
+        rb = ev.get(("stageB_lr20", rel), {})
         ga = ginfo[("stageA_default", rel)]
-        gb = ginfo[("stageB_lr12", rel)]
+        gb = ginfo[("stageB_lr20", rel)]
         print(
             f"  {rel:34s} | orig={od:8.1f} | "
             f"A={ra.get('delay_ps', -1):8.1f}({ra.get('cec','ERR')}, {ga.get('rw4b_total_s',0)*1000:5.0f}ms) | "
-            f"B(lr12)={rb.get('delay_ps', -1):8.1f}({rb.get('cec','ERR')}, {gb.get('rw4b_total_s',0)*1000:5.0f}ms)",
+            f"B(lr20)={rb.get('delay_ps', -1):8.1f}({rb.get('cec','ERR')}, {gb.get('rw4b_total_s',0)*1000:5.0f}ms)",
             flush=True,
         )
 

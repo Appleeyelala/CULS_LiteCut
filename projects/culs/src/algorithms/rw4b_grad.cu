@@ -16,7 +16,7 @@ namespace rw4b {
 
 static constexpr int kGradBlock = 256;
 static constexpr float kTauFo = 0.10f;
-static constexpr float kStepClip = 0.25f;
+static constexpr float kStepClip = 0.35f;
 
 // ---------------- Device smooth math helpers ----------------
 
@@ -687,14 +687,12 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
         CHECK_CUDA(cudaMemcpy(d_foDeltaVal, prob.foDeltaVal.data(), nnz * sizeof(int), cudaMemcpyHostToDevice));
     }
 
-    // Soft warm-start logits: if region has a Stage A positive-ADP candidate k*, give it gentle +0.15 prior;
-    // otherwise give no-op (k=0) gentle +0.15 prior.
+    // Start near the true original circuit (p(no-op) ~ 0.75..0.92) so simultaneous
+    // fractional fanout deltas never cause a 50x fanout explosion at t=1.
     auto initWarmLogits = [&](std::vector<float> & zVec) {
         std::fill(zVec.begin(), zVec.end(), 0.0f);
         for (int m = 0; m < M; ++m) {
-            int wk = (m < static_cast<int>(prob.candWarmBestK.size())) ? prob.candWarmBestK[m] : 0;
-            if (wk > 0 && wk < prob.candCount[m]) zVec[m * kGradMaxK + wk] = 0.15f;
-            else zVec[m * kGradMaxK + 0] = 0.15f;
+            zVec[m * kGradMaxK + 0] = 2.5f;
         }
     };
     std::vector<float> hLogits(MK, 0.0f);

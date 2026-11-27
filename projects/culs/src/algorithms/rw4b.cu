@@ -1544,6 +1544,8 @@ __global__ void evaluateNode4BMenuKernel(
 
             float rawTiming = sRoot * deltaJ - side - slewCost;
             float adpScore = adpW * ((rawTiming / phi) * invDepth) - (reg * invDepth) - static_cast<float>(da) * invArea;
+            // Prune speculative zero/negative-ADP noise unless it offers meaningful local speedup (> 0.5)
+            if (adpScore <= 1e-9f && !(inVision && deltaJ > 0.5f)) continue;
             MenuSlot cur = {adpScore, deltaJ, posFoInc, da, slot, out};
 
             if (deltaJ > bestSpeed.deltaJ || (deltaJ == bestSpeed.deltaJ && adpScore > bestSpeed.score)) bestSpeed = cur;

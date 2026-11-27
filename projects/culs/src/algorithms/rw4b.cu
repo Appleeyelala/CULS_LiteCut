@@ -2887,11 +2887,11 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
                                 for (int g = 0; g < nG; ++g) {
                                     const SubGate & sg = op->subGates[g];
                                     float a0, s0, a1, s1;
-                                    if (sg.in0 < 0) { a0 = locA[-1 - sg.in0]; s0 = locS[-1 - sg.in0]; }
-                                    else readFbLit(sg.in0, a0, s0);
-                                    if (sg.in1 < 0) { a1 = locA[-1 - sg.in1]; s1 = locS[-1 - sg.in1]; }
-                                    else readFbLit(sg.in1, a1, s1);
-                                    float ld = (g == nG - 1) ? rootLd : sg.internalLoad;
+                                    if (sg.src0 < 0) { a0 = locA[-1 - sg.src0]; s0 = locS[-1 - sg.src0]; }
+                                    else readFbLit(sg.src0, a0, s0);
+                                    if (sg.src1 < 0) { a1 = locA[-1 - sg.src1]; s1 = locS[-1 - sg.src1]; }
+                                    else readFbLit(sg.src1, a1, s1);
+                                    float ld = (g == nG - 1) ? rootLd : sg.load;
                                     float gd = 1.0f + params.fanoutAlpha * ld * (1.0f + params.slewBeta * std::max(s0, s1));
                                     locA[g] = gd + std::max(a0, a1);
                                     locS[g] = ld;

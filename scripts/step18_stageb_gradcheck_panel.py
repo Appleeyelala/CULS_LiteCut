@@ -83,7 +83,7 @@ def main() -> int:
     configs = [
         ("stageA_default",  "-r 3 -v 1"),
         ("stageB_lr20",     "-r 3 --joint-grad --steps 25 --lr 0.20 --disc-lam 0.30 -v 1"),
-        ("stageB_lr30",     "-r 3 --joint-grad --steps 25 --lr 0.30 --disc-lam 0.30 -v 1"),
+        ("stageB_lr22_s30", "-r 3 --joint-grad --steps 30 --lr 0.22 --disc-lam 0.30 -v 1"),
     ]
     eval_items = []
     ginfo = {}

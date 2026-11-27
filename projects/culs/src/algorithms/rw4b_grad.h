@@ -74,6 +74,7 @@ struct GradSolveStats {
 };
 
 GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & params,
-                                 std::vector<int> & chosenCand);
+                                 std::vector<int> & chosenCand,
+                                 std::vector<float> * chosenProb = nullptr);
 
 } // namespace rw4b

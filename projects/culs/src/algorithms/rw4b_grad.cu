@@ -598,9 +598,11 @@ __global__ void k_region_grad_and_adam(
 // ---------------- Host Orchestrator ----------------
 
 GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & params,
-                                 std::vector<int> & chosenCand) {
+                                 std::vector<int> & chosenCand,
+                                 std::vector<float> * chosenProb) {
     GradSolveStats stats;
     chosenCand.assign(prob.M, 0);
+    if (chosenProb) chosenProb->assign(prob.M, 1.0f);
     if (prob.M <= 0 || prob.nNodes <= 0 || prob.nPOs <= 0) return stats;
 
     auto tLoop0 = std::chrono::steady_clock::now();
@@ -1100,6 +1102,10 @@ GradSolveStats solveJointGradGPU(const GradProblem & prob, const Rw4BParams & pa
     }
 
     chosenCand.swap(bestChoices);
+    if (chosenProb) {
+        chosenProb->resize(M);
+        for (int m = 0; m < M; ++m) (*chosenProb)[m] = hProb[m * kGradMaxK + chosenCand[m]];
+    }
     int nonZero = 0;
     for (int c : chosenCand)
         if (c > 0) nonZero++;

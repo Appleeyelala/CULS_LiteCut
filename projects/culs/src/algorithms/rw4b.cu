@@ -2291,14 +2291,22 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
             msEval += std::chrono::duration<double, std::milli>(t3 - t2).count();
 
             std::vector<MenuSlot> hMenu(static_cast<size_t>(nObjs) * 4);
-            std::vector<int> hFo(nObjs), hNegFo(nObjs);
-            std::vector<float> hArr(nObjs), hReq(nObjs);
+            std::vector<int> hFo(nObjs), hNegFo(nObjs), hFoOff(nObjs + 1), hFoEdge(totalEdges);
+            std::vector<float> hArr(nObjs), hReq(nObjs), hGd(nObjs), hNegExtra(nObjs), hSlewIn(nObjs);
+            std::vector<Top3Bounds> hTop3(nObjs), hNegTop3(nPIs + 1);
             std::vector<Cut4B> hCuts(static_cast<size_t>(nObjs) * kCutSetSize);
             CHECK_CUDA(cudaMemcpy(hMenu.data(), d_menuOut, static_cast<size_t>(nObjs) * 4 * sizeof(MenuSlot), cudaMemcpyDeviceToHost));
             CHECK_CUDA(cudaMemcpy(hFo.data(), d_fo, nObjs * sizeof(int), cudaMemcpyDeviceToHost));
             CHECK_CUDA(cudaMemcpy(hNegFo.data(), d_negFo, nObjs * sizeof(int), cudaMemcpyDeviceToHost));
+            CHECK_CUDA(cudaMemcpy(hFoOff.data(), d_foOff, (nObjs + 1) * sizeof(int), cudaMemcpyDeviceToHost));
+            CHECK_CUDA(cudaMemcpy(hFoEdge.data(), d_foEdge, totalEdges * sizeof(int), cudaMemcpyDeviceToHost));
             CHECK_CUDA(cudaMemcpy(hArr.data(), d_arr, nObjs * sizeof(float), cudaMemcpyDeviceToHost));
             CHECK_CUDA(cudaMemcpy(hReq.data(), d_req, nObjs * sizeof(float), cudaMemcpyDeviceToHost));
+            CHECK_CUDA(cudaMemcpy(hGd.data(), d_gd, nObjs * sizeof(float), cudaMemcpyDeviceToHost));
+            CHECK_CUDA(cudaMemcpy(hNegExtra.data(), d_negExtra, nObjs * sizeof(float), cudaMemcpyDeviceToHost));
+            CHECK_CUDA(cudaMemcpy(hSlewIn.data(), d_slewIn, nObjs * sizeof(float), cudaMemcpyDeviceToHost));
+            CHECK_CUDA(cudaMemcpy(hTop3.data(), d_top3, nObjs * sizeof(Top3Bounds), cudaMemcpyDeviceToHost));
+            CHECK_CUDA(cudaMemcpy(hNegTop3.data(), d_negTop3, (nPIs + 1) * sizeof(Top3Bounds), cudaMemcpyDeviceToHost));
             CHECK_CUDA(cudaMemcpy(hCuts.data(), d_cuts, static_cast<size_t>(nObjs) * kCutSetSize * sizeof(Cut4B), cudaMemcpyDeviceToHost));
 
             cudaFree(d_nodeLv); cudaFree(d_menuOut);
@@ -2685,33 +2693,75 @@ void runRw4B(AIGMan & aigman, const Rw4BParams & params) {
             }
 
             std::vector<int> chosenCand;
-            GradSolveStats gStats = solveJointGradGPU(prob, params, chosenCand);
+            std::vector<float> chosenProb;
+            GradSolveStats gStats = solveJointGradGPU(prob, params, chosenCand, &chosenProb);
+
+            // Post-discretization Live Fanout-Spike Guard (ordered by descending gradient confidence)
+            // Prevents multi-region simultaneous fanout pileups on shared off-critical nets (ASAP7 slew cliff).
+            int guardedApplied = 0;
+            std::vector<uint8_t> finalDelStrict(nObjs, 0);
+            std::vector<const GradCandHost *> chosenOp(nObjs, nullptr);
+            if (gStats.selectedNonZero > 0) {
+                std::vector<int> selRegions;
+                selRegions.reserve(gStats.selectedNonZero);
+                for (int m = 0; m < M; ++m) {
+                    if (chosenCand[m] > 0) selRegions.push_back(m);
+                }
+                std::sort(selRegions.begin(), selRegions.end(), [&](int a, int b) {
+                    if (chosenProb[a] != chosenProb[b]) return chosenProb[a] > chosenProb[b];
+                    return candRegions[finalActiveIdx[a]].weight > candRegions[finalActiveIdx[b]].weight;
+                });
+
+                auto hLoad = [](int fo) { return fo > 1 ? (fo - 1) : 0; };
+                std::vector<int> accFo(nObjs, 0);
+                for (int m : selRegions) {
+                    int ck = chosenCand[m];
+                    const auto & reg = candRegions[finalActiveIdx[m]];
+                    const auto & gc = reg.cands[ck - 1];
+                    bool ok = true;
+                    if (params.fanoutBudget) {
+                        for (const auto & kv : gc.foDeltas) {
+                            int u = kv.first, d = kv.second;
+                            if (d <= 0) continue;
+                            bool negOnly = (u <= nPIs && params.piPhaseAware);
+                            float coef = (u <= nPIs)
+                                ? params.piFanoutAlpha
+                                : (params.slewBeta > 0.0f ? params.fanoutAlpha * (1.0f + params.slewBeta * hSlewIn[u]) : params.fanoutAlpha);
+                            if (coef <= 0.0f) continue;
+                            int base = prob.foBase[u];
+                            int nCnt = std::max(0, base + accFo[u] + d);
+                            float inc = coef * static_cast<float>(hLoad(nCnt) - hLoad(base));
+                            if (inc > 1e-6f && !(nCnt <= params.fanoutPivot && inc <= 0.5f)) {
+                                float so = querySlackOtherHost(u, negOnly, nObjs, depth, params.piPhaseAware, gc.remAll,
+                                                               hFoOff, hFoEdge, hArr, hReq, hGd, hNegExtra, hTop3, hNegTop3);
+                                if (so < kInf * 0.5f && inc > std::max(0.0f, so) + params.budgetTol) {
+                                    ok = false;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (!ok) continue;
+                    for (const auto & kv : gc.foDeltas) accFo[kv.first] += kv.second;
+                    chosenOp[reg.root] = &gc;
+                    for (int u : gc.remStrict) finalDelStrict[u] = 1;
+                    guardedApplied++;
+                }
+            }
 
             if (params.verbose >= 1) {
-                printf("rw4b-grad round %d: M=%d applied=%d theta=%.2f avgMaxP=%.3f loss=%.5f->%.5f discD=%.2f(D0=%.2f) dAND=%d grad=%.1fms disc=%.1fms\n",
-                       rnd + 1, M, gStats.selectedNonZero, gStats.bestTheta, gStats.avgMaxProb,
+                printf("rw4b-grad round %d: M=%d applied=%d(raw=%d) theta=%.2f avgMaxP=%.3f loss=%.5f->%.5f discD=%.2f(D0=%.2f) dAND=%d grad=%.1fms disc=%.1fms\n",
+                       rnd + 1, M, guardedApplied, gStats.selectedNonZero, gStats.bestTheta, gStats.avgMaxProb,
                        gStats.initLoss, gStats.finalLoss, gStats.bestDiscDelay, depth,
                        gStats.bestDiscDeltaAnd, gStats.msGradLoop, gStats.msDiscSearch);
             }
 
-            if (gStats.selectedNonZero == 0) {
+            if (guardedApplied == 0) {
                 auto t4 = std::chrono::steady_clock::now();
                 msSelectRebuild += std::chrono::duration<double, std::milli>(t4 - t3).count();
                 break;
             }
-            totalApplied += gStats.selectedNonZero;
-
-            // Mark ONLY the remStrict of actually chosen non-noop candidates for clean StrashRebuild (--fo-cap 0)
-            std::vector<uint8_t> finalDelStrict(nObjs, 0);
-            std::vector<const GradCandHost *> chosenOp(nObjs, nullptr);
-            for (int m = 0; m < M; ++m) {
-                int ck = chosenCand[m];
-                if (ck <= 0) continue;
-                const auto & reg = candRegions[finalActiveIdx[m]];
-                const auto & gc = reg.cands[ck - 1];
-                chosenOp[reg.root] = &gc;
-                for (int u : gc.remStrict) finalDelStrict[u] = 1;
-            }
+            totalApplied += guardedApplied;
 
             StrashRebuild builder(nPIs, nNodes, 0);
             std::vector<int> litMap(nObjs, 0);
